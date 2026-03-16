@@ -1,6 +1,6 @@
 """Add building_passport_states and dossier_versions tables
 
-Revision ID: 004_add_passport_state_and_dossier_version
+Revision ID: 004_passport_dossier_version
 Revises: 003_add_physical_building_tables
 Create Date: 2026-03-16
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
 
 
-revision: str = "004_add_passport_state_and_dossier_version"
+revision: str = "004_passport_dossier_version"
 down_revision: Union[str, None] = "003_add_physical_building_tables"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

@@ -5,6 +5,7 @@
 
 set -euo pipefail
 
+SSH_KEY="$HOME/.ssh/id_ed25519_batiscan_vps"
 VPS_HOST="root@194.93.48.163"
 VPS_DIR="/opt/swissbuilding"
 REPO_URL="https://github.com/SanTiepi/SwissBuilding.git"
@@ -14,7 +15,7 @@ echo "Repo: $REPO_URL"
 echo "Target: $VPS_HOST:$VPS_DIR"
 
 # Deploy via SSH
-ssh $VPS_HOST << 'REMOTE_SCRIPT'
+ssh -i "$SSH_KEY" $VPS_HOST << 'REMOTE_SCRIPT'
 set -euo pipefail
 
 VPS_DIR="/opt/swissbuilding"
