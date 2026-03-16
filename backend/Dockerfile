@@ -29,4 +29,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD alembic upgrade head && python -m app.seeds.seed_data && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers
+CMD alembic upgrade head && (python -m app.seeds.seed_data || echo "Seed failed (non-fatal), continuing...") && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers
