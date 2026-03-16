@@ -1,4 +1,4 @@
-version: "3.8"
+# version removed (obsolete in modern Docker Compose)
 
 services:
   postgres:
@@ -92,7 +92,7 @@ services:
       - internal
 
   clamav:
-    image: clamav/clamav:1.2
+    image: clamav/clamav:stable
     container_name: swissbuildingos-clamav
     restart: always
     volumes:
