@@ -1,5 +1,5 @@
 #!/bin/bash
-# SwissBuilding OS — Deploy to VPS
+# SwissBuilding OS — Deploy to VPS via GitHub
 # Usage: bash scripts/deploy.sh
 # Note: Run `chmod +x scripts/deploy.sh` to make executable on Linux/WSL
 
@@ -7,33 +7,35 @@ set -euo pipefail
 
 VPS_HOST="root@194.93.48.163"
 VPS_DIR="/opt/swissbuilding"
-LOCAL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_URL="https://github.com/SanTiepi/SwissBuilding.git"
 
 echo "=== SwissBuilding Deploy ==="
-echo "Source: $LOCAL_DIR"
+echo "Repo: $REPO_URL"
 echo "Target: $VPS_HOST:$VPS_DIR"
 
-# Step 1: Ensure target directory exists
-ssh $VPS_HOST "mkdir -p $VPS_DIR"
+# Deploy via SSH
+ssh $VPS_HOST << 'REMOTE_SCRIPT'
+set -euo pipefail
 
-# Step 2: Rsync project (exclude heavy/dev files)
-echo ">>> Syncing files..."
-rsync -avz --delete \
-  --exclude 'node_modules/' \
-  --exclude '__pycache__/' \
-  --exclude '.pytest_cache/' \
-  --exclude 'dist/' \
-  --exclude '.env' \
-  --exclude '.env.production' \
-  --exclude '*.pyc' \
-  --exclude '.git/' \
-  --exclude 'frontend/test-results/' \
-  --exclude 'tmp/' \
-  "$LOCAL_DIR/" "$VPS_HOST:$VPS_DIR/"
+VPS_DIR="/opt/swissbuilding"
+REPO_URL="https://github.com/SanTiepi/SwissBuilding.git"
 
-# Step 3: Run setup on VPS
-echo ">>> Running setup on VPS..."
-ssh $VPS_HOST "bash $VPS_DIR/scripts/setup-vps.sh"
+# Step 1: Clone or pull
+if [ -d "$VPS_DIR/.git" ]; then
+    echo ">>> Pulling latest changes..."
+    cd "$VPS_DIR"
+    git pull --ff-only
+else
+    echo ">>> Cloning repository..."
+    rm -rf "$VPS_DIR"
+    git clone "$REPO_URL" "$VPS_DIR"
+fi
+
+# Step 2: Run setup
+echo ">>> Running setup..."
+chmod +x "$VPS_DIR/scripts/setup-vps.sh"
+bash "$VPS_DIR/scripts/setup-vps.sh"
 
 echo "=== Deploy complete ==="
 echo "Access: http://194.93.48.163"
+REMOTE_SCRIPT
