@@ -1,0 +1,73 @@
+wave: W92
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W92-A
+    outcome: Harden real e2e preflight to enforce deterministic backend/service readiness before execution.
+    files:
+      modify:
+        - frontend/scripts/e2e_real_preflight.mjs
+        - frontend/playwright.real.config.ts
+        - docs/safe-to-start-gate-runbook.md
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Preflight output must be machine-parseable.
+      - Fail fast on wrong target/seed/service state.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run test:e2e:real:preflight
+    exit: real-e2e preflight blocks unsafe runs with explicit diagnostics.
+
+  - id: W92-B
+    outcome: Add provenance completeness checks to authority pack and eco clause generation flows.
+    files:
+      modify:
+        - backend/app/services/authority_pack_service.py
+        - backend/app/services/eco_clause_template_service.py
+      create:
+        - backend/tests/test_authority_pack_provenance.py
+        - backend/tests/test_eco_clause_provenance.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Provenance fields must be explicit and deterministic.
+      - No hidden external source dependencies.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/test_authority_pack_provenance.py tests/test_eco_clause_provenance.py -q
+    exit: pack-generation outputs include verified provenance metadata.
+
+  - id: W92-C
+    outcome: Introduce request correlation ID propagation from backend responses to frontend API client.
+    files:
+      modify:
+        - backend/app/main.py
+        - backend/app/logging_config.py
+        - frontend/src/api/client.ts
+        - frontend/src/components/__tests__/client.test.ts
+      create:
+        - backend/tests/test_request_correlation_id.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Keep existing auth/session flow untouched.
+      - Correlation IDs must be stable per request and logged.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/test_request_correlation_id.py -q
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- client
+    exit: correlation IDs are emitted, propagated, and test-covered end-to-end.

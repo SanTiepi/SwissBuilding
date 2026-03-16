@@ -1,0 +1,75 @@
+wave: W87
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W87-A
+    outcome: Additive prework trigger backend contract in readiness payload.
+    files:
+      modify:
+        - backend/app/services/readiness_reasoner.py
+        - backend/app/schemas/readiness.py
+        - backend/app/api/readiness.py
+        - backend/tests/test_readiness_reasoner.py
+        - backend/tests/test_readiness.py
+      create: []
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/schemas/__init__.py
+        - backend/app/models/__init__.py
+    constraints:
+      - Additive backward-compatible contract only.
+      - Preserve egid/egrid/official_id semantics.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/test_readiness_reasoner.py tests/test_readiness.py -q
+    exit: readiness payload exposes deterministic prework trigger fields.
+
+  - id: W87-B
+    outcome: Prework trigger UI card in readiness surfaces.
+    files:
+      modify:
+        - frontend/src/components/building-detail/OverviewTab.tsx
+        - frontend/src/pages/ReadinessWallet.tsx
+        - frontend/src/api/readiness.ts
+        - frontend/src/types/index.ts
+        - frontend/src/components/__tests__/ReadinessWallet.test.tsx
+      create:
+        - frontend/src/components/PreworkDiagnosticTriggerCard.tsx
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Fallback-safe when trigger payload missing.
+      - No readiness surface regressions.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- ReadinessWallet
+    exit: trigger card is visible on seeded scenario with safe fallback.
+
+  - id: W87-C
+    outcome: Eco clause template backend service for pack consumption.
+    files:
+      modify:
+        - backend/app/services/authority_pack_service.py
+      create:
+        - backend/app/services/eco_clause_template_service.py
+        - backend/tests/test_eco_clause_template_service.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/schemas/__init__.py
+        - backend/app/models/__init__.py
+    constraints:
+      - Deterministic output with provenance expectations.
+      - No external scraping dependencies.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/test_eco_clause_template_service.py -q
+    exit: eco clause service returns structured payload for at least 2 contexts.
+

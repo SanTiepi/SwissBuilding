@@ -1,0 +1,25 @@
+# Environment
+.env
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Frontend generated artifacts
+frontend/dist/
+frontend/test-results/
+frontend/e2e-real/.auth/
+
+# Backend generated artifacts
+backend/**/__pycache__/
+
+# Temp & build
+tmp/
+tmp_*.json
+*.log

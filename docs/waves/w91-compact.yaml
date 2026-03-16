@@ -1,0 +1,76 @@
+wave: W91
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W91-A
+    outcome: Refactor backend seed system into modular seed packs with deterministic orchestrator entrypoint.
+    files:
+      modify:
+        - backend/app/seeds/seed_data.py
+        - backend/tests/test_seed_data.py
+      create:
+        - backend/app/seeds/packs/base_pack.py
+        - backend/app/seeds/packs/readiness_pack.py
+        - backend/app/seeds/packs/portfolio_pack.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Keep existing seed outputs backward-compatible.
+      - Keep idempotency guarantees explicit.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/test_seed_data.py -q
+    exit: seed orchestration is modularized and deterministic.
+
+  - id: W91-B
+    outcome: Decompose monolithic frontend type index into domain-scoped modules with stable exports.
+    files:
+      modify:
+        - frontend/src/types/index.ts
+        - frontend/src/api/client.ts
+      create:
+        - frontend/src/types/readiness.ts
+        - frontend/src/types/portfolio.ts
+        - frontend/src/types/evidence.ts
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Preserve existing public type import paths where feasible.
+      - No runtime behavior changes.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- client
+    exit: type modules are domain-scoped and frontend compiles without type regressions.
+
+  - id: W91-C
+    outcome: Split InterventionSimulator page into composable sections and hooks to reduce page complexity.
+    files:
+      modify:
+        - frontend/src/pages/InterventionSimulator.tsx
+        - frontend/src/components/__tests__/RiskSimulator.test.tsx
+      create:
+        - frontend/src/components/intervention-simulator/ScenarioEditor.tsx
+        - frontend/src/components/intervention-simulator/CostProjectionPanel.tsx
+        - frontend/src/hooks/useInterventionScenario.ts
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Keep current route behavior and payload contract.
+      - Preserve mobile usability.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- RiskSimulator
+      - cd frontend && npm run test:e2e -- pages.spec.ts
+    exit: page complexity is reduced with stable behavior and passing tests.

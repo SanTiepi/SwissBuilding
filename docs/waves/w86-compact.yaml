@@ -1,0 +1,73 @@
+wave: W86
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W86-A
+    outcome: Header dropdown keyboard a11y fixes (Escape close + menu semantics).
+    files:
+      modify:
+        - frontend/src/components/Header.tsx
+        - frontend/src/components/__tests__/Header.test.tsx
+        - frontend/e2e/navigation.spec.ts
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Preserve existing visual behavior.
+      - Keep keyboard + touch usability.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- Header
+      - cd frontend && npm run test:e2e -- navigation.spec.ts
+    exit: Dropdowns close on Escape and remain keyboard navigable.
+
+  - id: W86-B
+    outcome: Skip-link and main-landmark path for keyboard users.
+    files:
+      modify:
+        - frontend/src/components/Layout.tsx
+        - frontend/e2e/navigation.spec.ts
+        - frontend/e2e/pages.spec.ts
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Skip link must be focus-visible and deterministic.
+      - No layout regressions.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm run test:e2e -- navigation.spec.ts pages.spec.ts
+    exit: Keyboard user can skip directly to main content.
+
+  - id: W86-C
+    outcome: CommandPalette modal a11y/focus fixes (Tab behavior, aria-modal, focus restore).
+    files:
+      modify:
+        - frontend/src/components/CommandPalette.tsx
+        - frontend/src/components/Layout.tsx
+        - frontend/src/components/__tests__/CommandPalette.test.tsx
+        - frontend/e2e/navigation.spec.ts
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Preserve Arrow/Enter command palette navigation.
+      - Keep Cmd/Ctrl+K behavior.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- CommandPalette
+      - cd frontend && npm run test:e2e -- navigation.spec.ts
+    exit: Palette keyboard flow complete, modal semantics correct, focus restored on close.
+

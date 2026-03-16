@@ -1,0 +1,73 @@
+wave: W90
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W90-A
+    outcome: Right-size the largest backend compliance test suite into focused integration slices.
+    files:
+      modify:
+        - backend/tests/test_compliance_edge_cases.py
+      create:
+        - backend/tests/compliance/test_compliance_edge_cases_core.py
+        - backend/tests/compliance/test_compliance_edge_cases_regression.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Preserve coverage signal while reducing file breadth.
+      - Shared fixtures must stay deterministic.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/compliance/test_compliance_edge_cases_core.py tests/compliance/test_compliance_edge_cases_regression.py -q
+    exit: compliance edge-case suite is split and remains green.
+
+  - id: W90-B
+    outcome: Decompose oversized backend security and simulation tests into maintainable modules.
+    files:
+      modify:
+        - backend/tests/test_security.py
+        - backend/tests/test_ui_simulation.py
+      create:
+        - backend/tests/security/test_authz_security.py
+        - backend/tests/security/test_input_security.py
+        - backend/tests/simulation/test_ui_simulation_flows.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Keep assertions behavior-equivalent.
+      - Remove duplication through fixture helpers.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd backend && python -m pytest tests/security/test_authz_security.py tests/security/test_input_security.py tests/simulation/test_ui_simulation_flows.py -q
+    exit: security/simulation suites are split with equal or better regression signal.
+
+  - id: W90-C
+    outcome: Reduce frontend unit test flag density by consolidating broad assertion files.
+    files:
+      modify:
+        - frontend/src/components/__tests__/formatters.test.ts
+        - frontend/src/components/__tests__/client.test.ts
+        - frontend/src/components/__tests__/CommandPalette.test.tsx
+      create:
+        - frontend/src/components/__tests__/formatters.integration.test.ts
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Prefer integration signal over assertion inflation.
+      - Avoid brittle implementation-detail assertions.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- formatters client CommandPalette
+      - npm run test:budget
+    exit: frontend flagged-test growth is reduced with all targeted suites passing.

@@ -1,0 +1,69 @@
+wave: W85
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W85-A
+    outcome: Produce deterministic keyboard/focus audit with e2e checks on critical flows.
+    files:
+      modify:
+        - frontend/e2e/navigation.spec.ts
+        - frontend/e2e/pages.spec.ts
+      create:
+        - docs/keyboard-focus-audit.md
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Include focus order and modal trap checks.
+      - Report must include reproducible references.
+      - Agent must run validate-fix loop before handoff.
+    validate:
+      - cd frontend && npm run test:e2e -- navigation.spec.ts pages.spec.ts
+    exit: Audit report committed, focused keyboard/focus checks green.
+
+  - id: W85-B
+    outcome: Run frontend performance audit and apply only low-risk measurable quick wins.
+    files:
+      modify:
+        - frontend/vite.config.ts
+        - frontend/src/App.tsx
+      create:
+        - docs/frontend-performance-audit.md
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Prefer report-first; modify code only when metrics justify.
+      - No fragile optimization hacks.
+      - Agent must run validate-fix loop before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm run build
+    exit: Performance report committed and build/validate green.
+
+  - id: W85-C
+    outcome: Reduce high-risk coverage gaps with targeted high-signal tests.
+    files:
+      modify:
+        - frontend/src/components/__tests__/CommandPalette.test.tsx
+        - frontend/src/components/__tests__/BuildingCard.test.tsx
+      create:
+        - docs/test-coverage-gap-analysis.md
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - No low-signal test count inflation.
+      - Prioritize branch/integration relevance.
+      - Agent must run validate-fix loop before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- CommandPalette BuildingCard
+    exit: Coverage-gap report committed and targeted tests green.
+

@@ -1,0 +1,24 @@
+{
+  "scripts": {
+    "test:related": "python scripts/run_related_checks.py",
+    "test:related:list": "python scripts/run_related_checks.py --list",
+    "test:inventory": "python scripts/test_inventory.py --write",
+    "test:budget": "python scripts/test_budget_guard.py",
+    "test:budget:write": "python scripts/test_budget_guard.py --write-current",
+    "test:budget:refresh": "python scripts/test_budget_guard.py --refresh-baseline",
+    "router:inventory": "python scripts/router_inventory.py --write",
+    "router:check": "python scripts/router_inventory.py --strict",
+    "lead:check": "python scripts/lead_control_plane_check.py --strict",
+    "lead:async-audit": "python scripts/frontend_async_state_audit.py --write --strict",
+    "gate:safe-to-start:plan": "python scripts/safe_to_start_gate_check.py",
+    "gate:safe-to-start": "python scripts/safe_to_start_gate_check.py --run",
+    "gate:safe-to-start:bundle": "python scripts/safe_to_start_proof_bundle.py",
+    "brief:lint": "python scripts/brief_lint.py",
+    "wave:ready": "python scripts/wave_readiness_gate.py",
+    "wave:overlap": "python scripts/wave_overlap_guard.py",
+    "wave:telemetry": "python scripts/wave_telemetry.py"
+  },
+  "dependencies": {
+    "benoit": "^0.3.0"
+  }
+}

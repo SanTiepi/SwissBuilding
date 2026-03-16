@@ -1,0 +1,73 @@
+wave: W88
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W88-A
+    outcome: Remove remaining frontend validate warnings without changing functional behavior.
+    files:
+      modify:
+        - frontend/src/components/UnknownIssuesPanel.tsx
+        - frontend/src/pages/InterventionSimulator.tsx
+        - frontend/src/pages/BuildingSamples.tsx
+        - frontend/src/pages/ReadinessWallet.tsx
+        - frontend/src/components/__tests__/UnknownIssuesList.test.tsx
+        - frontend/src/components/__tests__/ReadinessWallet.test.tsx
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Keep UX and API contracts unchanged.
+      - Fix causes instead of silencing lint rules.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- UnknownIssuesList ReadinessWallet
+    exit: frontend validate is clean and warning-free on touched surfaces.
+
+  - id: W88-B
+    outcome: Add deterministic frontend bundle budget guard based on current build profile.
+    files:
+      modify:
+        - frontend/vite.config.ts
+        - docs/frontend-performance-audit.md
+      create:
+        - frontend/scripts/check_bundle_budget.mjs
+        - docs/frontend-bundle-budget.json
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Keep thresholds realistic and explicitly documented.
+      - No fragile chunk hacks.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run build
+      - node frontend/scripts/check_bundle_budget.mjs --dist frontend/dist --budget docs/frontend-bundle-budget.json
+    exit: bundle budget check passes and fails predictably on budget breach.
+
+  - id: W88-C
+    outcome: Enforce generated-artifact hygiene with a repo-level guard.
+    files:
+      modify:
+        - .gitignore
+        - package.json
+      create:
+        - scripts/repo_artifact_guard.py
+        - docs/repo-artifact-policy.md
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Allowlist only intentional generated assets.
+      - Guard must be deterministic and CI-friendly.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - python scripts/repo_artifact_guard.py --check
+      - npm run lead:check
+    exit: guard detects transient artifacts and passes on clean tree policy.

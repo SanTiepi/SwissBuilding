@@ -1,0 +1,153 @@
+title: "SwissBuilding - European-model, Swiss-launch market strategy"
+date: "2026-03-08"
+audience: "Claude Code, Codex, product lead"
+language: "fr-CH / en"
+sources:
+  official:
+    bfs:
+      - "https://www.bfs.admin.ch/bfs/en/home/registers/buildings-dwellings.html"
+      - "https://dam-api.bfs.admin.ch/hub/api/dam/assets/32329330/master"
+    bfe:
+      - "https://www.bfe.admin.ch/bfe/en/home/efficiency/buildings.html"
+    bafu:
+      - "https://www.bafu.admin.ch/en/funding-in-the-building-sector"
+    suva:
+      - "https://www.suva.ch/en-ch/material/asbestos-in-buildings"
+      - "https://www.suva.ch/fr-ch/prevention/par-danger/materiaux-rayonnements-et-situations-a-risque/amiante/identifier-les-produits-contenant-de-lamiante/dans-quelles-parties-des-batiments-trouve-t-on-de-lamiante"
+    vd:
+      - "https://www.vd.ch/territoire-et-construction/amiante-1/diagnostic-et-assainissement"
+      - "https://www.vd.ch/territoire-et-construction/amiante-1/complements-a-la-directive"
+    ge:
+      - "https://www.ge.ch/renover-transformer-demolir-sans-danger-amiante-pcb-plomb/je-suis-proprietaire-immobilier"
+      - "https://www.ge.ch/document/directives-plomb-diagnostic-travaux-peintures-contenant-du-plomb"
+    bag:
+      - "https://www.bag.admin.ch/fr/renovation-attention-aux-substances-dangereuses"
+    eu:
+      - "https://energy.ec.europa.eu/topics/energy-efficiency/energy-efficient-buildings/energy-performance-buildings-directive_en"
+      - "https://build-up.ec.europa.eu/en/news-and-events/news/improving-buildings-efficiency-opendbl"
+  vendor:
+    - "https://www.smino.com/en"
+    - "https://www.planradar.com/ch-en/"
+    - "https://www.garaio-rem.ch/"
+    - "https://www.wwimmo.ch/produkte/cloudservices/schnittstellen/"
+    - "https://downloads.abacus.ch/en/downloads/abaconnect"
+    - "https://www.optiml.co/"
+    - "https://www.scandens.ch/en/"
+    - "https://lookthrough.io/"
+    - "https://www.wuestpartner.com/ch-en/product/wuest-dimensions/"
+defaults:
+  geography: "Europe-shaped model, Switzerland-first launch"
+  execution_regions:
+    - "VD"
+    - "GE"
+  pollutant_priority: "amiante_first"
+  primary_buyer: "multi_building_property_managers"
+  contributors:
+    - "diagnosticians"
+    - "labs"
+    - "architects"
+    - "contractors"
+category_now: "building_evidence_layer_for_regulated_renovation_readiness"
+category_later: "building_intelligence_network_agent_os"
+strategy_anchor:
+  european_model: true
+  swiss_launch_layer: true
+  canton_rules_pack_layer: true
+execution_wedge:
+  region_focus:
+    - "VD"
+    - "GE"
+  workflow_anchor: "AvT_to_ApT"
+  dossier_shape: "safe_to_start_dossier"
+  overlay_posture: "erp_and_archive_overlay"
+primary_buyer: "multi_building_property_managers"
+buyer_stack:
+  p1: "property_managers_vd_ge"
+  p2: "owners_and_small_funds"
+  p2_public: "public_owners_and_municipalities"
+  p3: "diagnosticians_and_labs_as_contributors"
+liability_posture:
+  promise:
+    - "completeness"
+    - "provenance"
+    - "workflow_traceability"
+    - "proof_packaging"
+  avoid:
+    - "legal_compliance_guarantee"
+erp_posture:
+  strategy: "overlay_first"
+  sequence:
+    - "exports"
+    - "archive_links"
+    - "light_connectors"
+    - "deeper_api_integrations_later"
+market_reality:
+  swiss_stock:
+    residential_buildings_2023: "1.79M"
+    dwellings_2023: "4.79M"
+  structural_drivers:
+    - "aging_building_stock"
+    - "pre_work_pollutant_obligations"
+    - "energy_and_co2_pressure"
+    - "strong_public_building_data"
+  execution_advantage:
+    - "VD_GE_make_the_wedge_explicit"
+    - "cantonal_fragmentation_creates_orchestration_value"
+moat_now:
+  - "regulatory_workflow_depth"
+  - "evidence_chain"
+  - "living_building_memory"
+  - "overlay_adoption"
+moat_future:
+  - "data_network_effects_from_diagnostics_interventions_and_dossiers"
+  - "portfolio_learning_effects"
+  - "embedded_invisible_agents"
+  - "rules_pack_extensibility"
+packaging_logic:
+  wedge:
+    buyer_thinks: "complete_pre_work_pollutant_dossier"
+    buyer_gets:
+      - "evidence_chain"
+      - "completeness_engine"
+      - "next_actions"
+      - "building_memory"
+  operational:
+    buyer_thinks: "living_building_dossier_and_contributor_workflow"
+    buyer_gets:
+      - "continuity_across_projects"
+      - "reduced_documentary_rework"
+      - "auditability"
+  portfolio:
+    buyer_thinks: "risk_cost_sequence_intelligence"
+    buyer_gets:
+      - "building_evidence_layer_for_portfolio_logic"
+poc_script:
+  - "select_real_vd_or_ge_project"
+  - "ingest_diagnostics_annexes_plans"
+  - "extract_and_link_evidence"
+  - "score_completeness"
+  - "orchestrate_missing_pieces"
+  - "generate_actor_ready_packs"
+  - "update_post_works_memory"
+poc_acceptance_criteria:
+  completeness_rate: ">=95%"
+  documentary_rework_reduction: ">=50%"
+  time_to_authority_ready_pack: "<=2h"
+  provenance_integrity: "100%"
+  reusable_post_works_memory: true
+next_mega_program_implications:
+  - "document_parser_and_structured_extraction"
+  - "completeness_reasoner"
+  - "evidence_pack_generator"
+  - "AvT_ApT_version_differ"
+  - "interop_layer"
+risks:
+  - "cantonal_fragmentation"
+  - "adjacent_tools_claiming_legal_certainty"
+  - "liability_overclaiming"
+  - "erp_integration_friction"
+open_assumptions:
+  - "pricing_model"
+  - "exact_poc_partner"
+  - "erp_api_depth"
+  - "final_legal_positioning_language"

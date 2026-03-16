@@ -1,0 +1,870 @@
+{
+  "router_path": "backend/app/api/router.py",
+  "imported_modules_count": 142,
+  "include_entries_count": 142,
+  "included_unique_modules_count": 142,
+  "api_module_files_count": 142,
+  "import_not_included": [],
+  "included_not_imported": [],
+  "duplicate_includes": [],
+  "malformed_include_lines": [],
+  "module_files_not_imported": [],
+  "imported_without_module_file": [],
+  "tag_style_issues": [],
+  "empty_prefix_count": 128,
+  "non_empty_prefix_count": 14,
+  "entries": [
+    {
+      "module": "auth",
+      "prefix": "/auth",
+      "tag": "Authentication",
+      "line": 149
+    },
+    {
+      "module": "buildings",
+      "prefix": "/buildings",
+      "tag": "Buildings",
+      "line": 150
+    },
+    {
+      "module": "diagnostics",
+      "prefix": "",
+      "tag": "Diagnostics",
+      "line": 151
+    },
+    {
+      "module": "samples",
+      "prefix": "",
+      "tag": "Samples",
+      "line": 152
+    },
+    {
+      "module": "events",
+      "prefix": "",
+      "tag": "Events",
+      "line": 153
+    },
+    {
+      "module": "documents",
+      "prefix": "",
+      "tag": "Documents",
+      "line": 154
+    },
+    {
+      "module": "risk_analysis",
+      "prefix": "/risk-analysis",
+      "tag": "Risk Analysis",
+      "line": 155
+    },
+    {
+      "module": "pollutant_inventory",
+      "prefix": "",
+      "tag": "Pollutant Inventory",
+      "line": 156
+    },
+    {
+      "module": "pollutant_map",
+      "prefix": "/pollutant-map",
+      "tag": "Pollutant Map",
+      "line": 157
+    },
+    {
+      "module": "users",
+      "prefix": "/users",
+      "tag": "Users",
+      "line": 158
+    },
+    {
+      "module": "actions",
+      "prefix": "",
+      "tag": "Actions",
+      "line": 159
+    },
+    {
+      "module": "exports",
+      "prefix": "/exports",
+      "tag": "Exports",
+      "line": 160
+    },
+    {
+      "module": "invitations",
+      "prefix": "/invitations",
+      "tag": "Invitations",
+      "line": 161
+    },
+    {
+      "module": "organizations",
+      "prefix": "/organizations",
+      "tag": "Organizations",
+      "line": 162
+    },
+    {
+      "module": "assignments",
+      "prefix": "",
+      "tag": "Assignments",
+      "line": 163
+    },
+    {
+      "module": "notification_digest",
+      "prefix": "",
+      "tag": "Notification Digest",
+      "line": 164
+    },
+    {
+      "module": "notifications",
+      "prefix": "",
+      "tag": "Notifications",
+      "line": 165
+    },
+    {
+      "module": "notification_preferences",
+      "prefix": "",
+      "tag": "Notification Preferences",
+      "line": 166
+    },
+    {
+      "module": "zones",
+      "prefix": "",
+      "tag": "Zones",
+      "line": 167
+    },
+    {
+      "module": "zone_classification",
+      "prefix": "",
+      "tag": "Zone Classification",
+      "line": 168
+    },
+    {
+      "module": "building_elements",
+      "prefix": "",
+      "tag": "Building Elements",
+      "line": 169
+    },
+    {
+      "module": "materials",
+      "prefix": "",
+      "tag": "Materials",
+      "line": 170
+    },
+    {
+      "module": "material_inventory",
+      "prefix": "",
+      "tag": "Material Inventory",
+      "line": 171
+    },
+    {
+      "module": "interventions",
+      "prefix": "",
+      "tag": "Interventions",
+      "line": 172
+    },
+    {
+      "module": "technical_plans",
+      "prefix": "",
+      "tag": "Technical Plans",
+      "line": 173
+    },
+    {
+      "module": "evidence",
+      "prefix": "",
+      "tag": "Evidence",
+      "line": 174
+    },
+    {
+      "module": "evidence_chain",
+      "prefix": "",
+      "tag": "Evidence Chain",
+      "line": 175
+    },
+    {
+      "module": "evidence_graph",
+      "prefix": "",
+      "tag": "Evidence Graph",
+      "line": 176
+    },
+    {
+      "module": "evidence_packs",
+      "prefix": "",
+      "tag": "Evidence Packs",
+      "line": 177
+    },
+    {
+      "module": "execution_quality",
+      "prefix": "",
+      "tag": "Execution Quality",
+      "line": 178
+    },
+    {
+      "module": "dossier",
+      "prefix": "",
+      "tag": "Dossier",
+      "line": 179
+    },
+    {
+      "module": "building_lifecycle",
+      "prefix": "",
+      "tag": "Building Lifecycle",
+      "line": 180
+    },
+    {
+      "module": "building_health_index",
+      "prefix": "",
+      "tag": "Building Health Index",
+      "line": 181
+    },
+    {
+      "module": "building_quality",
+      "prefix": "",
+      "tag": "Building Quality",
+      "line": 182
+    },
+    {
+      "module": "completeness",
+      "prefix": "",
+      "tag": "Completeness",
+      "line": 183
+    },
+    {
+      "module": "jurisdictions",
+      "prefix": "",
+      "tag": "Jurisdictions",
+      "line": 184
+    },
+    {
+      "module": "timeline",
+      "prefix": "",
+      "tag": "Timeline",
+      "line": 185
+    },
+    {
+      "module": "timeline_enrichment",
+      "prefix": "",
+      "tag": "Timeline Enrichment",
+      "line": 186
+    },
+    {
+      "module": "portfolio",
+      "prefix": "/portfolio",
+      "tag": "Portfolio",
+      "line": 187
+    },
+    {
+      "module": "audit_logs",
+      "prefix": "",
+      "tag": "Audit Logs",
+      "line": 188
+    },
+    {
+      "module": "audit_export",
+      "prefix": "",
+      "tag": "Audit Export",
+      "line": 189
+    },
+    {
+      "module": "audit_readiness",
+      "prefix": "",
+      "tag": "Audit Readiness",
+      "line": 190
+    },
+    {
+      "module": "search",
+      "prefix": "/search",
+      "tag": "Search",
+      "line": 191
+    },
+    {
+      "module": "campaigns",
+      "prefix": "",
+      "tag": "Campaigns",
+      "line": 192
+    },
+    {
+      "module": "campaign_tracking",
+      "prefix": "",
+      "tag": "Campaign Tracking",
+      "line": 193
+    },
+    {
+      "module": "capex_planning",
+      "prefix": "",
+      "tag": "CAPEX Planning",
+      "line": 194
+    },
+    {
+      "module": "compliance_artefacts",
+      "prefix": "",
+      "tag": "Compliance Artefacts",
+      "line": 195
+    },
+    {
+      "module": "compliance_calendar",
+      "prefix": "",
+      "tag": "Compliance Calendar",
+      "line": 196
+    },
+    {
+      "module": "compliance_gap",
+      "prefix": "",
+      "tag": "Compliance Gap",
+      "line": 197
+    },
+    {
+      "module": "saved_simulations",
+      "prefix": "",
+      "tag": "Saved Simulations",
+      "line": 198
+    },
+    {
+      "module": "data_provenance",
+      "prefix": "",
+      "tag": "Data Provenance",
+      "line": 199
+    },
+    {
+      "module": "data_quality",
+      "prefix": "",
+      "tag": "Data Quality",
+      "line": 200
+    },
+    {
+      "module": "change_signals",
+      "prefix": "",
+      "tag": "Change Signals",
+      "line": 201
+    },
+    {
+      "module": "co_ownership",
+      "prefix": "",
+      "tag": "Co Ownership",
+      "line": 202
+    },
+    {
+      "module": "readiness",
+      "prefix": "",
+      "tag": "Readiness",
+      "line": 203
+    },
+    {
+      "module": "trust_scores",
+      "prefix": "",
+      "tag": "Trust Scores",
+      "line": 204
+    },
+    {
+      "module": "unknowns",
+      "prefix": "",
+      "tag": "Unknowns",
+      "line": 205
+    },
+    {
+      "module": "passport",
+      "prefix": "",
+      "tag": "Passport",
+      "line": 206
+    },
+    {
+      "module": "passport_export",
+      "prefix": "",
+      "tag": "Passport Export",
+      "line": 207
+    },
+    {
+      "module": "post_works",
+      "prefix": "",
+      "tag": "Post Works",
+      "line": 208
+    },
+    {
+      "module": "building_snapshots",
+      "prefix": "",
+      "tag": "Building Snapshots",
+      "line": 209
+    },
+    {
+      "module": "transfer",
+      "prefix": "",
+      "tag": "Transfer Package",
+      "line": 210
+    },
+    {
+      "module": "requalification",
+      "prefix": "",
+      "tag": "Requalification",
+      "line": 211
+    },
+    {
+      "module": "building_comparison",
+      "prefix": "",
+      "tag": "Building Comparison",
+      "line": 212
+    },
+    {
+      "module": "transaction_readiness",
+      "prefix": "",
+      "tag": "Transaction Readiness",
+      "line": 213
+    },
+    {
+      "module": "contractor_acknowledgment",
+      "prefix": "",
+      "tag": "Contractor Acknowledgments",
+      "line": 214
+    },
+    {
+      "module": "contractor_matching",
+      "prefix": "",
+      "tag": "Contractor Matching",
+      "line": 215
+    },
+    {
+      "module": "dossier_completion",
+      "prefix": "",
+      "tag": "Dossier Completion",
+      "line": 216
+    },
+    {
+      "module": "energy_performance",
+      "prefix": "",
+      "tag": "Energy Performance",
+      "line": 217
+    },
+    {
+      "module": "environmental_impact",
+      "prefix": "",
+      "tag": "Environmental Impact",
+      "line": 218
+    },
+    {
+      "module": "bulk_operations",
+      "prefix": "",
+      "tag": "Bulk Operations",
+      "line": 219
+    },
+    {
+      "module": "sample_optimization",
+      "prefix": "",
+      "tag": "Sample Optimization",
+      "line": 220
+    },
+    {
+      "module": "sampling_planner",
+      "prefix": "",
+      "tag": "Sampling Planner",
+      "line": 221
+    },
+    {
+      "module": "document_templates",
+      "prefix": "",
+      "tag": "Document Templates",
+      "line": 222
+    },
+    {
+      "module": "completion_workspace",
+      "prefix": "",
+      "tag": "Completion Workspace",
+      "line": 223
+    },
+    {
+      "module": "multi_org_dashboard",
+      "prefix": "/multi-org",
+      "tag": "Multi Org Dashboard",
+      "line": 224
+    },
+    {
+      "module": "pack_impact",
+      "prefix": "",
+      "tag": "Pack Impact",
+      "line": 225
+    },
+    {
+      "module": "field_observations",
+      "prefix": "",
+      "tag": "Field Observations",
+      "line": 226
+    },
+    {
+      "module": "authority_packs",
+      "prefix": "",
+      "tag": "Authority Packs",
+      "line": 227
+    },
+    {
+      "module": "portfolio_summary",
+      "prefix": "",
+      "tag": "Portfolio Summary",
+      "line": 228
+    },
+    {
+      "module": "portfolio_trends",
+      "prefix": "",
+      "tag": "Portfolio Trends",
+      "line": 229
+    },
+    {
+      "module": "weak_signals",
+      "prefix": "",
+      "tag": "Weak Signals",
+      "line": 230
+    },
+    {
+      "module": "compliance_timeline",
+      "prefix": "",
+      "tag": "Compliance Timeline",
+      "line": 231
+    },
+    {
+      "module": "decision_replay",
+      "prefix": "",
+      "tag": "Decision Replay",
+      "line": 232
+    },
+    {
+      "module": "constraint_graph",
+      "prefix": "",
+      "tag": "Constraint Graph",
+      "line": 233
+    },
+    {
+      "module": "building_dashboard",
+      "prefix": "",
+      "tag": "Building Dashboard",
+      "line": 234
+    },
+    {
+      "module": "anomaly_detection",
+      "prefix": "",
+      "tag": "Anomaly Detection",
+      "line": 235
+    },
+    {
+      "module": "building_age_analysis",
+      "prefix": "",
+      "tag": "Building Age Analysis",
+      "line": 236
+    },
+    {
+      "module": "building_benchmark",
+      "prefix": "",
+      "tag": "Building Benchmark",
+      "line": 237
+    },
+    {
+      "module": "maintenance_forecast",
+      "prefix": "",
+      "tag": "Maintenance Forecast",
+      "line": 238
+    },
+    {
+      "module": "monitoring_plan",
+      "prefix": "",
+      "tag": "Monitoring Plan",
+      "line": 239
+    },
+    {
+      "module": "regulatory_deadlines",
+      "prefix": "",
+      "tag": "Regulatory Deadlines",
+      "line": 240
+    },
+    {
+      "module": "remediation_costs",
+      "prefix": "",
+      "tag": "Remediation Costs",
+      "line": 241
+    },
+    {
+      "module": "remediation_tracking",
+      "prefix": "",
+      "tag": "Remediation Tracking",
+      "line": 242
+    },
+    {
+      "module": "document_classification",
+      "prefix": "",
+      "tag": "Document Classification",
+      "line": 243
+    },
+    {
+      "module": "document_completeness",
+      "prefix": "",
+      "tag": "Document Completeness",
+      "line": 244
+    },
+    {
+      "module": "risk_mitigation",
+      "prefix": "",
+      "tag": "Risk Mitigation",
+      "line": 245
+    },
+    {
+      "module": "portfolio_optimization",
+      "prefix": "",
+      "tag": "Portfolio Optimization",
+      "line": 246
+    },
+    {
+      "module": "workflow_orchestration",
+      "prefix": "",
+      "tag": "Workflow Orchestration",
+      "line": 247
+    },
+    {
+      "module": "insurance_risk_assessment",
+      "prefix": "",
+      "tag": "Insurance Risk Assessment",
+      "line": 248
+    },
+    {
+      "module": "knowledge_gap",
+      "prefix": "",
+      "tag": "Knowledge Gap",
+      "line": 249
+    },
+    {
+      "module": "lab_result",
+      "prefix": "",
+      "tag": "Lab Results",
+      "line": 250
+    },
+    {
+      "module": "regulatory_change_impact",
+      "prefix": "",
+      "tag": "Regulatory Change Impact",
+      "line": 251
+    },
+    {
+      "module": "regulatory_filing",
+      "prefix": "",
+      "tag": "Regulatory Filing",
+      "line": 252
+    },
+    {
+      "module": "regulatory_watch",
+      "prefix": "",
+      "tag": "Regulatory Watch",
+      "line": 253
+    },
+    {
+      "module": "occupant_safety",
+      "prefix": "",
+      "tag": "Occupant Safety",
+      "line": 254
+    },
+    {
+      "module": "occupancy_risks",
+      "prefix": "/occupancy-risks",
+      "tag": "Occupancy Risks",
+      "line": 255
+    },
+    {
+      "module": "permit_tracking",
+      "prefix": "",
+      "tag": "Permit Tracking",
+      "line": 256
+    },
+    {
+      "module": "spatial_risk_mapping",
+      "prefix": "",
+      "tag": "Spatial Risk Mapping",
+      "line": 257
+    },
+    {
+      "module": "stakeholder_dashboard",
+      "prefix": "",
+      "tag": "Stakeholder Dashboard",
+      "line": 258
+    },
+    {
+      "module": "stakeholder_notifications",
+      "prefix": "",
+      "tag": "Stakeholder Notifications",
+      "line": 259
+    },
+    {
+      "module": "stakeholder_report",
+      "prefix": "",
+      "tag": "Stakeholder Reports",
+      "line": 260
+    },
+    {
+      "module": "waste_management",
+      "prefix": "",
+      "tag": "Waste Management",
+      "line": 261
+    },
+    {
+      "module": "cost_benefit_analysis",
+      "prefix": "",
+      "tag": "Cost Benefit Analysis",
+      "line": 262
+    },
+    {
+      "module": "counterfactual_analysis",
+      "prefix": "",
+      "tag": "Counterfactual Analysis",
+      "line": 263
+    },
+    {
+      "module": "due_diligence",
+      "prefix": "",
+      "tag": "Due Diligence",
+      "line": 264
+    },
+    {
+      "module": "handoff_pack",
+      "prefix": "",
+      "tag": "Handoff Pack",
+      "line": 265
+    },
+    {
+      "module": "quality_assurance",
+      "prefix": "",
+      "tag": "Quality Assurance",
+      "line": 266
+    },
+    {
+      "module": "renovation_sequencer",
+      "prefix": "",
+      "tag": "Renovation Sequencer",
+      "line": 267
+    },
+    {
+      "module": "risk_communication",
+      "prefix": "",
+      "tag": "Risk Communication",
+      "line": 268
+    },
+    {
+      "module": "scenario_planning",
+      "prefix": "",
+      "tag": "Scenario Planning",
+      "line": 269
+    },
+    {
+      "module": "tenant_impact",
+      "prefix": "",
+      "tag": "Tenant Impact",
+      "line": 270
+    },
+    {
+      "module": "access_control",
+      "prefix": "",
+      "tag": "Access Control",
+      "line": 271
+    },
+    {
+      "module": "priority_matrix",
+      "prefix": "",
+      "tag": "Priority Matrix",
+      "line": 272
+    },
+    {
+      "module": "risk_aggregation",
+      "prefix": "",
+      "tag": "Risk Aggregation",
+      "line": 273
+    },
+    {
+      "module": "diagnostic_quality",
+      "prefix": "",
+      "tag": "Diagnostic Quality",
+      "line": 274
+    },
+    {
+      "module": "digital_vault",
+      "prefix": "",
+      "tag": "Digital Vault",
+      "line": 275
+    },
+    {
+      "module": "budget_tracking",
+      "prefix": "",
+      "tag": "Budget Tracking",
+      "line": 276
+    },
+    {
+      "module": "ventilation_assessment",
+      "prefix": "",
+      "tag": "Ventilation Assessment",
+      "line": 277
+    },
+    {
+      "module": "incident_response",
+      "prefix": "",
+      "tag": "Incident Response",
+      "line": 278
+    },
+    {
+      "module": "reporting_metrics",
+      "prefix": "",
+      "tag": "Reporting Metrics",
+      "line": 279
+    },
+    {
+      "module": "cross_building_pattern",
+      "prefix": "",
+      "tag": "Cross Building Patterns",
+      "line": 280
+    },
+    {
+      "module": "building_certifications",
+      "prefix": "/building-certifications",
+      "tag": "Building Certifications",
+      "line": 281
+    },
+    {
+      "module": "notification_rules",
+      "prefix": "/notification-rules",
+      "tag": "Notification Rules",
+      "line": 282
+    },
+    {
+      "module": "maintenance_schedules",
+      "prefix": "",
+      "tag": "Maintenance Schedules",
+      "line": 283
+    },
+    {
+      "module": "data_exports",
+      "prefix": "",
+      "tag": "Data Exports",
+      "line": 284
+    },
+    {
+      "module": "building_valuations",
+      "prefix": "",
+      "tag": "Building Valuations",
+      "line": 285
+    },
+    {
+      "module": "work_phases",
+      "prefix": "",
+      "tag": "Work Phases",
+      "line": 286
+    },
+    {
+      "module": "building_clustering",
+      "prefix": "",
+      "tag": "Building Clustering",
+      "line": 287
+    },
+    {
+      "module": "warranty_obligations",
+      "prefix": "",
+      "tag": "Warranty Obligations",
+      "line": 288
+    },
+    {
+      "module": "subsidy_tracking",
+      "prefix": "",
+      "tag": "Subsidy Tracking",
+      "line": 289
+    },
+    {
+      "module": "sensor_integration",
+      "prefix": "",
+      "tag": "Sensor Integration",
+      "line": 290
+    }
+  ]
+}

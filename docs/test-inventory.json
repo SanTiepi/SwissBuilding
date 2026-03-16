@@ -1,0 +1,1887 @@
+{
+  "total_files": 215,
+  "total_lines": 70644,
+  "total_tests": 825,
+  "by_layer": {
+    "backend_pytest": {
+      "files": 160,
+      "lines": 65384,
+      "tests": 478,
+      "flagged": 133
+    },
+    "frontend_unit": {
+      "files": 34,
+      "lines": 3433,
+      "tests": 176,
+      "flagged": 6
+    },
+    "frontend_e2e_mock": {
+      "files": 19,
+      "lines": 1665,
+      "tests": 159,
+      "flagged": 8
+    },
+    "frontend_e2e_real": {
+      "files": 2,
+      "lines": 162,
+      "tests": 12,
+      "flagged": 1
+    }
+  },
+  "flagged_count": 148,
+  "top_by_lines": [
+    {
+      "path": "backend/tests/test_security.py",
+      "layer": "backend_pytest",
+      "lines": 1392,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_edge_cases.py",
+      "layer": "backend_pytest",
+      "lines": 1366,
+      "tests": 139,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_ui_simulation.py",
+      "layer": "backend_pytest",
+      "lines": 1313,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_data_integrity.py",
+      "layer": "backend_pytest",
+      "lines": 1196,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_transaction_readiness.py",
+      "layer": "backend_pytest",
+      "lines": 942,
+      "tests": 15,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_api_edge_cases.py",
+      "layer": "backend_pytest",
+      "lines": 800,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_plan_heatmap.py",
+      "layer": "backend_pytest",
+      "lines": 767,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_dossier_completion_agent.py",
+      "layer": "backend_pytest",
+      "lines": 688,
+      "tests": 6,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_regulatory_deadline.py",
+      "layer": "backend_pytest",
+      "lines": 662,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_remediation_cost.py",
+      "layer": "backend_pytest",
+      "lines": 661,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_portfolio_summary.py",
+      "layer": "backend_pytest",
+      "lines": 650,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_occupancy_risk.py",
+      "layer": "backend_pytest",
+      "lines": 648,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_vaud_public_importer.py",
+      "layer": "backend_pytest",
+      "lines": 632,
+      "tests": 21,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_permit_tracking.py",
+      "layer": "backend_pytest",
+      "lines": 627,
+      "tests": 8,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_completion_workspace.py",
+      "layer": "backend_pytest",
+      "lines": 615,
+      "tests": 11,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    }
+  ],
+  "top_by_tests": [
+    {
+      "path": "backend/tests/test_compliance_edge_cases.py",
+      "layer": "backend_pytest",
+      "lines": 1366,
+      "tests": 139,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/formatters.test.ts",
+      "layer": "frontend_unit",
+      "lines": 206,
+      "tests": 35,
+      "describes": 13,
+      "flags": [
+        "large",
+        "high_case_count"
+      ]
+    },
+    {
+      "path": "backend/tests/test_occupant_safety.py",
+      "layer": "backend_pytest",
+      "lines": 508,
+      "tests": 30,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_access_control.py",
+      "layer": "backend_pytest",
+      "lines": 574,
+      "tests": 26,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_timeline_enrichment.py",
+      "layer": "backend_pytest",
+      "lines": 458,
+      "tests": 25,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_portfolio_optimization.py",
+      "layer": "backend_pytest",
+      "lines": 410,
+      "tests": 22,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_search.py",
+      "layer": "backend_pytest",
+      "lines": 371,
+      "tests": 22,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_energy_performance.py",
+      "layer": "backend_pytest",
+      "lines": 418,
+      "tests": 21,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_vaud_public_importer.py",
+      "layer": "backend_pytest",
+      "lines": 632,
+      "tests": 21,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_engine.py",
+      "layer": "backend_pytest",
+      "lines": 100,
+      "tests": 16,
+      "describes": 0,
+      "flags": [
+        "high_case_count"
+      ]
+    },
+    {
+      "path": "backend/tests/test_risk_engine.py",
+      "layer": "backend_pytest",
+      "lines": 103,
+      "tests": 15,
+      "describes": 0,
+      "flags": [
+        "medium_case_count"
+      ]
+    },
+    {
+      "path": "backend/tests/test_transaction_readiness.py",
+      "layer": "backend_pytest",
+      "lines": 942,
+      "tests": 15,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "frontend/e2e/buildings.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 104,
+      "tests": 15,
+      "describes": 2,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/e2e/pages.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 125,
+      "tests": 15,
+      "describes": 5,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "backend/tests/test_ventilation_assessment.py",
+      "layer": "backend_pytest",
+      "lines": 496,
+      "tests": 13,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    }
+  ],
+  "flagged": [
+    {
+      "path": "backend/tests/test_security.py",
+      "layer": "backend_pytest",
+      "lines": 1392,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_edge_cases.py",
+      "layer": "backend_pytest",
+      "lines": 1366,
+      "tests": 139,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_ui_simulation.py",
+      "layer": "backend_pytest",
+      "lines": 1313,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_data_integrity.py",
+      "layer": "backend_pytest",
+      "lines": 1196,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_transaction_readiness.py",
+      "layer": "backend_pytest",
+      "lines": 942,
+      "tests": 15,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_api_edge_cases.py",
+      "layer": "backend_pytest",
+      "lines": 800,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_plan_heatmap.py",
+      "layer": "backend_pytest",
+      "lines": 767,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_dossier_completion_agent.py",
+      "layer": "backend_pytest",
+      "lines": 688,
+      "tests": 6,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_regulatory_deadline.py",
+      "layer": "backend_pytest",
+      "lines": 662,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_remediation_cost.py",
+      "layer": "backend_pytest",
+      "lines": 661,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_portfolio_summary.py",
+      "layer": "backend_pytest",
+      "lines": 650,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_occupancy_risk.py",
+      "layer": "backend_pytest",
+      "lines": 648,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_vaud_public_importer.py",
+      "layer": "backend_pytest",
+      "lines": 632,
+      "tests": 21,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_permit_tracking.py",
+      "layer": "backend_pytest",
+      "lines": 627,
+      "tests": 8,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_completion_workspace.py",
+      "layer": "backend_pytest",
+      "lines": 615,
+      "tests": 11,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_notification_rules.py",
+      "layer": "backend_pytest",
+      "lines": 612,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_risk_mitigation.py",
+      "layer": "backend_pytest",
+      "lines": 607,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_tenant_impact.py",
+      "layer": "backend_pytest",
+      "lines": 602,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_audit_readiness.py",
+      "layer": "backend_pytest",
+      "lines": 598,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_data_provenance.py",
+      "layer": "backend_pytest",
+      "lines": 586,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_insurance_risk_assessment.py",
+      "layer": "backend_pytest",
+      "lines": 575,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_access_control.py",
+      "layer": "backend_pytest",
+      "lines": 574,
+      "tests": 26,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_weak_signal_watchtower.py",
+      "layer": "backend_pytest",
+      "lines": 549,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_timeline.py",
+      "layer": "backend_pytest",
+      "lines": 547,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_seed_data.py",
+      "layer": "backend_pytest",
+      "lines": 545,
+      "tests": 8,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_cross_building_pattern.py",
+      "layer": "backend_pytest",
+      "lines": 542,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_pollutant_inventory.py",
+      "layer": "backend_pytest",
+      "lines": 541,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_lab_result.py",
+      "layer": "backend_pytest",
+      "lines": 539,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_evidence_graph.py",
+      "layer": "backend_pytest",
+      "lines": 538,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_quality_assurance.py",
+      "layer": "backend_pytest",
+      "lines": 538,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_health_index.py",
+      "layer": "backend_pytest",
+      "lines": 535,
+      "tests": 9,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_dashboard.py",
+      "layer": "backend_pytest",
+      "lines": 528,
+      "tests": 1,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_requalification_service.py",
+      "layer": "backend_pytest",
+      "lines": 527,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_zone_classification.py",
+      "layer": "backend_pytest",
+      "lines": 527,
+      "tests": 12,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_calendar.py",
+      "layer": "backend_pytest",
+      "lines": 520,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_benchmark.py",
+      "layer": "backend_pytest",
+      "lines": 519,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_material_inventory.py",
+      "layer": "backend_pytest",
+      "lines": 515,
+      "tests": 11,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_contractor_acknowledgment.py",
+      "layer": "backend_pytest",
+      "lines": 513,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_readiness_reasoner.py",
+      "layer": "backend_pytest",
+      "lines": 512,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_gap.py",
+      "layer": "backend_pytest",
+      "lines": 510,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_decision_replay.py",
+      "layer": "backend_pytest",
+      "lines": 510,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_occupant_safety.py",
+      "layer": "backend_pytest",
+      "lines": 508,
+      "tests": 30,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_priority_matrix.py",
+      "layer": "backend_pytest",
+      "lines": 508,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_scenario_planning.py",
+      "layer": "backend_pytest",
+      "lines": 505,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_evidence_chain.py",
+      "layer": "backend_pytest",
+      "lines": 501,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_renovation_sequencer.py",
+      "layer": "backend_pytest",
+      "lines": 499,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_regulatory_filing.py",
+      "layer": "backend_pytest",
+      "lines": 497,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_stakeholder_report.py",
+      "layer": "backend_pytest",
+      "lines": 497,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_ventilation_assessment.py",
+      "layer": "backend_pytest",
+      "lines": 496,
+      "tests": 13,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_spatial_risk_mapping.py",
+      "layer": "backend_pytest",
+      "lines": 495,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_diagnostic_quality.py",
+      "layer": "backend_pytest",
+      "lines": 491,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_jurisdictions.py",
+      "layer": "backend_pytest",
+      "lines": 490,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_reporting_metrics.py",
+      "layer": "backend_pytest",
+      "lines": 490,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_handoff_pack.py",
+      "layer": "backend_pytest",
+      "lines": 488,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_incident_response.py",
+      "layer": "backend_pytest",
+      "lines": 487,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_action_generator.py",
+      "layer": "backend_pytest",
+      "lines": 480,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_contractor_matching.py",
+      "layer": "backend_pytest",
+      "lines": 480,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_maintenance_forecast.py",
+      "layer": "backend_pytest",
+      "lines": 477,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_certification.py",
+      "layer": "backend_pytest",
+      "lines": 471,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_campaigns.py",
+      "layer": "backend_pytest",
+      "lines": 471,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_anomaly_detection.py",
+      "layer": "backend_pytest",
+      "lines": 470,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_budget_tracking.py",
+      "layer": "backend_pytest",
+      "lines": 470,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_campaign_tracking.py",
+      "layer": "backend_pytest",
+      "lines": 467,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_actions.py",
+      "layer": "backend_pytest",
+      "lines": 466,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_portfolio_risk_trends.py",
+      "layer": "backend_pytest",
+      "lines": 462,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_due_diligence.py",
+      "layer": "backend_pytest",
+      "lines": 461,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_timeline_enrichment.py",
+      "layer": "backend_pytest",
+      "lines": 458,
+      "tests": 25,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_constraint_graph.py",
+      "layer": "backend_pytest",
+      "lines": 456,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_notification_digest.py",
+      "layer": "backend_pytest",
+      "lines": 454,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_cost_benefit_analysis.py",
+      "layer": "backend_pytest",
+      "lines": 452,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_knowledge_gap.py",
+      "layer": "backend_pytest",
+      "lines": 451,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_monitoring_plan.py",
+      "layer": "backend_pytest",
+      "lines": 450,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_risk_aggregation.py",
+      "layer": "backend_pytest",
+      "lines": 449,
+      "tests": 6,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_stakeholder_dashboard.py",
+      "layer": "backend_pytest",
+      "lines": 442,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_document_classification.py",
+      "layer": "backend_pytest",
+      "lines": 439,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_sample_optimization.py",
+      "layer": "backend_pytest",
+      "lines": 435,
+      "tests": 7,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_age_analysis.py",
+      "layer": "backend_pytest",
+      "lines": 430,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_multi_org_dashboard.py",
+      "layer": "backend_pytest",
+      "lines": 430,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_lifecycle.py",
+      "layer": "backend_pytest",
+      "lines": 428,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_field_observations.py",
+      "layer": "backend_pytest",
+      "lines": 419,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_energy_performance.py",
+      "layer": "backend_pytest",
+      "lines": 418,
+      "tests": 21,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_regulatory_change_impact.py",
+      "layer": "backend_pytest",
+      "lines": 418,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_portfolio_optimization.py",
+      "layer": "backend_pytest",
+      "lines": 410,
+      "tests": 22,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_document_completeness.py",
+      "layer": "backend_pytest",
+      "lines": 407,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_maintenance_schedule.py",
+      "layer": "backend_pytest",
+      "lines": 403,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_dossier_v2.py",
+      "layer": "backend_pytest",
+      "lines": 399,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_authority_packs.py",
+      "layer": "backend_pytest",
+      "lines": 390,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_passport_service.py",
+      "layer": "backend_pytest",
+      "lines": 389,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_data_export.py",
+      "layer": "backend_pytest",
+      "lines": 385,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_waste_management.py",
+      "layer": "backend_pytest",
+      "lines": 376,
+      "tests": 10,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_sampling_planner.py",
+      "layer": "backend_pytest",
+      "lines": 372,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_search.py",
+      "layer": "backend_pytest",
+      "lines": 371,
+      "tests": 22,
+      "describes": 0,
+      "flags": [
+        "oversized",
+        "high_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_document_template_service.py",
+      "layer": "backend_pytest",
+      "lines": 364,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_building_comparison.py",
+      "layer": "backend_pytest",
+      "lines": 359,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_environmental_impact.py",
+      "layer": "backend_pytest",
+      "lines": 357,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_contradiction_detector.py",
+      "layer": "backend_pytest",
+      "lines": 348,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_readiness_action_generator.py",
+      "layer": "backend_pytest",
+      "lines": 342,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_artefacts.py",
+      "layer": "backend_pytest",
+      "lines": 330,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_risk_communication.py",
+      "layer": "backend_pytest",
+      "lines": 323,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_bulk_operations.py",
+      "layer": "backend_pytest",
+      "lines": 321,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_invitations.py",
+      "layer": "backend_pytest",
+      "lines": 320,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_zones.py",
+      "layer": "backend_pytest",
+      "lines": 316,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_completeness_engine.py",
+      "layer": "backend_pytest",
+      "lines": 311,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_unknown_generator.py",
+      "layer": "backend_pytest",
+      "lines": 307,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_interventions.py",
+      "layer": "backend_pytest",
+      "lines": 305,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_parse_report.py",
+      "layer": "backend_pytest",
+      "lines": 302,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_plan_annotations.py",
+      "layer": "backend_pytest",
+      "lines": 300,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "oversized"
+      ]
+    },
+    {
+      "path": "backend/tests/test_file_processing.py",
+      "layer": "backend_pytest",
+      "lines": 296,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_trust_score_calculator.py",
+      "layer": "backend_pytest",
+      "lines": 296,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_organizations.py",
+      "layer": "backend_pytest",
+      "lines": 294,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_change_signal_generator.py",
+      "layer": "backend_pytest",
+      "lines": 287,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_rule_resolver.py",
+      "layer": "backend_pytest",
+      "lines": 275,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_timeline.py",
+      "layer": "backend_pytest",
+      "lines": 274,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_pack_impact.py",
+      "layer": "backend_pytest",
+      "lines": 271,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_seed_authority_demo.py",
+      "layer": "backend_pytest",
+      "lines": 271,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_time_machine.py",
+      "layer": "backend_pytest",
+      "lines": 268,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_technical_plans.py",
+      "layer": "backend_pytest",
+      "lines": 267,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_post_works_service.py",
+      "layer": "backend_pytest",
+      "lines": 265,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_seed_demo_enrich.py",
+      "layer": "backend_pytest",
+      "lines": 256,
+      "tests": 11,
+      "describes": 0,
+      "flags": [
+        "large",
+        "medium_case_count",
+        "broad_backend"
+      ]
+    },
+    {
+      "path": "backend/tests/test_audit_export.py",
+      "layer": "backend_pytest",
+      "lines": 248,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_intervention_simulator.py",
+      "layer": "backend_pytest",
+      "lines": 230,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_evidence.py",
+      "layer": "backend_pytest",
+      "lines": 228,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/client.test.ts",
+      "layer": "frontend_unit",
+      "lines": 226,
+      "tests": 13,
+      "describes": 4,
+      "flags": [
+        "large",
+        "medium_case_count"
+      ]
+    },
+    {
+      "path": "backend/tests/test_notification_preferences.py",
+      "layer": "backend_pytest",
+      "lines": 224,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_notifications.py",
+      "layer": "backend_pytest",
+      "lines": 222,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/BuildingDetailPage.test.tsx",
+      "layer": "frontend_unit",
+      "lines": 222,
+      "tests": 2,
+      "describes": 1,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_dossier_archive.py",
+      "layer": "backend_pytest",
+      "lines": 216,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_workflow_orchestration.py",
+      "layer": "backend_pytest",
+      "lines": 216,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_portfolio_map.py",
+      "layer": "backend_pytest",
+      "lines": 215,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_campaign_impact.py",
+      "layer": "backend_pytest",
+      "lines": 214,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_engine_resolved.py",
+      "layer": "backend_pytest",
+      "lines": 214,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/formatters.test.ts",
+      "layer": "frontend_unit",
+      "lines": 206,
+      "tests": 35,
+      "describes": 13,
+      "flags": [
+        "large",
+        "high_case_count"
+      ]
+    },
+    {
+      "path": "backend/tests/test_campaign_recommender.py",
+      "layer": "backend_pytest",
+      "lines": 204,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "backend/tests/test_transfer_package.py",
+      "layer": "backend_pytest",
+      "lines": 200,
+      "tests": 0,
+      "describes": 0,
+      "flags": [
+        "large"
+      ]
+    },
+    {
+      "path": "frontend/e2e/campaigns.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 187,
+      "tests": 11,
+      "describes": 1,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/DossierPackButton.test.tsx",
+      "layer": "frontend_unit",
+      "lines": 182,
+      "tests": 10,
+      "describes": 1,
+      "flags": [
+        "medium_case_count"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/BuildingCard.test.tsx",
+      "layer": "frontend_unit",
+      "lines": 161,
+      "tests": 11,
+      "describes": 1,
+      "flags": [
+        "medium_case_count"
+      ]
+    },
+    {
+      "path": "frontend/e2e/navigation.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 143,
+      "tests": 11,
+      "describes": 2,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/src/components/__tests__/DataQualityScore.test.tsx",
+      "layer": "frontend_unit",
+      "lines": 126,
+      "tests": 10,
+      "describes": 1,
+      "flags": [
+        "medium_case_count"
+      ]
+    },
+    {
+      "path": "frontend/e2e/pages.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 125,
+      "tests": 15,
+      "describes": 5,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/e2e/actions-page.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 123,
+      "tests": 12,
+      "describes": 1,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/e2e/buildings.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 104,
+      "tests": 15,
+      "describes": 2,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "backend/tests/test_risk_engine.py",
+      "layer": "backend_pytest",
+      "lines": 103,
+      "tests": 15,
+      "describes": 0,
+      "flags": [
+        "medium_case_count"
+      ]
+    },
+    {
+      "path": "backend/tests/test_compliance_engine.py",
+      "layer": "backend_pytest",
+      "lines": 100,
+      "tests": 16,
+      "describes": 0,
+      "flags": [
+        "high_case_count"
+      ]
+    },
+    {
+      "path": "frontend/e2e/building-timeline.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 97,
+      "tests": 8,
+      "describes": 1,
+      "flags": [
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/e2e/login.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 92,
+      "tests": 9,
+      "describes": 1,
+      "flags": [
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/e2e-real/smoke.spec.ts",
+      "layer": "frontend_e2e_real",
+      "lines": 86,
+      "tests": 9,
+      "describes": 1,
+      "flags": [
+        "broad_e2e"
+      ]
+    },
+    {
+      "path": "frontend/e2e/diagnostic-view.spec.ts",
+      "layer": "frontend_e2e_mock",
+      "lines": 83,
+      "tests": 13,
+      "describes": 2,
+      "flags": [
+        "medium_case_count",
+        "broad_e2e"
+      ]
+    }
+  ]
+}

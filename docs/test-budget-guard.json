@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "owner": "lead",
+    "purpose": "Prevent runaway broad test-suite growth and preserve high-signal validation.",
+    "updated_at": "2026-03-08T18:55:00+00:00"
+  },
+  "limits": {
+    "max_total_files_growth": 20,
+    "max_total_tests_growth": 220,
+    "max_flagged_growth": 12,
+    "max_flagged_by_layer_growth": {
+      "backend_pytest": 8,
+      "frontend_unit": 3,
+      "frontend_e2e_mock": 3,
+      "frontend_e2e_real": 2
+    },
+    "max_flag_growth": {
+      "oversized": 6,
+      "large": 5,
+      "broad_backend": 3,
+      "broad_e2e": 2,
+      "high_case_count": 3
+    }
+  },
+  "baseline": {
+    "total_files": 215,
+    "total_tests": 825,
+    "flagged_count": 148,
+    "by_layer": {
+      "backend_pytest": {
+        "files": 160,
+        "lines": 65387,
+        "tests": 478,
+        "flagged": 133
+      },
+      "frontend_unit": {
+        "files": 34,
+        "lines": 3433,
+        "tests": 176,
+        "flagged": 6
+      },
+      "frontend_e2e_mock": {
+        "files": 19,
+        "lines": 1665,
+        "tests": 159,
+        "flagged": 8
+      },
+      "frontend_e2e_real": {
+        "files": 2,
+        "lines": 162,
+        "tests": 12,
+        "flagged": 1
+      }
+    },
+    "flag_counts": {
+      "oversized": 107,
+      "high_case_count": 10,
+      "broad_backend": 15,
+      "medium_case_count": 18,
+      "large": 27,
+      "broad_e2e": 9
+    },
+    "captured_at": "2026-03-08T18:55:00+00:00"
+  }
+}
+

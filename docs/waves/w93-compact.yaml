@@ -1,0 +1,76 @@
+wave: W93
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W93-A
+    outcome: Stabilize failing Playwright smoke tests with deterministic selectors and assertions.
+    files:
+      modify:
+        - frontend/e2e/login.spec.ts
+        - frontend/e2e/completeness.spec.ts
+        - frontend/e2e/buildings.spec.ts
+        - frontend/e2e/navigation.spec.ts
+        - frontend/e2e/helpers.ts
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Use stable locators (role+exact, test ids, scoped containers) over brittle text/nth selectors.
+      - Remove assumptions tied to one locale-only rendering.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run test:e2e:smoke
+      - cd frontend && npm run test:e2e:smoke
+    exit: smoke suite is green twice consecutively with no flaky retries.
+
+  - id: W93-B
+    outcome: Eliminate explicit Playwright flakiness patterns across mock and real suites.
+    files:
+      modify:
+        - frontend/e2e/building-interventions.spec.ts
+        - frontend/e2e/building-explorer.spec.ts
+        - frontend/e2e/building-plans.spec.ts
+        - frontend/e2e/admin-jurisdictions.spec.ts
+        - frontend/e2e/navigation.spec.ts
+        - frontend/e2e-real/screenshot-audit.spec.ts
+      create:
+        - frontend/e2e/utils/waitForStableUi.ts
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Replace raw waitForTimeout with deterministic waits tied to UI state/network completion.
+      - Avoid naked nth selectors when semantic selectors are possible.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - rg -n "waitForTimeout\\(|\\.nth\\(" frontend/e2e frontend/e2e-real -S
+      - cd frontend && npm run test:e2e -- navigation.spec.ts building-plans.spec.ts building-explorer.spec.ts building-interventions.spec.ts admin-jurisdictions.spec.ts
+    exit: explicit timeout/nth anti-patterns are removed or justified with inline rationale.
+
+  - id: W93-C
+    outcome: Harden real Playwright execution boundary and artifact hygiene.
+    files:
+      modify:
+        - frontend/scripts/e2e_real_preflight.mjs
+        - frontend/playwright.real.config.ts
+        - frontend/playwright.config.ts
+        - .gitignore
+      create:
+        - docs/playwright-test-ops.md
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Real preflight must fail fast on wrong backend identity with actionable override guidance.
+      - Keep test artifacts out of versioned defaults.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd frontend && npm run test:e2e:real:preflight
+      - cd frontend && npm run test:e2e -- login.spec.ts navigation.spec.ts
+    exit: real preflight is deterministic and Playwright artifact lifecycle is documented and controlled.

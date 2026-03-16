@@ -1,0 +1,71 @@
+import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
+
+
+class FieldObservationCreate(BaseModel):
+    building_id: uuid.UUID
+    observation_type: str
+    severity: str = "info"
+    title: str
+    description: str | None = None
+    zone_id: uuid.UUID | None = None
+    element_id: uuid.UUID | None = None
+    location_description: str | None = None
+    observed_at: datetime | None = None
+    photo_reference: str | None = None
+    metadata_json: str | None = None
+
+
+class FieldObservationUpdate(BaseModel):
+    observation_type: str | None = None
+    severity: str | None = None
+    title: str | None = None
+    description: str | None = None
+    zone_id: uuid.UUID | None = None
+    element_id: uuid.UUID | None = None
+    location_description: str | None = None
+    observed_at: datetime | None = None
+    photo_reference: str | None = None
+    metadata_json: str | None = None
+    status: str | None = None
+
+
+class FieldObservationRead(BaseModel):
+    id: uuid.UUID
+    building_id: uuid.UUID
+    zone_id: uuid.UUID | None
+    element_id: uuid.UUID | None
+    observer_id: uuid.UUID
+    observation_type: str
+    severity: str
+    title: str
+    description: str | None
+    location_description: str | None
+    observed_at: datetime | None
+    photo_reference: str | None
+    verified: bool
+    verified_by_id: uuid.UUID | None
+    verified_at: datetime | None
+    metadata_json: str | None
+    status: str
+    created_at: datetime | None
+    updated_at: datetime | None
+    observer_name: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FieldObservationSummary(BaseModel):
+    building_id: uuid.UUID
+    total_observations: int
+    by_type: dict[str, int]
+    by_severity: dict[str, int]
+    unverified_count: int
+    latest_observation_at: datetime | None
+
+
+class FieldObservationVerify(BaseModel):
+    verified: bool
+    notes: str | None = None

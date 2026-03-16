@@ -1,0 +1,68 @@
+wave: W89
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W89-A
+    outcome: Add core CI workflow enforcing frontend and backend validation gates on pull requests.
+    files:
+      modify:
+        - README.md
+      create:
+        - .github/workflows/ci-core.yml
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - CI jobs must mirror repo-local commands.
+      - Keep runtime bounded with focused smoke subsets when needed.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - cd backend && ruff check app/ tests/
+      - cd backend && ruff format --check app/ tests/
+      - cd frontend && npm run validate
+      - cd frontend && npm test
+      - cd frontend && npm run build
+    exit: PR CI blocks merge when core validate/test/build gates fail.
+
+  - id: W89-B
+    outcome: Add dependency and security audit CI lane for JS and Python dependencies.
+    files:
+      modify:
+        - backend/requirements.txt
+      create:
+        - .github/workflows/security-audit.yml
+        - scripts/security_audit_gate.py
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Focus on deterministic, automatable checks.
+      - Fail on high-severity findings by default.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - python scripts/security_audit_gate.py --python backend/requirements.txt --npm frontend/package-lock.json
+    exit: security audit lane is runnable in CI and produces actionable pass/fail output.
+
+  - id: W89-C
+    outcome: Add repo policy CI lane enforcing budget and control-plane checks.
+    files:
+      modify:
+        - package.json
+      create:
+        - .github/workflows/repo-policy.yml
+      do_not_touch:
+        - backend/app/api/router.py
+        - backend/app/models/__init__.py
+        - backend/app/schemas/__init__.py
+    constraints:
+      - Reuse existing policy scripts; do not duplicate logic.
+      - Keep policy failures explicit and readable.
+      - validate-fix-rerun loop mandatory before handoff.
+    validate:
+      - npm run test:budget
+      - npm run lead:check
+      - npm run router:check
+    exit: repo policy lane fails CI on budget or control-plane regressions.

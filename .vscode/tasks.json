@@ -1,0 +1,221 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Frontend: Unit Tests",
+      "type": "shell",
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: Confidence",
+      "type": "shell",
+      "command": "npm run test:confidence",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: Surface Suite",
+      "type": "shell",
+      "command": "npm run test:surface -- ${input:frontendSurface}",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: Surface Suite + E2E",
+      "type": "shell",
+      "command": "npm run test:surface -- ${input:frontendSurface} --with-e2e",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Repo: Related Checks",
+      "type": "shell",
+      "command": "python scripts/run_related_checks.py ${input:relatedTargets}",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Repo: Test Inventory",
+      "type": "shell",
+      "command": "python scripts/test_inventory.py --write",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Repo: Test Budget Guard",
+      "type": "shell",
+      "command": "python scripts/test_budget_guard.py --write-current",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Repo: Router Inventory",
+      "type": "shell",
+      "command": "python scripts/router_inventory.py --write",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Repo: Lead Control Plane Check",
+      "type": "shell",
+      "command": "python scripts/lead_control_plane_check.py --strict",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Repo: Frontend Async State Audit",
+      "type": "shell",
+      "command": "python scripts/frontend_async_state_audit.py --write --strict",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: E2E Mock",
+      "type": "shell",
+      "command": "npm run test:e2e",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: E2E Smoke",
+      "type": "shell",
+      "command": "npm run test:e2e:smoke",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: E2E Real",
+      "type": "shell",
+      "command": "npm run test:e2e:real",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: E2E Real Preflight",
+      "type": "shell",
+      "command": "npm run test:e2e:real:preflight",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "PreLive: Launch All (No Password)",
+      "type": "shell",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start_prelive.ps1",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Frontend: Validate",
+      "type": "shell",
+      "command": "npm run validate",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "build",
+      "problemMatcher": ["$tsc", "$eslint-stylish"],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Backend: Confidence Suite",
+      "type": "shell",
+      "command": "python scripts/run_confidence_suite.py",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Backend: Ruff Check",
+      "type": "shell",
+      "command": "ruff check app/ tests/",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Backend: Tests",
+      "type": "shell",
+      "command": "python -m pytest tests/ -q",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Backend: Seed Verify",
+      "type": "shell",
+      "command": "python -m app.seeds.seed_verify",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "revealProblems": "onProblem" }
+    },
+    {
+      "label": "Validate All",
+      "dependsOn": ["Frontend: Validate", "Backend: Ruff Check"],
+      "dependsOrder": "parallel",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test All Fast",
+      "dependsOn": ["Frontend: Confidence", "Backend: Confidence Suite"],
+      "dependsOrder": "parallel",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "frontendSurface",
+      "type": "pickString",
+      "description": "Choose a frontend product surface",
+      "options": [
+        "trust",
+        "readiness",
+        "timeline",
+        "portfolio",
+        "dossier",
+        "shell"
+      ],
+      "default": "readiness"
+    },
+    {
+      "id": "relatedTargets",
+      "type": "promptString",
+      "description": "Repo-relative file paths to infer related checks from (space-separated)",
+      "default": "frontend/src/pages/ReadinessWallet.tsx"
+    }
+  ]
+}

@@ -1,0 +1,445 @@
+{
+  "summary": {
+    "surfaces_scanned": 35,
+    "explicit_error_state": 35,
+    "review_error_path": 0,
+    "missing_error_state": 0
+  },
+  "items": [
+    {
+      "file": "frontend/src/pages/Actions.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/AdminAuditLogs.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/AdminInvitations.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/AdminJurisdictions.tsx",
+      "query_count": 2,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/AdminOrganizations.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/AdminUsers.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/BuildingComparison.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "buildingsError",
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/BuildingDetail.tsx",
+      "query_count": 2,
+      "error_variables": [
+        "actionsError",
+        "activityError",
+        "error",
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/BuildingExplorer.tsx",
+      "query_count": 4,
+      "error_variables": [
+        "isError",
+        "zonesError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/BuildingInterventions.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/BuildingPlans.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/Campaigns.tsx",
+      "query_count": 3,
+      "error_variables": [
+        "error"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/Dashboard.tsx",
+      "query_count": 2,
+      "error_variables": [
+        "actionsError",
+        "buildingsError",
+        "diagnosticsError",
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/ExportJobs.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/Portfolio.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/ReadinessWallet.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError",
+        "readinessError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/RiskSimulator.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "buildingsError",
+        "error",
+        "isError",
+        "savedSimsError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/SafeToXCockpit.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/pages/Settings.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "error",
+        "isError",
+        "notifPrefsError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/BuildingTimeline.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/ChangeSignalsFeed.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/CompletenessGauge.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/ContradictionCard.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/DataQualityScore.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/EvidenceChain.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/NotificationBell.tsx",
+      "query_count": 2,
+      "error_variables": [
+        "isError",
+        "notificationsError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/PassportCard.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/PortfolioSignalsFeed.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/PostWorksDiffCard.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/ProofHeatmapOverlay.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/ReadinessSummary.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/RequalificationTimeline.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/TimeMachinePanel.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": true,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/TrustScoreCard.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    },
+    {
+      "file": "frontend/src/components/UnknownIssuesList.tsx",
+      "query_count": 1,
+      "error_variables": [
+        "isError"
+      ],
+      "has_property_error_usage": false,
+      "has_error_token": true,
+      "has_error_branch": true,
+      "status": "explicit_error_state",
+      "notes": []
+    }
+  ]
+}

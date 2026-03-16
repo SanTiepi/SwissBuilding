@@ -1,0 +1,74 @@
+wave: W84
+mode: lean_autonomy
+checkpoint: wave_close_only
+tasks:
+  - id: W84-A
+    outcome: Restore visible mobile search trigger in header and keep command palette behavior unchanged.
+    files:
+      modify:
+        - frontend/src/components/Header.tsx
+        - frontend/src/components/__tests__/Header.test.tsx
+        - frontend/e2e/navigation.spec.ts
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Keep desktop behavior unchanged.
+      - Keep Cmd/Ctrl+K shortcut behavior.
+      - Mobile control must be touch-safe (>=44px target).
+      - Agent must run validate-fix loop before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- Header
+      - cd frontend && npm run test:e2e -- navigation.spec.ts
+    exit: Mobile search trigger is visible and tested, no header regressions.
+
+  - id: W84-B
+    outcome: Add mobile fallback layout for BuildingComparison usable with 3+ buildings.
+    files:
+      modify:
+        - frontend/src/pages/BuildingComparison.tsx
+        - frontend/src/components/__tests__/BuildingComparisonPage.test.tsx
+        - frontend/e2e/pages.spec.ts
+      create: []
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Preserve desktop comparison table behavior.
+      - No backend contract changes.
+      - Agent must run validate-fix loop before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- BuildingComparisonPage
+      - cd frontend && npm run test:e2e -- pages.spec.ts
+    exit: Mobile comparison is usable at 375px for 3+ buildings and tests are green.
+
+  - id: W84-C
+    outcome: Standardize loading skeleton patterns across shared loading wrappers.
+    files:
+      modify:
+        - frontend/src/components/Skeleton.tsx
+        - frontend/src/components/AsyncStateWrapper.tsx
+        - frontend/src/components/__tests__/AsyncStateWrapper.test.tsx
+      create:
+        - frontend/src/components/__tests__/SkeletonLoadingStates.test.tsx
+      do_not_touch:
+        - frontend/src/i18n/en.ts
+        - frontend/src/i18n/fr.ts
+        - frontend/src/i18n/de.ts
+        - frontend/src/i18n/it.ts
+    constraints:
+      - Keep loading states accessible.
+      - No API/query contract changes.
+      - Agent must run validate-fix loop before handoff.
+    validate:
+      - cd frontend && npm run validate
+      - cd frontend && npm test -- AsyncStateWrapper SkeletonLoadingStates
+    exit: Shared loading behavior is consistent, tested, and regression-safe.
+

@@ -1,0 +1,73 @@
+{
+  "gate": "safe-to-start dossier",
+  "generated_at_utc": "2026-03-09T18:59:43.447390+00:00",
+  "generated_on": "2026-03-09",
+  "mode": "plan",
+  "verdict": "FAIL",
+  "summary": {
+    "total": 5,
+    "passed": 1,
+    "failed": 1,
+    "skipped": 3
+  },
+  "checks": [
+    {
+      "check_id": "G1",
+      "requirement": "Seeded scenario exists and passes threshold checks",
+      "status": "skipped",
+      "exit_code": null,
+      "duration_seconds": null,
+      "evidence": [],
+      "notes": [
+        "Planned command: python -m app.seeds.seed_verify (cwd=C:\\PROJET IA\\SwissBuilding\\backend)"
+      ]
+    },
+    {
+      "check_id": "G2",
+      "requirement": "Real environment targeting is correct before test run",
+      "status": "skipped",
+      "exit_code": null,
+      "duration_seconds": null,
+      "evidence": [],
+      "notes": [
+        "Planned command: npm run test:e2e:real:preflight (cwd=C:\\PROJET IA\\SwissBuilding\\frontend)"
+      ]
+    },
+    {
+      "check_id": "G3",
+      "requirement": "Real e2e suite passes against SwissBuilding backend",
+      "status": "skipped",
+      "exit_code": null,
+      "duration_seconds": null,
+      "evidence": [],
+      "notes": [
+        "Planned command: npm run test:e2e:real (cwd=C:\\PROJET IA\\SwissBuilding\\frontend)"
+      ]
+    },
+    {
+      "check_id": "G4",
+      "requirement": "UI progression raw -> complete is visible on the same building chain",
+      "status": "failed",
+      "exit_code": null,
+      "duration_seconds": null,
+      "evidence": [],
+      "notes": [
+        "Missing required screenshots: real-audit-dashboard-desktop.png, real-audit-dashboard-mobile.png, real-audit-building-detail-desktop.png, real-audit-building-detail-mobile.png"
+      ]
+    },
+    {
+      "check_id": "G5",
+      "requirement": "Safe-to-start positioning remains claim-disciplined",
+      "status": "passed",
+      "exit_code": null,
+      "duration_seconds": null,
+      "evidence": [
+        "docs/safe-to-start-gate-runbook.md",
+        "docs/market/safe-to-start-demo-onepager.md"
+      ],
+      "notes": [
+        "Claim-discipline checks found in runbook and one-pager."
+      ]
+    }
+  ]
+}
