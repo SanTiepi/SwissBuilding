@@ -14,6 +14,7 @@ PreworkTriggerType = Literal[
     "lead_check",
     "hap_check",
     "radon_check",
+    "pfas_check",
 ]
 
 PreworkTriggerUrgency = Literal["low", "medium", "high"]
@@ -24,6 +25,7 @@ _CHECK_TO_TRIGGER: dict[str, tuple[PreworkTriggerType, str]] = {
     "all_pollutants_evaluated": ("amiante_check", "Missing pollutant evaluation may include asbestos"),
     "suva_notification": ("amiante_check", "SUVA notification required — asbestos diagnostic needed"),
     "cfst_work_category": ("amiante_check", "CFST work category undetermined — asbestos assessment needed"),
+    "pfas_assessment": ("pfas_check", "PFAS environmental assessment required"),
 }
 
 # Pollutant names found in check details → trigger type
@@ -33,6 +35,7 @@ _POLLUTANT_TRIGGER_MAP: dict[str, PreworkTriggerType] = {
     "lead": "lead_check",
     "hap": "hap_check",
     "radon": "radon_check",
+    "pfas": "pfas_check",
 }
 
 

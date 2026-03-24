@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -12,6 +13,44 @@ from app.models.contractor_acknowledgment import ContractorAcknowledgment
 from app.models.intervention import Intervention
 from app.schemas.contractor_acknowledgment import ContractorAcknowledgmentCreate
 
+logger = logging.getLogger(__name__)
+
+
+async def _build_eco_clause_summary(db: AsyncSession, building_id: UUID) -> dict | None:
+    """Generate eco clause summary for a building if pollutant samples exist.
+
+    Returns a dict with clause metadata or None when no pollutants are detected.
+    """
+    try:
+        from app.services.eco_clause_template_service import generate_eco_clauses
+
+        payload = await generate_eco_clauses(building_id, "renovation", db)
+        if not payload.detected_pollutants:
+            return None
+        return {
+            "total_clauses": payload.total_clauses,
+            "detected_pollutants": payload.detected_pollutants,
+            "sections": [
+                {
+                    "section_id": s.section_id,
+                    "title": s.title,
+                    "clauses": [
+                        {
+                            "clause_id": c.clause_id,
+                            "title": c.title,
+                            "body": c.body,
+                            "legal_references": c.legal_references,
+                        }
+                        for c in s.clauses
+                    ],
+                }
+                for s in payload.sections
+            ],
+        }
+    except Exception as e:
+        logger.warning("Failed to generate eco clauses for building %s: %s", building_id, e)
+        return None
+
 
 async def create_acknowledgment(
     db: AsyncSession,
@@ -19,7 +58,12 @@ async def create_acknowledgment(
     data: ContractorAcknowledgmentCreate,
     created_by_id: UUID,
 ) -> ContractorAcknowledgment:
-    """Create a pending contractor acknowledgment. Validates intervention exists and belongs to building."""
+    """Create a pending contractor acknowledgment. Validates intervention exists and belongs to building.
+
+    When the building has pollutant samples with threshold exceedances, eco clause
+    sections are automatically appended to ``safety_requirements`` under the
+    ``eco_clauses`` key.
+    """
     result = await db.execute(
         select(Intervention).where(
             Intervention.id == data.intervention_id,
@@ -30,12 +74,22 @@ async def create_acknowledgment(
     if not intervention:
         raise ValueError("Intervention not found or does not belong to this building")
 
+    # Enrich safety_requirements with eco clauses when pollutants are detected
+    safety_reqs = data.safety_requirements
+    eco_summary = await _build_eco_clause_summary(db, building_id)
+    if eco_summary is not None:
+        # safety_requirements may be a list or dict; wrap in dict if needed
+        if isinstance(safety_reqs, list):
+            safety_reqs = {"items": safety_reqs, "eco_clauses": eco_summary}
+        elif isinstance(safety_reqs, dict):
+            safety_reqs = {**safety_reqs, "eco_clauses": eco_summary}
+
     ack = ContractorAcknowledgment(
         intervention_id=data.intervention_id,
         building_id=building_id,
         contractor_user_id=data.contractor_user_id,
         status="pending",
-        safety_requirements=data.safety_requirements,
+        safety_requirements=safety_reqs,
         expires_at=data.expires_at,
         created_by=created_by_id,
     )

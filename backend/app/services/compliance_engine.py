@@ -41,6 +41,18 @@ SWISS_THRESHOLDS = {
         "reference_value": {"threshold": 300, "unit": "bq_per_m3", "legal_ref": "ORaP Art. 110"},
         "mandatory_action": {"threshold": 1000, "unit": "bq_per_m3", "legal_ref": "ORaP Art. 110"},
     },
+    "pfas": {
+        "water_content": {
+            "threshold": 0.1,
+            "unit": "ug_per_l",
+            "legal_ref": "OSEC / EU Directive 2020/2184 (provisional)",
+        },
+        "soil_content": {
+            "threshold": 50,
+            "unit": "ng_per_kg",
+            "legal_ref": "OSol / OFEV guidance (provisional)",
+        },
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -256,6 +268,9 @@ def determine_waste_disposal(
         return "type_e"
 
     if pollutant_lower == "hap":
+        return "special"
+
+    if pollutant_lower == "pfas":
         return "special"
 
     # Default for unknown pollutants

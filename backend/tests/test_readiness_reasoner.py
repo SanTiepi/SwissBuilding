@@ -151,7 +151,7 @@ async def _create_full_building_data(db_session, admin_user):
         suva_notification_required=True,
         suva_notification_date=date(2024, 2, 1),
     )
-    # All 5 pollutants
+    # All 6 pollutants
     _make_sample(db_session, diag, pollutant_type="asbestos")
     _make_sample(
         db_session,
@@ -192,6 +192,17 @@ async def _create_full_building_data(db_session, admin_user):
         pollutant_type="radon",
         concentration=100.0,
         unit="bq_per_m3",
+        threshold_exceeded=False,
+        risk_level="low",
+        cfst_work_category=None,
+        action_required="none",
+    )
+    _make_sample(
+        db_session,
+        diag,
+        pollutant_type="pfas",
+        concentration=0.01,
+        unit="ug_per_l",
         threshold_exceeded=False,
         risk_level="low",
         cfst_work_category=None,
@@ -280,7 +291,7 @@ class TestSafeToStart:
             suva_notification_required=True,
             suva_notification_date=None,  # Not notified
         )
-        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
             _make_sample(
                 db_session,
                 diag,
@@ -303,7 +314,7 @@ class TestSafeToStart:
         building = _make_building(db_session, admin_user)
         diag = _make_diagnostic(db_session, building)
         # All pollutants, none positive
-        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
             _make_sample(
                 db_session,
                 diag,
@@ -563,7 +574,7 @@ class TestPreworkTriggers:
             suva_notification_required=True,
             suva_notification_date=None,
         )
-        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
             _make_sample(
                 db_session,
                 diag,
@@ -620,6 +631,7 @@ class TestPreworkTriggers:
                 "lead_check",
                 "hap_check",
                 "radon_check",
+                "pfas_check",
             )
             assert trigger.urgency in ("low", "medium", "high")
             assert len(trigger.reason) > 0
@@ -662,3 +674,175 @@ def test_derive_prework_triggers_all_passing():
         {"id": "all_pollutants_evaluated", "status": "pass", "required": True},
     ]
     assert _derive_prework_triggers(checks) == []
+
+
+def test_derive_prework_triggers_pfas_missing():
+    """Missing PFAS in pollutant evaluation should produce pfas_check trigger."""
+    checks = [
+        {
+            "id": "all_pollutants_evaluated",
+            "label": "All pollutants evaluated",
+            "status": "fail",
+            "detail": "Missing: pfas",
+            "required": True,
+        },
+    ]
+    triggers = _derive_prework_triggers(checks)
+    types = {t["trigger_type"] for t in triggers}
+    assert "pfas_check" in types
+
+
+def test_derive_prework_triggers_pfas_assessment():
+    """Failed pfas_assessment check should produce pfas_check trigger."""
+    checks = [
+        {
+            "id": "pfas_assessment",
+            "label": "PFAS environmental assessment available",
+            "status": "fail",
+            "detail": "PFAS detected above threshold",
+            "required": True,
+        },
+    ]
+    triggers = _derive_prework_triggers(checks)
+    types = {t["trigger_type"] for t in triggers}
+    assert "pfas_check" in types
+
+
+# ---------------------------------------------------------------------------
+# PFAS-specific readiness tests (async — need DB)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+class TestPfasReadiness:
+    """Tests for PFAS pollutant coverage in readiness evaluation."""
+
+    async def test_blocked_when_pfas_missing(self, db_session, admin_user):
+        """Building missing PFAS evaluation should be blocked (missing pollutant)."""
+        building = _make_building(db_session, admin_user)
+        diag = _make_diagnostic(db_session, building)
+        # Only 5 pollutants — no PFAS
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+            _make_sample(
+                db_session,
+                diag,
+                pollutant_type=pt,
+                threshold_exceeded=False,
+                risk_level="low",
+                cfst_work_category=None,
+                action_required="none",
+            )
+        await db_session.commit()
+
+        result = await evaluate_readiness(db_session, building.id, "safe_to_start")
+
+        assert result.status == "blocked"
+        blocker_messages = [b["message"] for b in result.blockers_json]
+        assert any("pfas" in m.lower() for m in blocker_messages)
+
+    async def test_pfas_positive_without_assessment_blocked(self, db_session, admin_user):
+        """Positive PFAS without environmental assessment should be blocked."""
+        building = _make_building(db_session, admin_user)
+        diag = _make_diagnostic(db_session, building)
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+            _make_sample(
+                db_session,
+                diag,
+                pollutant_type=pt,
+                threshold_exceeded=False,
+                risk_level="low",
+                cfst_work_category=None,
+                action_required="none",
+            )
+        _make_sample(
+            db_session,
+            diag,
+            pollutant_type="pfas",
+            concentration=0.5,
+            unit="ug_per_l",
+            threshold_exceeded=True,
+            risk_level="high",
+            cfst_work_category=None,
+            action_required="remove_planned",
+        )
+        _make_document(db_session, building, document_type="diagnostic_report")
+        await db_session.commit()
+
+        result = await evaluate_readiness(db_session, building.id, "safe_to_start")
+
+        assert result.status == "blocked"
+        blocker_messages = [b["message"] for b in result.blockers_json]
+        assert any("pfas" in m.lower() for m in blocker_messages)
+
+    async def test_pfas_positive_with_assessment_passes(self, db_session, admin_user):
+        """Positive PFAS with environmental assessment should pass PFAS check."""
+        building = _make_building(db_session, admin_user)
+        diag = _make_diagnostic(
+            db_session,
+            building,
+            suva_notification_required=True,
+            suva_notification_date=date(2024, 2, 1),
+        )
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+            _make_sample(
+                db_session,
+                diag,
+                pollutant_type=pt,
+                threshold_exceeded=False,
+                risk_level="low",
+                cfst_work_category=None,
+                action_required="none",
+            )
+        _make_sample(
+            db_session,
+            diag,
+            pollutant_type="pfas",
+            concentration=0.5,
+            unit="ug_per_l",
+            threshold_exceeded=True,
+            risk_level="high",
+            cfst_work_category=None,
+            action_required="remove_planned",
+        )
+        _make_document(db_session, building, document_type="diagnostic_report")
+        _make_document(db_session, building, document_type="pfas_assessment")
+        await db_session.commit()
+
+        result = await evaluate_readiness(db_session, building.id, "safe_to_start")
+
+        # PFAS assessment check should pass
+        pfas_checks = [c for c in result.checks_json if c["id"] == "pfas_assessment"]
+        assert len(pfas_checks) == 1
+        assert pfas_checks[0]["status"] == "pass"
+
+    async def test_pfas_negative_assessment_not_applicable(self, db_session, admin_user):
+        """Negative PFAS should mark assessment as not_applicable."""
+        building, _ = await _create_full_building_data(db_session, admin_user)
+
+        result = await evaluate_readiness(db_session, building.id, "safe_to_start")
+
+        pfas_checks = [c for c in result.checks_json if c["id"] == "pfas_assessment"]
+        assert len(pfas_checks) == 1
+        assert pfas_checks[0]["status"] == "not_applicable"
+
+    async def test_pfas_trigger_generated_when_missing(self, db_session, admin_user):
+        """Missing PFAS evaluation should generate pfas_check prework trigger."""
+        building = _make_building(db_session, admin_user)
+        diag = _make_diagnostic(db_session, building)
+        # Only asbestos — missing pcb, lead, hap, radon, pfas
+        _make_sample(
+            db_session,
+            diag,
+            pollutant_type="asbestos",
+            threshold_exceeded=False,
+            risk_level="low",
+            cfst_work_category=None,
+            action_required="none",
+        )
+        await db_session.commit()
+
+        result = await evaluate_readiness(db_session, building.id, "safe_to_start")
+        read = ReadinessAssessmentRead.model_validate(result)
+
+        trigger_types = {t.trigger_type for t in read.prework_triggers}
+        assert "pfas_check" in trigger_types

@@ -35,6 +35,7 @@ class TransferPackageResponse(BaseModel):
     snapshots: list[dict] | None = None
     completeness: dict | None = None
     readiness: dict | None = None
+    eco_clauses: dict | None = None
     metadata: dict
 
     model_config = ConfigDict(from_attributes=True)

@@ -165,7 +165,7 @@ async def _evaluate_safe_to_start(
                 "all_pollutants_evaluated",
                 "All pollutants evaluated",
                 "pass",
-                detail="All 5 pollutant types covered",
+                detail=f"All {len(ALL_POLLUTANTS)} pollutant types covered",
             )
         )
     else:
@@ -327,6 +327,48 @@ async def _evaluate_safe_to_start(
                 "not_applicable",
                 legal_basis="OLED",
                 detail="No positive samples",
+            )
+        )
+
+    # 6b. PFAS environmental assessment (if PFAS positive)
+    has_positive_pfas = any((s.pollutant_type or "").lower() == "pfas" and s.threshold_exceeded for s in samples)
+    if has_positive_pfas:
+        # PFAS remediation requires an environmental impact assessment
+        pfas_docs = [
+            d
+            for d in documents
+            if (d.document_type or "").lower()
+            in ("pfas_assessment", "environmental_assessment", "pfas_remediation_plan")
+        ]
+        if pfas_docs:
+            checks.append(
+                _check(
+                    "pfas_assessment",
+                    "PFAS environmental assessment available",
+                    "pass",
+                    legal_basis="OSEC / OFEV guidance (provisional)",
+                    detail="PFAS environmental assessment document available",
+                )
+            )
+        else:
+            checks.append(
+                _check(
+                    "pfas_assessment",
+                    "PFAS environmental assessment available",
+                    "fail",
+                    legal_basis="OSEC / OFEV guidance (provisional)",
+                    detail="PFAS detected above threshold — environmental assessment required",
+                )
+            )
+            blockers.append("PFAS detected above threshold — environmental assessment required")
+    else:
+        checks.append(
+            _check(
+                "pfas_assessment",
+                "PFAS environmental assessment available",
+                "not_applicable",
+                legal_basis="OSEC / OFEV guidance (provisional)",
+                detail="No positive PFAS samples",
             )
         )
 

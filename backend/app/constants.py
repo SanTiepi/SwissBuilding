@@ -375,7 +375,7 @@ TRANSFER_PACKAGE_SECTIONS = [
 # ---------------------------------------------------------------------------
 # Pollutant types
 # ---------------------------------------------------------------------------
-ALL_POLLUTANTS = ("asbestos", "pcb", "lead", "hap", "radon")
+ALL_POLLUTANTS = ("asbestos", "pcb", "lead", "hap", "radon", "pfas")
 
 # Severity ranking (higher = more dangerous)
 POLLUTANT_SEVERITY: dict[str, int] = {
@@ -384,6 +384,7 @@ POLLUTANT_SEVERITY: dict[str, int] = {
     "lead": 3,
     "hap": 2,
     "radon": 1,
+    "pfas": 3,
 }
 
 # ---------------------------------------------------------------------------

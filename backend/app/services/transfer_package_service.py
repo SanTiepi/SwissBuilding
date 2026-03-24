@@ -272,6 +272,30 @@ async def generate_transfer_package(
             except Exception as e:
                 logger.warning(f"Failed to get readiness data for building {building_id}: {e}")
 
+    # ── Eco clauses ────────────────────────────────────────────────
+    eco_clauses: dict | None = None
+    if _should_include("eco_clauses", include_sections):
+        try:
+            from app.services.eco_clause_template_service import generate_eco_clauses
+
+            eco_payload = await generate_eco_clauses(building_id, "renovation", db)
+            if eco_payload.detected_pollutants:
+                eco_clauses = {
+                    "context": eco_payload.context,
+                    "total_clauses": eco_payload.total_clauses,
+                    "detected_pollutants": eco_payload.detected_pollutants,
+                    "sections": [
+                        {
+                            "section_id": s.section_id,
+                            "title": s.title,
+                            "clause_count": len(s.clauses),
+                        }
+                        for s in eco_payload.sections
+                    ],
+                }
+        except Exception as e:
+            logger.warning("Failed to generate eco clauses for building %s: %s", building_id, e)
+
     # ── Metadata ──────────────────────────────────────────────────
     included = include_sections if include_sections else list(TRANSFER_PACKAGE_SECTIONS)
     metadata = {
@@ -298,5 +322,6 @@ async def generate_transfer_package(
         snapshots=snapshots,
         completeness=completeness,
         readiness=readiness,
+        eco_clauses=eco_clauses,
         metadata=metadata,
     )
