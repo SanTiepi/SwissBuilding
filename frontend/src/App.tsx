@@ -18,6 +18,7 @@ const AdminInvitations = lazy(() => import('@/pages/AdminInvitations'));
 const AdminJurisdictions = lazy(() => import('@/pages/AdminJurisdictions'));
 const AdminAuditLogs = lazy(() => import('@/pages/AdminAuditLogs'));
 const AdminDiagnosticReview = lazy(() => import('@/pages/AdminDiagnosticReview'));
+const AdminIntakeReview = lazy(() => import('@/pages/AdminIntakeReview'));
 const RulesPackStudio = lazy(() => import('@/pages/RulesPackStudio'));
 
 const PollutantMap = lazy(() => import('@/pages/PollutantMap'));
@@ -37,7 +38,9 @@ const SafeToXCockpit = lazy(() => import('@/pages/SafeToXCockpit'));
 const BuildingComparison = lazy(() => import('@/pages/BuildingComparison'));
 const AuthorityPacks = lazy(() => import('@/pages/AuthorityPacks'));
 const SharedView = lazy(() => import('@/pages/SharedView'));
+const PublicIntake = lazy(() => import('@/pages/PublicIntake'));
 const FieldObservations = lazy(() => import('@/pages/FieldObservations'));
+const ControlTower = lazy(() => import('@/pages/ControlTower'));
 
 function LoadingSpinner() {
   return (
@@ -67,6 +70,14 @@ export default function App() {
             </Suspense>
           }
         />
+        <Route
+          path="/intake"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <PublicIntake />
+            </Suspense>
+          }
+        />
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -76,6 +87,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Dashboard">
                   <Suspense fallback={<LoadingSpinner />}>
                     <Dashboard />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/control-tower"
+              element={
+                <PageErrorBoundary pageName="Control Tower">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <ControlTower />
                   </Suspense>
                 </PageErrorBoundary>
               }
@@ -346,6 +367,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Admin Diagnostic Review">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminDiagnosticReview />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/intake-review"
+              element={
+                <PageErrorBoundary pageName="Admin Intake Review">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminIntakeReview />
                   </Suspense>
                 </PageErrorBoundary>
               }

@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   BookOpen,
   ClipboardCheck,
+  Radar,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import { useAuthStore } from '@/store/authStore';
@@ -37,6 +38,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+  { to: '/control-tower', icon: Radar, labelKey: 'nav.control_tower' },
   { to: '/portfolio', icon: BarChart3, labelKey: 'nav.portfolio' },
   { to: '/buildings', icon: Building2, labelKey: 'nav.buildings' },
   { to: '/comparison', icon: ArrowLeftRight, labelKey: 'nav.comparison' },
