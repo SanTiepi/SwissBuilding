@@ -19,6 +19,9 @@ from app.models.contractor_acknowledgment import ContractorAcknowledgment
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.decision_record import DecisionRecord
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_mission_order import DiagnosticMissionOrder
+from app.models.diagnostic_publication import DiagnosticReportPublication
+from app.models.diagnostic_publication_version import DiagnosticPublicationVersion
 from app.models.document import Document
 from app.models.document_link import DocumentLink
 from app.models.dossier_version import DossierVersion
@@ -80,6 +83,9 @@ __all__ = [
     "DataQualityIssue",
     "DecisionRecord",
     "Diagnostic",
+    "DiagnosticMissionOrder",
+    "DiagnosticPublicationVersion",
+    "DiagnosticReportPublication",
     "Document",
     "DocumentLink",
     "DossierVersion",
