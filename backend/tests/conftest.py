@@ -50,8 +50,11 @@ from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa
 from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
 from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
 from app.models.unit import Unit as _Unit  # noqa: E402, F401
+from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
 from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
+from app.models.obligation import Obligation as _Obligation  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
+from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

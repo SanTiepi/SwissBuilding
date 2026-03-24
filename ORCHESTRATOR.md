@@ -1506,18 +1506,16 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| Rank | Action | Why now | Depends on |
-|------|--------|---------|------------|
-| 1 | Diagnostic publication in PassportCard + TransferPackage | Publications should enrich existing read models | W96-W99 integration ✅ |
-| 2 | Diagnostic publication timeline event injection | Publications should appear in building timeline | W96-W99 integration ✅ |
-| 3 | Unmatched publications admin review page | Admin needs UI to review and match ambiguous publications | W97 API ✅ + W98 cards ✅ |
-| 4 | Building workspace concept: shared access model | Core differentiator — multi-actor building dossier with role-based views | W96-W99 integration ✅ |
-| 5 | GED inbox: document inbox for unlinked incoming documents | Key reusable module from Batiscan → SwissBuilding | existing document system ✅ |
-| 6 | Obligations/deadlines tracker | Building-level obligation engine with due dates and alerts | ActionItem + readiness ✅ |
-| 7 | Full test suite regression run | Validate all ~5000 tests still pass after 12 waves | W88-W99 ✅ |
-| 8 | Safe-to-start gate proof refresh (real e2e) | External milestone proof — BLOCKED on VPS | W99 ✅ |
-| 9 | Search (Meilisearch) finish + cross-entity grouping | Accelerate dossier navigation | existing search service ✅ |
-| 10 | Intake public form (lead → contact + building + dossier) | Entry point for external diagnostic requests | W96-W99 integration ✅ |
+| 1 | Building workspace shared access model | Core differentiator — multi-actor dossier with role-based views | W100 ✅ |
+| 2 | GED inbox: document inbox for unlinked incoming documents | Key reusable module from Batiscan → SwissBuilding | existing document system ✅ |
+| 3 | Obligations/deadlines tracker | Building-level obligation engine with due dates and alerts | ActionItem + readiness ✅ |
+| 4 | Full test suite regression run | Validate all ~5000 tests still pass after 13 waves | W100 ✅ |
+| 5 | Intake public form (lead → contact + building + dossier) | Entry point for external diagnostic requests | W96-W99 ✅ |
+| 6 | Search (Meilisearch) finish + cross-entity grouping | Accelerate dossier navigation | existing search service ✅ |
+| 7 | Safe-to-start gate proof refresh (real e2e) | External milestone proof — BLOCKED on VPS | W100 ✅ |
+| 8 | Building workspace invitation flow | Invite external actors to a workspace | workspace access model |
+| 9 | Workspace activity feed (cross-actor) | Unified activity view across workspace members | workspace access model |
+| 10 | Control tower dashboard (next best actions) | Pilotage + NBA for building workspace operators | obligations + workspace ✅ |
 
 ## Next Queue (11+)
 

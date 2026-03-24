@@ -23,6 +23,7 @@ from app.models.diagnostic_mission_order import DiagnosticMissionOrder
 from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.models.diagnostic_publication_version import DiagnosticPublicationVersion
 from app.models.document import Document
+from app.models.document_inbox import DocumentInboxItem
 from app.models.document_link import DocumentLink
 from app.models.dossier_version import DossierVersion
 from app.models.event import Event
@@ -40,6 +41,7 @@ from app.models.jurisdiction import Jurisdiction
 from app.models.lease import Lease, LeaseEvent
 from app.models.material import Material
 from app.models.notification import Notification, NotificationPreference
+from app.models.obligation import Obligation
 from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
 from app.models.party_role_assignment import PartyRoleAssignment
@@ -58,6 +60,7 @@ from app.models.unit import Unit
 from app.models.unit_zone import UnitZone
 from app.models.unknown_issue import UnknownIssue
 from app.models.user import User
+from app.models.workspace_membership import WorkspaceMembership
 from app.models.zone import Zone
 from app.models.zone_safety import OccupantNotice, ZoneSafetyStatus
 
@@ -87,6 +90,7 @@ __all__ = [
     "DiagnosticPublicationVersion",
     "DiagnosticReportPublication",
     "Document",
+    "DocumentInboxItem",
     "DocumentLink",
     "DossierVersion",
     "Event",
@@ -106,6 +110,7 @@ __all__ = [
     "Material",
     "Notification",
     "NotificationPreference",
+    "Obligation",
     "OccupantNotice",
     "Organization",
     "OwnershipRecord",
@@ -125,6 +130,7 @@ __all__ = [
     "UnitZone",
     "UnknownIssue",
     "User",
+    "WorkspaceMembership",
     "Zone",
     "ZoneSafetyStatus",
 ]

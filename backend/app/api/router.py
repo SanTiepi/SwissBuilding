@@ -55,6 +55,7 @@ from app.api import (
     digital_vault,
     document_classification,
     document_completeness,
+    document_inbox,
     document_templates,
     documents,
     dossier,
@@ -93,6 +94,7 @@ from app.api import (
     notification_preferences,
     notification_rules,
     notifications,
+    obligations,
     occupancy_risks,
     occupant_safety,
     organizations,
@@ -153,6 +155,7 @@ from app.api import (
     weak_signals,
     work_phases,
     workflow_orchestration,
+    workspace,
     zone_classification,
     zone_safety,
     zones,
@@ -166,6 +169,7 @@ api_router.include_router(diagnostics.router, prefix="", tags=["Diagnostics"])
 api_router.include_router(samples.router, prefix="", tags=["Samples"])
 api_router.include_router(events.router, prefix="", tags=["Events"])
 api_router.include_router(documents.router, prefix="", tags=["Documents"])
+api_router.include_router(document_inbox.router, prefix="", tags=["Document Inbox"])
 api_router.include_router(risk_analysis.router, prefix="/risk-analysis", tags=["Risk Analysis"])
 api_router.include_router(pollutant_inventory.router, prefix="", tags=["Pollutant Inventory"])
 api_router.include_router(pollutant_map.router, prefix="/pollutant-map", tags=["Pollutant Map"])
@@ -178,6 +182,8 @@ api_router.include_router(assignments.router, prefix="", tags=["Assignments"])
 api_router.include_router(notification_digest.router, prefix="", tags=["Notification Digest"])
 api_router.include_router(notifications.router, prefix="", tags=["Notifications"])
 api_router.include_router(notification_preferences.router, prefix="", tags=["Notification Preferences"])
+api_router.include_router(obligations.router, prefix="", tags=["Obligations"])
+api_router.include_router(workspace.router, prefix="", tags=["Workspace"])
 api_router.include_router(zones.router, prefix="", tags=["Zones"])
 api_router.include_router(zone_classification.router, prefix="", tags=["Zone Classification"])
 api_router.include_router(building_elements.router, prefix="", tags=["Building Elements"])
