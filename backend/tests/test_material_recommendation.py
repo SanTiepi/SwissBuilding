@@ -439,3 +439,126 @@ class TestSchemaValidation:
             summary="Test summary",
         )
         assert report.intervention_count == 2
+
+
+# ── API route tests (HTTP-level) ─────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_api_get_recommendations_returns_200(client, auth_headers, db_session, sample_building):
+    """GET /buildings/{id}/material-recommendations returns 200 with valid building."""
+    resp = await client.get(
+        f"/api/v1/buildings/{sample_building.id}/material-recommendations",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["building_id"] == str(sample_building.id)
+    assert "recommendations" in body
+    assert "summary" in body
+    assert body["pollutant_material_count"] == 0
+    assert body["recommendations"] == []
+
+
+@pytest.mark.asyncio
+async def test_api_get_recommendations_not_found(client, auth_headers):
+    """GET /buildings/{non-existent}/material-recommendations returns 404."""
+    fake_id = uuid.uuid4()
+    resp = await client.get(
+        f"/api/v1/buildings/{fake_id}/material-recommendations",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 404
+    assert "not found" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_api_get_recommendations_requires_auth(client):
+    """GET without auth token returns 401/403."""
+    fake_id = uuid.uuid4()
+    resp = await client.get(f"/api/v1/buildings/{fake_id}/material-recommendations")
+    assert resp.status_code in (401, 403)
+
+
+@pytest.mark.asyncio
+async def test_api_get_recommendations_with_pollutant_materials(
+    client, auth_headers, db_session, sample_building, admin_user
+):
+    """GET returns recommendations when building has pollutant-containing materials."""
+    zone = Zone(
+        id=uuid.uuid4(),
+        building_id=sample_building.id,
+        zone_type="floor",
+        name="Ground floor",
+    )
+    db_session.add(zone)
+    await db_session.flush()
+
+    element = BuildingElement(
+        id=uuid.uuid4(),
+        zone_id=zone.id,
+        element_type="wall",
+        name="Main wall",
+    )
+    db_session.add(element)
+    await db_session.flush()
+
+    mat = Material(
+        id=uuid.uuid4(),
+        element_id=element.id,
+        material_type="insulation",
+        name="Amiante flocage",
+        contains_pollutant=True,
+        pollutant_type="asbestos",
+        pollutant_confirmed=True,
+    )
+    db_session.add(mat)
+
+    intervention = Intervention(
+        id=uuid.uuid4(),
+        building_id=sample_building.id,
+        intervention_type="renovation",
+        title="Renovation test",
+        status="planned",
+    )
+    db_session.add(intervention)
+    await db_session.commit()
+
+    resp = await client.get(
+        f"/api/v1/buildings/{sample_building.id}/material-recommendations",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["building_id"] == str(sample_building.id)
+    assert body["pollutant_material_count"] == 1
+    assert body["intervention_count"] == 1
+    assert len(body["recommendations"]) == 1
+
+    rec = body["recommendations"][0]
+    assert rec["original_pollutant"] == "asbestos"
+    assert rec["original_material_type"] == "insulation"
+    assert rec["recommended_material_type"] == "mineral_wool_new_gen"
+    assert rec["risk_level"] == "high"  # confirmed pollutant
+    assert len(rec["evidence_requirements"]) == 4
+    assert len(rec["risk_flags"]) >= 1
+    assert "reason" in rec
+    assert "recommended_material" in rec
+
+
+@pytest.mark.asyncio
+async def test_api_get_recommendations_response_schema_shape(client, auth_headers, db_session, sample_building):
+    """Verify response has all top-level fields with correct types."""
+    resp = await client.get(
+        f"/api/v1/buildings/{sample_building.id}/material-recommendations",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+
+    # Top-level fields
+    assert isinstance(body["building_id"], str)
+    assert isinstance(body["recommendations"], list)
+    assert isinstance(body["summary"], str)
+    assert isinstance(body["pollutant_material_count"], int)
+    assert isinstance(body["intervention_count"], int)

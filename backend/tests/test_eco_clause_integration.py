@@ -237,3 +237,75 @@ async def test_transfer_package_full_includes_eco_clauses(db_session, admin_user
     assert pkg is not None
     assert pkg.eco_clauses is not None
     assert pkg.eco_clauses["total_clauses"] > 0
+
+
+@pytest.mark.asyncio
+async def test_transfer_package_eco_clauses_has_correct_keys(db_session, admin_user):
+    """Eco clauses section contains the expected top-level keys."""
+    building = _make_building(db_session, created_by=admin_user.id)
+    _make_diagnostic_with_samples(db_session, building.id, admin_user.id, pollutants=["asbestos"])
+    await db_session.commit()
+
+    pkg = await generate_transfer_package(db_session, building.id, include_sections=["eco_clauses"])
+    assert pkg is not None
+    eco = pkg.eco_clauses
+    assert eco is not None
+    assert set(eco.keys()) == {"context", "total_clauses", "detected_pollutants", "sections"}
+    assert isinstance(eco["context"], str)
+    assert isinstance(eco["total_clauses"], int)
+    assert isinstance(eco["detected_pollutants"], list)
+    assert isinstance(eco["sections"], list)
+
+
+@pytest.mark.asyncio
+async def test_transfer_package_eco_clauses_section_entries_have_correct_keys(db_session, admin_user):
+    """Each section entry in eco_clauses contains section_id, title, clause_count."""
+    building = _make_building(db_session, created_by=admin_user.id)
+    _make_diagnostic_with_samples(db_session, building.id, admin_user.id, pollutants=["asbestos"])
+    await db_session.commit()
+
+    pkg = await generate_transfer_package(db_session, building.id, include_sections=["eco_clauses"])
+    eco = pkg.eco_clauses
+    assert eco is not None
+    assert len(eco["sections"]) > 0
+    for section in eco["sections"]:
+        assert "section_id" in section
+        assert "title" in section
+        assert "clause_count" in section
+        assert isinstance(section["clause_count"], int)
+        assert section["clause_count"] > 0
+
+
+@pytest.mark.asyncio
+async def test_transfer_package_multiple_pollutants_produce_multiple_sections(db_session, admin_user):
+    """Multiple pollutants produce multiple clause sections in the transfer package."""
+    building = _make_building(db_session, created_by=admin_user.id)
+    _make_diagnostic_with_samples(db_session, building.id, admin_user.id, pollutants=["asbestos", "pcb", "lead"])
+    await db_session.commit()
+
+    pkg = await generate_transfer_package(db_session, building.id, include_sections=["eco_clauses"])
+    eco = pkg.eco_clauses
+    assert eco is not None
+    detected = eco["detected_pollutants"]
+    assert "asbestos" in detected
+    assert "pcb" in detected
+    assert "lead" in detected
+    # Should have at least general + one section per pollutant
+    assert len(eco["sections"]) >= 4
+    assert eco["total_clauses"] > 0
+
+
+@pytest.mark.asyncio
+async def test_transfer_package_eco_clauses_only_section_others_none(db_session, admin_user):
+    """When only eco_clauses is requested, other sections remain None."""
+    building = _make_building(db_session, created_by=admin_user.id)
+    _make_diagnostic_with_samples(db_session, building.id, admin_user.id, pollutants=["asbestos"])
+    await db_session.commit()
+
+    pkg = await generate_transfer_package(db_session, building.id, include_sections=["eco_clauses"])
+    assert pkg is not None
+    assert pkg.eco_clauses is not None
+    assert pkg.diagnostics_summary is None
+    assert pkg.documents_summary is None
+    assert pkg.interventions_summary is None
+    assert pkg.actions_summary is None
