@@ -24,6 +24,11 @@ export interface PassportSummary {
     latest_diagnostic_date: string | null;
     latest_document_date: string | null;
   };
+  diagnostic_publications: {
+    count: number;
+    pollutants_covered: string[];
+    latest_published_at: string | null;
+  };
   pollutant_coverage: {
     total_pollutants: number;
     covered_count: number;

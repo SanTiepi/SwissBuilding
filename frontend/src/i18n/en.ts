@@ -2211,6 +2211,9 @@ export const en: TranslationMap = {
   'passport.blind_spots': 'Blind spots',
   'passport.contradictions': 'Contradictions',
   'passport.evidence': 'Evidence coverage',
+  'passport.diagnostic_reports': 'Diagnostic Reports',
+  'passport.diagnostic_reports_short': 'reports',
+  'passport.latest_report': 'Latest report',
   'passport.trend.improving': 'Improving',
   'passport.trend.declining': 'Declining',
   'passport.trend.stable': 'Stable',
@@ -2907,6 +2910,21 @@ export const en: TranslationMap = {
   'diag_pub.pollutants_found': 'Pollutants found',
   'diag_pub.fach_urgency': 'FACH urgency',
   'diag_pub.zones': 'Zones',
+
+  // Diagnostic Review (admin)
+  'nav.diagnostic_review': 'Diagnostic Review',
+  'diag_review.title': 'Diagnostic Publication Review',
+  'diag_review.description': 'Review diagnostic publications that could not be automatically matched to a building. Match them manually to integrate the diagnostic data.',
+  'diag_review.match_to_building': 'Match to building',
+  'diag_review.select_building': 'Select a building',
+  'diag_review.search_placeholder': 'Search by address, EGID, or city...',
+  'diag_review.confirm_match': 'Confirm match',
+  'diag_review.match_success': 'Successfully matched to building',
+  'diag_review.match_error': 'Match failed. Please try again.',
+  'diag_review.no_buildings_found': 'No buildings found.',
+  'diag_review.empty_title': 'All caught up!',
+  'diag_review.empty_description': 'All diagnostic publications have been matched to buildings.',
+  'diag_review.error': 'Failed to load unmatched publications.',
 
   // Mission Orders
   'mission_order.title': 'Mission Orders',

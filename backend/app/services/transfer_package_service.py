@@ -21,6 +21,7 @@ from app.models.action_item import ActionItem
 from app.models.building import Building
 from app.models.building_snapshot import BuildingSnapshot
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.models.document import Document
 from app.models.evidence_link import EvidenceLink
 from app.models.intervention import Intervention
@@ -296,6 +297,32 @@ async def generate_transfer_package(
         except Exception as e:
             logger.warning("Failed to generate eco clauses for building %s: %s", building_id, e)
 
+    # ── Diagnostic publications (external reports) ─────────────────
+    diagnostic_publications: list[dict] | None = None
+    if _should_include("diagnostic_publications", include_sections):
+        pub_result = await db.execute(
+            select(DiagnosticReportPublication).where(
+                and_(
+                    DiagnosticReportPublication.building_id == building_id,
+                    DiagnosticReportPublication.match_state.in_(["auto_matched", "manual_matched"]),
+                )
+            )
+        )
+        pubs = list(pub_result.scalars().all())
+        diagnostic_publications = [
+            {
+                "id": str(p.id),
+                "mission_type": p.mission_type,
+                "source_system": p.source_system,
+                "published_at": p.published_at.isoformat() if p.published_at else None,
+                "report_pdf_url": p.report_pdf_url,
+                "structured_summary": p.structured_summary,
+                "source_mission_id": p.source_mission_id,
+                "current_version": p.current_version,
+            }
+            for p in pubs
+        ]
+
     # ── Metadata ──────────────────────────────────────────────────
     included = include_sections if include_sections else list(TRANSFER_PACKAGE_SECTIONS)
     metadata = {
@@ -323,5 +350,6 @@ async def generate_transfer_package(
         completeness=completeness,
         readiness=readiness,
         eco_clauses=eco_clauses,
+        diagnostic_publications=diagnostic_publications,
         metadata=metadata,
     )

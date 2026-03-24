@@ -36,6 +36,7 @@ class TransferPackageResponse(BaseModel):
     completeness: dict | None = None
     readiness: dict | None = None
     eco_clauses: dict | None = None
+    diagnostic_publications: list[dict] | None = None
     metadata: dict
 
     model_config = ConfigDict(from_attributes=True)

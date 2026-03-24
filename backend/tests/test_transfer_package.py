@@ -1,6 +1,7 @@
 """Tests for the Building Memory Transfer Package service and API."""
 
 import uuid
+from datetime import UTC, datetime
 
 import pytest
 
@@ -8,6 +9,7 @@ from app.constants import TRANSFER_PACKAGE_VERSION
 from app.models.building import Building
 from app.models.building_snapshot import BuildingSnapshot
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.services.transfer_package_service import generate_transfer_package
 
 
@@ -198,3 +200,112 @@ async def test_api_endpoint_building_not_found(client, auth_headers):
         json={},
     )
     assert response.status_code == 404
+
+
+# ── Diagnostic publications section tests ─────────────────────────
+
+
+@pytest.fixture
+async def building_with_publications(db_session, admin_user):
+    """Create a building with diagnostic publications."""
+    building = Building(
+        id=uuid.uuid4(),
+        address="Rue Publications 5",
+        postal_code="1003",
+        city="Lausanne",
+        canton="VD",
+        construction_year=1975,
+        building_type="residential",
+        created_by=admin_user.id,
+        status="active",
+        egid=99999,
+    )
+    db_session.add(building)
+    await db_session.flush()
+
+    pub1 = DiagnosticReportPublication(
+        id=uuid.uuid4(),
+        building_id=building.id,
+        source_system="batiscan",
+        source_mission_id="M-001",
+        current_version=1,
+        match_state="auto_matched",
+        match_key="99999",
+        match_key_type="egid",
+        mission_type="asbestos_full",
+        report_pdf_url="https://example.com/report1.pdf",
+        structured_summary={"pollutants_found": ["asbestos"]},
+        payload_hash="a" * 64,
+        published_at=datetime(2025, 3, 1, tzinfo=UTC),
+        is_immutable=True,
+    )
+    pub2 = DiagnosticReportPublication(
+        id=uuid.uuid4(),
+        building_id=building.id,
+        source_system="batiscan",
+        source_mission_id="M-002",
+        current_version=1,
+        match_state="manual_matched",
+        match_key="99999",
+        match_key_type="egid",
+        mission_type="pcb",
+        report_pdf_url="https://example.com/report2.pdf",
+        structured_summary={"pollutants_found": ["pcb"]},
+        payload_hash="b" * 64,
+        published_at=datetime(2025, 6, 15, tzinfo=UTC),
+        is_immutable=True,
+    )
+    db_session.add_all([pub1, pub2])
+    await db_session.commit()
+    await db_session.refresh(building)
+    return building
+
+
+@pytest.mark.asyncio
+async def test_package_includes_diagnostic_publications(db_session, building_with_publications):
+    """Transfer package includes diagnostic publications section."""
+    pkg = await generate_transfer_package(
+        db_session,
+        building_with_publications.id,
+        include_sections=["diagnostic_publications"],
+    )
+    assert pkg is not None
+    assert pkg.diagnostic_publications is not None
+    assert len(pkg.diagnostic_publications) == 2
+
+    mission_types = {p["mission_type"] for p in pkg.diagnostic_publications}
+    assert mission_types == {"asbestos_full", "pcb"}
+
+    # Check structure of individual entries
+    pub = pkg.diagnostic_publications[0]
+    assert "id" in pub
+    assert "mission_type" in pub
+    assert "source_system" in pub
+    assert "published_at" in pub
+    assert "report_pdf_url" in pub
+    assert "structured_summary" in pub
+
+
+@pytest.mark.asyncio
+async def test_package_diagnostic_publications_empty_when_none(db_session, building_with_data):
+    """diagnostic_publications is empty list when no publications exist."""
+    pkg = await generate_transfer_package(
+        db_session,
+        building_with_data.id,
+        include_sections=["diagnostic_publications"],
+    )
+    assert pkg is not None
+    assert pkg.diagnostic_publications is not None
+    assert len(pkg.diagnostic_publications) == 0
+
+
+@pytest.mark.asyncio
+async def test_package_diagnostic_publications_excluded_when_not_requested(db_session, building_with_publications):
+    """diagnostic_publications is None when not in include_sections."""
+    pkg = await generate_transfer_package(
+        db_session,
+        building_with_publications.id,
+        include_sections=["diagnostics"],
+    )
+    assert pkg is not None
+    assert pkg.diagnostic_publications is None

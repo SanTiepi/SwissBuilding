@@ -25,6 +25,7 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
+  ClipboardList,
 } from 'lucide-react';
 
 const AUDIENCE_TYPES = ['buyer', 'insurer', 'lender', 'authority', 'contractor', 'tenant'] as const;
@@ -368,6 +369,7 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
       blind_spots,
       contradictions,
       evidence_coverage,
+      diagnostic_publications,
       pollutant_coverage,
       passport_grade,
     } = passport;
@@ -566,6 +568,12 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
                     {evidence_coverage.interventions_count} interv
                   </span>
                 )}
+                {diagnostic_publications.count > 0 && (
+                  <span className="flex items-center gap-1">
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    {diagnostic_publications.count} {t('passport.diagnostic_reports_short') || 'reports'}
+                  </span>
+                )}
               </div>
             }
           >
@@ -598,6 +606,21 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
                     {t('intervention.title') || 'Interventions'}
                   </span>
                   <span className="tabular-nums font-medium">{evidence_coverage.interventions_count}</span>
+                </div>
+              )}
+              {diagnostic_publications.count > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ClipboardList className="w-3.5 h-3.5 text-gray-400" />
+                    {t('passport.diagnostic_reports') || 'Diagnostic Reports'}
+                  </span>
+                  <span className="tabular-nums font-medium">{diagnostic_publications.count}</span>
+                </div>
+              )}
+              {diagnostic_publications.count > 0 && diagnostic_publications.latest_published_at && (
+                <div className="flex items-center justify-between text-[10px] text-gray-400 dark:text-slate-500">
+                  <span>{t('passport.latest_report') || 'Latest report'}</span>
+                  <span>{new Date(diagnostic_publications.latest_published_at).toLocaleDateString()}</span>
                 </div>
               )}
               {evidence_coverage.latest_diagnostic_date && (

@@ -23,6 +23,7 @@ from app.models.building import Building
 from app.models.building_trust_score_v2 import BuildingTrustScore
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.models.document import Document
 from app.models.intervention import Intervention
 from app.models.readiness_assessment import ReadinessAssessment
@@ -253,6 +254,30 @@ async def get_passport_summary(
         "latest_document_date": (latest_doc_date.isoformat() if latest_doc_date else None),
     }
 
+    # ── 5a. Diagnostic publications (external reports from Batiscan) ──
+    pub_result = await db.execute(
+        select(DiagnosticReportPublication).where(
+            and_(
+                DiagnosticReportPublication.building_id == building_id,
+                DiagnosticReportPublication.match_state.in_(["auto_matched", "manual_matched"]),
+            )
+        )
+    )
+    publications = list(pub_result.scalars().all())
+
+    pub_pollutants: set[str] = set()
+    latest_pub_date = None
+    for pub in publications:
+        pub_pollutants.add(pub.mission_type)
+        if latest_pub_date is None or (pub.published_at and pub.published_at > latest_pub_date):
+            latest_pub_date = pub.published_at
+
+    diagnostic_publications = {
+        "count": len(publications),
+        "pollutants_covered": sorted(pub_pollutants),
+        "latest_published_at": (latest_pub_date.isoformat() if latest_pub_date else None),
+    }
+
     # ── 5b. Pollutant coverage ─────────────────────────────────────
     # Which of the ALL_POLLUTANTS have at least one diagnostic?
     pollutant_diag_result = await db.execute(
@@ -316,6 +341,7 @@ async def get_passport_summary(
         "blind_spots": blind_spots,
         "contradictions": contradictions,
         "evidence_coverage": evidence_coverage,
+        "diagnostic_publications": diagnostic_publications,
         "pollutant_coverage": pollutant_coverage,
         "passport_grade": passport_grade,
         "assessed_at": assessed_at.isoformat(),

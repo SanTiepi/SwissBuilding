@@ -166,6 +166,36 @@ async def get_building_timeline(
             )
         )
 
+    # --- Diagnostic Publications ---
+    from app.models.diagnostic_publication import DiagnosticReportPublication
+
+    pub_result = await db.execute(
+        select(DiagnosticReportPublication).where(
+            DiagnosticReportPublication.building_id == building_id,
+            DiagnosticReportPublication.match_state.in_(["auto_matched", "manual_matched"]),
+        )
+    )
+    for pub in pub_result.scalars().all():
+        items.append(
+            TimelineEntryRead(
+                id=str(pub.id),
+                date=pub.published_at,
+                event_type="diagnostic_publication",
+                title=f"Diagnostic publication ({pub.mission_type})",
+                description=f"Report from {pub.source_system}, version {pub.current_version}",
+                icon_hint="clipboard",
+                metadata={
+                    "mission_type": pub.mission_type,
+                    "source_system": pub.source_system,
+                    "current_version": pub.current_version,
+                    "match_state": pub.match_state,
+                    "source_mission_id": pub.source_mission_id,
+                },
+                source_id=str(pub.id),
+                source_type="diagnostic_publication",
+            )
+        )
+
     # --- Events ---
     evt_result = await db.execute(select(Event).where(Event.building_id == building_id))
     for evt in evt_result.scalars().all():

@@ -9,9 +9,7 @@ from pydantic import BaseModel, ConfigDict
 class TimelineEntryRead(BaseModel):
     id: str
     date: datetime
-    event_type: (
-        str  # "construction", "diagnostic", "sample", "document", "intervention", "risk_change", "plan", "event"
-    )
+    event_type: str  # "construction", "diagnostic", "sample", "document", "intervention", "risk_change", "plan", "event", "diagnostic_publication"
     title: str
     description: str | None = None
     icon_hint: str  # "building", "microscope", "flask", "file", "wrench", "shield", "map", "calendar"

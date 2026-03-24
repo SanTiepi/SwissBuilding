@@ -17,6 +17,7 @@ const AdminOrganizations = lazy(() => import('@/pages/AdminOrganizations'));
 const AdminInvitations = lazy(() => import('@/pages/AdminInvitations'));
 const AdminJurisdictions = lazy(() => import('@/pages/AdminJurisdictions'));
 const AdminAuditLogs = lazy(() => import('@/pages/AdminAuditLogs'));
+const AdminDiagnosticReview = lazy(() => import('@/pages/AdminDiagnosticReview'));
 const RulesPackStudio = lazy(() => import('@/pages/RulesPackStudio'));
 
 const PollutantMap = lazy(() => import('@/pages/PollutantMap'));
@@ -335,6 +336,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Admin Audit Logs">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminAuditLogs />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/diagnostic-review"
+              element={
+                <PageErrorBoundary pageName="Admin Diagnostic Review">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminDiagnosticReview />
                   </Suspense>
                 </PageErrorBoundary>
               }

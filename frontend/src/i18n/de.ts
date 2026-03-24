@@ -2218,6 +2218,9 @@ export const de: TranslationMap = {
   'passport.blind_spots': 'Blinde Flecken',
   'passport.contradictions': 'Widersprueche',
   'passport.evidence': 'Nachweisabdeckung',
+  'passport.diagnostic_reports': 'Diagnostische Berichte',
+  'passport.diagnostic_reports_short': 'Berichte',
+  'passport.latest_report': 'Letzter Bericht',
   'passport.trend.improving': 'Verbessernd',
   'passport.trend.declining': 'Verschlechternd',
   'passport.trend.stable': 'Stabil',
@@ -2914,6 +2917,21 @@ export const de: TranslationMap = {
   'diag_pub.pollutants_found': 'Gefundene Schadstoffe',
   'diag_pub.fach_urgency': 'FACH-Dringlichkeit',
   'diag_pub.zones': 'Zonen',
+
+  // Diagnostic Review (admin)
+  'nav.diagnostic_review': 'Diagnose-Uberprufung',
+  'diag_review.title': 'Uberprufung der Diagnosepublikationen',
+  'diag_review.description': 'Uberprufung von Diagnosepublikationen, die nicht automatisch einem Gebaude zugeordnet werden konnten. Ordnen Sie sie manuell zu, um die Diagnosedaten zu integrieren.',
+  'diag_review.match_to_building': 'Gebaude zuordnen',
+  'diag_review.select_building': 'Gebaude auswahlen',
+  'diag_review.search_placeholder': 'Nach Adresse, EGID oder Stadt suchen...',
+  'diag_review.confirm_match': 'Zuordnung bestatigen',
+  'diag_review.match_success': 'Erfolgreich dem Gebaude zugeordnet',
+  'diag_review.match_error': 'Zuordnung fehlgeschlagen. Bitte erneut versuchen.',
+  'diag_review.no_buildings_found': 'Keine Gebaude gefunden.',
+  'diag_review.empty_title': 'Alles erledigt!',
+  'diag_review.empty_description': 'Alle Diagnosepublikationen wurden Gebauden zugeordnet.',
+  'diag_review.error': 'Fehler beim Laden der nicht zugeordneten Publikationen.',
 
   // Mission Orders
   'mission_order.title': 'Auftragserteilungen',

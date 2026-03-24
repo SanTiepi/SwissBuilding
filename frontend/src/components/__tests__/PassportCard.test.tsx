@@ -49,6 +49,11 @@ const passportData = {
     latest_diagnostic_date: null,
     latest_document_date: null,
   },
+  diagnostic_publications: {
+    count: 0,
+    pollutants_covered: [],
+    latest_published_at: null,
+  },
   pollutant_coverage: {
     total_pollutants: 6,
     covered_count: 4,

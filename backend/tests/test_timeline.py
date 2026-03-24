@@ -1,10 +1,11 @@
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime
 
 import pytest
 
 from app.models.building import Building
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.models.event import Event
 from app.models.intervention import Intervention
 from app.models.sample import Sample
@@ -272,3 +273,107 @@ async def test_timeline_with_intervention(client, auth_headers, db_session, samp
     data = resp.json()
     assert data["total"] == 1
     assert data["items"][0]["event_type"] == "intervention"
+
+
+@pytest.mark.asyncio
+async def test_timeline_with_diagnostic_publication(client, auth_headers, db_session, sample_building):
+    """Matched diagnostic publications appear in the timeline."""
+    pub = DiagnosticReportPublication(
+        id=uuid.uuid4(),
+        building_id=sample_building.id,
+        source_system="batiscan",
+        source_mission_id="MISS-001",
+        current_version=1,
+        match_state="auto_matched",
+        match_key_type="egid",
+        match_key="123",
+        payload_hash="abc123def456",
+        mission_type="asbestos_full",
+        published_at=datetime(2025, 3, 15, tzinfo=UTC),
+        source_type="import",
+        confidence="verified",
+        source_ref="batiscan:MISS-001",
+    )
+    db_session.add(pub)
+    await db_session.commit()
+
+    resp = await client.get(
+        f"/api/v1/buildings/{sample_building.id}/timeline?event_type=diagnostic_publication",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 1
+    item = data["items"][0]
+    assert item["event_type"] == "diagnostic_publication"
+    assert "asbestos_full" in item["title"]
+    assert "batiscan" in item["description"]
+    assert item["metadata"]["mission_type"] == "asbestos_full"
+    assert item["metadata"]["source_system"] == "batiscan"
+    assert item["metadata"]["current_version"] == 1
+    assert item["source_type"] == "diagnostic_publication"
+
+
+@pytest.mark.asyncio
+async def test_timeline_excludes_unmatched_publications(client, auth_headers, db_session, sample_building):
+    """Unmatched/needs_review publications do NOT appear in the timeline."""
+    for state in ("unmatched", "needs_review"):
+        pub = DiagnosticReportPublication(
+            id=uuid.uuid4(),
+            building_id=sample_building.id,
+            source_system="batiscan",
+            source_mission_id=f"MISS-{state}",
+            current_version=1,
+            match_state=state,
+            match_key_type="none",
+            payload_hash=f"hash-{state}-xyz",
+            mission_type="pcb",
+            published_at=datetime(2025, 4, 1, tzinfo=UTC),
+            source_type="import",
+            confidence="verified",
+            source_ref=f"batiscan:MISS-{state}",
+        )
+        db_session.add(pub)
+    await db_session.commit()
+
+    resp = await client.get(
+        f"/api/v1/buildings/{sample_building.id}/timeline?event_type=diagnostic_publication",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_timeline_publication_version_update(client, auth_headers, db_session, sample_building):
+    """Updated publication (version > 1) shows correct version in timeline."""
+    pub = DiagnosticReportPublication(
+        id=uuid.uuid4(),
+        building_id=sample_building.id,
+        source_system="batiscan",
+        source_mission_id="MISS-V3",
+        current_version=3,
+        match_state="manual_matched",
+        match_key_type="manual",
+        match_key=str(sample_building.id),
+        payload_hash="hash-v3-abc",
+        mission_type="multi",
+        published_at=datetime(2025, 5, 10, tzinfo=UTC),
+        source_type="import",
+        confidence="verified",
+        source_ref="batiscan:MISS-V3",
+    )
+    db_session.add(pub)
+    await db_session.commit()
+
+    resp = await client.get(
+        f"/api/v1/buildings/{sample_building.id}/timeline?event_type=diagnostic_publication",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 1
+    item = data["items"][0]
+    assert item["metadata"]["current_version"] == 3
+    assert "version 3" in item["description"]

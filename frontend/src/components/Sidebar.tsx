@@ -21,6 +21,7 @@ import {
   ArrowLeftRight,
   ShieldCheck,
   BookOpen,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import { useAuthStore } from '@/store/authStore';
@@ -57,6 +58,7 @@ const navItems: NavItem[] = [
   { to: '/admin/jurisdictions', icon: Scale, labelKey: 'nav.jurisdictions', allowedRoles: ['admin'] as UserRole[] },
   { to: '/rules-studio', icon: BookOpen, labelKey: 'nav.rules_studio', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/audit-logs', icon: FileSearch, labelKey: 'nav.audit_logs', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/diagnostic-review', icon: ClipboardCheck, labelKey: 'nav.diagnostic_review', allowedRoles: ['admin'] as UserRole[] },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 

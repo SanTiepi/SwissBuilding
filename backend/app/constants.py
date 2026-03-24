@@ -2,7 +2,7 @@
 
 # Demo credentials (local/dev only)
 DEMO_ADMIN_EMAIL = "admin@swissbuildingos.ch"
-DEMO_ADMIN_PASSWORD = "noob"
+DEMO_ADMIN_PASSWORD = "noob42"
 
 # Source dataset identifiers (used in importers, seeds, and tests)
 SOURCE_DATASET_VAUD_PUBLIC = "vd-public-rcb"
@@ -370,6 +370,7 @@ TRANSFER_PACKAGE_SECTIONS = [
     "snapshots",
     "completeness",
     "readiness",
+    "diagnostic_publications",
 ]
 
 # ---------------------------------------------------------------------------

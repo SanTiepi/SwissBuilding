@@ -11,6 +11,7 @@ from app.models.building import Building
 from app.models.building_trust_score_v2 import BuildingTrustScore
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.models.document import Document
 from app.models.intervention import Intervention
 from app.models.readiness_assessment import ReadinessAssessment
@@ -206,6 +207,7 @@ async def test_passport_summary_returns_correct_structure(db_session, admin_user
     assert "blind_spots" in result
     assert "contradictions" in result
     assert "evidence_coverage" in result
+    assert "diagnostic_publications" in result
     assert "pollutant_coverage" in result
     assert "passport_grade" in result
     assert "assessed_at" in result
@@ -468,3 +470,102 @@ async def test_pollutant_coverage_includes_pfas(db_session, admin_user):
     assert "pfas" in pc["covered"]
     assert pc["covered"]["pfas"] == 1
     assert "pfas" not in pc["missing"]
+
+
+# ── Diagnostic publications tests ─────────────────────────────────
+
+
+async def _create_publication(db, building_id, **kwargs):
+    defaults = {
+        "id": uuid.uuid4(),
+        "building_id": building_id,
+        "source_system": "batiscan",
+        "source_mission_id": f"M-{uuid.uuid4().hex[:8]}",
+        "current_version": 1,
+        "match_state": "auto_matched",
+        "match_key": "12345",
+        "match_key_type": "egid",
+        "mission_type": "asbestos_full",
+        "report_pdf_url": "https://example.com/report.pdf",
+        "structured_summary": {"pollutants_found": ["asbestos"]},
+        "payload_hash": uuid.uuid4().hex + uuid.uuid4().hex,
+        "published_at": datetime(2025, 6, 1, tzinfo=UTC),
+        "is_immutable": True,
+    }
+    defaults.update(kwargs)
+    p = DiagnosticReportPublication(**defaults)
+    db.add(p)
+    await db.flush()
+    return p
+
+
+@pytest.mark.asyncio
+async def test_diagnostic_publications_empty(db_session, admin_user):
+    """Test: diagnostic_publications is empty when no publications exist."""
+    building = await _create_building(db_session, admin_user)
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+
+    dp = result["diagnostic_publications"]
+    assert dp["count"] == 0
+    assert dp["pollutants_covered"] == []
+    assert dp["latest_published_at"] is None
+
+
+@pytest.mark.asyncio
+async def test_diagnostic_publications_with_matched_reports(db_session, admin_user):
+    """Test: diagnostic_publications counts matched publications."""
+    building = await _create_building(db_session, admin_user)
+    await _create_publication(
+        db_session,
+        building.id,
+        mission_type="asbestos_full",
+        published_at=datetime(2025, 3, 1, tzinfo=UTC),
+    )
+    await _create_publication(
+        db_session,
+        building.id,
+        mission_type="pcb",
+        published_at=datetime(2025, 6, 15, tzinfo=UTC),
+    )
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+
+    dp = result["diagnostic_publications"]
+    assert dp["count"] == 2
+    assert sorted(dp["pollutants_covered"]) == ["asbestos_full", "pcb"]
+    assert dp["latest_published_at"] is not None
+    assert "2025-06-15" in dp["latest_published_at"]
+
+
+@pytest.mark.asyncio
+async def test_diagnostic_publications_excludes_unmatched(db_session, admin_user):
+    """Test: unmatched publications are excluded from passport."""
+    building = await _create_building(db_session, admin_user)
+    await _create_publication(
+        db_session,
+        building.id,
+        match_state="auto_matched",
+        mission_type="asbestos_full",
+    )
+    await _create_publication(
+        db_session,
+        building.id,
+        match_state="unmatched",
+        mission_type="pcb",
+    )
+    await _create_publication(
+        db_session,
+        building.id,
+        match_state="needs_review",
+        mission_type="lead",
+    )
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+
+    dp = result["diagnostic_publications"]
+    assert dp["count"] == 1
+    assert dp["pollutants_covered"] == ["asbestos_full"]

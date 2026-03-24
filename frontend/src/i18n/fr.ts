@@ -2219,6 +2219,9 @@ export const fr: TranslationMap = {
   'passport.blind_spots': "Zones d'ombre",
   'passport.contradictions': 'Contradictions',
   'passport.evidence': 'Couverture probatoire',
+  'passport.diagnostic_reports': 'Rapports diagnostiques',
+  'passport.diagnostic_reports_short': 'rapports',
+  'passport.latest_report': 'Dernier rapport',
   'passport.trend.improving': 'En amelioration',
   'passport.trend.declining': 'En degradation',
   'passport.trend.stable': 'Stable',
@@ -2915,6 +2918,21 @@ export const fr: TranslationMap = {
   'diag_pub.pollutants_found': 'Polluants trouves',
   'diag_pub.fach_urgency': 'Urgence FACH',
   'diag_pub.zones': 'Zones',
+
+  // Diagnostic Review (admin)
+  'nav.diagnostic_review': 'Revue diagnostics',
+  'diag_review.title': 'Revue des publications de diagnostic',
+  'diag_review.description': 'Verifiez les publications de diagnostic qui n\'ont pas pu etre associees automatiquement a un batiment. Associez-les manuellement pour integrer les donnees de diagnostic.',
+  'diag_review.match_to_building': 'Associer a un batiment',
+  'diag_review.select_building': 'Selectionner un batiment',
+  'diag_review.search_placeholder': 'Rechercher par adresse, EGID ou ville...',
+  'diag_review.confirm_match': 'Confirmer l\'association',
+  'diag_review.match_success': 'Association au batiment reussie',
+  'diag_review.match_error': 'Echec de l\'association. Veuillez reessayer.',
+  'diag_review.no_buildings_found': 'Aucun batiment trouve.',
+  'diag_review.empty_title': 'Tout est a jour !',
+  'diag_review.empty_description': 'Toutes les publications de diagnostic ont ete associees a des batiments.',
+  'diag_review.error': 'Echec du chargement des publications non associees.',
 
   // Mission Orders
   'mission_order.title': 'Ordres de mission',

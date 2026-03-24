@@ -304,7 +304,7 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `34` (`W61-W66` + `W68-W95` reported)
+- waves_completed: `38` (`W61-W66` + `W68-W99` reported)
 - rework_count: `0`
 - blocked_count: `0`
 - last_updated: `2026-03-24`
@@ -1508,8 +1508,16 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 |------|--------|---------|------------|
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W95 surfaces | W95 ✅ — **BLOCKED: needs real backend environment** |
-| — | Queue cleared | All executable items from W88-W95 are delivered | — |
+| 1 | Diagnostic publication in PassportCard + TransferPackage | Publications should enrich existing read models | W96-W99 integration ✅ |
+| 2 | Diagnostic publication timeline event injection | Publications should appear in building timeline | W96-W99 integration ✅ |
+| 3 | Unmatched publications admin review page | Admin needs UI to review and match ambiguous publications | W97 API ✅ + W98 cards ✅ |
+| 4 | Building workspace concept: shared access model | Core differentiator — multi-actor building dossier with role-based views | W96-W99 integration ✅ |
+| 5 | GED inbox: document inbox for unlinked incoming documents | Key reusable module from Batiscan → SwissBuilding | existing document system ✅ |
+| 6 | Obligations/deadlines tracker | Building-level obligation engine with due dates and alerts | ActionItem + readiness ✅ |
+| 7 | Full test suite regression run | Validate all ~5000 tests still pass after 12 waves | W88-W99 ✅ |
+| 8 | Safe-to-start gate proof refresh (real e2e) | External milestone proof — BLOCKED on VPS | W99 ✅ |
+| 9 | Search (Meilisearch) finish + cross-entity grouping | Accelerate dossier navigation | existing search service ✅ |
+| 10 | Intake public form (lead → contact + building + dossier) | Entry point for external diagnostic requests | W96-W99 integration ✅ |
 
 ## Next Queue (11+)
 
@@ -1522,6 +1530,95 @@ Overflow rule:
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W95
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 9 | Seed BC ops verification test (W95-A) | ✅ 51 tests: imports, UUID5 determinism, DB integration, idempotency, referential integrity |
+| 10 | Readiness wallet integration test (W95-B) | ✅ 4 new tests: eco clause + prework coexistence, PFAS trigger + eco clause, empty state. Total 10 |
+| 2 | Duplicate-service consolidation brief (W95-C) | ✅ Brief: 14 families, 3 HIGH/6 MED/5 LOW priority, 5-phase sequence, ~35-40 eliminations |
+
+W95 debrief:
+- clear: final queue clearance wave; 61 tests validated; 21st consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W94
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 5 | Eco clause transfer package test (W94-A) | ✅ 4 new tests: correct keys, section entries, multi-pollutant, section filtering. Total 12 |
+| 6 | Material recommendation API test (W94-B) | ✅ 5 new API tests: 200/404/401, pollutant materials, response schema. Total 34 |
+| 7 | PFAS compliance engine test (W94-C) | ✅ 15 new tests: water/soil thresholds, waste classification, legal refs, risk levels, auto_classify. Total 32 |
+
+W94 debrief:
+- clear: pure test wave; 78 tests validated; 20th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W93
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 3 | Portfolio PFAS exposure (W93-A) | ✅ pollutant_exposure array in portfolio summary, 6 pollutants. 4 new tests |
+| 4 | Contractor eco clause preview (W93-B) | ✅ ContractorEcoClausePreview: pollutant badges, collapsible clauses, legal refs, dark mode. 9 tests |
+| 8 | Passport UI PFAS coverage (W93-C) | ✅ PollutantCoverageSection: 6 chips, PFAS emerging badge, coverage ratio. i18n 4 langs. 4 tests |
+
+W93 debrief:
+- clear: all 3 scopes disjoint; tsc clean; 19th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W99
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| — | BatiscanClient adapter (W99-A) | ✅ Abstract base + StubBatiscanClient + HttpBatiscanClient + factory. 8 tests |
+| — | Diagnostic integration seed (W99-B) | ✅ 2 publications, 2 orders, 2 versions. UUID5 idempotent, realistic Swiss data |
+
+W99 debrief:
+- clear: final wave of integration plan; adapter pattern clean; seed realistic
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W98
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| — | DiagnosticPublicationCard (W98-A) | ✅ Badges, PDF link, structured summary, annexes, version history, dark mode. 14 tests |
+| — | MissionOrderCard (W98-B) | ✅ Order list + create form, 6 status badges, 8 mission types, dark mode. 12 tests |
+| — | BuildingDetail wiring (W98-C) | ✅ API client + DiagnosticsTab React Query + BuildingDetail prop passing. tsc clean |
+
+W98 debrief:
+- clear: 3 frontend scopes disjoint; 26 tests; i18n 42 keys
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W97
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| — | Diagnostic integration API (W97-A) | ✅ 7 endpoints: POST/GET publications, manual match, mission orders. Router wired |
+| — | Integration tests (W97-B) | ✅ 27 tests: auto-match, idempotency, versioning, manual match, mission orders, schemas |
+
+W97 debrief:
+- clear: API + tests disjoint; corrections applied (status enum, last_error, building relationships)
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W96
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| — | DiagnosticPublication models (W96-A) | ✅ DiagnosticReportPublication + DiagnosticPublicationVersion with ProvenanceMixin |
+| — | MissionOrder model + schemas (W96-B) | ✅ DiagnosticMissionOrder + 6 Pydantic schemas |
+| — | Integration service + migration (W96-C) | ✅ diagnostic_integration_service (matching, idempotence, versioning) + migration 009 |
+
+W96 debrief:
+- clear: 3 backend scopes disjoint; architecture decision documented in memory
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W95
 

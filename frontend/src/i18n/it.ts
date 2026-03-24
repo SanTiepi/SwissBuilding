@@ -2217,6 +2217,9 @@ export const it: TranslationMap = {
   'passport.blind_spots': 'Zone cieche',
   'passport.contradictions': 'Contraddizioni',
   'passport.evidence': 'Copertura probatoria',
+  'passport.diagnostic_reports': 'Rapporti diagnostici',
+  'passport.diagnostic_reports_short': 'rapporti',
+  'passport.latest_report': 'Ultimo rapporto',
   'passport.trend.improving': 'In miglioramento',
   'passport.trend.declining': 'In peggioramento',
   'passport.trend.stable': 'Stabile',
@@ -2913,6 +2916,21 @@ export const it: TranslationMap = {
   'diag_pub.pollutants_found': 'Inquinanti trovati',
   'diag_pub.fach_urgency': 'Urgenza FACH',
   'diag_pub.zones': 'Zone',
+
+  // Diagnostic Review (admin)
+  'nav.diagnostic_review': 'Revisione diagnostica',
+  'diag_review.title': 'Revisione delle pubblicazioni diagnostiche',
+  'diag_review.description': 'Verifica le pubblicazioni diagnostiche che non hanno potuto essere associate automaticamente a un edificio. Associale manualmente per integrare i dati diagnostici.',
+  'diag_review.match_to_building': 'Associa a un edificio',
+  'diag_review.select_building': 'Seleziona un edificio',
+  'diag_review.search_placeholder': 'Cerca per indirizzo, EGID o citta...',
+  'diag_review.confirm_match': 'Conferma associazione',
+  'diag_review.match_success': 'Associazione all\'edificio riuscita',
+  'diag_review.match_error': 'Associazione fallita. Riprovare.',
+  'diag_review.no_buildings_found': 'Nessun edificio trovato.',
+  'diag_review.empty_title': 'Tutto aggiornato!',
+  'diag_review.empty_description': 'Tutte le pubblicazioni diagnostiche sono state associate agli edifici.',
+  'diag_review.error': 'Errore nel caricamento delle pubblicazioni non associate.',
 
   // Mission Orders
   'mission_order.title': 'Ordini di missione',
