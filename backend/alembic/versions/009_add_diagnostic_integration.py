@@ -142,6 +142,7 @@ def upgrade() -> None:
         sa.Column("attachments", sa.JSON(), nullable=True),
         sa.Column("building_identifiers", sa.JSON(), nullable=True),
         sa.Column("external_mission_id", sa.String(100), nullable=True),
+        sa.Column("last_error", sa.Text(), nullable=True),
         # ProvenanceMixin columns
         sa.Column("source_type", sa.String(30), nullable=True),
         sa.Column("confidence", sa.String(20), nullable=True),

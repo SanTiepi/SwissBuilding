@@ -74,6 +74,7 @@ class DiagnosticMissionOrderRead(BaseModel):
     attachments: list[dict]
     building_identifiers: dict | None
     external_mission_id: str | None
+    last_error: str | None
     created_at: datetime
     updated_at: datetime | None
 

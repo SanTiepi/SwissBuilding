@@ -55,6 +55,8 @@ class Building(Base):
     zones = relationship("Zone", back_populates="building", cascade="all, delete-orphan")
     interventions = relationship("Intervention", back_populates="building", cascade="all, delete-orphan")
     technical_plans = relationship("TechnicalPlan", back_populates="building", cascade="all, delete-orphan")
+    diagnostic_publications = relationship("DiagnosticReportPublication", back_populates="building")
+    diagnostic_mission_orders = relationship("DiagnosticMissionOrder", back_populates="building")
 
     __table_args__ = (
         Index("idx_buildings_canton", "canton"),

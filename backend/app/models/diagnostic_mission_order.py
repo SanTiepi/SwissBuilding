@@ -18,7 +18,8 @@ class DiagnosticMissionOrder(ProvenanceMixin, Base):
     mission_type = Column(
         String(50), nullable=False
     )  # asbestos_full | asbestos_complement | pcb | lead | hap | radon | pfas | multi
-    status = Column(String(20), default="draft")  # draft | sent | accepted | in_progress | completed | cancelled
+    status = Column(String(20), default="draft")  # draft | queued | sent | acknowledged | failed | cancelled
+    last_error = Column(Text, nullable=True)  # last delivery error message
     context_notes = Column(Text, nullable=True)
     attachments = Column(JSON, nullable=True)  # [{name: str, url: str, type: str}]
     building_identifiers = Column(

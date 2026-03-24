@@ -49,6 +49,7 @@ from app.api import (
     data_provenance,
     data_quality,
     decision_replay,
+    diagnostic_integration,
     diagnostic_quality,
     diagnostics,
     digital_vault,
@@ -293,6 +294,7 @@ api_router.include_router(tenant_impact.router, prefix="", tags=["Tenant Impact"
 api_router.include_router(access_control.router, prefix="", tags=["Access Control"])
 api_router.include_router(priority_matrix.router, prefix="", tags=["Priority Matrix"])
 api_router.include_router(risk_aggregation.router, prefix="", tags=["Risk Aggregation"])
+api_router.include_router(diagnostic_integration.router, prefix="", tags=["Diagnostic Integration"])
 api_router.include_router(diagnostic_quality.router, prefix="", tags=["Diagnostic Quality"])
 api_router.include_router(digital_vault.router, prefix="", tags=["Digital Vault"])
 api_router.include_router(budget_tracking.router, prefix="", tags=["Budget Tracking"])
