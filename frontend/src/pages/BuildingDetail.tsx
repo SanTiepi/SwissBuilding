@@ -286,6 +286,7 @@ export default function BuildingDetail() {
                 onClick={() => setActiveTab(tab.key)}
                 role="tab"
                 aria-selected={activeTab === tab.key}
+                data-testid={`building-tab-${tab.key}`}
                 className={cn(
                   'flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                   activeTab === tab.key
@@ -348,7 +349,7 @@ export default function BuildingDetail() {
           {/* Diagnostics Tab */}
           {activeTab === 'diagnostics' && (
             <Suspense fallback={TabFallback}>
-              <LazyDiagnosticsTab diagnostics={diagnostics} onCreateClick={() => setShowDiagnosticForm(true)} />
+              <LazyDiagnosticsTab buildingId={id!} diagnostics={diagnostics} onCreateClick={() => setShowDiagnosticForm(true)} />
             </Suspense>
           )}
 
@@ -616,7 +617,10 @@ export default function BuildingDetail() {
       {/* Create Diagnostic Form */}
       {showDiagnosticForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+          <div
+            data-testid="building-diagnostic-modal"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('diagnostic.create')}</h2>
               <button
@@ -673,6 +677,7 @@ function DiagnosticCreateForm({
         </label>
         <select
           {...register('diagnostic_type')}
+          data-testid="building-diagnostic-type"
           className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           <option value="">{t('diagnostic.selectType')}</option>
@@ -693,6 +698,7 @@ function DiagnosticCreateForm({
         <select
           {...register('diagnostic_context')}
           defaultValue="AvT"
+          data-testid="building-diagnostic-context"
           className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           <option value="UN">{t('diagnostic.context_UN')}</option>
@@ -710,6 +716,7 @@ function DiagnosticCreateForm({
         <input
           type="date"
           {...register('date_inspection')}
+          data-testid="building-diagnostic-date"
           className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
         />
         {errors.date_inspection && (
@@ -722,6 +729,7 @@ function DiagnosticCreateForm({
         </label>
         <input
           {...register('methodology')}
+          data-testid="building-diagnostic-methodology"
           className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
         />
       </div>
@@ -736,6 +744,7 @@ function DiagnosticCreateForm({
         <button
           type="submit"
           disabled={isPending}
+          data-testid="building-diagnostic-submit"
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400"
         >
           {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
