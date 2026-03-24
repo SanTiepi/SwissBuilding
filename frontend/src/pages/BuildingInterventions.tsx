@@ -5,6 +5,8 @@ import { useTranslation } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { interventionsApi } from '@/api/interventions';
+import { materialRecommendationsApi } from '@/api/materialRecommendations';
+import { MaterialRecommendationsCard } from '@/components/building-detail/MaterialRecommendationsCard';
 import { toast } from '@/store/toastStore';
 import { RoleGate } from '@/components/RoleGate';
 import type { Intervention, InterventionType, InterventionStatus } from '@/types';
@@ -105,6 +107,12 @@ export default function BuildingInterventions() {
         page,
         size: 20,
       }),
+    enabled: !!buildingId,
+  });
+
+  const { data: recData } = useQuery({
+    queryKey: ['material-recommendations', buildingId],
+    queryFn: () => materialRecommendationsApi.get(buildingId!),
     enabled: !!buildingId,
   });
 
@@ -292,6 +300,11 @@ export default function BuildingInterventions() {
           </div>
         )}
 
+        {/* Material recommendations */}
+        {recData && recData.recommendations.length > 0 && (
+          <MaterialRecommendationsCard recommendations={recData.recommendations} />
+        )}
+
         {/* Toolbar */}
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
@@ -315,6 +328,7 @@ export default function BuildingInterventions() {
           <RoleGate allowedRoles={['admin', 'diagnostician']}>
             <button
               onClick={() => setShowForm(!showForm)}
+              data-testid="interventions-create-toggle"
               className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700"
             >
               <Plus className="w-4 h-4" />
@@ -325,18 +339,23 @@ export default function BuildingInterventions() {
 
         {/* Create form */}
         {showForm && (
-          <div className="bg-white dark:bg-slate-900 p-4 border border-gray-200 dark:border-slate-800 rounded-lg space-y-3">
+          <div
+            data-testid="interventions-create-form"
+            className="bg-white dark:bg-slate-900 p-4 border border-gray-200 dark:border-slate-800 rounded-lg space-y-3"
+          >
             <div className="grid grid-cols-2 gap-3">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('intervention.field.title') || 'Title'}
+                data-testid="interventions-form-title"
                 className={inputClass}
               />
               <select
                 value={interventionType}
                 onChange={(e) => setInterventionType(e.target.value as InterventionType)}
+                data-testid="interventions-form-type"
                 className={inputClass}
               >
                 {INTERVENTION_TYPES.map((it) => (
@@ -349,6 +368,7 @@ export default function BuildingInterventions() {
                 type="date"
                 value={dateStart}
                 onChange={(e) => setDateStart(e.target.value)}
+                data-testid="interventions-form-date-start"
                 className={inputClass}
               />
               <input
@@ -356,6 +376,7 @@ export default function BuildingInterventions() {
                 value={costChf}
                 onChange={(e) => setCostChf(e.target.value)}
                 placeholder={t('intervention.field.cost') || 'Cost CHF'}
+                data-testid="interventions-form-cost"
                 className={inputClass}
               />
             </div>
@@ -363,12 +384,14 @@ export default function BuildingInterventions() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('intervention.field.description') || 'Description'}
+              data-testid="interventions-form-description"
               className={`w-full ${inputClass} resize-none`}
               rows={2}
             />
             <button
               onClick={handleCreate}
               disabled={!title.trim() || createIntervention.isPending}
+              data-testid="interventions-form-submit"
               className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
             >
               {createIntervention.isPending ? (

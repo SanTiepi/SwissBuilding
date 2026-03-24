@@ -1600,6 +1600,7 @@ export const fr: TranslationMap = {
   'rules_studio.field_notification_required': 'Notification requise',
   'rules_studio.field_notification_authority': 'Autorite de notification',
   'rules_studio.field_notification_delay_days': 'Delai de notification (jours)',
+  'rules_studio.desktop_hint': 'Cet outil est optimise pour un usage sur ordinateur. Pour une meilleure experience, utilisez un ecran plus grand.',
 
   // Portfolio
   'nav.portfolio': 'Portfolio',

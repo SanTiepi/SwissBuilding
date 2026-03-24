@@ -1599,6 +1599,7 @@ export const de: TranslationMap = {
   'rules_studio.field_notification_required': 'Meldepflicht',
   'rules_studio.field_notification_authority': 'Meldebehoerde',
   'rules_studio.field_notification_delay_days': 'Meldefrist (Tage)',
+  'rules_studio.desktop_hint': 'Dieses Tool ist fuer die Desktop-Nutzung optimiert. Fuer das beste Erlebnis verwenden Sie einen groesseren Bildschirm.',
 
   // Portfolio
   'nav.portfolio': 'Portfolio',

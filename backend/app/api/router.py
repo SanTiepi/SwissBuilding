@@ -83,6 +83,7 @@ from app.api import (
     leases,
     maintenance_forecast,
     material_inventory,
+    material_recommendations,
     materials,
     monitoring_plan,
     multi_org_dashboard,
@@ -180,6 +181,7 @@ api_router.include_router(zone_classification.router, prefix="", tags=["Zone Cla
 api_router.include_router(building_elements.router, prefix="", tags=["Building Elements"])
 api_router.include_router(materials.router, prefix="", tags=["Materials"])
 api_router.include_router(material_inventory.router, prefix="", tags=["Material Inventory"])
+api_router.include_router(material_recommendations.router, prefix="", tags=["Material Recommendations"])
 api_router.include_router(interventions.router, prefix="", tags=["Interventions"])
 api_router.include_router(leases.router, prefix="", tags=["Leases"])
 api_router.include_router(contact_lookup.router, prefix="", tags=["Contacts"])

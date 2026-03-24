@@ -400,15 +400,15 @@ export default function InterventionSimulator() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Link
           to={`/buildings/${buildingId}`}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-slate-300" />
         </Link>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             {t('simulator.title') || 'Intervention Simulator'}
           </h1>
           <p className="text-sm text-gray-500 dark:text-slate-400">
@@ -418,7 +418,7 @@ export default function InterventionSimulator() {
         {/* Scenario toggle */}
         <button
           onClick={() => setShowScenarioPanel(!showScenarioPanel)}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors min-h-[44px]"
         >
           <FolderOpen className="w-4 h-4" />
           {t('simulator.load_scenario') || 'Load Scenario'}
@@ -612,7 +612,7 @@ export default function InterventionSimulator() {
           </h2>
           <button
             onClick={addIntervention}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm min-h-[44px]"
           >
             <Plus className="w-4 h-4" />
             {t('simulator.add_intervention') || 'Add Intervention'}
@@ -674,21 +674,21 @@ export default function InterventionSimulator() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => duplicateIntervention(index)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-2 sm:p-1.5 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                         title={t('simulator.duplicate_intervention') || 'Duplicate'}
                       >
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
                       <button
                         onClick={() => removeIntervention(index)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-2 sm:p-1.5 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                         title={t('simulator.remove_intervention') || 'Remove'}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
                       <button
                         onClick={() => toggleExpanded(index)}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                        className="p-2 sm:p-1.5 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
                       >
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
@@ -707,7 +707,7 @@ export default function InterventionSimulator() {
                           <select
                             value={intervention.intervention_type}
                             onChange={(e) => updateIntervention(index, 'intervention_type', e.target.value)}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[44px]"
                           >
                             {INTERVENTION_TYPES.map((type) => (
                               <option key={type} value={type}>
@@ -725,7 +725,7 @@ export default function InterventionSimulator() {
                           <select
                             value={intervention.target_pollutant ?? ''}
                             onChange={(e) => updateIntervention(index, 'target_pollutant', e.target.value || null)}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[44px]"
                           >
                             <option value="">--</option>
                             {POLLUTANT_TYPES.map((p) => (
@@ -754,7 +754,7 @@ export default function InterventionSimulator() {
                               )
                             }
                             placeholder="0"
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[44px]"
                           />
                         </div>
                       </div>
@@ -769,10 +769,10 @@ export default function InterventionSimulator() {
                             value={intervention.scope ?? ''}
                             onChange={(e) => updateIntervention(index, 'scope', e.target.value || null)}
                             placeholder={t('simulator.scope_placeholder') || 'e.g. 2nd floor, facade...'}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[44px]"
                           />
                         </div>
-                        <div className="w-40">
+                        <div className="w-full sm:w-40">
                           <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
                             {t('simulator.timeline') || 'Timeline (weeks)'}
                           </label>
@@ -789,7 +789,7 @@ export default function InterventionSimulator() {
                               )
                             }
                             placeholder="0"
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[44px]"
                           />
                         </div>
                       </div>
@@ -823,7 +823,7 @@ export default function InterventionSimulator() {
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               {/* Save scenario */}
               <div className="flex items-center gap-1">
                 <input
@@ -831,12 +831,12 @@ export default function InterventionSimulator() {
                   value={scenarioName}
                   onChange={(e) => setScenarioName(e.target.value)}
                   placeholder={t('simulator.scenario_name') || 'Scenario name'}
-                  className="w-40 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="flex-1 sm:w-40 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[44px]"
                 />
                 <button
                   onClick={saveScenario}
                   disabled={!scenarioName.trim() || interventions.length === 0}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px]"
                   title={t('simulator.save_scenario') || 'Save'}
                 >
                   <Save className="w-4 h-4" />
@@ -845,7 +845,7 @@ export default function InterventionSimulator() {
               <button
                 onClick={() => mutation.mutate()}
                 disabled={interventions.length === 0 || mutation.isPending}
-                className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md min-h-[44px] w-full sm:w-auto"
               >
                 {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                 {t('simulator.run_simulation') || 'Run Simulation'}

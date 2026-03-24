@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Monitor,
 } from 'lucide-react';
 
 const POLLUTANTS = ['asbestos', 'pcb', 'lead', 'hap', 'radon'] as const;
@@ -397,6 +398,17 @@ export default function RulesPackStudio() {
         </p>
       </div>
 
+      {/* Mobile disclosure banner */}
+      <div
+        className="md:hidden flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3"
+        data-testid="mobile-desktop-hint"
+      >
+        <Monitor className="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+          {t('rules_studio.desktop_hint') || 'This tool is optimized for desktop use. For the best experience, use a larger screen.'}
+        </p>
+      </div>
+
       {/* Search + filter bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -489,7 +501,7 @@ export default function RulesPackStudio() {
                   </span>
                 )}
               </div>
-              <div className="p-2 max-h-[calc(100vh-340px)] overflow-y-auto space-y-1">
+              <div className="p-2 max-h-[60vh] lg:max-h-[calc(100vh-340px)] overflow-y-auto space-y-1">
                 {filteredPacks.length === 0 ? (
                   <div className="text-center py-8">
                     <Scale className="w-10 h-10 text-gray-300 dark:text-slate-600 mx-auto mb-2" />

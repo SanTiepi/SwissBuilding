@@ -174,7 +174,10 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6">
+      <div
+        data-testid="ownership-form-modal"
+        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6"
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {isEdit ? t('ownership.edit') || 'Edit Ownership' : t('ownership.create') || 'Create Ownership Record'}
@@ -227,6 +230,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                         className={cn(inputCls, 'pl-9')}
                         placeholder={t('ownership.search_owner') || 'Search contacts...'}
                         data-testid="contact-search-input"
+                        aria-label={t('ownership.owner') || 'Owner'}
                       />
                       {contactLoading && (
                         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-gray-400" />
@@ -265,7 +269,12 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
             {/* Ownership type */}
             <div>
               <label className={labelCls}>{t('ownership.ownership_type') || 'Ownership Type'} *</label>
-              <select value={formState.ownership_type} onChange={set('ownership_type')} className={inputCls}>
+              <select
+                value={formState.ownership_type}
+                onChange={set('ownership_type')}
+                className={inputCls}
+                data-testid="ownership-form-ownership-type"
+              >
                 {OWNERSHIP_TYPES.map((ot) => (
                   <option key={ot} value={ot}>
                     {t(`ownership.type.${ot}`) || ot}
@@ -284,6 +293,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                 max="100"
                 value={formState.share_pct}
                 onChange={set('share_pct')}
+                data-testid="ownership-form-share"
                 className={inputCls}
               />
             </div>
@@ -291,7 +301,12 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
             {/* Acquisition type */}
             <div>
               <label className={labelCls}>{t('ownership.acquisition_type') || 'Acquisition Type'}</label>
-              <select value={formState.acquisition_type} onChange={set('acquisition_type')} className={inputCls}>
+              <select
+                value={formState.acquisition_type}
+                onChange={set('acquisition_type')}
+                className={inputCls}
+                data-testid="ownership-form-acquisition-type"
+              >
                 <option value="">{t('form.select') || '-- Select --'}</option>
                 {ACQUISITION_TYPES.map((at) => (
                   <option key={at} value={at}>
@@ -308,6 +323,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                 type="date"
                 value={formState.acquisition_date}
                 onChange={set('acquisition_date')}
+                data-testid="ownership-form-acquisition-date"
                 className={inputCls}
               />
             </div>
@@ -327,6 +343,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                 min="0"
                 value={formState.acquisition_price_chf}
                 onChange={set('acquisition_price_chf')}
+                data-testid="ownership-form-acquisition-price"
                 className={inputCls}
               />
             </div>
@@ -338,6 +355,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                 type="text"
                 value={formState.land_register_ref}
                 onChange={set('land_register_ref')}
+                data-testid="ownership-form-land-register-ref"
                 className={inputCls}
               />
             </div>
@@ -345,7 +363,12 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
             {/* Status */}
             <div>
               <label className={labelCls}>{t('ownership.status') || 'Status'}</label>
-              <select value={formState.status} onChange={set('status')} className={inputCls}>
+              <select
+                value={formState.status}
+                onChange={set('status')}
+                className={inputCls}
+                data-testid="ownership-form-status"
+              >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {t(`ownership.status.${s}`) || s}
@@ -358,7 +381,13 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
           {/* Notes */}
           <div>
             <label className={labelCls}>{t('ownership.notes') || 'Notes'}</label>
-            <textarea value={formState.notes} onChange={set('notes')} rows={3} className={inputCls} />
+            <textarea
+              value={formState.notes}
+              onChange={set('notes')}
+              rows={3}
+              className={inputCls}
+              data-testid="ownership-form-notes"
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
@@ -372,6 +401,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
             <button
               type="submit"
               disabled={isPending}
+              data-testid="ownership-form-submit"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400"
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -482,6 +512,7 @@ export default function OwnershipTab({ buildingId }: OwnershipTabProps) {
         </h3>
         <button
           onClick={() => setShowCreateModal(true)}
+          data-testid="ownership-create-button"
           className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
         >
           <Plus className="w-4 h-4" />

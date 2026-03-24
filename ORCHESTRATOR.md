@@ -304,7 +304,7 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `28` (`W61-W66` + `W68-W89` reported)
+- waves_completed: `29` (`W61-W66` + `W68-W90` reported)
 - rework_count: `0`
 - blocked_count: `0`
 - last_updated: `2026-03-24`
@@ -1506,16 +1506,16 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | Dashboard grade chart responsive fix (audit D-1) | Improve readability of grade distribution bars on mobile widths | mobile audit report ✅ |
-| 2 | Admin jurisdictions packs-table mobile fallback (audit AJ-1) | Reduce horizontal-scroll friction on admin packs table | mobile audit report ✅ |
-| 3 | Admin users/audit search-width mobile fixes (audit AU-1/AAL-1) | Remove residual overflow risk in admin filter bars | mobile audit report ✅ |
-| 4 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
-| 5 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
-| 6 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W89 surfaces | W89 ✅ |
-| 7 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
-| 8 | MaterialRecommendationsCard page wiring | Wire card into BuildingInterventions or OverviewTab with API endpoint | W89-B component ✅ |
-| 9 | BatiConnect seed enrichment (lease/contract/ownership demo data) | Seed depth for BC vertical slices still thin | BC commit ✅ |
-| 10 | PreworkTriggerCard integration test (real e2e) | Validate prework trigger flow end-to-end with seeded data | W87 trigger + W88 PFAS ✅ |
+| 1 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
+| 2 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
+| 3 | MaterialRecommendationsCard page wiring | Wire card into BuildingInterventions or OverviewTab with API endpoint | W89-B component ✅ |
+| 4 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W90 surfaces | W90 ✅ |
+| 5 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
+| 6 | BatiConnect seed enrichment (lease/contract/ownership demo data) | Seed depth for BC vertical slices still thin | BC commit ✅ |
+| 7 | PreworkTriggerCard integration test (real e2e) | Validate prework trigger flow end-to-end with seeded data | W87 trigger + W88 PFAS ✅ |
+| 8 | Eco clause UI card in ReadinessWallet | Surface eco clause recommendations alongside prework triggers | W88-A eco clause integration ✅ |
+| 9 | PFAS i18n completion audit | Ensure all PFAS-related surfaces have complete i18n across 4 langs | W89-A PFAS UI ✅ |
+| 10 | Building passport PFAS section | Include PFAS in passport summary alongside existing 5 pollutants | W88-B PFAS backend ✅ |
 
 ## Next Queue (11+)
 
@@ -1528,6 +1528,19 @@ Overflow rule:
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W90
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 1 | Dashboard grade chart responsive (W90-A) | ✅ Grade grid 3-cols on mobile, h-16 bars, text-xs labels. 2 new tests (total 20) |
+| 2 | Admin jurisdictions packs-table mobile (W90-B) | ✅ MobilePackCard fallback <768px with expandable details. 2 new tests (total 15) |
+| 3 | Admin search-width mobile (W90-C) | ✅ AdminUsers + AdminAuditLogs filter bars flex-col on mobile, full-width inputs, overflow-hidden. CSS-only |
+
+W90 debrief:
+- clear: cohesive mobile polish cluster; 35 tests validated; 16th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W89
 
