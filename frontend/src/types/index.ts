@@ -1,6 +1,6 @@
 // User roles
 export type UserRole = 'admin' | 'owner' | 'diagnostician' | 'architect' | 'authority' | 'contractor';
-export type PollutantType = 'asbestos' | 'pcb' | 'lead' | 'hap' | 'radon';
+export type PollutantType = 'asbestos' | 'pcb' | 'lead' | 'hap' | 'radon' | 'pfas';
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
 export type DiagnosticStatus = 'draft' | 'in_progress' | 'completed' | 'validated';
 export type DiagnosticContext = 'UN' | 'AvT' | 'ApT';

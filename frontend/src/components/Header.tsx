@@ -77,19 +77,19 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
   // Language display available via SUPPORTED_LANGUAGES if needed
 
   return (
-    <header className="flex items-center justify-between h-16 px-6 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <header className="flex items-center justify-between h-16 px-3 sm:px-6 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
       {/* Left side: hamburger + page title */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
-            className="md:hidden p-2 -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="md:hidden p-2 -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex-shrink-0"
             aria-label="Menu"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{pageTitle}</h1>
+        <h1 className="text-base sm:text-xl font-semibold text-slate-900 dark:text-white truncate">{pageTitle}</h1>
       </div>
 
       {/* Search trigger */}
@@ -108,7 +108,7 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
       )}
 
       {/* Right side controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
         {/* Mobile search button — visible only below sm breakpoint */}
         {onSearchOpen && (
           <button
@@ -120,11 +120,12 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
           </button>
         )}
 
-        {/* Dark mode toggle */}
+        {/* Dark mode toggle — hidden on very small screens, available in user menu context */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="hidden sm:flex min-w-[44px] min-h-[44px] items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           aria-label={t('settings.dark_mode')}
+          data-testid="theme-toggle-desktop"
         >
           {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
@@ -136,14 +137,14 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
         <div ref={langRef} className="relative">
           <button
             onClick={() => setLangOpen(!langOpen)}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="flex items-center gap-1 sm:gap-1.5 min-w-[44px] min-h-[44px] justify-center sm:justify-start sm:px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             aria-label={t('settings.language')}
             aria-expanded={langOpen}
             aria-haspopup="true"
           >
             <Globe className="w-4 h-4" />
-            <span className="uppercase font-medium">{locale}</span>
-            <ChevronDown className="w-3.5 h-3.5" />
+            <span className="uppercase font-medium hidden sm:inline">{locale}</span>
+            <ChevronDown className="w-3.5 h-3.5 hidden sm:block" />
           </button>
           {langOpen && (
             <div
@@ -173,19 +174,19 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
           )}
         </div>
 
-        {/* Separator */}
-        <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
+        {/* Separator — hidden on very small screens */}
+        <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
 
         {/* User menu */}
         <div ref={userRef} className="relative">
           <button
             onClick={() => setUserOpen(!userOpen)}
-            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="flex items-center gap-1 sm:gap-2.5 min-w-[44px] min-h-[44px] px-1 sm:px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             aria-label={t('nav.profile')}
             aria-expanded={userOpen}
             aria-haspopup="true"
           >
-            <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-semibold">
+            <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
               {initials}
             </div>
             {user && (
@@ -196,7 +197,7 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">{t(`role.${user.role}`)}</p>
               </div>
             )}
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
           </button>
           {userOpen && (
             <div
@@ -219,6 +220,19 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
               >
                 <User className="w-4 h-4" />
                 {t('nav.profile')}
+              </button>
+              {/* Dark mode toggle — visible in dropdown on small screens */}
+              <button
+                role="menuitem"
+                onClick={() => {
+                  toggleTheme();
+                  setUserOpen(false);
+                }}
+                className="flex sm:hidden items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                data-testid="theme-toggle-mobile"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                {t('settings.dark_mode')}
               </button>
               <div className="border-t border-slate-100 dark:border-slate-700">
                 <button

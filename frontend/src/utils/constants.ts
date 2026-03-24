@@ -12,6 +12,7 @@ export const POLLUTANT_COLORS: Record<string, string> = {
   lead: '#f59e0b',
   hap: '#ec4899',
   radon: '#14b8a6',
+  pfas: '#ef4444',
 };
 
 export const SWISS_CANTONS = [
@@ -47,7 +48,7 @@ export const BUILDING_TYPES = ['residential', 'commercial', 'industrial', 'publi
 
 export const ROLES: string[] = ['admin', 'owner', 'diagnostician', 'architect', 'authority', 'contractor'];
 
-export const POLLUTANT_TYPES = ['asbestos', 'pcb', 'lead', 'hap', 'radon'] as const;
+export const POLLUTANT_TYPES = ['asbestos', 'pcb', 'lead', 'hap', 'radon', 'pfas'] as const;
 
 export const RISK_LEVELS = ['low', 'medium', 'high', 'critical', 'unknown'] as const;
 

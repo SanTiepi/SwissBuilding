@@ -266,6 +266,8 @@ export const de: TranslationMap = {
   'pollutant.short.lead': 'Blei',
   'pollutant.short.hap': 'PAK',
   'pollutant.short.radon': 'Radon',
+  'pollutant.pfas': 'PFAS (Per- und Polyfluoralkylsubstanzen)',
+  'pollutant.short.pfas': 'PFAS',
 
   // Risk Levels
   'risk.low': 'Niedrig',
@@ -2862,4 +2864,13 @@ export const de: TranslationMap = {
   'evidence_pack.required_sections': 'Erforderliche Abschnitte',
   'evidence_pack.artefacts': 'Artefakte',
   'evidence_pack.documents': 'Dokumente',
+  'material_rec.title': 'Materialempfehlungen',
+  'material_rec.empty': 'Keine Materialempfehlungen verfugbar.',
+  'material_rec.count': 'Empfehlung(en)',
+  'material_rec.suggested': 'Vorgeschlagen',
+  'material_rec.reason': 'Grund',
+  'material_rec.replacement_type': 'Ersatztyp',
+  'material_rec.risk_flags': 'Risikosignale',
+  'material_rec.evidence_requirements': 'Nachweisanforderungen',
+  'material_rec.mandatory': 'obligatorisch',
 };

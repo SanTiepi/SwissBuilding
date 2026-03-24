@@ -26,6 +26,9 @@ function triggerIcon(triggerType: string) {
   if (lower.includes('document') || lower.includes('report')) {
     return <FileSearch className="w-4 h-4" />;
   }
+  if (lower.includes('pfas')) {
+    return <ShieldAlert className="w-4 h-4" />;
+  }
   if (lower.includes('compliance') || lower.includes('regulation')) {
     return <ShieldAlert className="w-4 h-4" />;
   }

@@ -810,6 +810,12 @@ function CheckItem({
         path: `/buildings/${buildingId}?tab=diagnostics`,
       };
     }
+    if (lower.includes('pfas')) {
+      return {
+        label: t('readiness.see_diagnostics') || 'See diagnostics',
+        path: `/buildings/${buildingId}?tab=diagnostics`,
+      };
+    }
     return null;
   }, [check.details, buildingId, t]);
 

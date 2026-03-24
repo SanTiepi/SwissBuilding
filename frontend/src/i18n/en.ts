@@ -264,6 +264,8 @@ export const en: TranslationMap = {
   'pollutant.short.lead': 'Lead',
   'pollutant.short.hap': 'PAH',
   'pollutant.short.radon': 'Radon',
+  'pollutant.pfas': 'PFAS (Per- and Polyfluoroalkyl Substances)',
+  'pollutant.short.pfas': 'PFAS',
 
   // Risk Levels
   'risk.low': 'Low',
@@ -2856,4 +2858,13 @@ export const en: TranslationMap = {
   'evidence_pack.required_sections': 'Required Sections',
   'evidence_pack.artefacts': 'Artefacts',
   'evidence_pack.documents': 'Documents',
+  'material_rec.title': 'Material Recommendations',
+  'material_rec.empty': 'No material recommendations available.',
+  'material_rec.count': 'recommendation(s)',
+  'material_rec.suggested': 'Suggested',
+  'material_rec.reason': 'Reason',
+  'material_rec.replacement_type': 'Replacement Type',
+  'material_rec.risk_flags': 'Risk Flags',
+  'material_rec.evidence_requirements': 'Evidence Requirements',
+  'material_rec.mandatory': 'mandatory',
 };

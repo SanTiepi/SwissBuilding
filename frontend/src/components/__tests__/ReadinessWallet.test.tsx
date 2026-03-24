@@ -150,6 +150,41 @@ describe('ReadinessWallet', () => {
     expect(screen.queryByText('readiness.prework_triggers')).not.toBeInTheDocument();
   });
 
+  it('renders pfas_check prework trigger alongside other triggers', async () => {
+    mockList.mockResolvedValue({
+      items: [
+        {
+          readiness_type: 'safe_to_start',
+          status: 'not_ready',
+          score: 0.3,
+          assessed_at: '2026-03-08T00:00:00Z',
+          checks_json: [{ label: 'PFAS assessment', passed: false, details: 'PFAS evaluation missing' }],
+          blockers_json: [
+            { label: 'PFAS assessment required', severity: 'high', details: 'No PFAS evaluation on file' },
+          ],
+          conditions_json: [],
+          prework_triggers: [
+            {
+              trigger_type: 'pfas_check',
+              reason: 'PFAS evaluation required before renovation',
+              urgency: 'high',
+              source_check: 'pfas_assessment',
+            },
+          ],
+        },
+      ],
+      total: 1,
+    });
+
+    render(<ReadinessWallet />, { wrapper });
+
+    expect(await screen.findByText('readiness.prework_triggers')).toBeInTheDocument();
+    expect(screen.getByText('PFAS evaluation required before renovation')).toBeInTheDocument();
+    expect(screen.getByText('pfas_check')).toBeInTheDocument();
+    // Blocker should also appear
+    expect(screen.getByText('PFAS assessment required')).toBeInTheDocument();
+  });
+
   it('does not render prework trigger card when triggers field is missing', async () => {
     mockList.mockResolvedValue({
       items: [

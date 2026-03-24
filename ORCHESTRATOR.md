@@ -304,10 +304,10 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `26` (`W61-W66` + `W68-W87` reported)
+- waves_completed: `27` (`W61-W66` + `W68-W88` reported)
 - rework_count: `0`
 - blocked_count: `0`
-- last_updated: `2026-03-10`
+- last_updated: `2026-03-24`
 
 Wave debrief (mandatory):
 - clear: what was clear and accelerated execution
@@ -1506,36 +1506,41 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | Header dropdown keyboard a11y fixes (H1/H2) | Accessibility blocker from latest audit; low-cost/high-impact closeout | W85 keyboard audit ✅ |
-| 2 | Skip-link and main-landmark path (H3/L1) | Keyboard navigation ergonomics still incomplete | W85 keyboard audit ✅ |
-| 3 | CommandPalette modal a11y fixes (CP1/CP2/CP3) | Core search flow must be fully keyboard-safe | W85 keyboard audit ✅ |
-| 4 | Prework trigger backend contract | Restart safe-to-start differentiation with deterministic escalation logic | readiness_reasoner + regulatory packs ✅ |
-| 5 | Prework trigger UI card | Expose trigger guidance in BuildingDetail/Readiness journey | prework trigger backend contract |
-| 6 | Eco clause template backend generator | Convert readiness signals into procurement-ready language blocks | intervention + compliance + dossier services ✅ |
-| 7 | Eco clause pack integration | Make eco specs operational inside authority/contractor outputs | eco clause templates + authority_pack flow |
-| 8 | PFAS readiness backend extension | Expand pollutant readiness coverage where market demand is rising | readiness_reasoner + regulatory packs ✅ |
-| 9 | PFAS readiness wallet UI | Surface PFAS blockers/conditions in operator wallet | PFAS readiness backend extension |
-| 10 | Material recommendation evidence shelf backend | Bridge diagnosis to intervention material choices with explicit evidence needs | intervention_simulator + material_inventory ✅ |
+| 1 | PFAS readiness wallet UI | Surface PFAS blockers/conditions in operator wallet | PFAS readiness backend ✅ (W88-B) |
+| 2 | Material recommendation shelf UI | Buyer-visible recommendation quality layer in simulator/readiness | material recommendation backend ✅ (W88-C) |
+| 3 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87/W88 surfaces | W88 ✅ |
+| 4 | Header control-density mobile polish (audit H-1) | Prevent crowding/control collision at 375px | mobile audit report ✅ |
+| 5 | Dashboard grade chart responsive fix (audit D-1) | Improve readability of grade distribution bars on mobile widths | mobile audit report ✅ |
+| 6 | Admin jurisdictions packs-table mobile fallback (audit AJ-1) | Reduce horizontal-scroll friction on admin packs table | mobile audit report ✅ |
+| 7 | Admin users/audit search-width mobile fixes (audit AU-1/AAL-1) | Remove residual overflow risk in admin filter bars | mobile audit report ✅ |
+| 8 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
+| 9 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
+| 10 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
 
 ## Next Queue (11+)
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 11 | Material recommendation shelf UI | Buyer-visible recommendation quality layer in simulator/readiness surfaces | material recommendation backend shelf |
-| 12 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87/W88 surfaces | trigger + PFAS + eco-clause + recommendation features |
-| 13 | Header control-density mobile polish (audit H-1) | Prevent crowding/control collision at 375px | mobile audit report ✅ |
-| 14 | Dashboard grade chart responsive fix (audit D-1) | Improve readability of grade distribution bars on mobile widths | mobile audit report ✅ |
-| 15 | Admin jurisdictions packs-table mobile fallback (audit AJ-1) | Reduce horizontal-scroll friction on admin packs table | mobile audit report ✅ |
-| 16 | Admin users/audit search-width mobile fixes (audit AU-1/AAL-1) | Remove residual overflow risk in admin filter bars | mobile audit report ✅ |
-| 17 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
-| 18 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
-| 19 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
+| 11 | (auto-promote from Future Horizon Feed when ranks clear) | — | — |
 
 Overflow rule:
 - keep ranks `1-10` order locked
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W88
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 1 | Eco clause pack integration (W88-A) | ✅ Eco clauses auto-injected into contractor_acknowledgment (safety_requirements) + transfer_package (new eco_clauses section). 8 new integration tests + 30 existing green |
+| 2 | PFAS readiness backend (W88-B) | ✅ PFAS as 6th pollutant: constants, compliance_engine (0.1 µg/L water, 50 ng/kg soil), readiness_reasoner (check 6b pfas_assessment), PreworkTriggerType. 7 new tests. Backward-compatible |
+| 3 | Material recommendation shelf backend (W88-C) | ✅ New material_recommendation_service: 5 pollutants × 11+ material types, safe alternatives, evidence requirements, risk flags, Swiss regulatory refs. 29 new tests |
+
+W88 debrief:
+- clear: all 3 scopes fully disjoint; 133 tests validated (72 W88 + 61 regression); 14th consecutive zero-fix wave; agents completed autonomously
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W87
 

@@ -266,6 +266,8 @@ export const it: TranslationMap = {
   'pollutant.short.lead': 'Piombo',
   'pollutant.short.hap': 'IPA',
   'pollutant.short.radon': 'Radon',
+  'pollutant.pfas': 'PFAS (Sostanze per- e polifluoroalchiliche)',
+  'pollutant.short.pfas': 'PFAS',
 
   // Risk Levels
   'risk.low': 'Basso',
@@ -2861,4 +2863,13 @@ export const it: TranslationMap = {
   'evidence_pack.required_sections': 'Sezioni richieste',
   'evidence_pack.artefacts': 'Artefatti',
   'evidence_pack.documents': 'Documenti',
+  'material_rec.title': 'Raccomandazioni materiali',
+  'material_rec.empty': 'Nessuna raccomandazione di materiale disponibile.',
+  'material_rec.count': 'raccomandazione/i',
+  'material_rec.suggested': 'Suggerito',
+  'material_rec.reason': 'Motivo',
+  'material_rec.replacement_type': 'Tipo di sostituzione',
+  'material_rec.risk_flags': 'Segnali di rischio',
+  'material_rec.evidence_requirements': 'Requisiti di prova',
+  'material_rec.mandatory': 'obbligatorio',
 };
