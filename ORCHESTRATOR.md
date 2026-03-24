@@ -304,7 +304,7 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `31` (`W61-W66` + `W68-W92` reported)
+- waves_completed: `34` (`W61-W66` + `W68-W95` reported)
 - rework_count: `0`
 - blocked_count: `0`
 - last_updated: `2026-03-24`
@@ -1506,16 +1506,10 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W92 surfaces | W92 ✅ |
-| 2 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction | service-consumer-map ✅ |
-| 3 | Portfolio-level PFAS exposure summary | Aggregate PFAS status across portfolio buildings | W88-B + W92-B passport PFAS ✅ |
-| 4 | Contractor pack eco clause rendering preview | Show eco clause preview in contractor acknowledgment UI | W88-A + W92-A eco clause UI ✅ |
-| 5 | Eco clause in transfer package e2e test | Validate eco clauses appear in transfer package output | W88-A eco clause integration ✅ |
-| 6 | Material recommendation API integration test | Test GET endpoint returns correct recommendations for seeded building | W91-C wiring ✅ |
-| 7 | PFAS compliance engine integration test | Verify PFAS thresholds + waste classification end-to-end | W88-B PFAS backend ✅ |
-| 8 | Building passport UI PFAS coverage display | Show pollutant_coverage in passport frontend page | W92-B passport PFAS ✅ |
-| 9 | Lease/Contract/Ownership seed verification test | Verify seed_bc_ops data loads correctly | W92-C seed ✅ |
-| 10 | Readiness wallet integration test (eco clause + prework triggers) | Validate full readiness surface with eco clauses | W92-A eco clause UI ✅ |
+| Rank | Action | Why now | Depends on |
+|------|--------|---------|------------|
+| 1 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W95 surfaces | W95 ✅ — **BLOCKED: needs real backend environment** |
+| — | Queue cleared | All executable items from W88-W95 are delivered | — |
 
 ## Next Queue (11+)
 
@@ -1528,6 +1522,45 @@ Overflow rule:
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W95
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 9 | Seed BC ops verification test (W95-A) | ✅ 51 tests: imports, UUID5 determinism, DB integration, idempotency, referential integrity |
+| 10 | Readiness wallet integration test (W95-B) | ✅ 4 new tests: eco clause + prework coexistence, PFAS trigger + eco clause, empty state. Total 10 |
+| 2 | Duplicate-service consolidation brief (W95-C) | ✅ Brief: 14 families, 3 HIGH/6 MED/5 LOW priority, 5-phase sequence, ~35-40 eliminations |
+
+W95 debrief:
+- clear: final queue clearance wave; 61 tests validated; 21st consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W94
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 5 | Eco clause transfer package test (W94-A) | ✅ 4 new tests: correct keys, section entries, multi-pollutant, section filtering. Total 12 |
+| 6 | Material recommendation API test (W94-B) | ✅ 5 new API tests: 200/404/401, pollutant materials, response schema. Total 34 |
+| 7 | PFAS compliance engine test (W94-C) | ✅ 15 new tests: water/soil thresholds, waste classification, legal refs, risk levels, auto_classify. Total 32 |
+
+W94 debrief:
+- clear: pure test wave; 78 tests validated; 20th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
+
+### Completed in W93
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 3 | Portfolio PFAS exposure (W93-A) | ✅ pollutant_exposure array in portfolio summary, 6 pollutants. 4 new tests |
+| 4 | Contractor eco clause preview (W93-B) | ✅ ContractorEcoClausePreview: pollutant badges, collapsible clauses, legal refs, dark mode. 9 tests |
+| 8 | Passport UI PFAS coverage (W93-C) | ✅ PollutantCoverageSection: 6 chips, PFAS emerging badge, coverage ratio. i18n 4 langs. 4 tests |
+
+W93 debrief:
+- clear: all 3 scopes disjoint; tsc clean; 19th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W92
 
