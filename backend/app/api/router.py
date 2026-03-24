@@ -59,6 +59,7 @@ from app.api import (
     dossier,
     dossier_completion,
     due_diligence,
+    eco_clauses,
     energy_performance,
     environmental_impact,
     events,
@@ -299,6 +300,7 @@ api_router.include_router(ventilation_assessment.router, prefix="", tags=["Venti
 api_router.include_router(incident_response.router, prefix="", tags=["Incident Response"])
 api_router.include_router(reporting_metrics.router, prefix="", tags=["Reporting Metrics"])
 api_router.include_router(cross_building_pattern.router, prefix="", tags=["Cross Building Patterns"])
+api_router.include_router(eco_clauses.router, prefix="", tags=["Eco Clauses"])
 api_router.include_router(
     building_certifications.router, prefix="/building-certifications", tags=["Building Certifications"]
 )

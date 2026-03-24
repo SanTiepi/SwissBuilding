@@ -18,6 +18,7 @@ from uuid import UUID
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.constants import ALL_POLLUTANTS
 from app.models.building import Building
 from app.models.building_trust_score_v2 import BuildingTrustScore
 from app.models.data_quality_issue import DataQualityIssue
@@ -87,6 +88,7 @@ async def get_passport_summary(
       - blind_spots (open unknown issues)
       - contradictions (data quality issues of type contradiction)
       - evidence_coverage (entity counts and latest dates)
+      - pollutant_coverage (which of ALL_POLLUTANTS have diagnostics)
       - passport_grade (A-F)
       - assessed_at (ISO timestamp)
     """
@@ -251,6 +253,33 @@ async def get_passport_summary(
         "latest_document_date": (latest_doc_date.isoformat() if latest_doc_date else None),
     }
 
+    # ── 5b. Pollutant coverage ─────────────────────────────────────
+    # Which of the ALL_POLLUTANTS have at least one diagnostic?
+    pollutant_diag_result = await db.execute(
+        select(Diagnostic.diagnostic_type, func.count())
+        .where(
+            and_(
+                Diagnostic.building_id == building_id,
+                Diagnostic.diagnostic_type.in_(ALL_POLLUTANTS),
+            )
+        )
+        .group_by(Diagnostic.diagnostic_type)
+    )
+    covered_pollutants: dict[str, int] = {}
+    for ptype, cnt in pollutant_diag_result.all():
+        covered_pollutants[ptype] = cnt
+
+    missing_pollutants = [p for p in ALL_POLLUTANTS if p not in covered_pollutants]
+
+    pollutant_coverage = {
+        "total_pollutants": len(ALL_POLLUTANTS),
+        "covered_count": len(covered_pollutants),
+        "missing_count": len(missing_pollutants),
+        "covered": covered_pollutants,
+        "missing": missing_pollutants,
+        "coverage_ratio": round(len(covered_pollutants) / len(ALL_POLLUTANTS), 4),
+    }
+
     # ── 6. Completeness (from readiness scores as proxy) ───────────
     # Use the average of readiness scores as completeness proxy,
     # or 0.0 if no readiness assessments exist.
@@ -287,6 +316,7 @@ async def get_passport_summary(
         "blind_spots": blind_spots,
         "contradictions": contradictions,
         "evidence_coverage": evidence_coverage,
+        "pollutant_coverage": pollutant_coverage,
         "passport_grade": passport_grade,
         "assessed_at": assessed_at.isoformat(),
     }

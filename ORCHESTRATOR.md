@@ -304,7 +304,7 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `29` (`W61-W66` + `W68-W90` reported)
+- waves_completed: `30` (`W61-W66` + `W68-W91` reported)
 - rework_count: `0`
 - blocked_count: `0`
 - last_updated: `2026-03-24`
@@ -1506,16 +1506,16 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
-| 2 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
-| 3 | MaterialRecommendationsCard page wiring | Wire card into BuildingInterventions or OverviewTab with API endpoint | W89-B component ✅ |
-| 4 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W90 surfaces | W90 ✅ |
+| 1 | Eco clause UI card in ReadinessWallet | Surface eco clause recommendations alongside prework triggers | W88-A eco clause integration ✅ |
+| 2 | Building passport PFAS section | Include PFAS in passport summary alongside existing 5 pollutants | W88-B PFAS backend ✅ |
+| 3 | BatiConnect seed enrichment (lease/contract/ownership demo data) | Seed depth for BC vertical slices still thin | BC commit ✅ |
+| 4 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W91 surfaces | W91 ✅ |
 | 5 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
-| 6 | BatiConnect seed enrichment (lease/contract/ownership demo data) | Seed depth for BC vertical slices still thin | BC commit ✅ |
-| 7 | PreworkTriggerCard integration test (real e2e) | Validate prework trigger flow end-to-end with seeded data | W87 trigger + W88 PFAS ✅ |
-| 8 | Eco clause UI card in ReadinessWallet | Surface eco clause recommendations alongside prework triggers | W88-A eco clause integration ✅ |
-| 9 | PFAS i18n completion audit | Ensure all PFAS-related surfaces have complete i18n across 4 langs | W89-A PFAS UI ✅ |
-| 10 | Building passport PFAS section | Include PFAS in passport summary alongside existing 5 pollutants | W88-B PFAS backend ✅ |
+| 6 | PFAS compliance engine integration test | Verify PFAS thresholds + waste classification end-to-end | W88-B PFAS backend ✅ |
+| 7 | Eco clause in transfer package e2e test | Validate eco clauses appear in transfer package output | W88-A eco clause integration ✅ |
+| 8 | Material recommendation API integration test | Test GET endpoint returns correct recommendations for seeded building | W91-C wiring ✅ |
+| 9 | Portfolio-level PFAS exposure summary | Aggregate PFAS status across portfolio buildings | W88-B + portfolio services ✅ |
+| 10 | Contractor pack eco clause rendering preview | Show eco clause preview in contractor acknowledgment UI | W88-A + contractor flow ✅ |
 
 ## Next Queue (11+)
 
@@ -1528,6 +1528,19 @@ Overflow rule:
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W91
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 1 | Intervention simulator mobile (W91-A) | ✅ Header wrap, 44px touch targets, timeline input full-width, bottom bar stacking. CSS-only |
+| 2 | Rules pack studio disclosure (W91-B) | ✅ md:hidden info banner with i18n (4 langs), pack list max-height fix. 3 new tests |
+| 3 | MaterialRecoCard wiring (W91-C) | ✅ GET /material-recommendations endpoint + frontend API client + wired into BuildingInterventions via React Query. Router supervisor-merged |
+
+W91 debrief:
+- clear: mixed scope (2 mobile polish + 1 full-stack wiring); supervisor fixed OwnershipTab duplicate select + unused import; 17th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W90
 

@@ -17,6 +17,7 @@ import type {
   PreworkTrigger,
 } from '@/types';
 import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTriggerCard';
+import { EcoClauseCard } from '@/components/building-detail/EcoClauseCard';
 import {
   ArrowLeft,
   ShieldCheck,
@@ -437,6 +438,9 @@ export default function ReadinessWallet() {
 
           {/* Prework diagnostic triggers */}
           <PreworkDiagnosticTriggerCard triggers={allPreworkTriggers} />
+
+          {/* Eco clause recommendations */}
+          {buildingId && <EcoClauseCard buildingId={buildingId} />}
 
           {/* 4. Progress tracking */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

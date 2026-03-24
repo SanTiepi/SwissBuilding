@@ -1986,6 +1986,11 @@ export const fr: TranslationMap = {
   'readiness.all_checks': 'Toutes les verifications',
   'readiness.notes': 'Notes',
   'readiness.export_report': 'Exporter le rapport',
+  'eco_clause.title': 'Clauses eco-environnementales',
+  'eco_clause.clauses_count': 'clause(s)',
+  'eco_clause.context_renovation': 'Renovation',
+  'eco_clause.context_demolition': 'Demolition',
+  'eco_clause.detected_pollutants': 'Polluants detectes',
   'disclaimer.readiness_wallet': "Vue d'ensemble de la conformite reglementaire. Ne constitue pas un avis juridique.",
 
   // Trust Score

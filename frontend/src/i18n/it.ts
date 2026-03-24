@@ -1986,6 +1986,11 @@ export const it: TranslationMap = {
   'readiness.all_checks': 'Tutte le verifiche',
   'readiness.notes': 'Note',
   'readiness.export_report': 'Esporta rapporto',
+  'eco_clause.title': 'Clausole eco-ambientali',
+  'eco_clause.clauses_count': 'clausola/e',
+  'eco_clause.context_renovation': 'Ristrutturazione',
+  'eco_clause.context_demolition': 'Demolizione',
+  'eco_clause.detected_pollutants': 'Inquinanti rilevati',
   'disclaimer.readiness_wallet': 'Panoramica della conformita normativa. Non costituisce consulenza legale.',
 
   // Trust Score

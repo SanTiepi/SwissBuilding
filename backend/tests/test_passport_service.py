@@ -206,6 +206,7 @@ async def test_passport_summary_returns_correct_structure(db_session, admin_user
     assert "blind_spots" in result
     assert "contradictions" in result
     assert "evidence_coverage" in result
+    assert "pollutant_coverage" in result
     assert "passport_grade" in result
     assert "assessed_at" in result
 
@@ -387,3 +388,83 @@ async def test_passport_summary_returns_none_for_nonexistent_building(db_session
     fake_id = uuid.uuid4()
     result = await get_passport_summary(db_session, fake_id)
     assert result is None
+
+
+# ── Pollutant coverage tests ──────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_pollutant_coverage_empty_building(db_session, admin_user):
+    """Test: all pollutants missing when no diagnostics exist."""
+    from app.constants import ALL_POLLUTANTS
+
+    building = await _create_building(db_session, admin_user)
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+    pc = result["pollutant_coverage"]
+
+    assert pc["total_pollutants"] == len(ALL_POLLUTANTS)
+    assert pc["covered_count"] == 0
+    assert pc["missing_count"] == len(ALL_POLLUTANTS)
+    assert pc["coverage_ratio"] == 0.0
+    assert set(pc["missing"]) == set(ALL_POLLUTANTS)
+    assert pc["covered"] == {}
+
+
+@pytest.mark.asyncio
+async def test_pollutant_coverage_partial(db_session, admin_user):
+    """Test: partial pollutant coverage with asbestos and pfas diagnostics."""
+    from app.constants import ALL_POLLUTANTS
+
+    building = await _create_building(db_session, admin_user)
+    await _create_diagnostic(db_session, building.id, diagnostic_type="asbestos")
+    await _create_diagnostic(db_session, building.id, diagnostic_type="pfas")
+    await _create_diagnostic(db_session, building.id, diagnostic_type="pfas")
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+    pc = result["pollutant_coverage"]
+
+    assert pc["covered_count"] == 2
+    assert pc["covered"]["asbestos"] == 1
+    assert pc["covered"]["pfas"] == 2
+    assert "asbestos" not in pc["missing"]
+    assert "pfas" not in pc["missing"]
+    assert pc["missing_count"] == len(ALL_POLLUTANTS) - 2
+    assert pc["coverage_ratio"] == round(2 / len(ALL_POLLUTANTS), 4)
+
+
+@pytest.mark.asyncio
+async def test_pollutant_coverage_all_covered(db_session, admin_user):
+    """Test: full coverage when all pollutants have diagnostics."""
+    from app.constants import ALL_POLLUTANTS
+
+    building = await _create_building(db_session, admin_user)
+    for p in ALL_POLLUTANTS:
+        await _create_diagnostic(db_session, building.id, diagnostic_type=p)
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+    pc = result["pollutant_coverage"]
+
+    assert pc["covered_count"] == len(ALL_POLLUTANTS)
+    assert pc["missing_count"] == 0
+    assert pc["missing"] == []
+    assert pc["coverage_ratio"] == 1.0
+    assert "pfas" in pc["covered"]
+
+
+@pytest.mark.asyncio
+async def test_pollutant_coverage_includes_pfas(db_session, admin_user):
+    """Test: PFAS is tracked as a distinct pollutant in coverage."""
+    building = await _create_building(db_session, admin_user)
+    await _create_diagnostic(db_session, building.id, diagnostic_type="pfas")
+    await db_session.commit()
+
+    result = await get_passport_summary(db_session, building.id)
+    pc = result["pollutant_coverage"]
+
+    assert "pfas" in pc["covered"]
+    assert pc["covered"]["pfas"] == 1
+    assert "pfas" not in pc["missing"]

@@ -1983,6 +1983,11 @@ export const en: TranslationMap = {
   'readiness.all_checks': 'All checks',
   'readiness.notes': 'Notes',
   'readiness.export_report': 'Export report',
+  'eco_clause.title': 'Eco Clauses',
+  'eco_clause.clauses_count': 'clause(s)',
+  'eco_clause.context_renovation': 'Renovation',
+  'eco_clause.context_demolition': 'Demolition',
+  'eco_clause.detected_pollutants': 'Detected pollutants',
   'disclaimer.readiness_wallet': 'Regulatory readiness overview. Not legal advice.',
 
   // Trust Score

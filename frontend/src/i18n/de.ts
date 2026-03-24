@@ -1985,6 +1985,11 @@ export const de: TranslationMap = {
   'readiness.all_checks': 'Alle Pruefungen',
   'readiness.notes': 'Notizen',
   'readiness.export_report': 'Bericht exportieren',
+  'eco_clause.title': 'Umweltklauseln',
+  'eco_clause.clauses_count': 'Klausel(n)',
+  'eco_clause.context_renovation': 'Renovation',
+  'eco_clause.context_demolition': 'Abbruch',
+  'eco_clause.detected_pollutants': 'Erkannte Schadstoffe',
   'disclaimer.readiness_wallet': 'Uebersicht der regulatorischen Konformitaet. Keine Rechtsberatung.',
 
   // Trust Score
