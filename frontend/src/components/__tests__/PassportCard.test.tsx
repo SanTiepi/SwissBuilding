@@ -49,6 +49,14 @@ const passportData = {
     latest_diagnostic_date: null,
     latest_document_date: null,
   },
+  pollutant_coverage: {
+    total_pollutants: 6,
+    covered_count: 4,
+    missing_count: 2,
+    covered: { asbestos: 2, pcb: 1, lead: 1, radon: 1 },
+    missing: ['hap', 'pfas'],
+    coverage_ratio: 0.6667,
+  },
   passport_grade: 'B',
   assessed_at: '2026-03-08T00:00:00Z',
 };
@@ -85,5 +93,62 @@ describe('PassportCard', () => {
     render(<PassportCard buildingId="b1" />, { wrapper });
 
     expect(await screen.findByText('passport.no_data')).toBeInTheDocument();
+  });
+
+  it('renders pollutant coverage section with covered and missing indicators', async () => {
+    mockSummary.mockResolvedValue(passportData);
+    render(<PassportCard buildingId="b1" />, { wrapper });
+
+    // Wait for load
+    await screen.findByText('passport.title');
+
+    // Coverage ratio text (ratio + label in same element)
+    expect(screen.getByText(/4\/6.*passport\.pollutants_evaluated/)).toBeInTheDocument();
+
+    // Covered pollutants present
+    expect(screen.getByTestId('pollutant-asbestos')).toBeInTheDocument();
+    expect(screen.getByTestId('pollutant-pcb')).toBeInTheDocument();
+    expect(screen.getByTestId('pollutant-lead')).toBeInTheDocument();
+    expect(screen.getByTestId('pollutant-radon')).toBeInTheDocument();
+
+    // Missing pollutants present
+    expect(screen.getByTestId('pollutant-hap')).toBeInTheDocument();
+    expect(screen.getByTestId('pollutant-pfas')).toBeInTheDocument();
+  });
+
+  it('shows PFAS emerging regulation note when PFAS is missing', async () => {
+    mockSummary.mockResolvedValue(passportData);
+    render(<PassportCard buildingId="b1" />, { wrapper });
+
+    await screen.findByText('passport.title');
+    expect(screen.getByText('passport.pfas_note')).toBeInTheDocument();
+  });
+
+  it('shows emerging badge on PFAS when missing', async () => {
+    mockSummary.mockResolvedValue(passportData);
+    render(<PassportCard buildingId="b1" />, { wrapper });
+
+    await screen.findByText('passport.title');
+    const pfasEl = screen.getByTestId('pollutant-pfas');
+    expect(pfasEl).toHaveTextContent('passport.emerging');
+  });
+
+  it('does not show PFAS note when all pollutants are covered', async () => {
+    const fullCoverage = {
+      ...passportData,
+      pollutant_coverage: {
+        total_pollutants: 6,
+        covered_count: 6,
+        missing_count: 0,
+        covered: { asbestos: 2, pcb: 1, lead: 1, hap: 1, radon: 1, pfas: 1 },
+        missing: [],
+        coverage_ratio: 1.0,
+      },
+    };
+    mockSummary.mockResolvedValue(fullCoverage);
+    render(<PassportCard buildingId="b1" />, { wrapper });
+
+    await screen.findByText('passport.title');
+    expect(screen.queryByText('passport.pfas_note')).not.toBeInTheDocument();
   });
 });

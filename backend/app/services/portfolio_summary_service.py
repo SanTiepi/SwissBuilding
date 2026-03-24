@@ -13,6 +13,7 @@ from uuid import UUID
 from sqlalchemy import case, distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.constants import ALL_POLLUTANTS
 from app.models.action_item import ActionItem
 from app.models.building import Building
 from app.models.building_risk_score import BuildingRiskScore
@@ -30,6 +31,7 @@ from app.schemas.portfolio_summary import (
     PortfolioComplianceOverview,
     PortfolioGradeDistribution,
     PortfolioOverview,
+    PortfolioPollutantExposure,
     PortfolioReadinessOverview,
     PortfolioRiskDistribution,
     PortfolioSummary,
@@ -442,6 +444,72 @@ async def _build_alerts(db: AsyncSession, org_id: UUID | None) -> PortfolioAlert
     )
 
 
+async def _build_pollutant_exposure(db: AsyncSession, org_id: UUID | None) -> list[PortfolioPollutantExposure]:
+    """Build per-pollutant exposure summaries across the portfolio.
+
+    For each pollutant in ALL_POLLUTANTS:
+    - Count distinct buildings with at least one diagnostic of that type
+    - Count buildings missing that diagnostic type
+    - Count open unknown issues that block readiness and mention the pollutant
+    """
+    filters = _active_buildings_filter(org_id)
+
+    # Total active buildings
+    total_q = await db.execute(select(func.count()).select_from(Building).where(*filters))
+    total_buildings = total_q.scalar() or 0
+
+    if total_buildings == 0:
+        return [PortfolioPollutantExposure(pollutant=p, total_buildings=0) for p in ALL_POLLUTANTS]
+
+    # Count distinct buildings per pollutant diagnostic type (single query)
+    assessed_q = await db.execute(
+        select(Diagnostic.diagnostic_type, func.count(distinct(Diagnostic.building_id)))
+        .join(Building, Building.id == Diagnostic.building_id)
+        .where(*filters, Diagnostic.diagnostic_type.in_(ALL_POLLUTANTS))
+        .group_by(Diagnostic.diagnostic_type)
+    )
+    assessed_map: dict[str, int] = {}
+    for dtype, cnt in assessed_q.all():
+        assessed_map[dtype] = cnt
+
+    # Count readiness-blocking unknowns that reference each pollutant in title/description
+    # Use a single query grouping by pollutant keyword match
+    blocker_map: dict[str, int] = {}
+    for pollutant in ALL_POLLUTANTS:
+        pattern = f"%{pollutant}%"
+        blocker_q = await db.execute(
+            select(func.count())
+            .select_from(UnknownIssue)
+            .join(Building, Building.id == UnknownIssue.building_id)
+            .where(
+                *filters,
+                UnknownIssue.status == "open",
+                UnknownIssue.blocks_readiness.is_(True),
+                (UnknownIssue.title.ilike(pattern) | UnknownIssue.unknown_type.ilike(pattern)),
+            )
+        )
+        count = blocker_q.scalar() or 0
+        if count > 0:
+            blocker_map[pollutant] = count
+
+    results = []
+    for pollutant in ALL_POLLUTANTS:
+        assessed = assessed_map.get(pollutant, 0)
+        missing = total_buildings - assessed
+        coverage = round(assessed / total_buildings, 4) if total_buildings > 0 else 0.0
+        results.append(
+            PortfolioPollutantExposure(
+                pollutant=pollutant,
+                buildings_assessed=assessed,
+                buildings_missing=missing,
+                total_buildings=total_buildings,
+                coverage_ratio=coverage,
+                readiness_blockers=blocker_map.get(pollutant, 0),
+            )
+        )
+    return results
+
+
 async def get_portfolio_summary(
     db: AsyncSession,
     organization_id: UUID | None = None,
@@ -454,6 +522,7 @@ async def get_portfolio_summary(
     grades = await _build_grades(db, organization_id)
     actions = await _build_actions(db, organization_id)
     alerts = await _build_alerts(db, organization_id)
+    pollutant_exposure = await _build_pollutant_exposure(db, organization_id)
 
     return PortfolioSummary(
         overview=overview,
@@ -463,6 +532,7 @@ async def get_portfolio_summary(
         grades=grades,
         actions=actions,
         alerts=alerts,
+        pollutant_exposure=pollutant_exposure,
         generated_at=datetime.now(UTC),
         organization_id=organization_id,
     )

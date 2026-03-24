@@ -1599,7 +1599,8 @@ export const de: TranslationMap = {
   'rules_studio.field_notification_required': 'Meldepflicht',
   'rules_studio.field_notification_authority': 'Meldebehoerde',
   'rules_studio.field_notification_delay_days': 'Meldefrist (Tage)',
-  'rules_studio.desktop_hint': 'Dieses Tool ist fuer die Desktop-Nutzung optimiert. Fuer das beste Erlebnis verwenden Sie einen groesseren Bildschirm.',
+  'rules_studio.desktop_hint':
+    'Dieses Tool ist fuer die Desktop-Nutzung optimiert. Fuer das beste Erlebnis verwenden Sie einen groesseren Bildschirm.',
 
   // Portfolio
   'nav.portfolio': 'Portfolio',
@@ -1990,6 +1991,9 @@ export const de: TranslationMap = {
   'eco_clause.context_renovation': 'Renovation',
   'eco_clause.context_demolition': 'Abbruch',
   'eco_clause.detected_pollutants': 'Erkannte Schadstoffe',
+  'eco_clause.contractor_preview_title': 'Umwelt-Sicherheitsklauseln',
+  'eco_clause.contractor_notice':
+    'Die folgenden Umweltklauseln gelten fuer diesen Eingriff. Mit der Bestaetigung erkennen Sie die Kenntnis dieser Anforderungen an.',
   'disclaimer.readiness_wallet': 'Uebersicht der regulatorischen Konformitaet. Keine Rechtsberatung.',
 
   // Trust Score
@@ -2239,6 +2243,16 @@ export const de: TranslationMap = {
   'passport.copied': 'Kopiert!',
   'passport.expand_details': 'Details anzeigen',
   'passport.collapse_details': 'Einklappen',
+  'passport.pollutant_coverage': 'Schadstoffabdeckung',
+  'passport.pollutants_evaluated': 'bewertet',
+  'passport.pollutant_asbestos': 'Asbest',
+  'passport.pollutant_pcb': 'PCB',
+  'passport.pollutant_lead': 'Blei',
+  'passport.pollutant_hap': 'PAK',
+  'passport.pollutant_radon': 'Radon',
+  'passport.pollutant_pfas': 'PFAS',
+  'passport.emerging': 'NEU',
+  'passport.pfas_note': 'PFAS: aufkommende Regulierung — Bewertung empfohlen',
 
   // Shared Links
   'shared_links.manage_links': 'Geteilte Links',

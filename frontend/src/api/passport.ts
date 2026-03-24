@@ -24,6 +24,14 @@ export interface PassportSummary {
     latest_diagnostic_date: string | null;
     latest_document_date: string | null;
   };
+  pollutant_coverage: {
+    total_pollutants: number;
+    covered_count: number;
+    missing_count: number;
+    covered: Record<string, number>;
+    missing: string[];
+    coverage_ratio: number;
+  };
   passport_grade: string;
   assessed_at: string;
 }

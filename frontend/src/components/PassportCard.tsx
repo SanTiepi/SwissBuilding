@@ -23,6 +23,8 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
 const AUDIENCE_TYPES = ['buyer', 'insurer', 'lender', 'authority', 'contractor', 'tenant'] as const;
@@ -285,6 +287,61 @@ function ExpandableSection({
   );
 }
 
+/* ---------- Pollutant Coverage ---------- */
+const EMERGING_POLLUTANTS = new Set(['pfas']);
+
+function PollutantCoverageSection({ pollutantCoverage }: { pollutantCoverage: PassportSummary['pollutant_coverage'] }) {
+  const { t } = useTranslation();
+  const coveredSet = new Set(Object.keys(pollutantCoverage.covered));
+  // Build ordered list: all 6 pollutants (covered first, then missing)
+  const allPollutants = [...Object.keys(pollutantCoverage.covered), ...pollutantCoverage.missing];
+
+  return (
+    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-slate-500">
+          {t('passport.pollutant_coverage') || 'Pollutant Coverage'}
+        </span>
+        <span className="text-xs font-medium tabular-nums text-gray-600 dark:text-slate-300">
+          {pollutantCoverage.covered_count}/{pollutantCoverage.total_pollutants}{' '}
+          {t('passport.pollutants_evaluated') || 'evaluated'}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {allPollutants.map((pollutant) => {
+          const isCovered = coveredSet.has(pollutant);
+          const isEmerging = EMERGING_POLLUTANTS.has(pollutant);
+          return (
+            <div
+              key={pollutant}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border',
+                isCovered
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                  : isEmerging
+                    ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300'
+                    : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300',
+              )}
+              data-testid={`pollutant-${pollutant}`}
+            >
+              {isCovered ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+              <span className="uppercase">{t(`passport.pollutant_${pollutant}`) || pollutant}</span>
+              {!isCovered && isEmerging && (
+                <span className="text-[9px] font-bold uppercase ml-0.5">{t('passport.emerging') || 'NEW'}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {pollutantCoverage.missing_count > 0 && pollutantCoverage.missing.some((p) => EMERGING_POLLUTANTS.has(p)) && (
+        <p className="mt-2 text-[10px] text-amber-600 dark:text-amber-400">
+          {t('passport.pfas_note') || 'PFAS: emerging regulation — evaluation recommended'}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Main PassportCard ---------- */
 export function PassportCard({ buildingId }: { buildingId: string }) {
   const { t } = useTranslation();
@@ -305,7 +362,15 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
 
   const renderContent = () => {
     if (!passport) return null;
-    const { knowledge_state, completeness, blind_spots, contradictions, evidence_coverage, passport_grade } = passport;
+    const {
+      knowledge_state,
+      completeness,
+      blind_spots,
+      contradictions,
+      evidence_coverage,
+      pollutant_coverage,
+      passport_grade,
+    } = passport;
 
     const trustPct = Math.round(knowledge_state.overall_trust * 100);
     const completenessPct = Math.round(completeness.overall_score * 100);
@@ -550,6 +615,9 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
             </div>
           </ExpandableSection>
         </div>
+
+        {/* Pollutant coverage */}
+        {pollutant_coverage && <PollutantCoverageSection pollutantCoverage={pollutant_coverage} />}
 
         {/* Share modal */}
         {showShareModal && <SharePassportModal buildingId={buildingId} onClose={() => setShowShareModal(false)} />}

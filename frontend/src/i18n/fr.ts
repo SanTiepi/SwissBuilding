@@ -1600,7 +1600,8 @@ export const fr: TranslationMap = {
   'rules_studio.field_notification_required': 'Notification requise',
   'rules_studio.field_notification_authority': 'Autorite de notification',
   'rules_studio.field_notification_delay_days': 'Delai de notification (jours)',
-  'rules_studio.desktop_hint': 'Cet outil est optimise pour un usage sur ordinateur. Pour une meilleure experience, utilisez un ecran plus grand.',
+  'rules_studio.desktop_hint':
+    'Cet outil est optimise pour un usage sur ordinateur. Pour une meilleure experience, utilisez un ecran plus grand.',
 
   // Portfolio
   'nav.portfolio': 'Portfolio',
@@ -1991,6 +1992,9 @@ export const fr: TranslationMap = {
   'eco_clause.context_renovation': 'Renovation',
   'eco_clause.context_demolition': 'Demolition',
   'eco_clause.detected_pollutants': 'Polluants detectes',
+  'eco_clause.contractor_preview_title': 'Clauses de securite environnementale',
+  'eco_clause.contractor_notice':
+    "Les clauses environnementales suivantes s'appliquent a cette intervention. En accusant reception, vous confirmez avoir pris connaissance de ces exigences.",
   'disclaimer.readiness_wallet': "Vue d'ensemble de la conformite reglementaire. Ne constitue pas un avis juridique.",
 
   // Trust Score
@@ -2240,6 +2244,16 @@ export const fr: TranslationMap = {
   'passport.copied': 'Copie !',
   'passport.expand_details': 'Voir les details',
   'passport.collapse_details': 'Replier',
+  'passport.pollutant_coverage': 'Couverture polluants',
+  'passport.pollutants_evaluated': 'evalues',
+  'passport.pollutant_asbestos': 'Amiante',
+  'passport.pollutant_pcb': 'PCB',
+  'passport.pollutant_lead': 'Plomb',
+  'passport.pollutant_hap': 'HAP',
+  'passport.pollutant_radon': 'Radon',
+  'passport.pollutant_pfas': 'PFAS',
+  'passport.emerging': 'NOUVEAU',
+  'passport.pfas_note': 'PFAS : reglementation emergente — evaluation recommandee',
 
   // Shared Links
   'shared_links.manage_links': 'Liens partages',

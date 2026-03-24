@@ -1988,6 +1988,9 @@ export const en: TranslationMap = {
   'eco_clause.context_renovation': 'Renovation',
   'eco_clause.context_demolition': 'Demolition',
   'eco_clause.detected_pollutants': 'Detected pollutants',
+  'eco_clause.contractor_preview_title': 'Environmental Safety Clauses',
+  'eco_clause.contractor_notice':
+    'The following environmental clauses apply to this intervention. By acknowledging, you confirm awareness of these requirements.',
   'disclaimer.readiness_wallet': 'Regulatory readiness overview. Not legal advice.',
 
   // Trust Score
@@ -2233,6 +2236,16 @@ export const en: TranslationMap = {
   'passport.copied': 'Copied!',
   'passport.expand_details': 'Show details',
   'passport.collapse_details': 'Collapse',
+  'passport.pollutant_coverage': 'Pollutant Coverage',
+  'passport.pollutants_evaluated': 'evaluated',
+  'passport.pollutant_asbestos': 'Asbestos',
+  'passport.pollutant_pcb': 'PCB',
+  'passport.pollutant_lead': 'Lead',
+  'passport.pollutant_hap': 'PAH',
+  'passport.pollutant_radon': 'Radon',
+  'passport.pollutant_pfas': 'PFAS',
+  'passport.emerging': 'NEW',
+  'passport.pfas_note': 'PFAS: emerging regulation — evaluation recommended',
 
   // Shared Links
   'shared_links.manage_links': 'Shared Links',

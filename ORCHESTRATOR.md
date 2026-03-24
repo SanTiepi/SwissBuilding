@@ -304,7 +304,7 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `30` (`W61-W66` + `W68-W91` reported)
+- waves_completed: `31` (`W61-W66` + `W68-W92` reported)
 - rework_count: `0`
 - blocked_count: `0`
 - last_updated: `2026-03-24`
@@ -1506,16 +1506,16 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | Eco clause UI card in ReadinessWallet | Surface eco clause recommendations alongside prework triggers | W88-A eco clause integration ✅ |
-| 2 | Building passport PFAS section | Include PFAS in passport summary alongside existing 5 pollutants | W88-B PFAS backend ✅ |
-| 3 | BatiConnect seed enrichment (lease/contract/ownership demo data) | Seed depth for BC vertical slices still thin | BC commit ✅ |
-| 4 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W91 surfaces | W91 ✅ |
-| 5 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
-| 6 | PFAS compliance engine integration test | Verify PFAS thresholds + waste classification end-to-end | W88-B PFAS backend ✅ |
-| 7 | Eco clause in transfer package e2e test | Validate eco clauses appear in transfer package output | W88-A eco clause integration ✅ |
-| 8 | Material recommendation API integration test | Test GET endpoint returns correct recommendations for seeded building | W91-C wiring ✅ |
-| 9 | Portfolio-level PFAS exposure summary | Aggregate PFAS status across portfolio buildings | W88-B + portfolio services ✅ |
-| 10 | Contractor pack eco clause rendering preview | Show eco clause preview in contractor acknowledgment UI | W88-A + contractor flow ✅ |
+| 1 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W92 surfaces | W92 ✅ |
+| 2 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction | service-consumer-map ✅ |
+| 3 | Portfolio-level PFAS exposure summary | Aggregate PFAS status across portfolio buildings | W88-B + W92-B passport PFAS ✅ |
+| 4 | Contractor pack eco clause rendering preview | Show eco clause preview in contractor acknowledgment UI | W88-A + W92-A eco clause UI ✅ |
+| 5 | Eco clause in transfer package e2e test | Validate eco clauses appear in transfer package output | W88-A eco clause integration ✅ |
+| 6 | Material recommendation API integration test | Test GET endpoint returns correct recommendations for seeded building | W91-C wiring ✅ |
+| 7 | PFAS compliance engine integration test | Verify PFAS thresholds + waste classification end-to-end | W88-B PFAS backend ✅ |
+| 8 | Building passport UI PFAS coverage display | Show pollutant_coverage in passport frontend page | W92-B passport PFAS ✅ |
+| 9 | Lease/Contract/Ownership seed verification test | Verify seed_bc_ops data loads correctly | W92-C seed ✅ |
+| 10 | Readiness wallet integration test (eco clause + prework triggers) | Validate full readiness surface with eco clauses | W92-A eco clause UI ✅ |
 
 ## Next Queue (11+)
 
@@ -1528,6 +1528,19 @@ Overflow rule:
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W92
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 1 | Eco clause UI in ReadinessWallet (W92-A) | ✅ EcoClauseCard with context toggle, pollutant badges, collapsible clauses, legal refs. GET /eco-clauses API. i18n 4 langs. 6+9 tests |
+| 2 | Building passport PFAS (W92-B) | ✅ pollutant_coverage section via ALL_POLLUTANTS (6 pollutants). 4 new tests (12 total) |
+| 3 | BatiConnect seed enrichment (W92-C) | ✅ seed_bc_ops.py: 5 contacts, 3 ownership, 5 leases, 6 events, 3 contracts, 4 party roles. UUID5 idempotent |
+
+W92 debrief:
+- clear: mixed full-stack + backend + seed; supervisor fixed router import order; 18th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W91
 

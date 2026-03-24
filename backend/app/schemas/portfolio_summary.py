@@ -70,6 +70,19 @@ class PortfolioAlertSummary(BaseModel):
     buildings_with_stale_diagnostics: int = 0
 
 
+class PortfolioPollutantExposure(BaseModel):
+    """Per-pollutant exposure summary across the portfolio."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    pollutant: str
+    buildings_assessed: int = 0
+    buildings_missing: int = 0
+    total_buildings: int = 0
+    coverage_ratio: float = 0.0
+    readiness_blockers: int = 0
+
+
 class PortfolioSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -80,6 +93,7 @@ class PortfolioSummary(BaseModel):
     grades: PortfolioGradeDistribution
     actions: PortfolioActionSummary
     alerts: PortfolioAlertSummary
+    pollutant_exposure: list[PortfolioPollutantExposure] = []
     generated_at: datetime
     organization_id: UUID | None = None
 

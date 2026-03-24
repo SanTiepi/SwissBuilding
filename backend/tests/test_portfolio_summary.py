@@ -589,6 +589,119 @@ async def test_compliance_overview(db_session: AsyncSession):
 # ---------------------------------------------------------------------------
 
 
+async def test_pollutant_exposure_empty(db_session: AsyncSession):
+    """Empty portfolio returns pollutant exposure with zero counts."""
+    summary = await get_portfolio_summary(db_session)
+    assert len(summary.pollutant_exposure) == 6  # ALL_POLLUTANTS has 6 entries
+    for pe in summary.pollutant_exposure:
+        assert pe.total_buildings == 0
+        assert pe.buildings_assessed == 0
+        assert pe.buildings_missing == 0
+        assert pe.coverage_ratio == 0.0
+        assert pe.readiness_blockers == 0
+
+
+async def test_pollutant_exposure_pfas_assessed(db_session: AsyncSession):
+    """Buildings with PFAS diagnostics are counted as assessed."""
+    user = _make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    b1 = _make_building(user.id)
+    b2 = _make_building(user.id)
+    b3 = _make_building(user.id)
+    db_session.add_all([b1, b2, b3])
+    await db_session.flush()
+
+    # b1 has pfas diagnostic, b2 has asbestos, b3 has nothing
+    db_session.add(Diagnostic(id=uuid.uuid4(), building_id=b1.id, diagnostic_type="pfas"))
+    db_session.add(Diagnostic(id=uuid.uuid4(), building_id=b2.id, diagnostic_type="asbestos"))
+    await db_session.commit()
+
+    summary = await get_portfolio_summary(db_session)
+    pfas_exp = next(pe for pe in summary.pollutant_exposure if pe.pollutant == "pfas")
+    assert pfas_exp.total_buildings == 3
+    assert pfas_exp.buildings_assessed == 1
+    assert pfas_exp.buildings_missing == 2
+    assert pfas_exp.coverage_ratio == round(1 / 3, 4)
+    assert pfas_exp.readiness_blockers == 0
+
+    asbestos_exp = next(pe for pe in summary.pollutant_exposure if pe.pollutant == "asbestos")
+    assert asbestos_exp.buildings_assessed == 1
+    assert asbestos_exp.buildings_missing == 2
+
+
+async def test_pollutant_exposure_pfas_readiness_blockers(db_session: AsyncSession):
+    """PFAS-related readiness blockers are counted."""
+    user = _make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    b1 = _make_building(user.id)
+    db_session.add(b1)
+    await db_session.flush()
+
+    # Blocker mentioning pfas in title
+    db_session.add(
+        UnknownIssue(
+            id=uuid.uuid4(),
+            building_id=b1.id,
+            unknown_type="missing_data",
+            title="Missing pfas assessment for building",
+            status="open",
+            blocks_readiness=True,
+        )
+    )
+    # Blocker mentioning pfas in unknown_type
+    db_session.add(
+        UnknownIssue(
+            id=uuid.uuid4(),
+            building_id=b1.id,
+            unknown_type="pfas_gap",
+            title="Pollutant gap detected",
+            status="open",
+            blocks_readiness=True,
+        )
+    )
+    # Non-blocking pfas issue (should not count)
+    db_session.add(
+        UnknownIssue(
+            id=uuid.uuid4(),
+            building_id=b1.id,
+            unknown_type="missing_data",
+            title="pfas note",
+            status="open",
+            blocks_readiness=False,
+        )
+    )
+    await db_session.commit()
+
+    summary = await get_portfolio_summary(db_session)
+    pfas_exp = next(pe for pe in summary.pollutant_exposure if pe.pollutant == "pfas")
+    assert pfas_exp.readiness_blockers == 2
+
+
+async def test_pollutant_exposure_multiple_diags_same_building(db_session: AsyncSession):
+    """Multiple PFAS diagnostics on same building count as 1 assessed building."""
+    user = _make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    b1 = _make_building(user.id)
+    db_session.add(b1)
+    await db_session.flush()
+
+    db_session.add(Diagnostic(id=uuid.uuid4(), building_id=b1.id, diagnostic_type="pfas"))
+    db_session.add(Diagnostic(id=uuid.uuid4(), building_id=b1.id, diagnostic_type="pfas"))
+    await db_session.commit()
+
+    summary = await get_portfolio_summary(db_session)
+    pfas_exp = next(pe for pe in summary.pollutant_exposure if pe.pollutant == "pfas")
+    assert pfas_exp.buildings_assessed == 1
+    assert pfas_exp.buildings_missing == 0
+    assert pfas_exp.coverage_ratio == 1.0
+
+
 async def test_api_portfolio_summary(client, admin_user, auth_headers, db_session):
     """GET /api/portfolio/summary returns 200."""
     resp = await client.get("/api/v1/portfolio/summary", headers=auth_headers)
@@ -601,6 +714,11 @@ async def test_api_portfolio_summary(client, admin_user, auth_headers, db_sessio
     assert "grades" in data
     assert "actions" in data
     assert "alerts" in data
+    assert "pollutant_exposure" in data
+    assert isinstance(data["pollutant_exposure"], list)
+    assert len(data["pollutant_exposure"]) == 6
+    pollutant_names = [pe["pollutant"] for pe in data["pollutant_exposure"]]
+    assert "pfas" in pollutant_names
     assert "generated_at" in data
 
 
