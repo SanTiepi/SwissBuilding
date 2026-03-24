@@ -44,7 +44,7 @@ const PASSPORT_GRADE_COLORS: Record<string, string> = {
 };
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: buildingsData, isLoading: buildingsLoading, isError: buildingsError } = useBuildings();
@@ -81,6 +81,142 @@ export default function Dashboard() {
   const diagnostics = diagnosticsData ?? [];
 
   const isLoading = buildingsLoading || diagnosticsLoading;
+
+  const clientFitCopy = useMemo(() => {
+    if (locale === 'fr') {
+      return {
+        badge: 'Positionnement client',
+        title: 'Safe-to-start dossier pour gerances multi-batiments',
+        description:
+          'Pertinent quand des travaux approchent et que le dossier pre-travaux reste disperse entre rapports, annexes, plans et ERP.',
+        tags: ['VD/GE first', 'amiante first', 'overlay ERP'],
+        cards: [
+          {
+            label: 'Acheteur prioritaire',
+            value: 'Gerances immobilieres multi-batiments en VD/GE',
+          },
+          {
+            label: 'Douleur critique',
+            value: 'Arrets, rework documentaire et pieces manquantes avant chantier',
+          },
+          {
+            label: 'Posture produit',
+            value: 'Couche de preuve et de readiness, sans remplacement ERP',
+          },
+        ],
+        metrics: [
+          { value: '>=95%', label: 'completude dossier cible' },
+          { value: '<=2h', label: 'latence pack pret a partager' },
+          { value: '100%', label: 'preuves critiques tracables' },
+        ],
+        primaryCta: 'Voir la readiness',
+        secondaryCta: 'Voir le portefeuille',
+        tertiaryCta: 'Explorer les immeubles',
+        boundary:
+          'Pas de garantie juridique: SwissBuilding rend la preuve, les manques et la preparation visibles avant travaux.',
+      };
+    }
+
+    if (locale === 'de') {
+      return {
+        badge: 'Kundennutzen',
+        title: 'Safe-to-start dossier fuer Multi-Building Property Manager',
+        description:
+          'Relevant wenn Arbeiten anstehen und der Pre-Work-Ordner zwischen Berichten, Laboranhaengen, Plaenen und ERP zerstreut bleibt.',
+        tags: ['VD/GE first', 'asbestos first', 'ERP overlay'],
+        cards: [
+          {
+            label: 'Prioritaerer Kaeufer',
+            value: 'Multi-Building Property Manager in VD/GE',
+          },
+          {
+            label: 'Kritischer Schmerz',
+            value: 'Stop-work, Dokumenten-Rework und fehlende Nachweise vor Baubeginn',
+          },
+          {
+            label: 'Produktrolle',
+            value: 'Evidence- und Readiness-Layer, kein ERP-Ersatz',
+          },
+        ],
+        metrics: [
+          { value: '>=95%', label: 'Ziel fuer Dossier-Vollstaendigkeit' },
+          { value: '<=2h', label: 'Zeit bis zum teilbaren Pack' },
+          { value: '100%', label: 'kritische Nachweise rueckverfolgbar' },
+        ],
+        primaryCta: 'Readiness ansehen',
+        secondaryCta: 'Portfolio ansehen',
+        tertiaryCta: 'Gebaeude oeffnen',
+        boundary:
+          'Keine Rechtsgarantie: SwissBuilding macht Nachweise, Luecken und Bereitschaft vor Arbeitsbeginn sichtbar.',
+      };
+    }
+
+    if (locale === 'it') {
+      return {
+        badge: 'Rilevanza cliente',
+        title: 'Safe-to-start dossier per gestori immobiliari multi-edificio',
+        description:
+          'Rilevante quando i lavori si avvicinano e il dossier pre-lavori resta disperso tra report, allegati di laboratorio, planimetrie ed ERP.',
+        tags: ['VD/GE first', 'amianto first', 'overlay ERP'],
+        cards: [
+          {
+            label: 'Buyer prioritario',
+            value: 'Gestori immobiliari multi-edificio in VD/GE',
+          },
+          {
+            label: 'Dolore critico',
+            value: 'Stop-work, rework documentale e prove mancanti prima del cantiere',
+          },
+          {
+            label: 'Ruolo prodotto',
+            value: 'Layer di evidenza e readiness, senza sostituire l ERP',
+          },
+        ],
+        metrics: [
+          { value: '>=95%', label: 'completezza dossier obiettivo' },
+          { value: '<=2h', label: 'tempo per pack condivisibile' },
+          { value: '100%', label: 'prove critiche tracciabili' },
+        ],
+        primaryCta: 'Vedi readiness',
+        secondaryCta: 'Vedi portafoglio',
+        tertiaryCta: 'Apri edifici',
+        boundary:
+          'Nessuna garanzia legale: SwissBuilding rende visibili prove, mancanze e preparazione prima dei lavori.',
+      };
+    }
+
+    return {
+      badge: 'Client Fit',
+      title: 'Safe-to-start dossier for multi-building property managers',
+      description:
+        'Most relevant when works are approaching and the pre-work dossier is still scattered across reports, lab annexes, plans, and ERP archives.',
+      tags: ['VD/GE first', 'asbestos first', 'ERP overlay'],
+      cards: [
+        {
+          label: 'Priority buyer',
+          value: 'Multi-building property managers in VD/GE',
+        },
+        {
+          label: 'Critical pain',
+          value: 'Stop-work risk, documentary rework, and missing evidence before works start',
+        },
+        {
+          label: 'Product posture',
+          value: 'Evidence and readiness layer, not an ERP replacement',
+        },
+      ],
+      metrics: [
+        { value: '>=95%', label: 'target dossier completeness' },
+        { value: '<=2h', label: 'shareable pack latency target' },
+        { value: '100%', label: 'critical evidence traceability' },
+      ],
+      primaryCta: 'Open readiness',
+      secondaryCta: 'Open portfolio',
+      tertiaryCta: 'Browse buildings',
+      boundary:
+        'No legal guarantee claim: SwissBuilding makes evidence, gaps, and readiness visible before works start.',
+    };
+  }, [locale]);
 
   // KPIs — primary row
   const totalBuildings = Array.isArray(buildings) ? buildings.length : 0;
@@ -304,6 +440,91 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      <section
+        data-testid="client-fit-banner"
+        className="relative overflow-hidden rounded-2xl border border-red-200/70 dark:border-red-900/50 bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-red-950/30 dark:via-slate-900 dark:to-orange-950/20 p-6 shadow-sm"
+      >
+        <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-red-200/60 blur-3xl dark:bg-red-800/20" />
+        <div className="pointer-events-none absolute -left-16 bottom-0 h-36 w-36 rounded-full bg-orange-200/50 blur-3xl dark:bg-orange-700/10" />
+
+        <div className="relative grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
+          <div className="space-y-4">
+            <span className="inline-flex items-center rounded-full border border-red-300/80 dark:border-red-800 bg-white/80 dark:bg-slate-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">
+              {clientFitCopy.badge}
+            </span>
+            <div className="space-y-3">
+              <h2 className="max-w-2xl text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                {clientFitCopy.title}
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-slate-300">
+                {clientFitCopy.description}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {clientFitCopy.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-white/85 dark:bg-slate-900/80 px-3 py-1 text-xs font-medium text-gray-700 dark:text-slate-200 ring-1 ring-gray-200 dark:ring-slate-700"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => navigate('/readiness-wallet')}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              >
+                {clientFitCopy.primaryCta}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => navigate('/portfolio')}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-100 transition-colors hover:bg-white dark:hover:bg-slate-800"
+              >
+                {clientFitCopy.secondaryCta}
+              </button>
+              <button
+                onClick={() => navigate('/buildings')}
+                className="inline-flex items-center gap-2 rounded-lg border border-transparent px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-white/70 dark:hover:bg-slate-800/70"
+              >
+                {clientFitCopy.tertiaryCta}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            {clientFitCopy.cards.map((card) => (
+              <div
+                key={card.label}
+                className="rounded-xl border border-white/80 dark:border-slate-800 bg-white/85 dark:bg-slate-900/85 p-4 shadow-sm backdrop-blur"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+                  {card.label}
+                </p>
+                <p className="mt-2 text-sm font-medium leading-6 text-gray-900 dark:text-white">{card.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {clientFitCopy.metrics.map((metric) => (
+            <div
+              key={metric.label}
+              className="rounded-xl border border-red-100 dark:border-red-900/40 bg-white/75 dark:bg-slate-900/75 p-4"
+            >
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{metric.value}</p>
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-gray-500 dark:text-slate-400">
+                {metric.label}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p className="relative mt-4 text-xs leading-5 text-gray-500 dark:text-slate-400">{clientFitCopy.boundary}</p>
+      </section>
 
       {/* Primary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -543,20 +764,20 @@ export default function Dashboard() {
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3" data-testid="grade-distribution-grid">
             {gradeDistribution.map(({ grade, count }) => {
               const maxCount = Math.max(...gradeDistribution.map((g) => g.count), 1);
               const heightPercent = Math.max((count / maxCount) * 100, 8);
               return (
-                <div key={grade} className="flex flex-col items-center gap-2">
-                  <div className="w-full h-24 flex items-end justify-center">
+                <div key={grade} data-testid={`grade-bar-${grade}`} className="flex flex-col items-center gap-2">
+                  <div className="w-full h-16 sm:h-24 flex items-end justify-center">
                     <div
                       className={cn('w-full max-w-[40px] rounded-t-md transition-all', PASSPORT_GRADE_COLORS[grade])}
                       style={{ height: `${heightPercent}%` }}
                     />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">{grade}</p>
+                    <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">{grade}</p>
                     <p className="text-xs text-gray-500 dark:text-slate-400">{count}</p>
                   </div>
                 </div>

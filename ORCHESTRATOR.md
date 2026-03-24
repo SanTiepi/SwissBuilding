@@ -304,7 +304,7 @@ After each completed wave:
 - apply debrief learnings directly to the next queued wave in the same supervision loop
 
 Execution counters (rolling, since protocol start):
-- waves_completed: `27` (`W61-W66` + `W68-W88` reported)
+- waves_completed: `28` (`W61-W66` + `W68-W89` reported)
 - rework_count: `0`
 - blocked_count: `0`
 - last_updated: `2026-03-24`
@@ -1506,16 +1506,16 @@ Auto-continuity rule: when `Next 10` thins out, auto-promote from `Next ready pr
 
 | Rank | Action | Why now | Depends on |
 |------|--------|---------|------------|
-| 1 | PFAS readiness wallet UI | Surface PFAS blockers/conditions in operator wallet | PFAS readiness backend ✅ (W88-B) |
-| 2 | Material recommendation shelf UI | Buyer-visible recommendation quality layer in simulator/readiness | material recommendation backend ✅ (W88-C) |
-| 3 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87/W88 surfaces | W88 ✅ |
-| 4 | Header control-density mobile polish (audit H-1) | Prevent crowding/control collision at 375px | mobile audit report ✅ |
-| 5 | Dashboard grade chart responsive fix (audit D-1) | Improve readability of grade distribution bars on mobile widths | mobile audit report ✅ |
-| 6 | Admin jurisdictions packs-table mobile fallback (audit AJ-1) | Reduce horizontal-scroll friction on admin packs table | mobile audit report ✅ |
-| 7 | Admin users/audit search-width mobile fixes (audit AU-1/AAL-1) | Remove residual overflow risk in admin filter bars | mobile audit report ✅ |
-| 8 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
-| 9 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
-| 10 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
+| 1 | Dashboard grade chart responsive fix (audit D-1) | Improve readability of grade distribution bars on mobile widths | mobile audit report ✅ |
+| 2 | Admin jurisdictions packs-table mobile fallback (audit AJ-1) | Reduce horizontal-scroll friction on admin packs table | mobile audit report ✅ |
+| 3 | Admin users/audit search-width mobile fixes (audit AU-1/AAL-1) | Remove residual overflow risk in admin filter bars | mobile audit report ✅ |
+| 4 | Intervention simulator mobile ergonomics fix (audit IS-1) | Improve form usability on mobile breakpoints | mobile audit report ✅ |
+| 5 | Rules pack studio desktop-scope disclosure polish (audit RPS-1) | Clarify desktop-first usage and avoid misleading mobile expectations | mobile audit report ✅ |
+| 6 | Safe-to-start gate proof refresh (real e2e + bundle) | External milestone proof must include W87-W89 surfaces | W89 ✅ |
+| 7 | Duplicate-service family consolidation brief | W81 audit found 14 duplicate families; prioritize debt reduction before more backend breadth | service-consumer-map + pruning candidates ✅ |
+| 8 | MaterialRecommendationsCard page wiring | Wire card into BuildingInterventions or OverviewTab with API endpoint | W89-B component ✅ |
+| 9 | BatiConnect seed enrichment (lease/contract/ownership demo data) | Seed depth for BC vertical slices still thin | BC commit ✅ |
+| 10 | PreworkTriggerCard integration test (real e2e) | Validate prework trigger flow end-to-end with seeded data | W87 trigger + W88 PFAS ✅ |
 
 ## Next Queue (11+)
 
@@ -1528,6 +1528,19 @@ Overflow rule:
 - pull ranks `11+` only when upstream ranks are accepted or blocked
 
 ## Recent Wave History
+
+### Completed in W89
+
+| Former Rank | Action | Result |
+|-------------|--------|--------|
+| 1 | PFAS readiness wallet UI (W89-A) | ✅ PFAS in PollutantType, POLLUTANT_COLORS, i18n (4 langs), ReadinessWallet check rendering, PreworkTriggerCard pfas_check icon. 6+13 tests |
+| 2 | Material recommendation shelf UI (W89-B) | ✅ New MaterialRecommendationsCard: accordion, risk badges, evidence requirements, dark mode, empty state. Props-only standalone. 11 tests |
+| 4 | Header mobile polish (W89-C) | ✅ Padding/gap reduction <640px, dark mode toggle in user dropdown on mobile, language icon-only, 44px touch targets. 15 tests |
+
+W89 debrief:
+- clear: all 3 frontend scopes disjoint; 32 tests validated; tsc clean; 15th consecutive zero-fix wave
+- fuzzy: nothing
+- missing: nothing
 
 ### Completed in W88
 

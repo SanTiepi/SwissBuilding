@@ -319,7 +319,7 @@ export default function AdminAuditLogs() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('audit.title')}</h1>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
@@ -472,9 +472,9 @@ export default function AdminAuditLogs() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm space-y-3">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-3 sm:p-4 shadow-sm space-y-2 sm:space-y-3 overflow-hidden">
         {/* Row 1: dropdowns */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
           <select
             value={userFilter}
             onChange={(e) => {
@@ -482,7 +482,7 @@ export default function AdminAuditLogs() {
               setPage(1);
             }}
             aria-label={t('audit.filter_user')}
-            className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
+            className="w-full sm:w-auto sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
           >
             <option value="">{t('audit.all_users')}</option>
             {usersList.map((u: User) => (
@@ -499,7 +499,7 @@ export default function AdminAuditLogs() {
               setPage(1);
             }}
             aria-label={t('audit.filter_entity_type')}
-            className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
+            className="w-full sm:w-auto sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
           >
             <option value="">{t('audit.all_entity_types')}</option>
             {ENTITY_TYPES.map((et) => (
@@ -516,7 +516,7 @@ export default function AdminAuditLogs() {
               setPage(1);
             }}
             aria-label={t('audit.filter_action')}
-            className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
+            className="w-full sm:w-auto sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
           >
             <option value="">{t('audit.all_actions')}</option>
             {ACTIONS.map((a) => (
@@ -538,8 +538,8 @@ export default function AdminAuditLogs() {
         </div>
 
         {/* Row 2: date presets + date inputs + search */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700 rounded-lg p-0.5">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700 rounded-lg p-0.5 overflow-x-auto">
             {(['today', '7days', '30days', 'custom'] as DatePreset[]).map((preset) => (
               <button
                 key={preset}
@@ -581,7 +581,7 @@ export default function AdminAuditLogs() {
             </>
           )}
 
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" />
             <input
               type="text"

@@ -266,6 +266,144 @@ function PackRow({ pack }: { pack: RegulatoryPack }) {
   );
 }
 
+function MobilePackCard({ pack }: { pack: RegulatoryPack }) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const colorClass = pollutantColors[pack.pollutant_type] || 'bg-gray-100 text-gray-700';
+  const borderClass = pollutantBorderColors[pack.pollutant_type] || 'border-l-gray-400';
+
+  return (
+    <div
+      className={cn('border-l-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden', borderClass)}
+      data-testid="pack-mobile-card"
+    >
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between"
+      >
+        <span className={cn('px-2 py-0.5 text-xs font-medium rounded-full', colorClass)}>
+          {t(`pollutant.${pack.pollutant_type}`) || pack.pollutant_type}
+        </span>
+        {expanded ? (
+          <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+        ) : (
+          <ChevronRight className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+        )}
+      </button>
+      <div className="divide-y divide-gray-100 dark:divide-slate-700">
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('regulatory_pack.threshold') || 'Threshold'}
+          </span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">
+            {pack.threshold_value != null ? pack.threshold_value : '-'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('regulatory_pack.unit') || 'Unit'}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">{pack.threshold_unit || '-'}</span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('regulatory_pack.action') || 'Action'}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">
+            {pack.threshold_action ? t(`regulatory_pack.action.${pack.threshold_action}`) || pack.threshold_action : '-'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('regulatory_pack.risk_years') || 'Risk Years'}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">
+            {pack.risk_year_start || pack.risk_year_end
+              ? `${pack.risk_year_start ?? '...'} - ${pack.risk_year_end ?? '...'}`
+              : '-'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('regulatory_pack.legal_reference') || 'Legal Ref'}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">
+            {pack.legal_reference ? (
+              pack.legal_url ? (
+                <a
+                  href={pack.legal_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {pack.legal_reference}
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              ) : (
+                pack.legal_reference
+              )
+            ) : (
+              '-'
+            )}
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            {t('regulatory_pack.notification') || 'Notification'}
+          </span>
+          <span className="text-sm">
+            {pack.notification_required ? (
+              <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <Bell className="w-3.5 h-3.5" />
+                <span className="text-xs">
+                  {pack.notification_authority || ''}{' '}
+                  {pack.notification_delay_days != null ? `(${pack.notification_delay_days}j)` : ''}
+                </span>
+              </span>
+            ) : (
+              <span className="text-gray-400 dark:text-slate-500 text-xs">-</span>
+            )}
+          </span>
+        </div>
+      </div>
+      {expanded && (
+        <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700 space-y-3 text-sm">
+          <p className="font-medium text-gray-700 dark:text-slate-300">
+            {t('regulatory_pack.version') || 'Version'}: {pack.version || '-'}
+          </p>
+          {pack.base_probability != null && (
+            <p className="text-gray-500 dark:text-slate-400">
+              {t('regulatory_pack.base_probability') || 'Base probability'}:{' '}
+              {(pack.base_probability * 100).toFixed(0)}%
+            </p>
+          )}
+          {pack.description_fr && <p className="text-gray-500 dark:text-slate-400">{pack.description_fr}</p>}
+          {pack.work_categories_json && (
+            <div>
+              <p className="font-medium text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider mb-1">
+                {t('regulatory_pack.work_categories') || 'Work categories'}
+              </p>
+              <pre className="text-xs bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded p-2 overflow-x-auto">
+                {JSON.stringify(pack.work_categories_json, null, 2)}
+              </pre>
+            </div>
+          )}
+          {pack.waste_classification_json && (
+            <div>
+              <p className="font-medium text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider mb-1">
+                {t('regulatory_pack.waste_classification') || 'Waste classification'}
+              </p>
+              <pre className="text-xs bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded p-2 overflow-x-auto">
+                {JSON.stringify(pack.waste_classification_json, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Auto-dismissing success toast */
 function SuccessBanner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
   useEffect(() => {
@@ -663,40 +801,49 @@ export default function AdminJurisdictions() {
                     </h3>
                   </div>
                   {selectedJurisdiction.regulatory_packs && selectedJurisdiction.regulatory_packs.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/30">
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('pollutant.label') || 'Pollutant'}
-                            </th>
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('regulatory_pack.threshold') || 'Threshold'}
-                            </th>
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('regulatory_pack.unit') || 'Unit'}
-                            </th>
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('regulatory_pack.action') || 'Action'}
-                            </th>
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('regulatory_pack.risk_years') || 'Risk Years'}
-                            </th>
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('regulatory_pack.legal_reference') || 'Legal Ref'}
-                            </th>
-                            <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
-                              {t('regulatory_pack.notification') || 'Notification'}
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                          {selectedJurisdiction.regulatory_packs.map((pack) => (
-                            <PackRow key={pack.id} pack={pack} />
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <>
+                      {/* Desktop table */}
+                      <div className="hidden md:block overflow-x-auto" data-testid="packs-desktop-table">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/30">
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('pollutant.label') || 'Pollutant'}
+                              </th>
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('regulatory_pack.threshold') || 'Threshold'}
+                              </th>
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('regulatory_pack.unit') || 'Unit'}
+                              </th>
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('regulatory_pack.action') || 'Action'}
+                              </th>
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('regulatory_pack.risk_years') || 'Risk Years'}
+                              </th>
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('regulatory_pack.legal_reference') || 'Legal Ref'}
+                              </th>
+                              <th className="text-left px-4 py-2.5 font-medium text-gray-500 dark:text-slate-400">
+                                {t('regulatory_pack.notification') || 'Notification'}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                            {selectedJurisdiction.regulatory_packs.map((pack) => (
+                              <PackRow key={pack.id} pack={pack} />
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      {/* Mobile cards */}
+                      <div className="md:hidden p-3 space-y-3" data-testid="packs-mobile-cards">
+                        {selectedJurisdiction.regulatory_packs.map((pack) => (
+                          <MobilePackCard key={pack.id} pack={pack} />
+                        ))}
+                      </div>
+                    </>
                   ) : (
                     <div className="p-8 text-center">
                       <Scale className="w-10 h-10 text-gray-300 dark:text-slate-600 mx-auto mb-2" />

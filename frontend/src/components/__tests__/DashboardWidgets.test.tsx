@@ -339,6 +339,52 @@ describe('Dashboard Widgets', () => {
       expect(screen.getByText('F')).toBeInTheDocument();
     });
 
+    it('renders grade distribution grid with responsive classes', async () => {
+      const buildings = [
+        createMockBuilding({
+          id: 'b-1',
+          risk_scores: { ...createMockBuilding().risk_scores!, overall_risk_level: 'low' },
+        }),
+      ];
+      mockUseBuildings.mockReturnValue({
+        data: { items: buildings },
+        isLoading: false,
+        isError: false,
+      });
+      renderDashboard();
+      await waitForDashboard();
+
+      const grid = screen.getByTestId('grade-distribution-grid');
+      // Mobile: 3 columns, desktop: 6 columns
+      expect(grid.className).toContain('grid-cols-3');
+      expect(grid.className).toContain('sm:grid-cols-6');
+    });
+
+    it('renders individual grade bars with test ids', async () => {
+      const buildings = [
+        createMockBuilding({
+          id: 'b-1',
+          risk_scores: { ...createMockBuilding().risk_scores!, overall_risk_level: 'low' },
+        }),
+        createMockBuilding({
+          id: 'b-2',
+          risk_scores: { ...createMockBuilding().risk_scores!, overall_risk_level: 'critical' },
+        }),
+      ];
+      mockUseBuildings.mockReturnValue({
+        data: { items: buildings },
+        isLoading: false,
+        isError: false,
+      });
+      renderDashboard();
+      await waitForDashboard();
+
+      // All 6 grades should be rendered
+      for (const grade of ['A', 'B', 'C', 'D', 'E', 'F']) {
+        expect(screen.getByTestId(`grade-bar-${grade}`)).toBeInTheDocument();
+      }
+    });
+
     it('does not render portfolio health when no buildings', async () => {
       mockUseBuildings.mockReturnValue({
         data: { items: [] },
@@ -417,6 +463,20 @@ describe('Dashboard Widgets', () => {
       await waitForDashboard();
 
       expect(screen.getByText('dashboard.welcome')).toBeInTheDocument();
+    });
+
+    it('renders the client-fit banner with positioning copy', async () => {
+      mockUseBuildings.mockReturnValue({
+        data: { items: [] },
+        isLoading: false,
+        isError: false,
+      });
+      renderDashboard();
+      await waitForDashboard();
+
+      expect(screen.getByTestId('client-fit-banner')).toBeInTheDocument();
+      expect(screen.getByText('Positionnement client')).toBeInTheDocument();
+      expect(screen.getByText('Safe-to-start dossier pour gerances multi-batiments')).toBeInTheDocument();
     });
   });
 });

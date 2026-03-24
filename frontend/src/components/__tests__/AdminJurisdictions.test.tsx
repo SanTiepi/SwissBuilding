@@ -287,6 +287,55 @@ describe('AdminJurisdictions', () => {
     expect(screen.getByText('jurisdiction.delete')).toBeInTheDocument();
   });
 
+  it('renders mobile pack cards when jurisdiction with packs is selected', async () => {
+    mockList.mockResolvedValue({ items: mockJurisdictions, total: 3, page: 1, size: 100, pages: 1 });
+    mockGet.mockResolvedValue(mockJurisdictions[1]); // Suisse with 1 pack
+
+    render(<AdminJurisdictions />, { wrapper });
+
+    await screen.findByText('European Union');
+
+    // Click Suisse to select it
+    fireEvent.click(screen.getByText('Suisse'));
+    await screen.findByText('Suisse', { selector: 'h2.text-lg' });
+
+    // Mobile cards container should exist
+    const mobileCards = screen.getByTestId('packs-mobile-cards');
+    expect(mobileCards).toBeInTheDocument();
+
+    // Desktop table should also exist (hidden via CSS)
+    const desktopTable = screen.getByTestId('packs-desktop-table');
+    expect(desktopTable).toBeInTheDocument();
+
+    // Individual mobile card should render
+    const cards = screen.getAllByTestId('pack-mobile-card');
+    expect(cards).toHaveLength(1);
+  });
+
+  it('mobile pack card displays key fields', async () => {
+    mockList.mockResolvedValue({ items: mockJurisdictions, total: 3, page: 1, size: 100, pages: 1 });
+    mockGet.mockResolvedValue(mockJurisdictions[1]);
+
+    render(<AdminJurisdictions />, { wrapper });
+
+    await screen.findByText('European Union');
+    fireEvent.click(screen.getByText('Suisse'));
+    await screen.findByText('Suisse', { selector: 'h2.text-lg' });
+
+    const card = screen.getByTestId('pack-mobile-card');
+    // pollutant badge
+    expect(card.textContent).toContain('pollutant.asbestos');
+    // threshold value
+    expect(card.textContent).toContain('1');
+    // unit
+    expect(card.textContent).toContain('percent_weight');
+    // risk years
+    expect(card.textContent).toContain('1904');
+    expect(card.textContent).toContain('1990');
+    // legal reference
+    expect(card.textContent).toContain('OTConst');
+  });
+
   it('renders error state when API fails', async () => {
     mockList.mockRejectedValue(new Error('Network error'));
     render(<AdminJurisdictions />, { wrapper });

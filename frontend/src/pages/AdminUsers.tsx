@@ -576,9 +576,9 @@ export default function AdminUsers() {
       {activeTab === 'users' && (
         <>
           {/* Filters */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative flex-1 min-w-[200px]">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-3 sm:p-4 shadow-sm overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
+              <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" />
                 <input
                   type="text"
@@ -599,7 +599,7 @@ export default function AdminUsers() {
                   setPage(1);
                 }}
                 aria-label={t('admin.filter_role') || 'Filter by role'}
-                className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
+                className="w-full sm:w-auto sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
               >
                 <option value="">{t('admin.all_roles') || 'All roles'}</option>
                 {ROLES.map((r) => (
@@ -615,7 +615,7 @@ export default function AdminUsers() {
                   setPage(1);
                 }}
                 aria-label={t('admin.filter_org') || 'Filter by organization'}
-                className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
+                className="w-full sm:w-auto sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
               >
                 <option value="">{t('admin.all_organizations') || 'All organizations'}</option>
                 <option value="__none__">{t('admin.no_organization') || 'No organization'}</option>
@@ -632,7 +632,7 @@ export default function AdminUsers() {
                   setPage(1);
                 }}
                 aria-label={t('admin.filter_status') || 'Filter by status'}
-                className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
+                className="w-full sm:w-auto sm:flex-none px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white min-w-0"
               >
                 <option value="">{t('admin.all_statuses') || 'All statuses'}</option>
                 <option value="active">{t('admin.active') || 'Active'}</option>
@@ -761,8 +761,8 @@ export default function AdminUsers() {
       {activeTab === 'invitations' && (
         <>
           {/* Invitation filters */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-3 sm:p-4 shadow-sm overflow-hidden">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <select
                 value={invStatusFilter}
                 onChange={(e) => {
