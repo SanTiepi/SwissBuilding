@@ -53,6 +53,7 @@ from app.models.unit import Unit as _Unit  # noqa: E402, F401
 from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
 from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.obligation import Obligation as _Obligation  # noqa: E402, F401
+from app.models.intake_request import IntakeRequest as _IR  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
 

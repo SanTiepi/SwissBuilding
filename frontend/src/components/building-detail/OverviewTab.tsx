@@ -16,6 +16,9 @@ import { TimeMachinePanel } from '@/components/TimeMachinePanel';
 import { PassportCard } from '@/components/PassportCard';
 import { SharedLinksPanel } from '@/components/SharedLinksPanel';
 import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTriggerCard';
+import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
+import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
+import ObligationsCard from '@/components/building-detail/ObligationsCard';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
 import {
@@ -377,6 +380,13 @@ export function OverviewTab({
 
       {/* Time Machine */}
       <TimeMachinePanel buildingId={buildingId} />
+
+      {/* Workspace, Inbox & Obligations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <WorkspaceMembersCard buildingId={buildingId} />
+        <DocumentInboxCard buildingId={buildingId} />
+      </div>
+      <ObligationsCard buildingId={buildingId} />
 
       {/* Quick Access Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
