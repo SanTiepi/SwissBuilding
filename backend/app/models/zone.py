@@ -19,6 +19,7 @@ class Zone(Base):
     description = Column(Text, nullable=True)
     floor_number = Column(Integer, nullable=True)
     surface_area_m2 = Column(Float, nullable=True)
+    usage_type = Column(String(30), nullable=True)  # residential | commercial | storage | parking | technical | common
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

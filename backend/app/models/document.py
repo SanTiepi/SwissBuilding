@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -21,6 +21,18 @@ class Document(Base):
     description = Column(String(500), nullable=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     processing_metadata = Column(JSON, nullable=True)  # {virus_scan: {...}, ocr: {...}}
+    content_hash = Column(String(64), nullable=True)  # SHA-256 for identity/dedup
     created_at = Column(DateTime, default=func.now())
 
     building = relationship("Building", back_populates="documents")
+
+    __table_args__ = (
+        # Partial unique: (content_hash, file_path) when content_hash IS NOT NULL
+        Index(
+            "uq_documents_content_hash_file_path",
+            "content_hash",
+            "file_path",
+            unique=True,
+            postgresql_where=Column("content_hash").isnot(None),
+        ),
+    )

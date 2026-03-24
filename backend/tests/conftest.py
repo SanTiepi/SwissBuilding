@@ -30,6 +30,27 @@ from jose import jwt  # noqa: E402
 from passlib.context import CryptContext  # noqa: E402
 
 from app.models.building import Building  # noqa: E402
+from app.models.building_portfolio import BuildingPortfolio as _BP  # noqa: E402, F401
+
+# BC2 property management models
+from app.models.claim import Claim as _Claim  # noqa: E402, F401
+
+# BC1 backbone models — must be imported before _build_sqlite_metadata()
+# so their tables are registered in Base.metadata.
+# Use from-imports to avoid shadowing the FastAPI `app` instance.
+from app.models.contact import Contact as _Contact  # noqa: E402, F401
+from app.models.contract import Contract as _Contract2  # noqa: E402, F401
+from app.models.document_link import DocumentLink as _DL  # noqa: E402, F401
+from app.models.financial_entry import FinancialEntry as _FE  # noqa: E402, F401
+from app.models.insurance_policy import InsurancePolicy as _IP  # noqa: E402, F401
+from app.models.inventory_item import InventoryItem as _II  # noqa: E402, F401
+from app.models.lease import Lease as _Lease  # noqa: E402, F401
+from app.models.ownership_record import OwnershipRecord as _OR  # noqa: E402, F401
+from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa: E402, F401
+from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
+from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
+from app.models.unit import Unit as _Unit  # noqa: E402, F401
+from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"

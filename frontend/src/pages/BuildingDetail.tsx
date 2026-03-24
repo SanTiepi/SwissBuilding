@@ -26,6 +26,9 @@ const LazyOverviewTab = lazy(() => import('@/components/building-detail/Overview
 const LazyActivityTab = lazy(() => import('@/components/building-detail/ActivityTab'));
 const LazyDiagnosticsTab = lazy(() => import('@/components/building-detail/DiagnosticsTab'));
 const LazyDocumentsTab = lazy(() => import('@/components/building-detail/DocumentsTab'));
+const LazyLeasesTab = lazy(() => import('@/components/building-detail/LeasesTab'));
+const LazyContractsTab = lazy(() => import('@/components/building-detail/ContractsTab'));
+const LazyOwnershipTab = lazy(() => import('@/components/building-detail/OwnershipTab'));
 const LazyTransferPackagePanel = lazy(() =>
   import('@/components/TransferPackagePanel').then((m) => ({ default: m.TransferPackagePanel })),
 );
@@ -44,7 +47,7 @@ const editSchema = z.object({
 
 type EditFormData = z.infer<typeof editSchema>;
 
-type TabKey = 'overview' | 'activity' | 'diagnostics' | 'documents' | 'details';
+type TabKey = 'overview' | 'activity' | 'diagnostics' | 'documents' | 'ownership' | 'leases' | 'contracts' | 'details';
 
 const TabFallback = (
   <div className="flex items-center justify-center py-12">
@@ -128,6 +131,9 @@ export default function BuildingDetail() {
     { key: 'activity', label: t('building.tab.activity') },
     { key: 'diagnostics', label: t('building.tab.diagnostics'), count: diagnostics.length },
     { key: 'documents', label: t('building.tab.documents'), count: documents.length },
+    { key: 'ownership', label: t('building.tab.ownership') || 'Ownership' },
+    { key: 'leases', label: t('building.tab.leases') || 'Leases' },
+    { key: 'contracts', label: t('building.tab.contracts') || 'Contracts' },
     { key: 'details', label: t('building.tab.details') },
   ];
 
@@ -355,6 +361,27 @@ export default function BuildingDetail() {
                 documentsError={documentsError}
                 onUpload={handleDocumentUpload}
               />
+            </Suspense>
+          )}
+
+          {/* Ownership Tab */}
+          {activeTab === 'ownership' && (
+            <Suspense fallback={TabFallback}>
+              <LazyOwnershipTab buildingId={id!} />
+            </Suspense>
+          )}
+
+          {/* Leases Tab */}
+          {activeTab === 'leases' && (
+            <Suspense fallback={TabFallback}>
+              <LazyLeasesTab buildingId={id!} />
+            </Suspense>
+          )}
+
+          {/* Contracts Tab */}
+          {activeTab === 'contracts' && (
+            <Suspense fallback={TabFallback}>
+              <LazyContractsTab buildingId={id!} />
             </Suspense>
           )}
 

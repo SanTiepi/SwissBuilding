@@ -20,9 +20,11 @@ class User(Base):
     organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
     language = Column(String(2), default="fr")
     is_active = Column(Boolean, default=True)
+    linked_contact_id = Column(UUID(as_uuid=True), ForeignKey("contacts.id", use_alter=True), nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     organization = relationship("Organization", back_populates="members")
     diagnostics = relationship("Diagnostic", back_populates="diagnostician", foreign_keys="Diagnostic.diagnostician_id")
     audit_logs = relationship("AuditLog", back_populates="user")
+    linked_contact = relationship("Contact", foreign_keys=[linked_contact_id])

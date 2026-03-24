@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -24,6 +24,8 @@ class Organization(Base):
     email = Column(String(255))
     suva_recognized = Column(Boolean, default=False)
     fach_approved = Column(Boolean, default=False)
+    contact_person_id = Column(UUID(as_uuid=True), ForeignKey("contacts.id", use_alter=True), nullable=True)
     created_at = Column(DateTime, default=func.now())
 
     members = relationship("User", back_populates="organization")
+    contact_person = relationship("Contact", foreign_keys=[contact_person_id])

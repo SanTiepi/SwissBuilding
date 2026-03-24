@@ -39,8 +39,10 @@ from app.api import (
     compliance_summary,
     compliance_timeline,
     constraint_graph,
+    contact_lookup,
     contractor_acknowledgment,
     contractor_matching,
+    contracts,
     cost_benefit_analysis,
     counterfactual_analysis,
     cross_building_pattern,
@@ -78,6 +80,7 @@ from app.api import (
     jurisdictions,
     knowledge_gap,
     lab_result,
+    leases,
     maintenance_forecast,
     material_inventory,
     materials,
@@ -90,6 +93,7 @@ from app.api import (
     occupancy_risks,
     occupant_safety,
     organizations,
+    ownership,
     pack_impact,
     passport,
     passport_export,
@@ -177,6 +181,10 @@ api_router.include_router(building_elements.router, prefix="", tags=["Building E
 api_router.include_router(materials.router, prefix="", tags=["Materials"])
 api_router.include_router(material_inventory.router, prefix="", tags=["Material Inventory"])
 api_router.include_router(interventions.router, prefix="", tags=["Interventions"])
+api_router.include_router(leases.router, prefix="", tags=["Leases"])
+api_router.include_router(contact_lookup.router, prefix="", tags=["Contacts"])
+api_router.include_router(contracts.router, prefix="", tags=["Contracts"])
+api_router.include_router(ownership.router, prefix="", tags=["Ownership"])
 api_router.include_router(technical_plans.router, prefix="", tags=["Technical Plans"])
 api_router.include_router(evidence.router, prefix="", tags=["Evidence"])
 api_router.include_router(evidence_chain.router, prefix="", tags=["Evidence Chain"])

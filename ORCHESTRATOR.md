@@ -926,6 +926,8 @@ Remaining frontend build noise on this stream:
 
 ### Next ready project briefs
 
+- `docs/projects/baticonnect-product-blueprint-program.md`
+  - BatiConnect canonical architecture: domain/surface/capability blueprints + 3 implementation wave briefs (backbone, ingestion, read-model)
 - `docs/projects/trust-readiness-postworks-program.md`
   - trust score, unknowns, readiness, post-works truth, data quality operating layer
 - `docs/projects/portfolio-execution-and-packs-program.md`
@@ -1115,6 +1117,28 @@ Wave closeout binary gates:
 
 Rule:
 - when the active top queue starts to thin out, pull the next project brief directly instead of waiting for a new prompt
+
+### BatiConnect Product Blueprint Program
+
+- status: BC1 accepted, BC2 accepted, Lease Ops accepted, hub files wired
+- umbrella brief: `docs/projects/baticonnect-product-blueprint-program.md`
+- blueprints: `docs/blueprints/baticonnect-{domain,surface,capability,build-order}-blueprint.md`
+
+#### Completed waves
+- **BC1 Canonical Backbone**: 7 new SQLAlchemy models (Contact, PartyRoleAssignment, Portfolio, BuildingPortfolio, Unit, UnitZone, OwnershipRecord) + ProvenanceMixin + migrations 005-006 + 48 tests
+- **BC2 Property Management**: 9 new models (Lease, LeaseEvent, Contract, InsurancePolicy, Claim, FinancialEntry, TaxContext, InventoryItem, DocumentLink) + migrations 007-008 + existing model edits (intervention.contract_id, zone.usage_type, document.content_hash) + 99 tests
+- **Lease Ops**: First vertical slice — lease_service + API routes + RBAC + contact_lookup + seed_lease_ops + LeasesTab in BuildingDetail + 19 API tests + 8 frontend tests
+- **Supervisor merge**: router.py wired (leases + contact_lookup), models/__init__.py wired (all BC1+BC2 models)
+
+#### Active / Next
+- Contract Ops slice (in progress)
+- Ownership Ops slice (in progress)
+- W-BC3 deferred (read-model extensions after vertical slices prove the backbone)
+
+#### Doctrine
+- build once expose later, superset + adapters, derived projections only
+- vertical slices > horizontal backbone after BC2
+- canonical entities: Portfolio, Asset, Unit, Party, PartyRoleAssignment, Ownership, Lease, Contract, InsurancePolicy, Claim, Document, EvidenceItem, Communication, Obligation, Incident, Intervention, FinancialEntry, TaxContext, InventoryItem, Recommendation, AIAnalysis, MemorySignal
 
 ## Future Horizon Feed
 

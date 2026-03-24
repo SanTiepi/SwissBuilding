@@ -25,6 +25,7 @@ class Intervention(Base):
     zones_affected = Column(JSON, nullable=True)
     materials_used = Column(JSON, nullable=True)
     diagnostic_id = Column(UUID(as_uuid=True), ForeignKey("diagnostics.id"), nullable=True)
+    contract_id = Column(UUID(as_uuid=True), ForeignKey("contracts.id"), nullable=True)
     notes = Column(Text, nullable=True)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=func.now())
@@ -32,6 +33,7 @@ class Intervention(Base):
 
     building = relationship("Building", back_populates="interventions")
     diagnostic = relationship("Diagnostic")
+    contract = relationship("Contract")
 
     __table_args__ = (
         Index("idx_interventions_building_id", "building_id"),
