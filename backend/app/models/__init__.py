@@ -34,6 +34,7 @@ from app.models.export_job import ExportJob
 from app.models.field_observation import FieldObservation
 from app.models.financial_entry import FinancialEntry
 from app.models.insurance_policy import InsurancePolicy
+from app.models.intake_request import IntakeRequest
 from app.models.intervention import Intervention
 from app.models.inventory_item import InventoryItem
 from app.models.invitation import Invitation
@@ -101,6 +102,7 @@ __all__ = [
     "FieldObservation",
     "FinancialEntry",
     "InsurancePolicy",
+    "IntakeRequest",
     "Intervention",
     "InventoryItem",
     "Invitation",

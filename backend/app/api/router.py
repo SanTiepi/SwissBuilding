@@ -78,6 +78,7 @@ from app.api import (
     handoff_pack,
     incident_response,
     insurance_risk_assessment,
+    intake,
     interventions,
     invitations,
     jurisdictions,
@@ -190,6 +191,7 @@ api_router.include_router(building_elements.router, prefix="", tags=["Building E
 api_router.include_router(materials.router, prefix="", tags=["Materials"])
 api_router.include_router(material_inventory.router, prefix="", tags=["Material Inventory"])
 api_router.include_router(material_recommendations.router, prefix="", tags=["Material Recommendations"])
+api_router.include_router(intake.router, prefix="", tags=["Intake"])
 api_router.include_router(interventions.router, prefix="", tags=["Interventions"])
 api_router.include_router(leases.router, prefix="", tags=["Leases"])
 api_router.include_router(contact_lookup.router, prefix="", tags=["Contacts"])
