@@ -16,6 +16,7 @@ from app.models.campaign import Campaign
 from app.models.case_study_template import CaseStudyTemplate
 from app.models.change_signal import ChangeSignal
 from app.models.claim import Claim
+from app.models.client_request import ClientRequest
 from app.models.committee_decision import CommitteeDecisionPack, ReviewDecisionTrace
 from app.models.communal_adapter import CommunalAdapterProfile
 from app.models.communal_override import CommunalRuleOverride
@@ -85,9 +86,12 @@ from app.models.post_works_state import PostWorksState
 from app.models.prework_trigger import PreworkTrigger
 from app.models.proof_delivery import ProofDelivery
 from app.models.public_owner_mode import PublicOwnerOperatingMode
+from app.models.quote import Quote
 from app.models.readiness_assessment import ReadinessAssessment
 from app.models.redaction_profile import DecisionCaveatProfile, ExternalAudienceRedactionProfile
 from app.models.regulatory_pack import RegulatoryPack
+from app.models.request_document import RequestDocument
+from app.models.request_invitation import RequestInvitation
 from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
 from app.models.saved_simulation import SavedSimulation
@@ -123,6 +127,7 @@ __all__ = [
     "CaseStudyTemplate",
     "ChangeSignal",
     "Claim",
+    "ClientRequest",
     "CommitteeDecisionPack",
     "CommunalAdapterProfile",
     "CommunalRuleOverride",
@@ -195,8 +200,11 @@ __all__ = [
     "ProofDelivery",
     "PublicAssetGovernanceSignal",
     "PublicOwnerOperatingMode",
+    "Quote",
     "ReadinessAssessment",
     "RegulatoryPack",
+    "RequestDocument",
+    "RequestInvitation",
     "ReviewDecisionTrace",
     "RuleChangeEvent",
     "RuleSource",

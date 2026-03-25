@@ -99,6 +99,12 @@ from app.models.company_profile import CompanyProfile as _CP  # noqa: E402, F401
 from app.models.company_subscription import CompanySubscription as _CS  # noqa: E402, F401
 from app.models.company_verification import CompanyVerification as _CV  # noqa: E402, F401
 
+# Marketplace RFQ models
+from app.models.client_request import ClientRequest as _CR  # noqa: E402, F401
+from app.models.quote import Quote as _Q  # noqa: E402, F401
+from app.models.request_document import RequestDocument as _RD  # noqa: E402, F401
+from app.models.request_invitation import RequestInvitation as _RI  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
