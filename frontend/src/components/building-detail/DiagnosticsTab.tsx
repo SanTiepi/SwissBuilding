@@ -3,6 +3,7 @@ import { useTranslation } from '@/i18n';
 import { DiagnosticTimeline } from '@/components/DiagnosticTimeline';
 import { RoleGate } from '@/components/RoleGate';
 import { DiagnosticPublicationCard } from '@/components/building-detail/DiagnosticPublicationCard';
+import { ImportedDiagnosticSummary } from '@/components/building-detail/ImportedDiagnosticSummary';
 import MissionOrderCard from '@/components/building-detail/MissionOrderCard';
 import { diagnosticIntegrationApi } from '@/api/diagnosticIntegration';
 import type { Diagnostic } from '@/types';
@@ -75,6 +76,9 @@ export function DiagnosticsTab({ buildingId, diagnostics, onCreateClick }: Diagn
           <p className="text-center text-sm text-gray-500 dark:text-slate-400 py-8">{t('building.noDiagnostics')}</p>
         )}
       </div>
+
+      {/* Imported diagnostic summaries */}
+      <ImportedDiagnosticSummary buildingId={buildingId} />
 
       {/* Diagnostic publications */}
       {pubLoading ? (

@@ -15,6 +15,7 @@ from app.schemas.diagnostic_publication import (
     DiagnosticReportPublicationRead,
     PublicationMatchRequest,
 )
+from app.schemas.imported_diagnostic import ImportedDiagnosticSummary
 from app.services.batiscan_client import get_batiscan_client
 from app.services.diagnostic_integration_service import (
     create_mission_order,
@@ -27,6 +28,7 @@ from app.services.diagnostic_integration_service import (
     receive_publication,
     validate_contract,
 )
+from app.services.imported_diagnostic_service import get_building_diagnostic_summaries
 
 router = APIRouter()
 
@@ -62,6 +64,20 @@ async def receive_publication_endpoint(
     publication = await receive_publication(db, payload)
     await db.commit()
     return publication
+
+
+@router.get(
+    "/buildings/{building_id}/imported-diagnostic-summary",
+    response_model=list[ImportedDiagnosticSummary],
+)
+async def get_imported_summaries(
+    building_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return projected diagnostic summaries for a building (read-model, no DB table)."""
+    await _get_building_or_404(db, building_id)
+    return await get_building_diagnostic_summaries(db, building_id)
 
 
 @router.get(
