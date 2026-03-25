@@ -2,7 +2,7 @@
 # SwissBuilding / BatiConnect — Deploy to VPS
 # Usage: bash scripts/deploy.sh
 # Prerequisites:
-#   1. Domain app.swissbuilding.ch DNS pointing to 83.228.221.188
+#   1. DNS: swissbuilding.batiscan.ch → 83.228.221.188 (staging, hidden)
 #   2. Infomaniak S3 buckets created (swissbuilding-uploads, swissbuilding-reports, swissbuilding-backups)
 #   3. .env.production file with real credentials on VPS
 
@@ -53,7 +53,7 @@ docker network connect swissbuilding batiscan_caddy 2>/dev/null || echo "Already
 
 echo ">>> Step 6: Append SwissBuilding config to Caddy"
 CADDY_FILE="/home/ubuntu/Batiscan-V4/Caddyfile"
-if ! grep -q "app.swissbuilding.ch" "$CADDY_FILE" 2>/dev/null; then
+if ! grep -q "swissbuilding.batiscan.ch" "$CADDY_FILE" 2>/dev/null; then
     echo "" >> "$CADDY_FILE"
     cat "$INFRA_DIR/Caddyfile" >> "$CADDY_FILE"
     echo ">>> Added SwissBuilding block to Caddyfile"
@@ -78,8 +78,8 @@ fi
 
 echo ""
 echo "=== Deploy complete ==="
-echo "URL: https://app.swissbuilding.ch"
-echo "Health: https://app.swissbuilding.ch/health"
+echo "URL: https://swissbuilding.batiscan.ch"
+echo "Health: https://swissbuilding.batiscan.ch/health"
 echo ""
 echo "Containers:"
 docker ps --filter "name=swissbuilding" --format "table {{.Names}}\t{{.Status}}"

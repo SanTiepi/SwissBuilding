@@ -7,7 +7,7 @@
 #
 # STAGING MODE: basic auth + noindex until ready for public launch
 
-app.swissbuilding.ch {
+swissbuilding.batiscan.ch {
     # Anti-indexation — not public yet
     header X-Robots-Tag "noindex, nofollow, noarchive"
     header X-Frame-Options "DENY"
