@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     OCRMYPDF_ENABLED: bool = True
     OCRMYPDF_LANGUAGE: str = "fra+deu+ita+eng"  # Swiss multilingual
 
+    # Batiscan Bridge (Consumer Bridge v1)
+    BATISCAN_API_URL: str | None = None
+    BATISCAN_API_KEY: str | None = None
+
     # CORS
     CORS_ORIGINS: list[str] = [
         "http://localhost:3000",

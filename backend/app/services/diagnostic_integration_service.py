@@ -1,6 +1,7 @@
 """Diagnostic integration service — handles publications from Batiscan and mission orders."""
 
 import logging
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -11,9 +12,17 @@ from app.models.building import Building
 from app.models.diagnostic_mission_order import DiagnosticMissionOrder
 from app.models.diagnostic_publication import DiagnosticReportPublication
 from app.models.diagnostic_publication_version import DiagnosticPublicationVersion
+from app.models.domain_event import DomainEvent
 from app.schemas.diagnostic_publication import (
+    ContractValidationResult,
     DiagnosticMissionOrderCreate,
     DiagnosticPublicationPackage,
+)
+from app.services.batiscan_client import (
+    BatiscanClientBase,
+    BridgeAuthError,
+    BridgeNotFoundError,
+    BridgeValidationError,
 )
 
 logger = logging.getLogger(__name__)
@@ -278,3 +287,128 @@ async def get_mission_orders_for_building(db: AsyncSession, building_id: UUID) -
         .order_by(DiagnosticMissionOrder.created_at.desc())
     )
     return list(result.scalars().all())
+
+
+# ---------------------------------------------------------------------------
+# Consumer Bridge v1
+# ---------------------------------------------------------------------------
+
+
+def validate_contract(payload: dict) -> ContractValidationResult:
+    """Validate incoming package against expected contract."""
+    errors: list[str] = []
+    for field in ["source_system", "source_mission_id", "mission_type", "payload_hash", "published_at"]:
+        if field not in payload or payload[field] is None:
+            errors.append(f"Missing required field: {field}")
+    source = payload.get("source_system")
+    if source and source != "batiscan":
+        errors.append(f"Unknown source_system: {source}")
+    schema_version = payload.get("schema_version")
+    if schema_version and schema_version not in ("1", "1.0", "v1"):
+        errors.append(f"Unsupported schema_version: {schema_version}")
+    return ContractValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+def _map_mission_type(payload: dict) -> str:
+    """Derive mission_type from V4 payload, tolerant on naming."""
+    mt = payload.get("mission_type")
+    if mt:
+        return str(mt)
+    # Fallback: derive from object type or default
+    return payload.get("type", "asbestos_full")
+
+
+def map_v4_payload_to_package(raw: dict) -> DiagnosticPublicationPackage:
+    """Map V4 producer format to BatiConnect consumer schema. Tolerant on optional fields."""
+    payload = raw.get("payload", raw)  # Support both wrapped and flat formats
+    published_at_raw = payload.get("published_at")
+    if isinstance(published_at_raw, str):
+        # Try ISO format parsing
+        try:
+            published_at = datetime.fromisoformat(published_at_raw.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            published_at = datetime.now(UTC)
+    elif isinstance(published_at_raw, datetime):
+        published_at = published_at_raw
+    else:
+        published_at = datetime.now(UTC)
+
+    return DiagnosticPublicationPackage(
+        source_system=payload.get("source_system", "batiscan"),
+        source_mission_id=payload.get("object_id") or payload.get("source_mission_id", ""),
+        mission_type=_map_mission_type(payload),
+        building_identifiers=payload.get("building_match_keys", payload.get("building_identifiers", {})),
+        report_pdf_url=payload.get("report_pdf_url"),
+        structured_summary=payload.get("publication_snapshot", payload.get("structured_summary", {})),
+        annexes=payload.get("annexes", []),
+        payload_hash=payload.get("payload_hash", ""),
+        published_at=published_at,
+        version=payload.get("snapshot_version", payload.get("version", 1)),
+    )
+
+
+async def fetch_and_ingest(
+    db: AsyncSession,
+    client: BatiscanClientBase,
+    dossier_ref: str,
+    user_id: UUID | None = None,
+) -> dict:
+    """Pull-mode: fetch package from V4, validate, ingest."""
+    try:
+        raw_payload = await client.fetch_diagnostic_package(dossier_ref)
+    except BridgeAuthError:
+        logger.warning("Bridge auth error fetching dossier %s", dossier_ref)
+        return {"consumer_state": "auth_error", "error": "Authentication failed"}
+    except BridgeNotFoundError:
+        logger.warning("Dossier %s not found on producer", dossier_ref)
+        return {"consumer_state": "not_found", "error": f"Dossier {dossier_ref} not found"}
+    except BridgeValidationError as e:
+        logger.warning("Producer rejected fetch for %s: %s", dossier_ref, e)
+        return {"consumer_state": "rejected_source", "error": str(e)}
+
+    # Validate contract
+    validation = validate_contract(raw_payload)
+    if not validation.valid:
+        return {"consumer_state": "validation_error", "errors": validation.errors}
+
+    # Map to DiagnosticPublicationPackage schema
+    package = map_v4_payload_to_package(raw_payload)
+
+    # Use existing receive_publication (idempotent)
+    publication = await receive_publication(db, package)
+
+    # Update consumer_state
+    if publication.building_id:
+        publication.consumer_state = "matched"
+    elif publication.match_state == "needs_review":
+        publication.consumer_state = "review_required"
+    else:
+        publication.consumer_state = "ingested"
+    publication.contract_version = raw_payload.get("schema_version", "v1")
+    publication.fetched_at = datetime.now(UTC)
+    await db.flush()
+
+    # Emit domain events
+    now = datetime.now(UTC)
+    event = DomainEvent(
+        event_type="diagnostic_publication_received",
+        aggregate_type="diagnostic_report_publication",
+        aggregate_id=publication.id,
+        payload={"dossier_ref": dossier_ref, "consumer_state": publication.consumer_state},
+        actor_user_id=user_id,
+        occurred_at=now,
+    )
+    db.add(event)
+
+    if publication.building_id:
+        event2 = DomainEvent(
+            event_type="diagnostic_publication_matched",
+            aggregate_type="diagnostic_report_publication",
+            aggregate_id=publication.id,
+            payload={"building_id": str(publication.building_id), "match_state": publication.match_state},
+            actor_user_id=user_id,
+            occurred_at=now,
+        )
+        db.add(event2)
+
+    return {"consumer_state": publication.consumer_state, "publication_id": str(publication.id)}

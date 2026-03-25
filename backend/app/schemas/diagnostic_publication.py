@@ -81,5 +81,32 @@ class DiagnosticMissionOrderRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ContractValidationResult(BaseModel):
+    """Result of validating a diagnostic package against the expected contract."""
+
+    valid: bool
+    errors: list[str] = []
+
+
+class ConsumerFetchResult(BaseModel):
+    """Result of fetch_and_ingest operation."""
+
+    consumer_state: str
+    publication_id: str | None = None
+    error: str | None = None
+    errors: list[str] | None = None
+
+
+class ConsumerStateRead(BaseModel):
+    """Consumer state for a publication."""
+
+    consumer_state: str | None
+    contract_version: str | None
+    fetch_error: str | None
+    fetched_at: datetime | None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PublicationMatchRequest(BaseModel):
     building_id: UUID

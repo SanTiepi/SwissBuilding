@@ -8,6 +8,22 @@ Config-driven via BATISCAN_API_URL / BATISCAN_API_KEY env vars.
 from abc import ABC, abstractmethod
 
 
+class BridgeError(Exception):
+    """Base exception for bridge communication errors."""
+
+
+class BridgeAuthError(BridgeError):
+    """Authentication failed (401)."""
+
+
+class BridgeNotFoundError(BridgeError):
+    """Resource not found on producer (404)."""
+
+
+class BridgeValidationError(BridgeError):
+    """Producer rejected the request (422)."""
+
+
 class BatiscanClientBase(ABC):
     """Abstract base for Batiscan communication."""
 
@@ -19,6 +35,11 @@ class BatiscanClientBase(ABC):
     @abstractmethod
     async def check_mission_status(self, external_mission_id: str) -> dict:
         """Check status of a mission in Batiscan."""
+        ...
+
+    @abstractmethod
+    async def fetch_diagnostic_package(self, dossier_ref: str) -> dict:
+        """Fetch diagnostic package from producer. Returns parsed payload or raises."""
         ...
 
 
@@ -41,6 +62,29 @@ class StubBatiscanClient(BatiscanClientBase):
             "message": "Mission is being processed (stub mode)",
         }
 
+    async def fetch_diagnostic_package(self, dossier_ref: str) -> dict:
+        import uuid
+        from datetime import UTC, datetime
+
+        return {
+            "source_system": "batiscan",
+            "source_mission_id": dossier_ref,
+            "object_id": dossier_ref,
+            "mission_type": "asbestos_full",
+            "schema_version": "v1",
+            "building_match_keys": {},
+            "report_pdf_url": f"https://cdn.stub.example.com/reports/{dossier_ref}.pdf",
+            "publication_snapshot": {
+                "pollutants_found": ["asbestos"],
+                "fach_urgency": "medium",
+                "zones": ["Z1"],
+            },
+            "annexes": [],
+            "payload_hash": uuid.uuid4().hex,
+            "published_at": datetime.now(UTC).isoformat(),
+            "snapshot_version": 1,
+        }
+
 
 class HttpBatiscanClient(BatiscanClientBase):
     """Real HTTP client for Batiscan API. Configured via settings."""
@@ -49,17 +93,20 @@ class HttpBatiscanClient(BatiscanClientBase):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
 
-    async def send_mission_order(self, order_data: dict) -> dict:
-        import httpx
-
+    def _headers(self) -> dict:
         headers = {}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
+        return headers
+
+    async def send_mission_order(self, order_data: dict) -> dict:
+        import httpx
+
         async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.post(
                 f"{self.base_url}/api/v1/diagnostic-orders/receive",
                 json=order_data,
-                headers=headers,
+                headers=self._headers(),
             )
             resp.raise_for_status()
             return resp.json()
@@ -67,24 +114,40 @@ class HttpBatiscanClient(BatiscanClientBase):
     async def check_mission_status(self, external_mission_id: str) -> dict:
         import httpx
 
-        headers = {}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
         async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.get(
                 f"{self.base_url}/api/v1/diagnostic-orders/{external_mission_id}/status",
-                headers=headers,
+                headers=self._headers(),
             )
             resp.raise_for_status()
             return resp.json()
+
+    async def fetch_diagnostic_package(self, dossier_ref: str) -> dict:
+        import httpx
+
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(
+                f"{self.base_url}/dossiers/{dossier_ref}/diagnostic-package",
+                headers=self._headers(),
+            )
+            if resp.status_code == 200:
+                return resp.json()
+            elif resp.status_code == 401:
+                raise BridgeAuthError("Authentication failed")
+            elif resp.status_code == 404:
+                raise BridgeNotFoundError(f"Dossier {dossier_ref} not found")
+            elif resp.status_code == 422:
+                detail = resp.json().get("detail", "Package not eligible")
+                raise BridgeValidationError(detail)
+            else:
+                resp.raise_for_status()
+                return {}  # unreachable, satisfies type checker
 
 
 def get_batiscan_client() -> BatiscanClientBase:
     """Factory: returns stub or HTTP client based on config."""
     from app.config import settings
 
-    batiscan_url = getattr(settings, "BATISCAN_API_URL", None)
-    if batiscan_url:
-        api_key = getattr(settings, "BATISCAN_API_KEY", None)
-        return HttpBatiscanClient(batiscan_url, api_key)
+    if settings.BATISCAN_API_URL:
+        return HttpBatiscanClient(settings.BATISCAN_API_URL, settings.BATISCAN_API_KEY)
     return StubBatiscanClient()

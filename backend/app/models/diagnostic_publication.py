@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -30,6 +30,13 @@ class DiagnosticReportPublication(ProvenanceMixin, Base):
     )  # asbestos_full | asbestos_complement | pcb | lead | hap | radon | pfas | multi
     published_at = Column(DateTime(timezone=True), nullable=False)
     is_immutable = Column(Boolean, default=True)
+    # Consumer Bridge v1 columns
+    consumer_state = Column(
+        String(30), nullable=True
+    )  # fetched|ingested|duplicate|rejected_source|matched|review_required|auth_error|not_found|validation_error
+    contract_version = Column(String(20), nullable=True)
+    fetch_error = Column(Text, nullable=True)
+    fetched_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

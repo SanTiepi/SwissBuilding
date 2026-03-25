@@ -15,8 +15,10 @@ from app.schemas.diagnostic_publication import (
     DiagnosticReportPublicationRead,
     PublicationMatchRequest,
 )
+from app.services.batiscan_client import get_batiscan_client
 from app.services.diagnostic_integration_service import (
     create_mission_order,
+    fetch_and_ingest,
     get_mission_orders_for_building,
     get_publication_with_versions,
     get_publications_for_building,
@@ -116,6 +118,26 @@ async def match_publication_endpoint(
         raise HTTPException(status_code=404, detail=str(exc)) from None
     await db.commit()
     return publication
+
+
+# ---------------------------------------------------------------------------
+# Consumer Bridge — Pull-mode fetch
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/diagnostic-publications/fetch/{dossier_ref}",
+)
+async def fetch_diagnostic_package_endpoint(
+    dossier_ref: str,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Pull-mode: fetch a diagnostic package from Batiscan by dossier reference."""
+    client = get_batiscan_client()
+    result = await fetch_and_ingest(db, client, dossier_ref, user_id=current_user.id)
+    await db.commit()
+    return result
 
 
 # ---------------------------------------------------------------------------
