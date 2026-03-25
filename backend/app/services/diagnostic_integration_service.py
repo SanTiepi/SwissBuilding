@@ -21,6 +21,7 @@ from app.schemas.diagnostic_publication import (
 from app.services.batiscan_client import (
     BatiscanClientBase,
     BridgeAuthError,
+    BridgeError,
     BridgeNotFoundError,
     BridgeValidationError,
 )
@@ -34,13 +35,21 @@ async def _match_building(db: AsyncSession, identifiers: dict) -> tuple[str, str
     Returns (match_state, match_key_type, building_id).
     Priority: egid > egrid > address.
     """
+    if not identifiers:
+        logger.warning("Empty building_identifiers — cannot match building")
+
     # 1. Try egid
     egid = identifiers.get("egid")
     if egid is not None:
-        result = await db.execute(select(Building).where(Building.egid == int(egid)))
-        building = result.scalar_one_or_none()
-        if building:
-            return "auto_matched", "egid", building.id
+        try:
+            egid_int = int(egid)
+        except (ValueError, TypeError):
+            logger.warning("Malformed egid value: %r — skipping egid match", egid)
+        else:
+            result = await db.execute(select(Building).where(Building.egid == egid_int))
+            building = result.scalar_one_or_none()
+            if building:
+                return "auto_matched", "egid", building.id
 
     # 2. Try egrid
     egrid = identifiers.get("egrid")
@@ -298,14 +307,21 @@ def validate_contract(payload: dict) -> ContractValidationResult:
     """Validate incoming package against expected contract."""
     errors: list[str] = []
     for field in ["source_system", "source_mission_id", "mission_type", "payload_hash", "published_at"]:
-        if field not in payload or payload[field] is None:
+        if field not in payload or not payload[field]:
             errors.append(f"Missing required field: {field}")
     source = payload.get("source_system")
     if source and source != "batiscan":
         errors.append(f"Unknown source_system: {source}")
+    # Warn on unexpected object_type but don't hard-fail (v1 compat)
+    object_type = payload.get("object_type")
+    if object_type and object_type not in ("diagnostic_report", "diagnostic_publication"):
+        logger.warning("Unexpected object_type: %r — accepting for v1 compat", object_type)
+    # Normalize schema_version: accept "1", "1.0", "v1" — store canonical "v1"
     schema_version = payload.get("schema_version")
     if schema_version and schema_version not in ("1", "1.0", "v1"):
         errors.append(f"Unsupported schema_version: {schema_version}")
+    elif schema_version in ("1", "1.0"):
+        payload["schema_version"] = "v1"
     return ContractValidationResult(valid=len(errors) == 0, errors=errors)
 
 
@@ -327,21 +343,38 @@ def map_v4_payload_to_package(raw: dict) -> DiagnosticPublicationPackage:
         try:
             published_at = datetime.fromisoformat(published_at_raw.replace("Z", "+00:00"))
         except (ValueError, TypeError):
+            logger.warning("Malformed published_at value: %r — falling back to now()", published_at_raw)
             published_at = datetime.now(UTC)
     elif isinstance(published_at_raw, datetime):
         published_at = published_at_raw
     else:
+        logger.warning("Missing published_at — falling back to now()")
         published_at = datetime.now(UTC)
 
+    source_system = payload.get("source_system")
+    if not source_system:
+        logger.warning("Missing source_system — defaulting to 'batiscan'")
+        source_system = "batiscan"
+
+    payload_hash = payload.get("payload_hash", "")
+    if not payload_hash:
+        msg = "payload_hash is empty after mapping — cannot ingest"
+        raise ValueError(msg)
+
+    source_mission_id = payload.get("object_id") or payload.get("source_mission_id", "")
+    if not source_mission_id:
+        msg = "source_mission_id is empty after mapping — cannot ingest"
+        raise ValueError(msg)
+
     return DiagnosticPublicationPackage(
-        source_system=payload.get("source_system", "batiscan"),
-        source_mission_id=payload.get("object_id") or payload.get("source_mission_id", ""),
+        source_system=source_system,
+        source_mission_id=source_mission_id,
         mission_type=_map_mission_type(payload),
         building_identifiers=payload.get("building_match_keys", payload.get("building_identifiers", {})),
         report_pdf_url=payload.get("report_pdf_url"),
         structured_summary=payload.get("publication_snapshot", payload.get("structured_summary", {})),
         annexes=payload.get("annexes", []),
-        payload_hash=payload.get("payload_hash", ""),
+        payload_hash=payload_hash,
         published_at=published_at,
         version=payload.get("snapshot_version", payload.get("version", 1)),
     )
@@ -365,6 +398,9 @@ async def fetch_and_ingest(
     except BridgeValidationError as e:
         logger.warning("Producer rejected fetch for %s: %s", dossier_ref, e)
         return {"consumer_state": "rejected_source", "error": str(e)}
+    except BridgeError as e:
+        logger.warning("Bridge error fetching dossier %s: %s", dossier_ref, e)
+        return {"consumer_state": "fetch_error", "error": str(e)}
 
     # Validate contract
     validation = validate_contract(raw_payload)
@@ -372,10 +408,28 @@ async def fetch_and_ingest(
         return {"consumer_state": "validation_error", "errors": validation.errors}
 
     # Map to DiagnosticPublicationPackage schema
-    package = map_v4_payload_to_package(raw_payload)
+    try:
+        package = map_v4_payload_to_package(raw_payload)
+    except (ValueError, KeyError, TypeError) as e:
+        logger.warning("Payload mapping failed for %s: %s", dossier_ref, e)
+        return {"consumer_state": "validation_error", "error": str(e)}
 
     # Use existing receive_publication (idempotent)
-    publication = await receive_publication(db, package)
+    try:
+        publication = await receive_publication(db, package)
+    except Exception as e:
+        logger.exception("receive_publication failed for %s: %s", dossier_ref, e)
+        return {"consumer_state": "ingest_error", "error": str(e)}
+
+    # Detect idempotent replay: if publication already had a consumer_state and same payload_hash,
+    # it was returned from the idempotency check — skip domain events
+    is_replay = publication.consumer_state is not None and publication.payload_hash == package.payload_hash
+    if is_replay:
+        logger.info(
+            "Idempotent replay for dossier %s — publication %s already ingested, skipping events",
+            dossier_ref,
+            publication.id,
+        )
 
     # Update consumer_state
     if publication.building_id:
@@ -386,29 +440,31 @@ async def fetch_and_ingest(
         publication.consumer_state = "ingested"
     publication.contract_version = raw_payload.get("schema_version", "v1")
     publication.fetched_at = datetime.now(UTC)
+    publication.fetch_error = None  # Clear any previous fetch_error on success
     await db.flush()
 
-    # Emit domain events
-    now = datetime.now(UTC)
-    event = DomainEvent(
-        event_type="diagnostic_publication_received",
-        aggregate_type="diagnostic_report_publication",
-        aggregate_id=publication.id,
-        payload={"dossier_ref": dossier_ref, "consumer_state": publication.consumer_state},
-        actor_user_id=user_id,
-        occurred_at=now,
-    )
-    db.add(event)
-
-    if publication.building_id:
-        event2 = DomainEvent(
-            event_type="diagnostic_publication_matched",
+    # Emit domain events only for new ingestions (not idempotent replays)
+    if not is_replay:
+        now = datetime.now(UTC)
+        event = DomainEvent(
+            event_type="diagnostic_publication_received",
             aggregate_type="diagnostic_report_publication",
             aggregate_id=publication.id,
-            payload={"building_id": str(publication.building_id), "match_state": publication.match_state},
+            payload={"dossier_ref": dossier_ref, "consumer_state": publication.consumer_state},
             actor_user_id=user_id,
             occurred_at=now,
         )
-        db.add(event2)
+        db.add(event)
+
+        if publication.building_id:
+            event2 = DomainEvent(
+                event_type="diagnostic_publication_matched",
+                aggregate_type="diagnostic_report_publication",
+                aggregate_id=publication.id,
+                payload={"building_id": str(publication.building_id), "match_state": publication.match_state},
+                actor_user_id=user_id,
+                occurred_at=now,
+            )
+            db.add(event2)
 
     return {"consumer_state": publication.consumer_state, "publication_id": str(publication.id)}

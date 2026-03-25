@@ -25,6 +25,7 @@ from app.services.diagnostic_integration_service import (
     get_unmatched_publications,
     match_publication,
     receive_publication,
+    validate_contract,
 )
 
 router = APIRouter()
@@ -54,6 +55,10 @@ async def receive_publication_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     """Webhook endpoint — receive a diagnostic report publication from Batiscan."""
+    # Validate contract on push-mode too
+    validation = validate_contract(payload.model_dump())
+    if not validation.valid:
+        raise HTTPException(status_code=422, detail={"errors": validation.errors})
     publication = await receive_publication(db, payload)
     await db.commit()
     return publication

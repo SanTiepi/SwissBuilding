@@ -125,23 +125,36 @@ class HttpBatiscanClient(BatiscanClientBase):
     async def fetch_diagnostic_package(self, dossier_ref: str) -> dict:
         import httpx
 
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.get(
-                f"{self.base_url}/dossiers/{dossier_ref}/diagnostic-package",
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json()
-            elif resp.status_code == 401:
-                raise BridgeAuthError("Authentication failed")
-            elif resp.status_code == 404:
-                raise BridgeNotFoundError(f"Dossier {dossier_ref} not found")
-            elif resp.status_code == 422:
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(
+                    f"{self.base_url}/dossiers/{dossier_ref}/diagnostic-package",
+                    headers=self._headers(),
+                )
+        except httpx.TimeoutException:
+            raise BridgeError("Connection to Batiscan timed out") from None
+        except httpx.ConnectError:
+            raise BridgeError("Cannot connect to Batiscan") from None
+        except httpx.HTTPError as e:
+            raise BridgeError(f"HTTP error: {e}") from None
+
+        if resp.status_code == 401:
+            raise BridgeAuthError("Authentication failed")
+        elif resp.status_code == 404:
+            raise BridgeNotFoundError(f"Dossier {dossier_ref} not found")
+        elif resp.status_code == 422:
+            try:
                 detail = resp.json().get("detail", "Package not eligible")
-                raise BridgeValidationError(detail)
-            else:
-                resp.raise_for_status()
-                return {}  # unreachable, satisfies type checker
+            except Exception:
+                detail = "Package not eligible"
+            raise BridgeValidationError(detail)
+        elif resp.status_code != 200:
+            raise BridgeError(f"Unexpected status {resp.status_code} from Batiscan")
+
+        try:
+            return resp.json()
+        except Exception as e:
+            raise BridgeError(f"Invalid JSON response from Batiscan: {e}") from None
 
 
 def get_batiscan_client() -> BatiscanClientBase:

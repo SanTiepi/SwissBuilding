@@ -22,6 +22,7 @@ if not hasattr(Building, "diagnostic_publications"):
 from app.services.batiscan_client import (
     BatiscanClientBase,
     BridgeAuthError,
+    BridgeError,
     BridgeNotFoundError,
     BridgeValidationError,
 )
@@ -396,3 +397,260 @@ def test_map_v4_payload_wrapped_format():
     package = map_v4_payload_to_package(wrapped)
     assert package.source_mission_id == "M-WRAPPED"
     assert package.building_identifiers == {"egid": 99999}
+
+
+# ===========================================================================
+# Hardening tests — Consumer Bridge v1 deep audit
+# ===========================================================================
+
+
+def test_validate_empty_payload_hash_rejected():
+    """Empty string payload_hash should be rejected."""
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "M-001",
+        "mission_type": "asbestos_full",
+        "payload_hash": "",
+        "published_at": datetime.now(UTC).isoformat(),
+    }
+    result = validate_contract(payload)
+    assert not result.valid
+    assert any("payload_hash" in e for e in result.errors)
+
+
+def test_validate_empty_source_mission_id_rejected():
+    """Empty string source_mission_id should be rejected."""
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "",
+        "mission_type": "asbestos_full",
+        "payload_hash": "abc123",
+        "published_at": datetime.now(UTC).isoformat(),
+    }
+    result = validate_contract(payload)
+    assert not result.valid
+    assert any("source_mission_id" in e for e in result.errors)
+
+
+def test_validate_empty_string_fields_rejected():
+    """All required fields as empty strings should be rejected."""
+    payload = {
+        "source_system": "",
+        "source_mission_id": "",
+        "mission_type": "",
+        "payload_hash": "",
+        "published_at": "",
+    }
+    result = validate_contract(payload)
+    assert not result.valid
+    assert len(result.errors) == 5
+
+
+@pytest.mark.asyncio
+async def test_match_building_malformed_egid_string(db_session, admin_user):
+    """Malformed egid (non-numeric) should not crash, just skip egid match."""
+    await _create_building(db_session, admin_user, egid=12345)
+    payload = _make_v4_payload(payload_hash=uuid.uuid4().hex)
+    payload["building_match_keys"] = {"egid": "not-a-number"}
+    client = MockBatiscanClient(response=payload)
+    result = await fetch_and_ingest(db_session, client, "DOS-MALFORMED", user_id=admin_user.id)
+    # Should not crash — just unmatched
+    assert result["consumer_state"] in ("ingested", "review_required")
+
+
+@pytest.mark.asyncio
+async def test_match_building_egid_as_string_number(db_session, admin_user):
+    """String-encoded egid '12345' should match building with egid=12345."""
+    await _create_building(db_session, admin_user, egid=12345)
+    payload = _make_v4_payload(payload_hash=uuid.uuid4().hex)
+    payload["building_match_keys"] = {"egid": "12345"}
+    client = MockBatiscanClient(response=payload)
+    result = await fetch_and_ingest(db_session, client, "DOS-STREGID", user_id=admin_user.id)
+    assert result["consumer_state"] == "matched"
+
+
+@pytest.mark.asyncio
+async def test_match_building_empty_identifiers(db_session, admin_user):
+    """Empty building_identifiers should result in 'ingested' (unmatched)."""
+    payload = _make_v4_payload(payload_hash=uuid.uuid4().hex)
+    payload["building_match_keys"] = {}
+    client = MockBatiscanClient(response=payload)
+    result = await fetch_and_ingest(db_session, client, "DOS-EMPTY-ID", user_id=admin_user.id)
+    assert result["consumer_state"] == "ingested"
+
+
+def test_mapping_malformed_published_at_logs_warning(caplog):
+    """Malformed published_at string should log warning and fall back to now()."""
+    import logging
+
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "M-MALDATE",
+        "mission_type": "asbestos_full",
+        "payload_hash": "abc123",
+        "published_at": "not-a-date",
+    }
+    with caplog.at_level(logging.WARNING):
+        package = map_v4_payload_to_package(payload)
+    assert package.published_at is not None
+    assert any("Malformed published_at" in r.message for r in caplog.records)
+
+
+def test_mapping_missing_published_at_logs_warning(caplog):
+    """Missing published_at should log warning and fall back to now()."""
+    import logging
+
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "M-NODATE",
+        "mission_type": "asbestos_full",
+        "payload_hash": "abc123",
+    }
+    with caplog.at_level(logging.WARNING):
+        package = map_v4_payload_to_package(payload)
+    assert package.published_at is not None
+    assert any("Missing published_at" in r.message for r in caplog.records)
+
+
+@pytest.mark.asyncio
+async def test_fetch_timeout_returns_error(db_session, admin_user):
+    """Timeout during fetch should return fetch_error state."""
+    client = MockBatiscanClient(error=BridgeError("Connection to Batiscan timed out"))
+    result = await fetch_and_ingest(db_session, client, "DOS-TIMEOUT")
+    assert result["consumer_state"] == "fetch_error"
+    assert "timed out" in result["error"]
+
+
+@pytest.mark.asyncio
+async def test_fetch_connection_error_returns_error(db_session, admin_user):
+    """Connection error during fetch should return fetch_error state."""
+    client = MockBatiscanClient(error=BridgeError("Cannot connect to Batiscan"))
+    result = await fetch_and_ingest(db_session, client, "DOS-CONNFAIL")
+    assert result["consumer_state"] == "fetch_error"
+    assert "Cannot connect" in result["error"]
+
+
+@pytest.mark.asyncio
+async def test_fetch_invalid_json_response(db_session, admin_user):
+    """BridgeError from invalid JSON should return fetch_error state."""
+    client = MockBatiscanClient(error=BridgeError("Invalid JSON response from Batiscan: ..."))
+    result = await fetch_and_ingest(db_session, client, "DOS-BADJSON")
+    assert result["consumer_state"] == "fetch_error"
+    assert "Invalid JSON" in result["error"]
+
+
+@pytest.mark.asyncio
+async def test_fetch_500_server_error(db_session, admin_user):
+    """BridgeError from 500 should return fetch_error state."""
+    client = MockBatiscanClient(error=BridgeError("Unexpected status 500 from Batiscan"))
+    result = await fetch_and_ingest(db_session, client, "DOS-500")
+    assert result["consumer_state"] == "fetch_error"
+    assert "500" in result["error"]
+
+
+@pytest.mark.asyncio
+async def test_idempotent_replay_no_duplicate_events(db_session, admin_user):
+    """Idempotent replay should NOT emit duplicate domain events."""
+    await _create_building(db_session, admin_user, egid=12345)
+    fixed_hash = "eventcheck" * 6 + "even"
+    payload = _make_v4_payload(egid=12345, payload_hash=fixed_hash)
+    client = MockBatiscanClient(response=payload)
+
+    # First ingest
+    await fetch_and_ingest(db_session, client, "DOS-IDEM-EVT", user_id=admin_user.id)
+    await db_session.flush()
+    events_after_first = (
+        (
+            await db_session.execute(
+                select(DomainEvent).where(DomainEvent.event_type == "diagnostic_publication_received")
+            )
+        )
+        .scalars()
+        .all()
+    )
+    count_first = len(events_after_first)
+
+    # Second ingest (replay)
+    await fetch_and_ingest(db_session, client, "DOS-IDEM-EVT", user_id=admin_user.id)
+    await db_session.flush()
+    events_after_second = (
+        (
+            await db_session.execute(
+                select(DomainEvent).where(DomainEvent.event_type == "diagnostic_publication_received")
+            )
+        )
+        .scalars()
+        .all()
+    )
+    count_second = len(events_after_second)
+
+    # No new events on replay
+    assert count_second == count_first
+
+
+def test_webhook_validates_contract():
+    """Push-mode webhook should pass contract validation for a valid payload."""
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "M-WEBHOOK",
+        "mission_type": "asbestos_full",
+        "payload_hash": uuid.uuid4().hex,
+        "published_at": datetime.now(UTC).isoformat(),
+        "building_identifiers": {},
+        "structured_summary": {},
+    }
+    result = validate_contract(payload)
+    assert result.valid
+    assert result.errors == []
+
+
+@pytest.mark.asyncio
+async def test_webhook_rejects_invalid_contract(db_session, admin_user):
+    """Push-mode webhook should reject invalid contract with 422."""
+    from fastapi import FastAPI
+    from httpx import ASGITransport, AsyncClient
+
+    from app.api.diagnostic_integration import router
+
+    app = FastAPI()
+    app.include_router(router)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        payload = {
+            "source_system": "batiscan",
+            "source_mission_id": "",
+            "mission_type": "asbestos_full",
+            "payload_hash": "",
+            "published_at": datetime.now(UTC).isoformat(),
+            "building_identifiers": {},
+            "structured_summary": {},
+        }
+        resp = await client.post("/diagnostic-publications", json=payload)
+        assert resp.status_code == 422
+
+
+def test_mapping_empty_payload_hash_raises():
+    """map_v4_payload_to_package should raise ValueError for empty payload_hash."""
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "M-001",
+        "mission_type": "asbestos_full",
+        "payload_hash": "",
+        "published_at": datetime.now(UTC).isoformat(),
+    }
+    with pytest.raises(ValueError, match="payload_hash is empty"):
+        map_v4_payload_to_package(payload)
+
+
+def test_mapping_empty_source_mission_id_raises():
+    """map_v4_payload_to_package should raise ValueError for empty source_mission_id."""
+    payload = {
+        "source_system": "batiscan",
+        "source_mission_id": "",
+        "mission_type": "asbestos_full",
+        "payload_hash": "abc123",
+        "published_at": datetime.now(UTC).isoformat(),
+    }
+    with pytest.raises(ValueError, match="source_mission_id is empty"):
+        map_v4_payload_to_package(payload)

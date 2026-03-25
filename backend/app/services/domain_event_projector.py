@@ -158,7 +158,42 @@ async def _handle_ai_feedback_recorded(db: AsyncSession, event: DomainEvent) -> 
         logger.exception("Pattern learning failed for feedback=%s", feedback_id)
 
 
+# ---------------------------------------------------------------------------
+# Built-in handlers for diagnostic publication events
+# ---------------------------------------------------------------------------
+
+
+async def _handle_publication_received(db: AsyncSession, event: DomainEvent) -> None:
+    """Placeholder: log diagnostic publication received.
+
+    Real projection (passport/trust refresh) is future work.
+    """
+    payload = event.payload or {}
+    logger.info(
+        "Diagnostic publication received: aggregate=%s, consumer_state=%s, dossier_ref=%s",
+        event.aggregate_id,
+        payload.get("consumer_state"),
+        payload.get("dossier_ref"),
+    )
+
+
+async def _handle_publication_matched(db: AsyncSession, event: DomainEvent) -> None:
+    """Placeholder: log diagnostic publication matched to building.
+
+    Real projection (passport/trust refresh) is future work.
+    """
+    payload = event.payload or {}
+    logger.info(
+        "Diagnostic publication matched: aggregate=%s, building_id=%s, match_state=%s",
+        event.aggregate_id,
+        payload.get("building_id"),
+        payload.get("match_state"),
+    )
+
+
 # Register built-in handlers
 register_handler("remediation_post_works_finalized", _handle_post_works_finalized)
 register_handler("remediation_post_works_finalized", _handle_post_works_finalized_pattern)
 register_handler("ai_feedback_recorded", _handle_ai_feedback_recorded)
+register_handler("diagnostic_publication_received", _handle_publication_received)
+register_handler("diagnostic_publication_matched", _handle_publication_matched)
