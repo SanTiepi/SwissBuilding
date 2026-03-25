@@ -12,6 +12,7 @@ import { UnknownIssuesList } from '@/components/UnknownIssuesList';
 import { ChangeSignalsFeed } from '@/components/ChangeSignalsFeed';
 import { ContradictionCard } from '@/components/ContradictionCard';
 import { PostWorksDiffCard } from '@/components/PostWorksDiffCard';
+import { ROICard } from '@/components/building-detail/ROICard';
 import { TimeMachinePanel } from '@/components/TimeMachinePanel';
 import { PassportCard } from '@/components/PassportCard';
 import { SharedLinksPanel } from '@/components/SharedLinksPanel';
@@ -20,6 +21,8 @@ import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersC
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
 import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHistory';
+import SwissRulesWatchPanel from '@/components/building-detail/SwissRulesWatchPanel';
+import ExchangeHistoryPanel from '@/components/building-detail/ExchangeHistoryPanel';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
 import {
@@ -361,6 +364,9 @@ export function OverviewTab({
       {/* Passport Summary */}
       <PassportCard buildingId={buildingId} />
 
+      {/* ROI Summary */}
+      <ROICard buildingId={buildingId} />
+
       {/* Shared Links for this building */}
       <SharedLinksPanel buildingId={buildingId} />
 
@@ -479,6 +485,12 @@ export function OverviewTab({
             <p className="text-xs text-gray-500 dark:text-slate-400">{t('building.quick_access.field_observations')}</p>
           </div>
         </Link>
+      </div>
+
+      {/* Swiss Rules Watch + Exchange History */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SwissRulesWatchPanel buildingId={buildingId} />
+        <ExchangeHistoryPanel buildingId={buildingId} />
       </div>
 
       {/* Proof Delivery History */}

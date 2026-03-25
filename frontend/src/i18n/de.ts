@@ -3190,4 +3190,82 @@ export const de: TranslationMap = {
   'authority_room.action_respond_request': 'Auf Behoerdenanfrage antworten',
   'authority_room.action_send_proof': 'Fehlende Dokumente anfuegen',
   'authority_room.action_wait': 'Warten auf Behoerdenpruefung',
+
+  // SwissRules Watch
+  'swiss_rules.title': 'Schweizer Regelueberwachung',
+  'swiss_rules.active_sources': 'Aktive Quellen',
+  'swiss_rules.freshness_current': 'Aktuell',
+  'swiss_rules.freshness_aging': 'Alternd',
+  'swiss_rules.freshness_stale': 'Veraltet',
+  'swiss_rules.freshness_unknown': 'Unbekannt',
+  'swiss_rules.adapter_status': 'Adapterstatus',
+  'swiss_rules.fallback': 'Rueckfallmodus',
+  'swiss_rules.no_adapter': 'Kein Gemeindeadapter konfiguriert',
+  'swiss_rules.unreviewed_changes': 'Nicht ueberprueft',
+  'swiss_rules.overrides': 'Gemeinde-Ausnahmen',
+  'swiss_rules.empty': 'Keine regulatorischen Quellen konfiguriert',
+
+  // Exchange
+  'exchange.title': 'Austauschverlauf',
+  'exchange.outbound': 'Ausgehende Publikationen',
+  'exchange.inbound': 'Eingehende Importe',
+  'exchange.empty': 'Kein Austausch fuer dieses Gebaeude',
+
+  // Partner Trust
+  'partner_trust.title': 'Partnervertrauen',
+  'partner_trust.level_strong': 'Stark',
+  'partner_trust.level_adequate': 'Angemessen',
+  'partner_trust.level_review': 'Zu pruefen',
+  'partner_trust.level_weak': 'Schwach',
+  'partner_trust.level_unknown': 'Unbekannt',
+  'partner_trust.delivery': 'Lieferzuverlaessigkeit',
+  'partner_trust.evidence': 'Beweisqualitaet',
+  'partner_trust.responsiveness': 'Reaktionsfaehigkeit',
+  'partner_trust.signals': 'Signale',
+
+  // Demo Runbook
+  'nav.demo_runbook': 'Demo Runbook',
+  'nav.pilot_dashboard': 'Pilot Dashboard',
+  'demo_runbook.title': 'Demo-Szenarien',
+  'demo_runbook.description': 'Verfuegbare Demo-Szenarien und ihre Runbooks.',
+  'demo_runbook.empty': 'Keine Demo-Szenarien verfuegbar.',
+  'demo_runbook.reveal_surfaces': 'Enthullte Oberflaechen',
+  'demo_runbook.proof_moment': 'Beweismoment',
+  'demo_runbook.action_moment': 'Aktionsmoment',
+  'demo_runbook.steps': 'Runbook-Schritte',
+  'demo_runbook.expected_state': 'Erwarteter Zustand',
+  'demo_runbook.start_demo': 'Demo starten',
+
+  // Pilot Dashboard
+  'pilot_dashboard.title': 'Pilot-Dashboard',
+  'pilot_dashboard.description': 'Aktive Pilot-Scorecards und ihre Metriken.',
+  'pilot_dashboard.empty': 'Keine aktiven Piloten.',
+  'pilot_dashboard.target_buildings': 'Zielgebaeude',
+  'pilot_dashboard.target_users': 'Zielbenutzer',
+  'pilot_dashboard.no_metrics': 'Keine Metriken erfasst.',
+  'pilot_dashboard.evidence': 'Quelle',
+  'pilot_dashboard.exit_recommendation': 'Austrittsempfehlung',
+  'pilot_dashboard.exit_scale': 'Skalieren',
+  'pilot_dashboard.exit_iterate': 'Iterieren',
+  'pilot_dashboard.exit_pivot': 'Pivotieren',
+  'pilot_dashboard.exit_insufficient_data': 'Unzureichende Daten',
+
+  // ROI
+  'roi.title': 'Gebaeude-ROI',
+  'roi.time_saved': 'Zeitersparnis',
+  'roi.rework_avoided': 'Nacharbeit vermieden',
+  'roi.blocker_days_saved': 'Blockade-Tage gespart',
+  'roi.pack_reuse': 'Pack-Wiederverwendung',
+  'roi.unit_hours': 'Stunden',
+  'roi.unit_days': 'Tage',
+  'roi.unit_count': 'Mal',
+  'roi.evidence_events': 'Ereignisse',
+  'roi.disclaimer': 'Basierend auf realen Workflow-Ereignissen.',
+
+  // Case Study
+  'case_study.before': 'Vorher',
+  'case_study.trigger': 'Ausloeser',
+  'case_study.after': 'Nachher',
+  'case_study.proof_points': 'Beweispunkte',
+  'case_study.evidence_requirements': 'Beweisanforderungen',
 };

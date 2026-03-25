@@ -23,6 +23,8 @@ import {
   BookOpen,
   ClipboardCheck,
   Radar,
+  Presentation,
+  Gauge,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import { useAuthStore } from '@/store/authStore';
@@ -62,6 +64,8 @@ const navItems: NavItem[] = [
   { to: '/admin/procedures', icon: ClipboardCheck, labelKey: 'nav.procedures', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/audit-logs', icon: FileSearch, labelKey: 'nav.audit_logs', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/diagnostic-review', icon: ClipboardCheck, labelKey: 'nav.diagnostic_review', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/demo-runbook', icon: Presentation, labelKey: 'nav.demo_runbook', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/pilot-dashboard', icon: Gauge, labelKey: 'nav.pilot_dashboard', allowedRoles: ['admin'] as UserRole[] },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 

@@ -3183,4 +3183,82 @@ export const en: TranslationMap = {
   'authority_room.action_respond_request': 'Respond to authority request',
   'authority_room.action_send_proof': 'Attach missing documents',
   'authority_room.action_wait': 'Waiting for authority review',
+
+  // SwissRules Watch
+  'swiss_rules.title': 'Swiss Rules Watch',
+  'swiss_rules.active_sources': 'Active sources',
+  'swiss_rules.freshness_current': 'Current',
+  'swiss_rules.freshness_aging': 'Aging',
+  'swiss_rules.freshness_stale': 'Stale',
+  'swiss_rules.freshness_unknown': 'Unknown',
+  'swiss_rules.adapter_status': 'Adapter status',
+  'swiss_rules.fallback': 'Fallback mode',
+  'swiss_rules.no_adapter': 'No communal adapter configured',
+  'swiss_rules.unreviewed_changes': 'Unreviewed changes',
+  'swiss_rules.overrides': 'Communal overrides',
+  'swiss_rules.empty': 'No regulatory sources configured',
+
+  // Exchange
+  'exchange.title': 'Exchange History',
+  'exchange.outbound': 'Outbound publications',
+  'exchange.inbound': 'Inbound imports',
+  'exchange.empty': 'No exchanges for this building',
+
+  // Partner Trust
+  'partner_trust.title': 'Partner Trust',
+  'partner_trust.level_strong': 'Strong',
+  'partner_trust.level_adequate': 'Adequate',
+  'partner_trust.level_review': 'Review',
+  'partner_trust.level_weak': 'Weak',
+  'partner_trust.level_unknown': 'Unknown',
+  'partner_trust.delivery': 'Delivery reliability',
+  'partner_trust.evidence': 'Evidence quality',
+  'partner_trust.responsiveness': 'Responsiveness',
+  'partner_trust.signals': 'signals',
+
+  // Demo Runbook
+  'nav.demo_runbook': 'Demo Runbook',
+  'nav.pilot_dashboard': 'Pilot Dashboard',
+  'demo_runbook.title': 'Demo Scenarios',
+  'demo_runbook.description': 'Available demo scenarios and their runbooks.',
+  'demo_runbook.empty': 'No demo scenarios available.',
+  'demo_runbook.reveal_surfaces': 'Reveal surfaces',
+  'demo_runbook.proof_moment': 'Proof moment',
+  'demo_runbook.action_moment': 'Action moment',
+  'demo_runbook.steps': 'Runbook steps',
+  'demo_runbook.expected_state': 'Expected state',
+  'demo_runbook.start_demo': 'Start demo',
+
+  // Pilot Dashboard
+  'pilot_dashboard.title': 'Pilot Dashboard',
+  'pilot_dashboard.description': 'Active pilot scorecards and their metrics.',
+  'pilot_dashboard.empty': 'No active pilots.',
+  'pilot_dashboard.target_buildings': 'target buildings',
+  'pilot_dashboard.target_users': 'target users',
+  'pilot_dashboard.no_metrics': 'No metrics recorded.',
+  'pilot_dashboard.evidence': 'Source',
+  'pilot_dashboard.exit_recommendation': 'Exit recommendation',
+  'pilot_dashboard.exit_scale': 'Scale',
+  'pilot_dashboard.exit_iterate': 'Iterate',
+  'pilot_dashboard.exit_pivot': 'Pivot',
+  'pilot_dashboard.exit_insufficient_data': 'Insufficient data',
+
+  // ROI
+  'roi.title': 'Building ROI',
+  'roi.time_saved': 'Time saved',
+  'roi.rework_avoided': 'Rework avoided',
+  'roi.blocker_days_saved': 'Blocker days saved',
+  'roi.pack_reuse': 'Pack reuse',
+  'roi.unit_hours': 'hours',
+  'roi.unit_days': 'days',
+  'roi.unit_count': 'times',
+  'roi.evidence_events': 'events',
+  'roi.disclaimer': 'Based on real workflow events.',
+
+  // Case Study
+  'case_study.before': 'Before',
+  'case_study.trigger': 'Trigger',
+  'case_study.after': 'After',
+  'case_study.proof_points': 'Proof points',
+  'case_study.evidence_requirements': 'Evidence requirements',
 };

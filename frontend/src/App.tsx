@@ -43,6 +43,8 @@ const PublicIntake = lazy(() => import('@/pages/PublicIntake'));
 const FieldObservations = lazy(() => import('@/pages/FieldObservations'));
 const ControlTower = lazy(() => import('@/pages/ControlTower'));
 const AuthoritySubmissionRoom = lazy(() => import('@/pages/AuthoritySubmissionRoom'));
+const DemoRunbook = lazy(() => import('@/pages/DemoRunbook'));
+const PilotDashboard = lazy(() => import('@/pages/PilotDashboard'));
 
 function LoadingSpinner() {
   return (
@@ -399,6 +401,26 @@ export default function App() {
                 <PageErrorBoundary pageName="Admin Intake Review">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminIntakeReview />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/demo-runbook"
+              element={
+                <PageErrorBoundary pageName="Demo Runbook">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <DemoRunbook />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/pilot-dashboard"
+              element={
+                <PageErrorBoundary pageName="Pilot Dashboard">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <PilotDashboard />
                   </Suspense>
                 </PageErrorBoundary>
               }

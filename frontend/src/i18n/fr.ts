@@ -3191,4 +3191,82 @@ export const fr: TranslationMap = {
   'authority_room.action_respond_request': "Repondre a la demande de l'autorite",
   'authority_room.action_send_proof': 'Joindre les documents manquants',
   'authority_room.action_wait': "En attente de l'examen par l'autorite",
+
+  // SwissRules Watch
+  'swiss_rules.title': 'Veille reglementaire suisse',
+  'swiss_rules.active_sources': 'Sources actives',
+  'swiss_rules.freshness_current': 'A jour',
+  'swiss_rules.freshness_aging': 'Vieillissant',
+  'swiss_rules.freshness_stale': 'Obsolete',
+  'swiss_rules.freshness_unknown': 'Inconnu',
+  'swiss_rules.adapter_status': 'Statut adaptateur',
+  'swiss_rules.fallback': 'Mode de repli',
+  'swiss_rules.no_adapter': 'Aucun adaptateur communal configure',
+  'swiss_rules.unreviewed_changes': 'Changements non examines',
+  'swiss_rules.overrides': 'Derogations communales',
+  'swiss_rules.empty': 'Aucune source reglementaire configuree',
+
+  // Exchange
+  'exchange.title': 'Historique des echanges',
+  'exchange.outbound': 'Publications sortantes',
+  'exchange.inbound': 'Importations entrantes',
+  'exchange.empty': 'Aucun echange pour ce batiment',
+
+  // Partner Trust
+  'partner_trust.title': 'Confiance partenaire',
+  'partner_trust.level_strong': 'Fort',
+  'partner_trust.level_adequate': 'Adequat',
+  'partner_trust.level_review': 'A revoir',
+  'partner_trust.level_weak': 'Faible',
+  'partner_trust.level_unknown': 'Inconnu',
+  'partner_trust.delivery': 'Fiabilite livraison',
+  'partner_trust.evidence': 'Qualite preuves',
+  'partner_trust.responsiveness': 'Reactivite',
+  'partner_trust.signals': 'signaux',
+
+  // Demo Runbook
+  'nav.demo_runbook': 'Demo Runbook',
+  'nav.pilot_dashboard': 'Pilote Dashboard',
+  'demo_runbook.title': 'Scenarios de demonstration',
+  'demo_runbook.description': 'Scenarios et runbooks disponibles pour les demonstrations.',
+  'demo_runbook.empty': 'Aucun scenario de demonstration disponible.',
+  'demo_runbook.reveal_surfaces': 'Surfaces revelees',
+  'demo_runbook.proof_moment': 'Moment de preuve',
+  'demo_runbook.action_moment': "Moment d'action",
+  'demo_runbook.steps': 'Etapes du runbook',
+  'demo_runbook.expected_state': 'Etat attendu',
+  'demo_runbook.start_demo': 'Demarrer la demo',
+
+  // Pilot Dashboard
+  'pilot_dashboard.title': 'Tableau de bord pilote',
+  'pilot_dashboard.description': 'Scorecards des pilotes actifs et leurs metriques.',
+  'pilot_dashboard.empty': 'Aucun pilote en cours.',
+  'pilot_dashboard.target_buildings': 'batiments cibles',
+  'pilot_dashboard.target_users': 'utilisateurs cibles',
+  'pilot_dashboard.no_metrics': 'Aucune metrique enregistree.',
+  'pilot_dashboard.evidence': 'Source',
+  'pilot_dashboard.exit_recommendation': 'Recommandation de sortie',
+  'pilot_dashboard.exit_scale': 'Deployer',
+  'pilot_dashboard.exit_iterate': 'Iterer',
+  'pilot_dashboard.exit_pivot': 'Pivoter',
+  'pilot_dashboard.exit_insufficient_data': 'Donnees insuffisantes',
+
+  // ROI
+  'roi.title': 'ROI du batiment',
+  'roi.time_saved': 'Temps economise',
+  'roi.rework_avoided': 'Reprises evitees',
+  'roi.blocker_days_saved': 'Jours de blocage evites',
+  'roi.pack_reuse': 'Reutilisations de pack',
+  'roi.unit_hours': 'heures',
+  'roi.unit_days': 'jours',
+  'roi.unit_count': 'fois',
+  'roi.evidence_events': 'evenements',
+  'roi.disclaimer': 'Base sur les evenements reels du workflow.',
+
+  // Case Study
+  'case_study.before': 'Avant',
+  'case_study.trigger': 'Declencheur',
+  'case_study.after': 'Apres',
+  'case_study.proof_points': 'Points de preuve',
+  'case_study.evidence_requirements': 'Preuves requises',
 };
