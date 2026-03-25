@@ -416,13 +416,13 @@ async def test_api_compare_unauthenticated(client, sample_building):
         "/api/v1/due-diligence/compare",
         json={"building_ids": [str(sample_building.id)]},
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
 async def test_api_due_diligence_unauthenticated(client, sample_building):
     resp = await client.get(f"/api/v1/buildings/{sample_building.id}/due-diligence")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 # ---------------------------------------------------------------------------

@@ -611,4 +611,4 @@ async def test_api_triggers_unauthenticated(client):
     resp = await client.get(
         f"/api/v1/notification-rules/triggers/{uuid.uuid4()}",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

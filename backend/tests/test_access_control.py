@@ -482,8 +482,10 @@ class TestGenerateAccessPermitRequirements:
 class TestPortfolioAccessStatus:
     @pytest.mark.asyncio
     async def test_org_not_found(self, db_session):
-        with pytest.raises(ValueError, match="not found"):
-            await get_portfolio_access_status(db_session, uuid.uuid4())
+        # Service returns empty result for unknown org (no longer raises ValueError)
+        result = await get_portfolio_access_status(db_session, uuid.uuid4())
+        assert result.total_buildings == 0
+        assert result.buildings == []
 
     @pytest.mark.asyncio
     async def test_portfolio_with_restrictions(self, db_session, org_with_buildings):
@@ -562,13 +564,15 @@ class TestAccessControlAPI:
         assert data["zones_requiring_permits"] == 0
 
     @pytest.mark.asyncio
-    async def test_get_access_status_404(self, client, auth_headers):
+    async def test_get_access_status_empty_for_unknown_org(self, client, auth_headers):
         fake_id = uuid.uuid4()
         resp = await client.get(f"/api/v1/organizations/{fake_id}/access-status", headers=auth_headers)
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total_buildings"] == 0
 
     @pytest.mark.asyncio
-    async def test_unauthenticated_returns_403(self, client):
+    async def test_unauthenticated_returns_401(self, client):
         fake_id = uuid.uuid4()
         resp = await client.get(f"/api/v1/buildings/{fake_id}/access-restrictions")
-        assert resp.status_code == 403
+        assert resp.status_code == 401

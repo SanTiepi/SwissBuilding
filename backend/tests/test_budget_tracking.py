@@ -347,8 +347,10 @@ async def test_portfolio_summary_no_members(db_session):
 
 @pytest.mark.asyncio
 async def test_portfolio_summary_not_found(db_session):
-    with pytest.raises(ValueError, match="not found"):
-        await get_portfolio_budget_summary(db_session, uuid.uuid4())
+    # Service returns empty result for unknown org (no longer raises ValueError)
+    result = await get_portfolio_budget_summary(db_session, uuid.uuid4())
+    assert result.total_estimated_chf == 0.0
+    assert result.buildings == []
 
 
 @pytest.mark.asyncio
@@ -454,12 +456,14 @@ async def test_api_portfolio_summary(client, auth_headers, db_session):
 
 
 @pytest.mark.asyncio
-async def test_api_portfolio_summary_404(client, auth_headers):
+async def test_api_portfolio_summary_empty_for_unknown_org(client, auth_headers):
     resp = await client.get(
         f"/api/v1/organizations/{uuid.uuid4()}/budget-summary",
         headers=auth_headers,
     )
-    assert resp.status_code == 404
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_estimated_chf"] == 0.0
 
 
 @pytest.mark.asyncio

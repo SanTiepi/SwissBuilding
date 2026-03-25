@@ -407,7 +407,7 @@ async def test_digest_with_change_signals(db_session):
 async def test_api_digest_requires_auth(client):
     """GET /notifications/digest returns 403 without auth."""
     resp = await client.get("/api/v1/notifications/digest")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

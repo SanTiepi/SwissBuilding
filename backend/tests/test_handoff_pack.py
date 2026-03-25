@@ -485,4 +485,4 @@ async def test_api_handoff_unauthorized(client: AsyncClient, building_with_data)
     resp = await client.get(
         f"/api/v1/buildings/{building_with_data.id}/handoff/diagnostic",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

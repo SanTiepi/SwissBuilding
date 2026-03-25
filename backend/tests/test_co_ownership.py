@@ -455,4 +455,4 @@ async def test_api_unauthorized(client: AsyncClient, ppe_building: Building):
     resp = await client.get(
         f"/api/v1/co-ownership/buildings/{ppe_building.id}/info",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

@@ -624,4 +624,4 @@ class TestPermitTrackingAPI:
         resp = await client.get(
             f"/api/v1/buildings/{building_with_asbestos.id}/permits/required",
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 401

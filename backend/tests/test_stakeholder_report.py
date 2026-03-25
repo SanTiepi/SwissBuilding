@@ -494,4 +494,4 @@ async def test_api_executive_report_not_found(client: AsyncClient, auth_headers:
 @pytest.mark.asyncio
 async def test_api_owner_report_unauthenticated(client: AsyncClient, sample_building: Building):
     resp = await client.get(f"/api/v1/buildings/{sample_building.id}/report/owner")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

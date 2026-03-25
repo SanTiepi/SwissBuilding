@@ -509,4 +509,4 @@ async def test_api_generate_passport_unauthenticated(client: AsyncClient, sample
     resp = await client.get(
         f"/api/v1/passport-export/buildings/{sample_building.id}/generate",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

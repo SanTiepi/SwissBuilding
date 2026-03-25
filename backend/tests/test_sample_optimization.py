@@ -432,4 +432,4 @@ class TestSampleOptimizationAPI:
         resp = await client.get(
             f"/api/v1/buildings/{building_1965.id}/sampling-optimization",
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 401

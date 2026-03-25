@@ -496,4 +496,4 @@ async def test_api_unauthenticated(client, sample_building):
     resp = await client.get(
         f"/api/v1/buildings/{sample_building.id}/renovation-sequence",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

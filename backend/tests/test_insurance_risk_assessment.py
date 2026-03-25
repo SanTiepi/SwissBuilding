@@ -572,4 +572,4 @@ async def test_api_compare(client, auth_headers, sample_building):
 async def test_api_unauthorized(client):
     """Endpoints require authentication."""
     resp = await client.get(f"/api/v1/buildings/{uuid.uuid4()}/insurance-risk")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

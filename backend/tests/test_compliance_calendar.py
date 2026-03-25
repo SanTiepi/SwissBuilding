@@ -517,4 +517,4 @@ async def test_api_unauthorized(client: AsyncClient, sample_building):
     resp = await client.get(
         f"/api/v1/buildings/{sample_building.id}/compliance-calendar/2026",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

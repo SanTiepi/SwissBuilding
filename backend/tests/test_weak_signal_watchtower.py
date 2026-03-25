@@ -546,4 +546,4 @@ async def test_api_requires_auth(client):
     """Endpoints should require authentication."""
     fake_id = uuid.uuid4()
     resp = await client.get(f"/api/v1/buildings/{fake_id}/weak-signals")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

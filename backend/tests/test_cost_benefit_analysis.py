@@ -347,7 +347,7 @@ async def test_portfolio_plan_empty_org(db_session: AsyncSession, org: Organizat
 @pytest.mark.asyncio
 async def test_portfolio_plan_empty_org_random_id(db_session: AsyncSession):
     result = await get_portfolio_investment_plan(db_session, uuid.uuid4())
-    assert result.total_buildings == 0
+    assert len(result.ranked_buildings) == 0
 
 
 @pytest.mark.asyncio
@@ -445,10 +445,10 @@ async def test_api_investment_plan_empty_org(client: AsyncClient, auth_headers: 
     resp = await client.get(f"/api/v1/organizations/{uuid.uuid4()}/investment-plan", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
-    assert data["total_buildings"] == 0
+    assert len(data["ranked_buildings"]) == 0
 
 
 @pytest.mark.asyncio
 async def test_api_no_auth(client: AsyncClient, building_with_samples: Building):
     resp = await client.get(f"/api/v1/buildings/{building_with_samples.id}/intervention-roi")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

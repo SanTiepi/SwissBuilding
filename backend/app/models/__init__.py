@@ -50,6 +50,7 @@ from app.models.plan_annotation import PlanAnnotation
 from app.models.pollutant_rule import PollutantRule
 from app.models.portfolio import Portfolio
 from app.models.post_works_state import PostWorksState
+from app.models.prework_trigger import PreworkTrigger
 from app.models.readiness_assessment import ReadinessAssessment
 from app.models.regulatory_pack import RegulatoryPack
 from app.models.sample import Sample
@@ -121,6 +122,7 @@ __all__ = [
     "PollutantRule",
     "Portfolio",
     "PostWorksState",
+    "PreworkTrigger",
     "ReadinessAssessment",
     "RegulatoryPack",
     "Sample",

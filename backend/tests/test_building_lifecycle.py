@@ -410,7 +410,7 @@ async def test_api_lifecycle_prediction(client, sample_building, auth_headers):
 @pytest.mark.asyncio
 async def test_api_lifecycle_prediction_401(client, sample_building):
     resp = await client.get(f"/api/v1/buildings/{sample_building.id}/lifecycle-prediction")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

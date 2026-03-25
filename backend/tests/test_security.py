@@ -376,7 +376,7 @@ class TestAuthenticationBypass:
     async def test_no_auth_header(self, client):
         """Requests without auth header should be rejected."""
         resp = await client.get("/api/v1/buildings")
-        assert resp.status_code == 403  # HTTPBearer returns 403 when missing
+        assert resp.status_code == 401  # Unauthenticated returns 401
 
     async def test_empty_bearer_token(self, client):
         resp = await client.get("/api/v1/buildings", headers={"Authorization": "Bearer "})

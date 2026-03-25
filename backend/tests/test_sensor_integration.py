@@ -488,4 +488,4 @@ async def test_api_overview_unauthenticated(client, sample_building):
     resp = await client.get(
         f"/api/v1/sensor-integration/buildings/{sample_building.id}/overview",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

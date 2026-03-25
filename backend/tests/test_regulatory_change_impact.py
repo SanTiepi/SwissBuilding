@@ -415,4 +415,4 @@ async def test_api_compliance_forecast(client, auth_headers, buildings_with_samp
 async def test_api_unauthenticated(client):
     """Endpoints should require auth."""
     resp = await client.get("/api/v1/regulatory-impact/compliance-forecast")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

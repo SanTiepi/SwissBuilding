@@ -439,4 +439,4 @@ class TestContractorDashboardAPI:
     async def test_unauthenticated_request(self, client):
         """Unauthenticated request returns 403."""
         resp = await client.get("/api/v1/dashboard/owner")
-        assert resp.status_code == 403
+        assert resp.status_code == 401

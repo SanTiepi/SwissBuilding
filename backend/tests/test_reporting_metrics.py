@@ -487,4 +487,4 @@ async def test_api_benchmark(client, auth_headers, db_session, org, org_user, or
 async def test_api_unauthenticated(client, db_session, org):
     """Unauthenticated requests return 403."""
     response = await client.get(f"/api/v1/organizations/{org.id}/kpi-dashboard")
-    assert response.status_code == 403
+    assert response.status_code == 401

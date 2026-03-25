@@ -446,7 +446,7 @@ async def test_enriched_timeline_no_auth(client, sample_building):
     resp = await client.get(
         f"/api/v1/buildings/{sample_building.id}/timeline/enriched",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -455,4 +455,4 @@ async def test_lifecycle_summary_no_auth(client, sample_building):
     resp = await client.get(
         f"/api/v1/buildings/{sample_building.id}/timeline/lifecycle-summary",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

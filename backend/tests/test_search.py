@@ -327,7 +327,7 @@ class TestHitToResult:
 class TestSearchAPI:
     async def test_search_requires_auth(self, client):
         response = await client.get("/api/v1/search?q=test")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     @patch("app.services.search_service.search_all")
     async def test_search_returns_results(self, mock_search_all, client, admin_user, auth_headers):

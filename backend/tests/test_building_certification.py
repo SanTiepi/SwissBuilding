@@ -148,7 +148,7 @@ async def _create_fully_ready_building(db_session, user_id, **building_kwargs):
     await db_session.commit()
 
     diag = await _create_diagnostic(db_session, b.id, status="validated", diagnostic_type="energy")
-    for pollutant in ("asbestos", "pcb", "lead", "hap", "radon"):
+    for pollutant in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
         await _create_sample(db_session, diag.id, pollutant_type=pollutant, threshold_exceeded=False)
     await _create_document(db_session, b.id, document_type="diagnostic_report")
     await _create_document(db_session, b.id, document_type="lab_report", file_name="lab.pdf")
@@ -232,7 +232,7 @@ class TestCheckRequirements:
     def test_all_pollutants_evaluated(self):
         samples = []
         diag_id = uuid.uuid4()
-        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
             samples.append(
                 Sample(
                     id=uuid.uuid4(),
@@ -455,7 +455,7 @@ class TestEvaluateCertificationReadiness:
         """Building ready except floor plans — should still get high score for cecb."""
         building = await _create_building(db_session, admin_user.id)
         diag = await _create_diagnostic(db_session, building.id, status="validated", diagnostic_type="energy")
-        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
             await _create_sample(db_session, diag.id, pollutant_type=pt, threshold_exceeded=False)
         await _create_document(db_session, building.id, document_type="diagnostic_report")
         await _create_document(db_session, building.id, document_type="lab_report", file_name="lab.pdf")

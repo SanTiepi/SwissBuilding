@@ -498,4 +498,4 @@ class TestEvidenceChainAPI:
         """Endpoints should reject unauthenticated requests."""
         data = setup_building
         resp = await client.get(f"/api/v1/buildings/{data['building'].id}/evidence-chain/validate")
-        assert resp.status_code == 403
+        assert resp.status_code == 401

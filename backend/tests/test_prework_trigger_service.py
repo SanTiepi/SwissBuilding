@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.building import Building
 from app.models.prework_trigger import PreworkTrigger
+from app.models.user import User
 from app.services.prework_trigger_service import (
     acknowledge_trigger,
     escalate_triggers,
@@ -27,12 +28,27 @@ USER_ID = uuid.uuid4()
 
 @pytest_asyncio.fixture
 async def building(db_session: AsyncSession):
+    user = User(
+        id=USER_ID,
+        email="prework-test@test.ch",
+        password_hash="$2b$12$dummyhashforpreworktestXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        first_name="Test",
+        last_name="Prework",
+        role="admin",
+        is_active=True,
+        language="fr",
+    )
+    db_session.add(user)
+    await db_session.flush()
+
     b = Building(
         id=BUILDING_ID,
         address="Test Prework",
         city="Lausanne",
         canton="VD",
         postal_code="1000",
+        building_type="residential",
+        created_by=USER_ID,
     )
     db_session.add(b)
     await db_session.flush()
@@ -371,7 +387,17 @@ class TestPortfolioSummary:
 
     async def test_portfolio_summary(self, db_session: AsyncSession, building):
         b2_id = uuid.uuid4()
-        db_session.add(Building(id=b2_id, address="B2", city="Genève", canton="GE", postal_code="1200"))
+        db_session.add(
+            Building(
+                id=b2_id,
+                address="B2",
+                city="Genève",
+                canton="GE",
+                postal_code="1200",
+                building_type="residential",
+                created_by=USER_ID,
+            )
+        )
         await db_session.flush()
 
         db_session.add(

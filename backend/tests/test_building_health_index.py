@@ -297,7 +297,7 @@ class TestScorePollutantStatus:
             status="completed",
         )
         samples = []
-        for pt in ("asbestos", "pcb", "lead", "hap", "radon"):
+        for pt in ("asbestos", "pcb", "lead", "hap", "radon", "pfas"):
             samples.append(
                 Sample(
                     id=uuid.uuid4(),
@@ -1012,4 +1012,4 @@ class TestHealthIndexAPI:
         resp = await client.get(
             f"/api/v1/buildings/{sample_building.id}/health-index",
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 401

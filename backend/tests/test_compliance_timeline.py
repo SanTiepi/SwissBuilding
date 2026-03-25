@@ -509,7 +509,7 @@ async def test_api_pollutant_states_endpoint(client, auth_headers, sample_buildi
     assert resp.status_code == 200
     data = resp.json()
     assert isinstance(data, list)
-    assert len(data) == 5  # 5 pollutants
+    assert len(data) == 6  # 6 pollutants (including pfas)
 
 
 @pytest.mark.asyncio

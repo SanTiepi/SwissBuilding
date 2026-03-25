@@ -765,4 +765,4 @@ async def test_api_portfolio_health_score(client, admin_user, auth_headers, db_s
 async def test_api_portfolio_summary_unauthorized(client):
     """GET /api/portfolio/summary without auth returns 403."""
     resp = await client.get("/api/v1/portfolio/summary")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

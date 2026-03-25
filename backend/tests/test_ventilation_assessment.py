@@ -493,4 +493,4 @@ class TestVentilationAPI:
         resp = await client.get(
             f"/api/v1/buildings/{sample_building.id}/ventilation-assessment",
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 401

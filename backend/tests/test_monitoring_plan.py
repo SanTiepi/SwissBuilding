@@ -435,7 +435,7 @@ async def test_api_monitoring_status_org(client, auth_headers, db_session):
 async def test_api_monitoring_plan_unauthenticated(client, sample_building):
     """Unauthenticated request returns 401."""
     resp = await client.get(f"/api/v1/buildings/{sample_building.id}/monitoring-plan")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

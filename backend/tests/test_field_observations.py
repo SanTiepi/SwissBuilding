@@ -410,10 +410,10 @@ async def test_create_observation_no_auth(client, building):
         "title": "Test",
     }
     resp = await client.post(f"/api/v1/buildings/{building.id}/field-observations", json=payload)
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
 async def test_list_observations_no_auth(client, building):
     resp = await client.get(f"/api/v1/buildings/{building.id}/field-observations")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

@@ -320,4 +320,4 @@ class TestRiskCommunicationAPI:
         resp = await client.get(
             f"/api/v1/buildings/{building_with_samples.id}/risk-communication/occupant-notice",
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 401

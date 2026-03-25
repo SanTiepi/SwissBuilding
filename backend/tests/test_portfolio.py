@@ -33,7 +33,7 @@ async def test_portfolio_metrics_empty_db(client, auth_headers):
 async def test_portfolio_metrics_requires_auth(client):
     """Test metrics endpoint requires authentication."""
     response = await client.get("/api/v1/portfolio/metrics")
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio

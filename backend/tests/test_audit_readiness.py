@@ -595,4 +595,4 @@ async def test_api_readiness_requires_auth(client: AsyncClient, sample_building)
     resp = await client.get(
         f"/api/v1/buildings/{sample_building.id}/audit-readiness",
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401

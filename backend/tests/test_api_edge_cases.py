@@ -584,13 +584,13 @@ class TestRBACEdgeCases:
         )
         assert response.status_code == 201
 
-    async def test_no_auth_header_returns_403(self, client):
+    async def test_no_auth_header_returns_401(self, client):
         response = await client.get("/api/v1/buildings")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     async def test_malformed_auth_header(self, client):
         response = await client.get("/api/v1/buildings", headers={"Authorization": "NotBearer xyz"})
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ============================================================================

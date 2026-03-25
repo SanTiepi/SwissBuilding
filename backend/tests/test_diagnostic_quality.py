@@ -488,4 +488,4 @@ async def test_api_benchmarks(client, auth_headers):
 async def test_api_quality_unauthenticated(client):
     """401 without auth."""
     resp = await client.get(f"/api/v1/diagnostics/{uuid.uuid4()}/quality")
-    assert resp.status_code == 403
+    assert resp.status_code == 401

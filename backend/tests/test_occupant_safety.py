@@ -505,4 +505,4 @@ class TestOccupantSafetyAPI:
     async def test_unauthenticated_returns_401(self, client):
         fake_id = uuid.uuid4()
         resp = await client.get(f"/api/v1/buildings/{fake_id}/occupant-safety")
-        assert resp.status_code == 403
+        assert resp.status_code == 401
