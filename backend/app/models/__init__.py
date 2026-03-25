@@ -1,6 +1,7 @@
 from app.models.action_item import ActionItem
 from app.models.assignment import Assignment
 from app.models.audit_log import AuditLog
+from app.models.authority_request import AuthorityRequest
 from app.models.background_job import BackgroundJob
 from app.models.building import Building
 from app.models.building_element import BuildingElement
@@ -46,11 +47,14 @@ from app.models.obligation import Obligation
 from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
 from app.models.party_role_assignment import PartyRoleAssignment
+from app.models.permit_procedure import PermitProcedure
+from app.models.permit_step import PermitStep
 from app.models.plan_annotation import PlanAnnotation
 from app.models.pollutant_rule import PollutantRule
 from app.models.portfolio import Portfolio
 from app.models.post_works_state import PostWorksState
 from app.models.prework_trigger import PreworkTrigger
+from app.models.proof_delivery import ProofDelivery
 from app.models.readiness_assessment import ReadinessAssessment
 from app.models.regulatory_pack import RegulatoryPack
 from app.models.sample import Sample
@@ -70,6 +74,7 @@ __all__ = [
     "ActionItem",
     "Assignment",
     "AuditLog",
+    "AuthorityRequest",
     "BackgroundJob",
     "Building",
     "BuildingElement",
@@ -118,11 +123,14 @@ __all__ = [
     "Organization",
     "OwnershipRecord",
     "PartyRoleAssignment",
+    "PermitProcedure",
+    "PermitStep",
     "PlanAnnotation",
     "PollutantRule",
     "Portfolio",
     "PostWorksState",
     "PreworkTrigger",
+    "ProofDelivery",
     "ReadinessAssessment",
     "RegulatoryPack",
     "Sample",

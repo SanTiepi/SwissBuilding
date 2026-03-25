@@ -43,6 +43,7 @@ from app.api import (
     contractor_acknowledgment,
     contractor_matching,
     contracts,
+    control_tower_v2,
     cost_benefit_analysis,
     counterfactual_analysis,
     cross_building_pattern,
@@ -103,6 +104,7 @@ from app.api import (
     pack_impact,
     passport,
     passport_export,
+    permit_procedures,
     permit_tracking,
     pollutant_inventory,
     pollutant_map,
@@ -112,6 +114,7 @@ from app.api import (
     portfolio_trends,
     post_works,
     priority_matrix,
+    proof_delivery,
     quality_assurance,
     readiness,
     regulatory_change_impact,
@@ -221,6 +224,9 @@ api_router.include_router(campaigns.router, prefix="", tags=["Campaigns"])
 api_router.include_router(campaign_tracking.router, prefix="", tags=["Campaign Tracking"])
 api_router.include_router(capex_planning.router, prefix="", tags=["CAPEX Planning"])
 api_router.include_router(compliance_artefacts.router, prefix="", tags=["Compliance Artefacts"])
+api_router.include_router(control_tower_v2.router, prefix="", tags=["Control Tower v2"])
+api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Procedures"])
+api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
 api_router.include_router(compliance_calendar.router, prefix="", tags=["Compliance Calendar"])
 api_router.include_router(compliance_gap.router, prefix="", tags=["Compliance Gap"])
 api_router.include_router(saved_simulations.router, prefix="", tags=["Saved Simulations"])
