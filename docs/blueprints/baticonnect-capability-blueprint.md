@@ -1158,3 +1158,60 @@ Version: 2.0 | Date: 2026-03-21
 1. **Occupancy** (Layer 3): 100% planned -- entirely new
 2. **Contractual** (Layer 4): 62% planned -- mostly new
 3. **Financial** (Layer 5): 50% planned -- partially covered by remediation cost services
+
+---
+
+## Planned -- Remediation Marketplace
+
+> Mise en concurrence encadree for pollutant remediation. Closed verified network with 5 delivery lots.
+
+### MKT-1: Company Verification and Onboarding
+
+| Field | Value |
+|---|---|
+| **Description** | Verify remediation companies (certifications, SUVA recognition, trade categories, service regions) before they can receive RFQs |
+| **Source entities** | CompanyProfile, CompanyVerification |
+| **Status** | `planned` |
+| **Dependencies** | Organization backbone, Document Intake (1.1) |
+
+### MKT-2: Neutral RFQ Lifecycle
+
+| Field | Value |
+|---|---|
+| **Description** | Property managers create ClientRequests (RFQs) scoped to building + pollutant type + work category. Verified companies receive RequestInvitations and submit Quotes. No platform ranking or recommendation. |
+| **Source entities** | ClientRequest, RequestDocument, RequestInvitation, Quote |
+| **Status** | `planned` |
+| **Dependencies** | MKT-1, Building asset, Document Intake (1.1) |
+
+### MKT-3: Award and Trust Chain
+
+| Field | Value |
+|---|---|
+| **Description** | Formal award of RFQ to selected quote with hash-signed AwardConfirmation. Post-works CompletionConfirmation with dual sign-off. Verified Review only after confirmed completion. |
+| **Source entities** | AwardConfirmation, CompletionConfirmation, Review |
+| **Status** | `planned` |
+| **Dependencies** | MKT-2 |
+
+### MKT-4: Subscription Monetization
+
+| Field | Value |
+|---|---|
+| **Description** | Company subscription management (plan tiers, billing lifecycle). Subscription tier does NOT influence visibility or ranking in RFQ results. |
+| **Source entities** | CompanySubscription |
+| **Status** | `planned` |
+| **Dependencies** | MKT-1 |
+
+### MKT-5: Site Integration
+
+| Field | Value |
+|---|---|
+| **Description** | Public-facing company profiles, RFQ submission forms, and marketplace navigation integrated into BatiConnect Workspace surface |
+| **Source entities** | CompanyProfile (read projection) |
+| **Status** | `planned` |
+| **Dependencies** | MKT-1, MKT-2 |
+
+### Marketplace Invariants
+
+- No recommendation: platform never ranks or recommends companies to clients
+- Payment != ranking: subscription tier does not influence visibility in RFQ results
+- Verified contracts only: awards and reviews require completed verification chain

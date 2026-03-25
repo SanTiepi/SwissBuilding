@@ -411,6 +411,61 @@ Conditional later boosters:
 - `Docling`
 - `PaddleOCR`
 
+## Remediation Marketplace (Validated 2026-03-25)
+
+SwissBuilding now includes a remediation marketplace as a validated strategic axis.
+
+### Purpose
+
+Create a closed, verified network for regulated competition on pollutant remediation works. The marketplace connects property managers who need remediation with verified remediation companies, using the BatiConnect evidence layer as the trust foundation.
+
+### Positioning
+
+The marketplace is not an open directory. It is a Batiscan-verified closed network where:
+- every participating company is verified before receiving any RFQ
+- ratings apply only to verified, completed contracts (double confirmation: client + company, with Batiscan moderation)
+- the platform does NOT recommend or rank companies -- the client always chooses
+- payment (company subscriptions) never influences ranking or visibility in RFQ results
+
+### Two Entry Paths
+
+1. **With diagnostic**: property manager has a BatiConnect diagnostic publication. The marketplace enables direct RFQ creation scoped to building, pollutant type, and work category.
+2. **Without diagnostic**: property manager does not yet have a diagnostic. The marketplace routes them to a Batiscan assessment first, which then feeds into the RFQ flow.
+
+### Revenue Model
+
+Company subscriptions for network participation and visibility. Subscription tiers do not influence ranking, priority, or visibility in RFQ results.
+
+### Trust Model
+
+- Closed network: companies verified by Batiscan (certifications, SUVA recognition, trade categories, service regions)
+- Verified contracts only: awards and reviews require completed verification chain
+- Double confirmation: both client and company confirm completion before any review is possible
+- Batiscan moderation: platform moderates reviews and disputes
+
+### Integration with BatiConnect
+
+The marketplace shares BatiConnect infrastructure:
+- consumes diagnostic publications as RFQ context
+- reuses existing auth, document intake, and audit layers
+- remediation evidence feeds back into the building dossier and evidence chain
+- post-works truth from marketplace-sourced interventions enriches the digital twin
+
+### Strategic Value
+
+- creates a new revenue stream (company subscriptions) alongside SaaS subscriptions
+- strengthens the evidence chain by connecting diagnostics to verified remediation outcomes
+- builds network effects: more verified companies attract more property managers and vice versa
+- reinforces the moat: the combination of diagnostic truth + verified remediation network is hard to replicate
+
+### Invariants
+
+- The platform does NOT recommend companies to clients
+- Payment does NOT influence ranking
+- Verified contracts only (no open reviews)
+- No shared database between BatiConnect and external systems
+- BatiConnect is an evidence/readiness layer, not a diagnostic tool itself
+
 ## Relationship to the Roadmap
 
 The roadmap in `docs/roadmap-next-batches.md` is the execution model.

@@ -1216,3 +1216,30 @@ Auto-resolve pattern: when triggering condition is resolved, issue is automatica
 | All other existing models | Stay as-is | Unchanged | None |
 
 **Guarantee**: All current API endpoints continue working. Canonical entities add NEW endpoints alongside. No drops, no renames, no breaking FK changes.
+
+---
+
+## Planned -- Remediation Marketplace
+
+> Mise en concurrence encadree for pollutant remediation. Closed verified network, not open directory. Shares BatiConnect infra (auth, docs, audit) but owns its own models and routes.
+
+### New Entities
+
+| Entity | Purpose | Key Fields |
+|---|---|---|
+| CompanyProfile | Verified remediation company identity | id, organization_id, trade_categories, service_regions, certifications, description, is_verified, verified_at |
+| CompanyVerification | Verification lifecycle for a company | id, company_profile_id, status (pending/approved/rejected/suspended), verified_by, evidence_refs, notes |
+| CompanySubscription | Subscription/monetization record | id, company_profile_id, plan_type, status (active/cancelled/expired), started_at, expires_at |
+| ClientRequest | RFQ issued by a property manager or owner | id, building_id, organization_id, created_by, title, description, pollutant_types, work_category, deadline, status (draft/open/closed/awarded/cancelled) |
+| RequestDocument | Document attached to a ClientRequest | id, client_request_id, document_id, label |
+| RequestInvitation | Invitation sent to a company for a specific RFQ | id, client_request_id, company_profile_id, status (pending/accepted/declined/expired), sent_at |
+| Quote | Company response to an RFQ | id, client_request_id, company_profile_id, amount, currency, validity_days, technical_description, status (draft/submitted/withdrawn/accepted/rejected) |
+| AwardConfirmation | Formal award of an RFQ to a company | id, client_request_id, quote_id, company_profile_id, awarded_by, awarded_at, confirmation_hash |
+| CompletionConfirmation | Post-works completion confirmation | id, award_confirmation_id, completed_at, confirmed_by_client, confirmed_by_company, completion_hash |
+| Review | Verified post-completion rating | id, completion_confirmation_id, reviewer_user_id, company_profile_id, rating, comment, is_verified |
+
+### Invariants
+
+- No recommendation: the platform never ranks or recommend companies to clients
+- Payment != ranking: subscription tier does not influence visibility in RFQ results
+- Verified contracts only: awards and reviews require completed verification chain (CompanyVerification approved, AwardConfirmation signed, CompletionConfirmation confirmed)

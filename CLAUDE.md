@@ -6,6 +6,16 @@ Read [ORCHESTRATOR.md](./ORCHESTRATOR.md) for active execution board (large/mult
 
 > AI agents MAY update this file to fix outdated counts, commands, or references.
 
+## Ecosystem
+
+BatiConnect is a **standalone brand** (Batiscan Sarl is founder/operator).
+This repo carries **two product surfaces**:
+1. **Building intelligence** — dossier, evidence, completeness, trust, readiness, portfolio
+2. **Remediation marketplace** — mise en concurrence encadree for pollutant remediation works
+
+Both share infra (auth, docs, audit) but have separate models and routes.
+See `memory/project_ecosystem_vision.md` for the full 4-brick map.
+
 ## Hard Rules
 
 - `egid` != `egrid` != `official_id` (see AGENTS.md for types)

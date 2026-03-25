@@ -1515,6 +1515,46 @@ Rule:
 346. **Integration Regression Sentinel**
      - catch full-chain drift before another backend primitive gets added
 
+### J59. Remediation Marketplace (Validated 2026-03-25)
+
+Status: `core_now`
+
+Closed verified network for regulated competition on pollutant remediation works. Batiscan-verified companies receive RFQs from property managers. No platform recommendation, no payment-influenced ranking.
+
+**5 Delivery Lots**
+
+347. **Company Verification and Onboarding (MKT-1)**
+     - verify remediation companies (certifications, SUVA recognition, trade categories, service regions) before they can receive RFQs
+348. **Neutral RFQ Lifecycle (MKT-2)**
+     - property managers create ClientRequests scoped to building + pollutant type + work category; verified companies receive RequestInvitations and submit Quotes; no platform ranking or recommendation
+349. **Award, Completion, and Verified Review (MKT-3)**
+     - formal award with hash-signed AwardConfirmation; post-works CompletionConfirmation with dual sign-off (client + company); verified Review only after confirmed completion
+350. **Company Subscription Management (MKT-4)**
+     - subscription tiers and billing lifecycle; subscription tier does NOT influence visibility or ranking in RFQ results
+351. **Marketplace Workspace Surface (MKT-5)**
+     - public-facing company profiles, RFQ submission forms, and marketplace navigation integrated into BatiConnect Workspace surface
+
+**Dependencies**
+
+- existing auth and RBAC (Organization backbone)
+- Document Intake (diagnostic publications as RFQ context)
+- audit trail infrastructure
+- diagnostic publications (BatiConnect evidence layer)
+
+**Unlocks**
+
+- company subscriptions (new revenue stream)
+- verified network effects (more companies attract more clients and vice versa)
+- remediation evidence chain (post-works truth feeds back into building dossier)
+- closed-loop diagnostic-to-remediation flow
+
+**Invariants**
+
+- No recommendation: platform never ranks or recommends companies to clients
+- Payment != ranking: subscription tier does not influence visibility in RFQ results
+- Verified contracts only: awards and reviews require completed verification chain
+- No shared database between BatiConnect and external systems
+
 ## K. Saturation and Triage Workflow
 
 This file is meant to grow until new additions become mostly variants or duplicates.

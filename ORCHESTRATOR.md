@@ -1228,6 +1228,13 @@ It should stay compact and focus on the next believable product jumps, not the f
 - openBIM / digital logbook convergence
 - ecosystem pull and standards
 
+14. **Remediation marketplace (mise en concurrence encadree)**
+- closed verified network, not open directory
+- 5 lots: foundations, neutral RFQ, award+trust, monetization, site integration
+- shares infra with BatiConnect (auth, docs, audit)
+- own models and routes
+- invariants: no recommendation, payment != ranking, verified contracts only
+
 ### Promotion rule
 
 - if the active wave finishes early, promote items from this feed into `Next 10 Actions`
