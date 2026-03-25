@@ -27,6 +27,7 @@ import { PackagePresetPreview } from '@/components/building-detail/PackagePreset
 import { PublicOwnerModePanel } from '@/components/building-detail/PublicOwnerModePanel';
 import { ReviewPackCard } from '@/components/building-detail/ReviewPackCard';
 import { CommitteePackCard } from '@/components/building-detail/CommitteePackCard';
+import { AudiencePackPreview } from '@/components/building-detail/AudiencePackPreview';
 import { useAuthStore } from '@/store/authStore';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
@@ -492,6 +493,9 @@ export function OverviewTab({
           </div>
         </Link>
       </div>
+
+      {/* Audience Pack Preview */}
+      <AudiencePackPreview buildingId={buildingId} />
 
       {/* Package Preset Preview */}
       <PackagePresetPreview buildingId={buildingId} />

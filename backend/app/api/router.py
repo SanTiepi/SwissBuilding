@@ -5,6 +5,7 @@ from app.api import (
     actions,
     anomaly_detection,
     assignments,
+    audience_packs,
     audit_export,
     audit_logs,
     audit_readiness,
@@ -239,6 +240,7 @@ api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
 api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
 api_router.include_router(expansion.router, prefix="", tags=["Expansion"])
 api_router.include_router(package_presets.router, prefix="", tags=["Package Presets"])
+api_router.include_router(audience_packs.router, prefix="", tags=["Audience Packs"])
 api_router.include_router(rollout.router, prefix="", tags=["Rollout"])
 api_router.include_router(public_sector.router, prefix="", tags=["Public Sector"])
 api_router.include_router(partner_trust.router, prefix="", tags=["Partner Trust"])

@@ -29,6 +29,8 @@ from datetime import UTC, datetime, timedelta  # noqa: E402
 from jose import jwt  # noqa: E402
 from passlib.context import CryptContext  # noqa: E402
 
+# Finance Surfaces models
+from app.models.audience_pack import AudiencePack as _AP  # noqa: E402, F401
 from app.models.authority_request import AuthorityRequest as _AR  # noqa: E402, F401
 from app.models.bounded_embed import BoundedEmbedToken as _BET  # noqa: E402, F401
 from app.models.bounded_embed import ExternalViewerProfile as _EVP  # noqa: E402, F401
@@ -38,6 +40,10 @@ from app.models.case_study_template import CaseStudyTemplate as _CST  # noqa: E4
 
 # BC2 property management models
 from app.models.claim import Claim as _Claim  # noqa: E402, F401
+
+# Public Sector models
+from app.models.committee_decision import CommitteeDecisionPack as _CDP  # noqa: E402, F401
+from app.models.committee_decision import ReviewDecisionTrace as _RDT  # noqa: E402, F401
 from app.models.communal_adapter import CommunalAdapterProfile as _CAP  # noqa: E402, F401
 from app.models.communal_override import CommunalRuleOverride as _CRO  # noqa: E402, F401
 
@@ -58,11 +64,13 @@ from app.models.expansion_signal import AccountExpansionTrigger as _AET  # noqa:
 from app.models.expansion_signal import DistributionLoopSignal as _DLS  # noqa: E402, F401
 from app.models.expansion_signal import ExpansionOpportunity as _EO  # noqa: E402, F401
 from app.models.financial_entry import FinancialEntry as _FE  # noqa: E402, F401
+from app.models.governance_signal import PublicAssetGovernanceSignal as _PAGS  # noqa: E402, F401
 from app.models.import_receipt import PassportImportReceipt as _PIR  # noqa: E402, F401
 from app.models.insurance_policy import InsurancePolicy as _IP  # noqa: E402, F401
 from app.models.intake_request import IntakeRequest as _IR  # noqa: E402, F401
 from app.models.inventory_item import InventoryItem as _II  # noqa: E402, F401
 from app.models.lease import Lease as _Lease  # noqa: E402, F401
+from app.models.municipality_review_pack import MunicipalityReviewPack as _MRP  # noqa: E402, F401
 from app.models.obligation import Obligation as _Obligation  # noqa: E402, F401
 from app.models.ownership_record import OwnershipRecord as _OR  # noqa: E402, F401
 from app.models.package_preset import PackagePreset as _PPr  # noqa: E402, F401
@@ -75,6 +83,9 @@ from app.models.permit_step import PermitStep as _PS  # noqa: E402, F401
 from app.models.pilot_scorecard import PilotScorecard as _PSc  # noqa: E402, F401
 from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
 from app.models.proof_delivery import ProofDelivery as _PD  # noqa: E402, F401
+from app.models.public_owner_mode import PublicOwnerOperatingMode as _POOM  # noqa: E402, F401
+from app.models.redaction_profile import DecisionCaveatProfile as _DCP  # noqa: E402, F401
+from app.models.redaction_profile import ExternalAudienceRedactionProfile as _EARP  # noqa: E402, F401
 from app.models.rule_change_event import RuleChangeEvent as _RCE  # noqa: E402, F401
 from app.models.swiss_rules_source import RuleSource as _RS  # noqa: E402, F401
 from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
@@ -82,13 +93,6 @@ from app.models.unit import Unit as _Unit  # noqa: E402, F401
 from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
-
-# Public Sector models
-from app.models.committee_decision import CommitteeDecisionPack as _CDP  # noqa: E402, F401
-from app.models.committee_decision import ReviewDecisionTrace as _RDT  # noqa: E402, F401
-from app.models.governance_signal import PublicAssetGovernanceSignal as _PAGS  # noqa: E402, F401
-from app.models.municipality_review_pack import MunicipalityReviewPack as _MRP  # noqa: E402, F401
-from app.models.public_owner_mode import PublicOwnerOperatingMode as _POOM  # noqa: E402, F401
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

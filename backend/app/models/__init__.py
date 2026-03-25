@@ -1,5 +1,6 @@
 from app.models.action_item import ActionItem
 from app.models.assignment import Assignment
+from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
 from app.models.authority_request import AuthorityRequest
 from app.models.background_job import BackgroundJob
@@ -82,6 +83,7 @@ from app.models.prework_trigger import PreworkTrigger
 from app.models.proof_delivery import ProofDelivery
 from app.models.public_owner_mode import PublicOwnerOperatingMode
 from app.models.readiness_assessment import ReadinessAssessment
+from app.models.redaction_profile import DecisionCaveatProfile, ExternalAudienceRedactionProfile
 from app.models.regulatory_pack import RegulatoryPack
 from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
@@ -102,6 +104,7 @@ __all__ = [
     "AccountExpansionTrigger",
     "ActionItem",
     "Assignment",
+    "AudiencePack",
     "AuditLog",
     "AuthorityRequest",
     "BackgroundJob",
@@ -126,6 +129,7 @@ __all__ = [
     "ContractorAcknowledgment",
     "CustomerSuccessMilestone",
     "DataQualityIssue",
+    "DecisionCaveatProfile",
     "DecisionRecord",
     "DelegatedAccessGrant",
     "DemoRunbookStep",
@@ -146,6 +150,7 @@ __all__ = [
     "ExpansionOpportunity",
     "ExpertReview",
     "ExportJob",
+    "ExternalAudienceRedactionProfile",
     "ExternalViewerProfile",
     "FieldObservation",
     "FinancialEntry",
