@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.types import JSON
@@ -23,10 +23,17 @@ class AIExtractionLog(Base):
     ai_model = Column(String(50), nullable=True)
     ambiguous_fields = Column(JSON, nullable=True)  # [{field, reason}]
     unknown_fields = Column(JSON, nullable=True)  # [{field}]
-    status = Column(String(20), nullable=False, default="draft")  # draft | confirmed | corrected | rejected
+    status = Column(String(20), nullable=False, default="draft")  # draft | confirmed | corrected | rejected | failed
     confirmed_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     confirmed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
+
+    # Provider metadata (intelligence stack)
+    provider_name = Column(String(50), nullable=True)
+    model_version = Column(String(50), nullable=True)
+    prompt_version = Column(String(20), nullable=True)
+    latency_ms = Column(Integer, nullable=True)
+    error_message = Column(Text, nullable=True)
 
     __table_args__ = (
         Index("idx_ai_extraction_logs_type", "extraction_type"),

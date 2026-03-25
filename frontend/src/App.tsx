@@ -54,6 +54,7 @@ const MarketplaceRFQ = lazy(() => import('@/pages/MarketplaceRFQ'));
 const MarketplaceReviews = lazy(() => import('@/pages/MarketplaceReviews'));
 const CompanyWorkspace = lazy(() => import('@/pages/CompanyWorkspace'));
 const OperatorWorkspace = lazy(() => import('@/pages/OperatorWorkspace'));
+const RemediationIntelligence = lazy(() => import('@/pages/RemediationIntelligence'));
 
 function LoadingSpinner() {
   return (
@@ -520,6 +521,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Operator Workspace">
                   <Suspense fallback={<LoadingSpinner />}>
                     <OperatorWorkspace />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/remediation-intelligence"
+              element={
+                <PageErrorBoundary pageName="Remediation Intelligence">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <RemediationIntelligence />
                   </Suspense>
                 </PageErrorBoundary>
               }

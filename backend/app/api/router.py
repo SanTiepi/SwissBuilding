@@ -132,6 +132,7 @@ from app.api import (
     regulatory_filing,
     regulatory_watch,
     remediation_costs,
+    remediation_intelligence,
     remediation_post_works,
     remediation_summary,
     remediation_tracking,
@@ -249,6 +250,7 @@ api_router.include_router(audience_packs.router, prefix="", tags=["Audience Pack
 api_router.include_router(marketplace.router, prefix="", tags=["Marketplace"])
 api_router.include_router(marketplace_rfq.router, prefix="", tags=["Marketplace RFQ"])
 api_router.include_router(marketplace_trust.router, prefix="", tags=["Marketplace Trust"])
+api_router.include_router(remediation_intelligence.router, prefix="", tags=["Remediation Intelligence"])
 api_router.include_router(remediation_post_works.router, prefix="", tags=["Remediation Post-Works"])
 api_router.include_router(remediation_workspace.router, prefix="", tags=["Remediation Workspace"])
 api_router.include_router(rollout.router, prefix="", tags=["Rollout"])

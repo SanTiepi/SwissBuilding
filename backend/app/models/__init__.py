@@ -1,6 +1,7 @@
 from app.models.action_item import ActionItem
 from app.models.ai_extraction_log import AIExtractionLog
 from app.models.ai_feedback import AIFeedback
+from app.models.ai_rule_pattern import AIRulePattern
 from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
@@ -118,6 +119,7 @@ from app.models.zone_safety import OccupantNotice, ZoneSafetyStatus
 __all__ = [
     "AIExtractionLog",
     "AIFeedback",
+    "AIRulePattern",
     "AccountExpansionTrigger",
     "ActionItem",
     "Assignment",

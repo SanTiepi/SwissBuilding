@@ -79,6 +79,7 @@ const navItems: NavItem[] = [
   { to: '/admin/customer-success', icon: Trophy, labelKey: 'nav.customer_success', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/governance-signals', icon: Landmark, labelKey: 'nav.governance_signals', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/marketplace-reviews', icon: ClipboardCheck, labelKey: 'nav.marketplace_reviews', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/remediation-intelligence', icon: Radar, labelKey: 'intelligence.nav_label', allowedRoles: ['admin'] as UserRole[] },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 

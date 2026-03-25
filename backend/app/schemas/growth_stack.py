@@ -80,6 +80,11 @@ class AIExtractionRead(BaseModel):
     confirmed_by_user_id: UUID | None = None
     confirmed_at: datetime | None = None
     created_at: datetime
+    provider_name: str | None = None
+    model_version: str | None = None
+    prompt_version: str | None = None
+    latency_ms: int | None = None
+    error_message: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

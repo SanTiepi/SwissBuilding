@@ -107,5 +107,58 @@ async def _handle_post_works_finalized(db: AsyncSession, event: DomainEvent) -> 
     )
 
 
+async def _handle_post_works_finalized_pattern(db: AsyncSession, event: DomainEvent) -> None:
+    """Create remediation_outcome pattern from finalized post-works."""
+    from app.models.ai_rule_pattern import AIRulePattern
+
+    payload = event.payload or {}
+    intervention_id = payload.get("intervention_id")
+    if not intervention_id:
+        return
+
+    import uuid as _uuid
+    from datetime import UTC, datetime
+
+    rule_key = f"remediation_outcome:{intervention_id}"
+    pattern = AIRulePattern(
+        id=_uuid.uuid4(),
+        pattern_type="remediation_outcome",
+        source_entity_type="post_works_link",
+        rule_key=rule_key,
+        rule_definition={
+            "intervention_id": str(intervention_id),
+            "verification_rate": payload.get("verification_rate"),
+        },
+        sample_count=1,
+        last_confirmed_at=datetime.now(UTC),
+        is_active=True,
+    )
+    db.add(pattern)
+    await db.flush()
+    logger.info("Created remediation_outcome pattern for intervention=%s", intervention_id)
+
+
+async def _handle_ai_feedback_recorded(db: AsyncSession, event: DomainEvent) -> None:
+    """On ai_feedback_recorded, call pattern_learning_service.record_pattern."""
+    payload = event.payload or {}
+    feedback_id = payload.get("feedback_id")
+    if not feedback_id:
+        return
+
+    import uuid as _uuid
+
+    from app.services.pattern_learning_service import record_pattern
+
+    try:
+        fid = _uuid.UUID(str(feedback_id))
+        pattern = await record_pattern(db, fid)
+        if pattern:
+            logger.info("Pattern learning recorded for feedback=%s, pattern=%s", feedback_id, pattern.rule_key)
+    except Exception:
+        logger.exception("Pattern learning failed for feedback=%s", feedback_id)
+
+
 # Register built-in handlers
 register_handler("remediation_post_works_finalized", _handle_post_works_finalized)
+register_handler("remediation_post_works_finalized", _handle_post_works_finalized_pattern)
+register_handler("ai_feedback_recorded", _handle_ai_feedback_recorded)
