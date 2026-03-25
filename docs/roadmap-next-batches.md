@@ -292,6 +292,14 @@ These are enablers for the product thesis. They are not independent side project
 - opaque AI features
 - mandatory paid cloud OCR/document AI
 
+### Validated new axis (2026-03-25)
+
+- **Remediation marketplace (mise en concurrence encadree)** — closed verified network for pollutant remediation works
+  - lives in same repo as building intelligence, separate models and routes
+  - 5 lots: foundations, neutral RFQ, award+trust, monetization, site integration
+  - invariants: no recommendation, payment != ranking, verified contracts only
+  - see `docs/vision-100x-master-brief.md` for strategic details
+
 ## Mega-Program 1 - Living and Actionable Building Dossier
 
 Status: `active`

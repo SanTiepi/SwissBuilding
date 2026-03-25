@@ -14,7 +14,8 @@ This repo carries **two product surfaces**:
 2. **Remediation marketplace** — mise en concurrence encadree for pollutant remediation works
 
 Both share infra (auth, docs, audit) but have separate models and routes.
-See `memory/project_ecosystem_vision.md` for the full 4-brick map.
+See `docs/vision-100x-master-brief.md` (section "Remediation Marketplace") for the full ecosystem map.
+See `AGENTS.md` (section "Ecosystem Invariants") for the 6 hard rules.
 
 ## Hard Rules
 

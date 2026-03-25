@@ -272,6 +272,8 @@ Explicitly not part of the near-term architecture:
 - opaque AI features
 - mandatory paid cloud OCR by default
 
+Note: Remediation marketplace (mise en concurrence encadree) is validated as a new product surface sharing this architecture. See `docs/vision-100x-master-brief.md` for details.
+
 ---
 
 ## Observability
