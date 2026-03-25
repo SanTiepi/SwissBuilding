@@ -15,6 +15,7 @@ from app.models.campaign import Campaign
 from app.models.case_study_template import CaseStudyTemplate
 from app.models.change_signal import ChangeSignal
 from app.models.claim import Claim
+from app.models.committee_decision import CommitteeDecisionPack, ReviewDecisionTrace
 from app.models.communal_adapter import CommunalAdapterProfile
 from app.models.communal_override import CommunalRuleOverride
 from app.models.compliance_artefact import ComplianceArtefact
@@ -51,6 +52,7 @@ from app.models.expert_review import ExpertReview
 from app.models.export_job import ExportJob
 from app.models.field_observation import FieldObservation
 from app.models.financial_entry import FinancialEntry
+from app.models.governance_signal import PublicAssetGovernanceSignal
 from app.models.import_receipt import PassportImportReceipt
 from app.models.insurance_policy import InsurancePolicy
 from app.models.intake_request import IntakeRequest
@@ -60,6 +62,7 @@ from app.models.invitation import Invitation
 from app.models.jurisdiction import Jurisdiction
 from app.models.lease import Lease, LeaseEvent
 from app.models.material import Material
+from app.models.municipality_review_pack import MunicipalityReviewPack
 from app.models.notification import Notification, NotificationPreference
 from app.models.obligation import Obligation
 from app.models.organization import Organization
@@ -77,6 +80,7 @@ from app.models.portfolio import Portfolio
 from app.models.post_works_state import PostWorksState
 from app.models.prework_trigger import PreworkTrigger
 from app.models.proof_delivery import ProofDelivery
+from app.models.public_owner_mode import PublicOwnerOperatingMode
 from app.models.readiness_assessment import ReadinessAssessment
 from app.models.regulatory_pack import RegulatoryPack
 from app.models.rule_change_event import RuleChangeEvent
@@ -113,6 +117,7 @@ __all__ = [
     "CaseStudyTemplate",
     "ChangeSignal",
     "Claim",
+    "CommitteeDecisionPack",
     "CommunalAdapterProfile",
     "CommunalRuleOverride",
     "ComplianceArtefact",
@@ -153,6 +158,7 @@ __all__ = [
     "Lease",
     "LeaseEvent",
     "Material",
+    "MunicipalityReviewPack",
     "Notification",
     "NotificationPreference",
     "Obligation",
@@ -176,8 +182,11 @@ __all__ = [
     "PreworkTrigger",
     "PrivilegedAccessEvent",
     "ProofDelivery",
+    "PublicAssetGovernanceSignal",
+    "PublicOwnerOperatingMode",
     "ReadinessAssessment",
     "RegulatoryPack",
+    "ReviewDecisionTrace",
     "RuleChangeEvent",
     "RuleSource",
     "Sample",

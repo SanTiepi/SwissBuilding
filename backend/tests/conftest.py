@@ -83,6 +83,13 @@ from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
 
+# Public Sector models
+from app.models.committee_decision import CommitteeDecisionPack as _CDP  # noqa: E402, F401
+from app.models.committee_decision import ReviewDecisionTrace as _RDT  # noqa: E402, F401
+from app.models.governance_signal import PublicAssetGovernanceSignal as _PAGS  # noqa: E402, F401
+from app.models.municipality_review_pack import MunicipalityReviewPack as _MRP  # noqa: E402, F401
+from app.models.public_owner_mode import PublicOwnerOperatingMode as _POOM  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

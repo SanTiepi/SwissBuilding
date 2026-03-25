@@ -48,6 +48,7 @@ const PilotDashboard = lazy(() => import('@/pages/PilotDashboard'));
 const AdminRollout = lazy(() => import('@/pages/AdminRollout'));
 const AdminExpansion = lazy(() => import('@/pages/AdminExpansion'));
 const AdminCustomerSuccess = lazy(() => import('@/pages/AdminCustomerSuccess'));
+const AdminGovernanceSignals = lazy(() => import('@/pages/AdminGovernanceSignals'));
 
 function LoadingSpinner() {
   return (
@@ -454,6 +455,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Customer Success">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminCustomerSuccess />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/governance-signals"
+              element={
+                <PageErrorBoundary pageName="Governance Signals">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminGovernanceSignals />
                   </Suspense>
                 </PageErrorBoundary>
               }

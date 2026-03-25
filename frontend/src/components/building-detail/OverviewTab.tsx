@@ -24,6 +24,10 @@ import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHist
 import SwissRulesWatchPanel from '@/components/building-detail/SwissRulesWatchPanel';
 import ExchangeHistoryPanel from '@/components/building-detail/ExchangeHistoryPanel';
 import { PackagePresetPreview } from '@/components/building-detail/PackagePresetPreview';
+import { PublicOwnerModePanel } from '@/components/building-detail/PublicOwnerModePanel';
+import { ReviewPackCard } from '@/components/building-detail/ReviewPackCard';
+import { CommitteePackCard } from '@/components/building-detail/CommitteePackCard';
+import { useAuthStore } from '@/store/authStore';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
 import {
@@ -73,6 +77,7 @@ export function OverviewTab({
   completenessPct,
 }: OverviewTabProps) {
   const { t } = useTranslation();
+  const currentUser = useAuthStore((s) => s.user);
 
   return (
     <div className="space-y-6">
@@ -499,6 +504,13 @@ export function OverviewTab({
 
       {/* Proof Delivery History */}
       <ProofDeliveryHistory buildingId={buildingId} />
+
+      {/* Public Sector Panels */}
+      {currentUser?.organization_id && (
+        <PublicOwnerModePanel orgId={currentUser.organization_id} />
+      )}
+      <ReviewPackCard buildingId={buildingId} />
+      <CommitteePackCard buildingId={buildingId} />
 
       {/* Dossier Export (handled by DossierStatusPanel above) */}
     </div>
