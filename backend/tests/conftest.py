@@ -110,6 +110,11 @@ from app.models.award_confirmation import AwardConfirmation as _AC  # noqa: E402
 from app.models.completion_confirmation import CompletionConfirmation as _CC  # noqa: E402, F401
 from app.models.review import Review as _Rev  # noqa: E402, F401
 
+# Lot 4: Post-Works Truth models
+from app.models.ai_feedback import AIFeedback as _AFB  # noqa: E402, F401
+from app.models.domain_event import DomainEvent as _DE  # noqa: E402, F401
+from app.models.post_works_link import PostWorksLink as _PWL  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

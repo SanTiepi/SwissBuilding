@@ -1,4 +1,5 @@
 from app.models.action_item import ActionItem
+from app.models.ai_feedback import AIFeedback
 from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
@@ -45,6 +46,7 @@ from app.models.diagnostic_publication_version import DiagnosticPublicationVersi
 from app.models.document import Document
 from app.models.document_inbox import DocumentInboxItem
 from app.models.document_link import DocumentLink
+from app.models.domain_event import DomainEvent
 from app.models.dossier_version import DossierVersion
 from app.models.event import Event
 from app.models.evidence_link import EvidenceLink
@@ -84,6 +86,7 @@ from app.models.pilot_scorecard import PilotMetric, PilotScorecard
 from app.models.plan_annotation import PlanAnnotation
 from app.models.pollutant_rule import PollutantRule
 from app.models.portfolio import Portfolio
+from app.models.post_works_link import PostWorksLink
 from app.models.post_works_state import PostWorksState
 from app.models.prework_trigger import PreworkTrigger
 from app.models.proof_delivery import ProofDelivery
@@ -111,6 +114,7 @@ from app.models.zone import Zone
 from app.models.zone_safety import OccupantNotice, ZoneSafetyStatus
 
 __all__ = [
+    "AIFeedback",
     "AccountExpansionTrigger",
     "ActionItem",
     "Assignment",
@@ -158,6 +162,7 @@ __all__ = [
     "Document",
     "DocumentInboxItem",
     "DocumentLink",
+    "DomainEvent",
     "DossierVersion",
     "Event",
     "EvidenceLink",
@@ -199,6 +204,7 @@ __all__ = [
     "PlanAnnotation",
     "PollutantRule",
     "Portfolio",
+    "PostWorksLink",
     "PostWorksState",
     "PreworkTrigger",
     "PrivilegedAccessEvent",
