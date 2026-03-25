@@ -42,6 +42,7 @@ const SharedView = lazy(() => import('@/pages/SharedView'));
 const PublicIntake = lazy(() => import('@/pages/PublicIntake'));
 const FieldObservations = lazy(() => import('@/pages/FieldObservations'));
 const ControlTower = lazy(() => import('@/pages/ControlTower'));
+const AuthoritySubmissionRoom = lazy(() => import('@/pages/AuthoritySubmissionRoom'));
 
 function LoadingSpinner() {
   return (
@@ -178,6 +179,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Intervention Simulator">
                   <Suspense fallback={<LoadingSpinner />}>
                     <InterventionSimulator />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/buildings/:buildingId/procedures/:procedureId/authority-room"
+              element={
+                <PageErrorBoundary pageName="Authority Submission Room">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AuthoritySubmissionRoom />
                   </Suspense>
                 </PageErrorBoundary>
               }
