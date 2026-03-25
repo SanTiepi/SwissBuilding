@@ -28,6 +28,8 @@ import { PublicOwnerModePanel } from '@/components/building-detail/PublicOwnerMo
 import { ReviewPackCard } from '@/components/building-detail/ReviewPackCard';
 import { CommitteePackCard } from '@/components/building-detail/CommitteePackCard';
 import { AudiencePackPreview } from '@/components/building-detail/AudiencePackPreview';
+import { ArchivePosture } from '@/components/building-detail/ArchivePosture';
+import { CustodyChainPanel } from '@/components/building-detail/CustodyChainPanel';
 import { useAuthStore } from '@/store/authStore';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
@@ -504,6 +506,12 @@ export function OverviewTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SwissRulesWatchPanel buildingId={buildingId} />
         <ExchangeHistoryPanel buildingId={buildingId} />
+      </div>
+
+      {/* Artifact Archive Posture + Custody Chain */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ArchivePosture buildingId={buildingId} />
+        <CustodyChainPanel buildingId={buildingId} />
       </div>
 
       {/* Proof Delivery History */}

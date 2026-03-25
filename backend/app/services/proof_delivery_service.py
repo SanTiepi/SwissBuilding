@@ -39,6 +39,21 @@ async def create_delivery(
     db.add(delivery)
     await db.flush()
     await db.refresh(delivery)
+
+    # Custody tracking: record delivered event for the target artifact
+    try:
+        from app.services.artifact_custody_service import get_current_version, record_custody_event
+
+        current = await get_current_version(db, delivery.target_type, delivery.target_id)
+        if current:
+            await record_custody_event(
+                db,
+                current.id,
+                {"event_type": "delivered", "actor_type": "system", "details": {"delivery_id": str(delivery.id)}},
+            )
+    except Exception:
+        pass  # Non-fatal
+
     return delivery
 
 
@@ -129,6 +144,21 @@ async def mark_acknowledged(db: AsyncSession, delivery_id: UUID, **kwargs) -> Pr
         delivery.notes = kwargs["notes"]
     await db.flush()
     await db.refresh(delivery)
+
+    # Custody tracking: record acknowledged event
+    try:
+        from app.services.artifact_custody_service import get_current_version, record_custody_event
+
+        current = await get_current_version(db, delivery.target_type, delivery.target_id)
+        if current:
+            await record_custody_event(
+                db,
+                current.id,
+                {"event_type": "acknowledged", "actor_type": "system", "details": {"delivery_id": str(delivery.id)}},
+            )
+    except Exception:
+        pass  # Non-fatal
+
     return delivery
 
 

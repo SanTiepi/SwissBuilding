@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api import (
     access_control,
     actions,
+    artifact_custody,
     anomaly_detection,
     assignments,
     audience_packs,
@@ -360,5 +361,6 @@ api_router.include_router(warranty_obligations.router, prefix="", tags=["Warrant
 api_router.include_router(subsidy_tracking.router, prefix="", tags=["Subsidy Tracking"])
 api_router.include_router(sensor_integration.router, prefix="", tags=["Sensor Integration"])
 api_router.include_router(zone_safety.router, prefix="", tags=["Zone Safety"])
+api_router.include_router(artifact_custody.router, prefix="", tags=["Artifact Custody"])
 api_router.include_router(shared_links.router, prefix="", tags=["Shared Links"])
 api_router.include_router(gdpr.router, prefix="", tags=["GDPR"])

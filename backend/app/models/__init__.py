@@ -1,5 +1,6 @@
 from app.models.action_item import ActionItem
 from app.models.ai_extraction_log import AIExtractionLog
+from app.models.artifact_version import ArtifactVersion
 from app.models.ai_feedback import AIFeedback
 from app.models.ai_rule_pattern import AIRulePattern
 from app.models.assignment import Assignment
@@ -31,6 +32,7 @@ from app.models.completion_confirmation import CompletionConfirmation
 from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
+from app.models.custody_event import CustodyEvent
 from app.models.contractor_acknowledgment import ContractorAcknowledgment
 from app.models.contributor_gateway import (
     ContributorGatewayRequest,
@@ -130,6 +132,7 @@ __all__ = [
     "AIRulePattern",
     "AccountExpansionTrigger",
     "ActionItem",
+    "ArtifactVersion",
     "Assignment",
     "AudiencePack",
     "AuditLog",
@@ -160,6 +163,7 @@ __all__ = [
     "Contact",
     "Contract",
     "ContractorAcknowledgment",
+    "CustodyEvent",
     "ContributorGatewayRequest",
     "ContributorReceipt",
     "ContributorSubmission",

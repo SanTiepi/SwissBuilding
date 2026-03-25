@@ -29,6 +29,9 @@ from datetime import UTC, datetime, timedelta  # noqa: E402
 from jose import jwt  # noqa: E402
 from passlib.context import CryptContext  # noqa: E402
 
+# Artifact Custody models
+from app.models.artifact_version import ArtifactVersion as _AV  # noqa: E402, F401
+
 # Finance Surfaces models
 from app.models.audience_pack import AudiencePack as _AP  # noqa: E402, F401
 from app.models.authority_request import AuthorityRequest as _AR  # noqa: E402, F401
@@ -52,6 +55,7 @@ from app.models.communal_override import CommunalRuleOverride as _CRO  # noqa: E
 # Use from-imports to avoid shadowing the FastAPI `app` instance.
 from app.models.contact import Contact as _Contact  # noqa: E402, F401
 from app.models.contract import Contract as _Contract2  # noqa: E402, F401
+from app.models.custody_event import CustodyEvent as _CE  # noqa: E402, F401
 from app.models.customer_success import CustomerSuccessMilestone as _CSM  # noqa: E402, F401
 from app.models.delegated_access import DelegatedAccessGrant as _DAG  # noqa: E402, F401
 from app.models.delegated_access import PrivilegedAccessEvent as _PAE  # noqa: E402, F401

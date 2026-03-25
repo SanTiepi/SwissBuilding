@@ -78,6 +78,22 @@ async def generate_pack(
     db.add(pack)
     await db.flush()
     await db.refresh(pack)
+
+    # Custody tracking: create version + created event
+    try:
+        from app.services.artifact_custody_service import create_version, record_custody_event
+
+        version = await create_version(
+            db,
+            artifact_type="audience_pack",
+            artifact_id=pack.id,
+            content_hash=pack.content_hash,
+            user_id=user_id,
+        )
+        await record_custody_event(db, version.id, {"event_type": "created", "actor_type": "system"})
+    except Exception:
+        pass  # Non-fatal
+
     return pack
 
 
@@ -131,6 +147,21 @@ async def share_pack(db: AsyncSession, pack_id: UUID, user_id: UUID | None = Non
     db.add(delivery)
     await db.flush()
     await db.refresh(pack)
+
+    # Custody tracking: record published event
+    try:
+        from app.services.artifact_custody_service import get_current_version, record_custody_event
+
+        current = await get_current_version(db, "audience_pack", pack.id)
+        if current:
+            await record_custody_event(
+                db,
+                current.id,
+                {"event_type": "published", "actor_type": "user", "actor_id": user_id},
+            )
+    except Exception:
+        pass  # Non-fatal
+
     return pack
 
 

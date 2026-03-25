@@ -52,6 +52,25 @@ async def publish_passport(
     db.add(pub)
     await db.flush()
     await db.refresh(pub)
+
+    # Custody tracking: create version + created/published events
+    try:
+        from app.services.artifact_custody_service import create_version, record_custody_event
+
+        version = await create_version(
+            db,
+            artifact_type="passport_publication",
+            artifact_id=pub.id,
+            content_hash=pub.content_hash if hasattr(pub, "content_hash") else None,
+            user_id=published_by_user_id,
+        )
+        await record_custody_event(db, version.id, {"event_type": "created", "actor_type": "system"})
+        await record_custody_event(
+            db, version.id, {"event_type": "published", "actor_type": "user", "actor_id": published_by_user_id}
+        )
+    except Exception:
+        pass  # Non-fatal: custody tracking should not break publication
+
     return pub
 
 
