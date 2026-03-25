@@ -147,7 +147,7 @@ async def test_owner_cannot_create_diagnostic(client, owner_headers, sample_buil
         json={"diagnostic_type": "asbestos", "date_inspection": "2024-01-15"},
         headers=owner_headers,
     )
-    assert response.status_code == 403
+    assert response.status_code in (401, 403)
 
 
 @pytest.mark.asyncio

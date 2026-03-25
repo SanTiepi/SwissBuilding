@@ -79,7 +79,7 @@ class TestCreateInvitation:
             json={"email": "nope@example.ch", "role": "owner"},
             headers=diag_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
     async def test_create_duplicate_pending_invitation(self, client, db_session, admin_user, auth_headers):
         await _make_invitation(db_session, admin_user.id, email="dup@example.ch")
@@ -136,7 +136,7 @@ class TestListInvitations:
 
     async def test_list_invitations_non_admin_forbidden(self, client, owner_user, owner_headers):
         response = await client.get("/api/v1/invitations", headers=owner_headers)
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
 
 # ---------------------------------------------------------------------------

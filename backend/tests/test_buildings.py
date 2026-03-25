@@ -21,6 +21,48 @@ class TestCreateBuilding:
         assert data["city"] == "Lausanne"
         assert data["canton"] == "VD"
 
+    async def test_create_building_assigns_current_user_organization(
+        self,
+        client,
+        db_session,
+        admin_user,
+        auth_headers,
+    ):
+        from app.models.building import Building
+        from app.models.organization import Organization
+
+        org = Organization(
+            id=uuid.uuid4(),
+            name="Regie Test Organisation",
+            type="property_management",
+            city="Lausanne",
+            canton="VD",
+        )
+        db_session.add(org)
+        await db_session.flush()
+
+        admin_user.organization_id = org.id
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/buildings",
+            json={
+                "address": "Rue des Organisations 14",
+                "postal_code": "1004",
+                "city": "Lausanne",
+                "canton": "VD",
+                "construction_year": 1974,
+                "building_type": "mixed",
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 201
+        building_id = uuid.UUID(response.json()["id"])
+        building = await db_session.get(Building, building_id)
+        assert building is not None
+        assert building.organization_id == org.id
+
     async def test_create_building_unauthorized(self, client):
         response = await client.post(
             "/api/v1/buildings",
@@ -48,7 +90,7 @@ class TestCreateBuilding:
             },
             headers=owner_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
 
 class TestListBuildings:

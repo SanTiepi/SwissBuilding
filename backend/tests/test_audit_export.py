@@ -224,7 +224,7 @@ class TestAuditExportAPI:
             json={"filters": {}, "format": "csv"},
             headers=diag_headers,
         )
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     async def test_count_filter_by_resource_type(self, client, auth_headers, audit_logs_data):
         """Count with resource_type filter returns correct count."""

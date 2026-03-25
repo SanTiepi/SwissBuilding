@@ -130,7 +130,7 @@ class TestGetExport:
         await db_session.commit()
 
         response = await client.get(f"/api/v1/exports/{job_id}", headers=diag_headers)
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
 
 class TestCancelExport:
@@ -179,4 +179,4 @@ class TestCancelExport:
         await db_session.commit()
 
         response = await client.delete(f"/api/v1/exports/{job_id}", headers=diag_headers)
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)

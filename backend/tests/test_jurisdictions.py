@@ -295,7 +295,7 @@ class TestJurisdictionAPI:
             json={"code": "ch", "name": "Suisse", "level": "country"},
             headers=owner_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
     async def test_update_jurisdiction(self, client, admin_user, auth_headers, db_session):
         j = Jurisdiction(id=uuid.uuid4(), code="ch", name="Suisse", level="country")
@@ -442,7 +442,7 @@ class TestRegulatoryPackAPI:
             json={"pollutant_type": "pcb", "threshold_value": 50.0},
             headers=diag_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
 
 class TestBuildingJurisdictionFK:

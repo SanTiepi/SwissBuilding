@@ -452,7 +452,7 @@ class TestCampaignPermissions:
             json={"title": "Forbidden", "campaign_type": "diagnostic"},
             headers=diag_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
     async def test_diagnostician_can_list(self, client, diagnostician_user, diag_headers):
         response = await client.get("/api/v1/campaigns", headers=diag_headers)

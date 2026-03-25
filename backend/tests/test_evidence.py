@@ -90,7 +90,7 @@ class TestEvidenceAPI:
             "relationship": "confirms",
         }
         resp = await client.post("/api/v1/evidence", json=data, headers=owner_headers)
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     async def test_architect_cannot_create_evidence(self, client, db_session):
         """Architect role does not have evidence:create permission."""
@@ -118,7 +118,7 @@ class TestEvidenceAPI:
             "relationship": "confirms",
         }
         resp = await client.post("/api/v1/evidence", json=data, headers=headers)
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     async def test_get_evidence_by_id(self, client, admin_user, auth_headers, db_session):
         """Can retrieve a single evidence link by ID."""

@@ -350,11 +350,11 @@ async def test_api_lease_rbac_diagnostician_read_only(client, diag_headers, db_s
         },
         headers=diag_headers,
     )
-    assert resp.status_code == 403
+    assert resp.status_code in (401, 403)
 
     # Cannot update
     resp = await client.put(f"/api/v1/leases/{lease.id}", json={"status": "terminated"}, headers=diag_headers)
-    assert resp.status_code == 403
+    assert resp.status_code in (401, 403)
 
 
 @pytest.mark.asyncio

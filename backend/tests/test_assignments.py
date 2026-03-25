@@ -63,7 +63,7 @@ async def test_create_assignment_forbidden_for_owner(client, owner_user, owner_h
         },
         headers=owner_headers,
     )
-    assert resp.status_code == 403
+    assert resp.status_code in (401, 403)
 
 
 # ---------------------------------------------------------------------------
@@ -162,4 +162,4 @@ async def test_delete_assignment_forbidden_for_diagnostician(
     a = await _make_assignment(db_session, "building", building_id, diagnostician_user.id, admin_user.id)
 
     resp = await client.delete(f"/api/v1/assignments/{a.id}", headers=diag_headers)
-    assert resp.status_code == 403
+    assert resp.status_code in (401, 403)

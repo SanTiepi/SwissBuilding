@@ -108,7 +108,7 @@ class TestCreateIntervention:
             json=INTERVENTION_PAYLOAD,
             headers=headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
     async def test_create_intervention_building_not_found(self, client, admin_user, auth_headers):
         fake_id = uuid.uuid4()

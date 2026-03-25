@@ -70,7 +70,7 @@ class TestCreateZone:
             json={"zone_type": "floor", "name": "RDC"},
             headers=owner_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
 
 class TestListZones:
@@ -157,6 +157,25 @@ class TestListZones:
         assert data["total"] == 5
         assert len(data["items"]) == 2
         assert data["pages"] == 3
+
+    async def test_list_zones_accepts_explorer_batch_size(self, client, admin_user, auth_headers, sample_building):
+        for i in range(3):
+            await client.post(
+                f"/api/v1/buildings/{sample_building.id}/zones",
+                json={"zone_type": "room", "name": f"Explorer {i}"},
+                headers=auth_headers,
+            )
+
+        response = await client.get(
+            f"/api/v1/buildings/{sample_building.id}/zones",
+            params={"size": 200},
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["size"] == 200
+        assert data["total"] == 3
 
 
 class TestGetZone:

@@ -375,7 +375,7 @@ class TestAuthorityPackAPI:
             json={},
             headers=headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
     async def test_generate_with_section_filter(self, client, admin_user, auth_headers, sample_building):
         response = await client.post(

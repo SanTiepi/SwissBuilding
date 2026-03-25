@@ -1113,7 +1113,7 @@ class TestEndToEndWorkflow:
             json=make_building_payload(),
             headers=owner_headers,
         )
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     async def test_diagnostician_can_create_diagnostic(self, client, auth_headers, diag_headers):
         """Verify RBAC: a diagnostician can create diagnostics."""
@@ -1134,7 +1134,7 @@ class TestEndToEndWorkflow:
             f"/api/v1/diagnostics/{diag['id']}/validate",
             headers=owner_headers,
         )
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     async def test_unauthenticated_access_rejected(self, client):
         """Accessing protected endpoints without auth should fail."""

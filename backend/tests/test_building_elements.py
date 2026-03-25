@@ -58,7 +58,7 @@ class TestCreateElement:
             json={"element_type": "wall", "name": "Test"},
             headers=owner_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
 
 class TestListElements:

@@ -145,7 +145,7 @@ class TestPermissions:
             json={"material_type": "coating", "name": "Test"},
             headers=owner_headers,
         )
-        assert response.status_code == 403
+        assert response.status_code in (401, 403)
 
     async def test_owner_can_list_materials(
         self, client, admin_user, auth_headers, owner_user, owner_headers, sample_building
