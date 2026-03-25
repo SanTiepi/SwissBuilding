@@ -29,35 +29,47 @@ from datetime import UTC, datetime, timedelta  # noqa: E402
 from jose import jwt  # noqa: E402
 from passlib.context import CryptContext  # noqa: E402
 
+from app.models.authority_request import AuthorityRequest as _AR  # noqa: E402, F401
 from app.models.building import Building  # noqa: E402
 from app.models.building_portfolio import BuildingPortfolio as _BP  # noqa: E402, F401
+from app.models.case_study_template import CaseStudyTemplate as _CST  # noqa: E402, F401
 
 # BC2 property management models
 from app.models.claim import Claim as _Claim  # noqa: E402, F401
+from app.models.communal_adapter import CommunalAdapterProfile as _CAP  # noqa: E402, F401
+from app.models.communal_override import CommunalRuleOverride as _CRO  # noqa: E402, F401
 
 # BC1 backbone models — must be imported before _build_sqlite_metadata()
 # so their tables are registered in Base.metadata.
 # Use from-imports to avoid shadowing the FastAPI `app` instance.
 from app.models.contact import Contact as _Contact  # noqa: E402, F401
 from app.models.contract import Contract as _Contract2  # noqa: E402, F401
+from app.models.demo_scenario import DemoScenario as _DS  # noqa: E402, F401
+from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
 from app.models.document_link import DocumentLink as _DL  # noqa: E402, F401
+from app.models.exchange_contract import ExchangeContractVersion as _ECV  # noqa: E402, F401
 from app.models.financial_entry import FinancialEntry as _FE  # noqa: E402, F401
+from app.models.import_receipt import PassportImportReceipt as _PIR  # noqa: E402, F401
 from app.models.insurance_policy import InsurancePolicy as _IP  # noqa: E402, F401
+from app.models.intake_request import IntakeRequest as _IR  # noqa: E402, F401
 from app.models.inventory_item import InventoryItem as _II  # noqa: E402, F401
 from app.models.lease import Lease as _Lease  # noqa: E402, F401
-from app.models.ownership_record import OwnershipRecord as _OR  # noqa: E402, F401
-from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa: E402, F401
-from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
-from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
-from app.models.unit import Unit as _Unit  # noqa: E402, F401
-from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
-from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.obligation import Obligation as _Obligation  # noqa: E402, F401
-from app.models.proof_delivery import ProofDelivery as _PD  # noqa: E402, F401
-from app.models.intake_request import IntakeRequest as _IR  # noqa: E402, F401
+from app.models.ownership_record import OwnershipRecord as _OR  # noqa: E402, F401
+from app.models.partner_trust import PartnerTrustProfile as _PTP  # noqa: E402, F401
+from app.models.partner_trust import PartnerTrustSignal as _PTS  # noqa: E402, F401
+from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa: E402, F401
+from app.models.passport_publication import PassportPublication as _PPub  # noqa: E402, F401
 from app.models.permit_procedure import PermitProcedure as _PP  # noqa: E402, F401
 from app.models.permit_step import PermitStep as _PS  # noqa: E402, F401
-from app.models.authority_request import AuthorityRequest as _AR  # noqa: E402, F401
+from app.models.pilot_scorecard import PilotScorecard as _PSc  # noqa: E402, F401
+from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
+from app.models.proof_delivery import ProofDelivery as _PD  # noqa: E402, F401
+from app.models.rule_change_event import RuleChangeEvent as _RCE  # noqa: E402, F401
+from app.models.swiss_rules_source import RuleSource as _RS  # noqa: E402, F401
+from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
+from app.models.unit import Unit as _Unit  # noqa: E402, F401
+from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
 

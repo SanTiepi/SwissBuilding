@@ -11,14 +11,18 @@ from app.models.building_risk_score import BuildingRiskScore
 from app.models.building_snapshot import BuildingSnapshot
 from app.models.building_trust_score_v2 import BuildingTrustScore
 from app.models.campaign import Campaign
+from app.models.case_study_template import CaseStudyTemplate
 from app.models.change_signal import ChangeSignal
 from app.models.claim import Claim
+from app.models.communal_adapter import CommunalAdapterProfile
+from app.models.communal_override import CommunalRuleOverride
 from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
 from app.models.contractor_acknowledgment import ContractorAcknowledgment
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.decision_record import DecisionRecord
+from app.models.demo_scenario import DemoRunbookStep, DemoScenario
 from app.models.diagnostic import Diagnostic
 from app.models.diagnostic_mission_order import DiagnosticMissionOrder
 from app.models.diagnostic_publication import DiagnosticReportPublication
@@ -30,10 +34,12 @@ from app.models.dossier_version import DossierVersion
 from app.models.event import Event
 from app.models.evidence_link import EvidenceLink
 from app.models.evidence_pack import EvidencePack
+from app.models.exchange_contract import ExchangeContractVersion
 from app.models.expert_review import ExpertReview
 from app.models.export_job import ExportJob
 from app.models.field_observation import FieldObservation
 from app.models.financial_entry import FinancialEntry
+from app.models.import_receipt import PassportImportReceipt
 from app.models.insurance_policy import InsurancePolicy
 from app.models.intake_request import IntakeRequest
 from app.models.intervention import Intervention
@@ -46,9 +52,12 @@ from app.models.notification import Notification, NotificationPreference
 from app.models.obligation import Obligation
 from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
+from app.models.partner_trust import PartnerTrustProfile, PartnerTrustSignal
 from app.models.party_role_assignment import PartyRoleAssignment
+from app.models.passport_publication import PassportPublication
 from app.models.permit_procedure import PermitProcedure
 from app.models.permit_step import PermitStep
+from app.models.pilot_scorecard import PilotMetric, PilotScorecard
 from app.models.plan_annotation import PlanAnnotation
 from app.models.pollutant_rule import PollutantRule
 from app.models.portfolio import Portfolio
@@ -57,9 +66,11 @@ from app.models.prework_trigger import PreworkTrigger
 from app.models.proof_delivery import ProofDelivery
 from app.models.readiness_assessment import ReadinessAssessment
 from app.models.regulatory_pack import RegulatoryPack
+from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
 from app.models.saved_simulation import SavedSimulation
 from app.models.shared_link import SharedLink
+from app.models.swiss_rules_source import RuleSource
 from app.models.tax_context import TaxContext
 from app.models.technical_plan import TechnicalPlan
 from app.models.unit import Unit
@@ -84,14 +95,19 @@ __all__ = [
     "BuildingSnapshot",
     "BuildingTrustScore",
     "Campaign",
+    "CaseStudyTemplate",
     "ChangeSignal",
     "Claim",
+    "CommunalAdapterProfile",
+    "CommunalRuleOverride",
     "ComplianceArtefact",
     "Contact",
     "Contract",
     "ContractorAcknowledgment",
     "DataQualityIssue",
     "DecisionRecord",
+    "DemoRunbookStep",
+    "DemoScenario",
     "Diagnostic",
     "DiagnosticMissionOrder",
     "DiagnosticPublicationVersion",
@@ -103,6 +119,7 @@ __all__ = [
     "Event",
     "EvidenceLink",
     "EvidencePack",
+    "ExchangeContractVersion",
     "ExpertReview",
     "ExportJob",
     "FieldObservation",
@@ -122,9 +139,15 @@ __all__ = [
     "OccupantNotice",
     "Organization",
     "OwnershipRecord",
+    "PartnerTrustProfile",
+    "PartnerTrustSignal",
     "PartyRoleAssignment",
+    "PassportImportReceipt",
+    "PassportPublication",
     "PermitProcedure",
     "PermitStep",
+    "PilotMetric",
+    "PilotScorecard",
     "PlanAnnotation",
     "PollutantRule",
     "Portfolio",
@@ -133,6 +156,8 @@ __all__ = [
     "ProofDelivery",
     "ReadinessAssessment",
     "RegulatoryPack",
+    "RuleChangeEvent",
+    "RuleSource",
     "Sample",
     "SavedSimulation",
     "SharedLink",

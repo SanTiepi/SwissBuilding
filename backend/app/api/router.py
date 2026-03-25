@@ -50,6 +50,7 @@ from app.api import (
     data_provenance,
     data_quality,
     decision_replay,
+    demo_pilot,
     diagnostic_integration,
     diagnostic_quality,
     diagnostics,
@@ -71,6 +72,7 @@ from app.api import (
     evidence_graph,
     evidence_packs,
     evidence_summary,
+    exchange,
     execution_quality,
     expert_reviews,
     exports,
@@ -102,6 +104,7 @@ from app.api import (
     organizations,
     ownership,
     pack_impact,
+    partner_trust,
     passport,
     passport_export,
     permit_procedures,
@@ -144,6 +147,7 @@ from app.api import (
     stakeholder_notifications,
     stakeholder_report,
     subsidy_tracking,
+    swiss_rules_watch,
     technical_plans,
     tenant_impact,
     timeline,
@@ -227,6 +231,10 @@ api_router.include_router(compliance_artefacts.router, prefix="", tags=["Complia
 api_router.include_router(control_tower_v2.router, prefix="", tags=["Control Tower v2"])
 api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Procedures"])
 api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
+api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
+api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
+api_router.include_router(partner_trust.router, prefix="", tags=["Partner Trust"])
+api_router.include_router(swiss_rules_watch.router, prefix="", tags=["Swiss Rules Watch"])
 api_router.include_router(compliance_calendar.router, prefix="", tags=["Compliance Calendar"])
 api_router.include_router(compliance_gap.router, prefix="", tags=["Compliance Gap"])
 api_router.include_router(saved_simulations.router, prefix="", tags=["Saved Simulations"])
