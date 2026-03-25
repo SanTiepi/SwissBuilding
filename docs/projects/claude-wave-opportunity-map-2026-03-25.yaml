@@ -1,0 +1,228 @@
+as_of: 2026-03-25
+
+decision_rule:
+  summary: >
+    Build only if the block increases at least two of:
+    cumulative dossier value, procedural clarity, evidence reuse,
+    useful multi-actor dependency.
+
+blocks:
+  - name: workspace_hardening
+    status: build_now
+    why_now: canonical workspace quality compounds every later wave
+    consumer_value: better building context, actor scoping, cleaner activity timeline
+    moat_value: shared truth foundation
+    depends_on: []
+    unlocks:
+      - procedure_engine
+      - control_tower_v2
+      - proof_delivery
+    min_validate:
+      - ruff check
+      - targeted workspace tests
+      - changed confidence loop
+    recommended_wave_shape: multi_agent
+
+  - name: procedure_engine
+    status: build_now
+    why_now: biggest structural gap between documented and procedurally ready
+    consumer_value: visible steps, blockers, authority requests, procedural state
+    moat_value: hard to copy, high trust value
+    depends_on:
+      - workspace_hardening
+      - obligations
+    unlocks:
+      - authority_flow
+      - control_tower_v2
+      - proof_delivery
+    min_validate:
+      - ruff check
+      - targeted model service tests
+      - one golden path integration test
+    recommended_wave_shape: multi_agent
+
+  - name: control_tower_v2
+    status: build_now
+    why_now: habit surface and operator leverage
+    consumer_value: one operating inbox for blockers, due dates, requests, mismatches
+    moat_value: daily workflow dependency
+    depends_on:
+      - workspace_hardening
+      - obligations
+    unlocks:
+      - portfolio_intelligence
+      - notification_flows
+    min_validate:
+      - backend changed loop
+      - frontend changed strict loop
+      - targeted control tower tests
+    recommended_wave_shape: multi_agent
+
+  - name: proof_delivery
+    status: build_now
+    why_now: needed to turn packs into institutional evidence rather than downloads
+    consumer_value: who received what, when, which version, and whether acknowledged
+    moat_value: trust and chain-of-proof advantage
+    depends_on:
+      - procedure_engine
+      - passport_exchange_hardening
+    unlocks:
+      - authority_flow
+      - trust_vault
+      - partner_trust
+    min_validate:
+      - ruff check
+      - targeted delivery tests
+      - one end-to-end pack flow test
+    recommended_wave_shape: multi_agent
+
+  - name: passport_exchange_hardening
+    status: build_now
+    why_now: exchange is the path from app to market standard
+    consumer_value: audience-specific packs and machine-readable export discipline
+    moat_value: de facto exchange path
+    depends_on:
+      - proof_delivery
+    unlocks:
+      - passport_exchange_network
+      - authority_flow
+      - finance_insurance_packs
+    min_validate:
+      - backend changed loop
+      - frontend changed strict loop
+      - targeted passport exchange tests
+    recommended_wave_shape: single_agent
+
+  - name: swissrules_watch_foundations
+    status: build_now
+    why_now: regulatory freshness must be prepared before deeper procedural coverage
+    consumer_value: future blockers and obligations remain explainable and current
+    moat_value: deep Swiss regulatory engine
+    depends_on:
+      - swissrules_spine
+    unlocks:
+      - authority_flow
+      - regulatory_alerts
+      - procedural_requalification
+    min_validate:
+      - ruff check
+      - targeted schema or service tests
+      - no full suite by default
+    recommended_wave_shape: single_agent
+
+  - name: portfolio_intelligence_grounded_in_proof
+    status: next_moat
+    why_now: valuable only if built on real blockers, obligations, and proof states
+    consumer_value: cross-building prioritization for managers
+    moat_value: portfolio intelligence tied to real building truth
+    depends_on:
+      - control_tower_v2
+      - procedure_engine
+      - proof_delivery
+    unlocks:
+      - benchmarking_learning
+    min_validate:
+      - targeted aggregation tests
+      - frontend portfolio tests
+    recommended_wave_shape: multi_agent
+
+  - name: partner_trust
+    status: prepare_schema_only
+    why_now: signals become meaningful once deliveries and acknowledgements exist
+    consumer_value: better routing later, not immediate wedge value
+    moat_value: network quality moat
+    depends_on:
+      - proof_delivery
+    unlocks:
+      - smarter routing
+      - partner recommendations
+    min_validate:
+      - schema tests only
+    recommended_wave_shape: single_agent
+
+  - name: geometry_intelligence
+    status: prepare_schema_only
+    why_now: useful, but only in support of proof/procedure surfaces
+    consumer_value: clearer spatial context later
+    moat_value: evidence tied to physical reality
+    depends_on:
+      - procedure_engine
+    unlocks:
+      - spatial blockers
+      - annotated handoff
+    min_validate:
+      - schema or adapter tests only
+    recommended_wave_shape: single_agent
+
+  - name: authority_flow
+    status: future_infrastructure
+    why_now: should follow live procedures and proof delivery, not precede them
+    consumer_value: native submission and complement loops
+    moat_value: public-process barrier to entry
+    depends_on:
+      - procedure_engine
+      - proof_delivery
+      - passport_exchange_hardening
+    unlocks:
+      - public_systems_coordination
+    min_validate:
+      - targeted integration tests
+      - later real partner flow proof
+    recommended_wave_shape: multi_agent
+
+  - name: trust_vault
+    status: future_infrastructure
+    why_now: must layer on top of delivery history, not replace it
+    consumer_value: stronger signatures, custody, auditability
+    moat_value: institutional trust substrate
+    depends_on:
+      - proof_delivery
+    unlocks:
+      - legal_grade_exchange
+    min_validate:
+      - targeted proof chain tests
+    recommended_wave_shape: single_agent
+
+  - name: territory_public_systems
+    status: future_infrastructure
+    why_now: important but not wedge-critical before procedure and proof are strong
+    consumer_value: public dependencies and district blockers later
+    moat_value: territory-aware operating layer
+    depends_on:
+      - authority_flow
+      - swissrules_watch_foundations
+    unlocks:
+      - public_owner_workflows
+    min_validate:
+      - schema and adapter tests
+    recommended_wave_shape: single_agent
+
+  - name: full_property_erp
+    status: integrate_boundary
+    why_now: null
+    consumer_value: needed around the product, not inside the core
+    moat_value: none
+    depends_on: []
+    unlocks: []
+    min_validate: []
+    recommended_wave_shape: supervisor_only
+
+  - name: chantier_suite
+    status: integrate_boundary
+    why_now: null
+    consumer_value: useful but already strong category elsewhere
+    moat_value: none
+    depends_on: []
+    unlocks: []
+    min_validate: []
+    recommended_wave_shape: supervisor_only
+
+  - name: bim_authoring
+    status: not_now
+    why_now: null
+    consumer_value: outside category focus
+    moat_value: none for us
+    depends_on: []
+    unlocks: []
+    min_validate: []
+    recommended_wave_shape: supervisor_only

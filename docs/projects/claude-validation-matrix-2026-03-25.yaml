@@ -1,0 +1,70 @@
+as_of: 2026-03-25
+
+core_rule:
+  - do_not_run_full_suites_by_default
+  - use_smallest_reliable_signal
+  - clear_homogeneous_regression_clusters_before_full_reruns
+
+change_types:
+  model_schema:
+    minimal: "cd backend && ruff check app/ tests/"
+    targeted: "cd backend && python -m pytest tests/test_{surface}.py -q"
+    confidence: "cd backend && python scripts/run_local_test_loop.py changed"
+    full: "cd backend && python -m pytest tests/ -q"
+    full_when: "only if schema touches many surfaces"
+  service_api:
+    minimal: "cd backend && ruff check app/ tests/"
+    targeted: "cd backend && python -m pytest tests/test_{surface}.py -q"
+    confidence: "cd backend && python scripts/run_local_test_loop.py changed"
+    full: "cd backend && python -m pytest tests/ -q"
+    full_when: "only if cross-cutting service"
+  frontend_component:
+    minimal: "cd frontend && npm run typecheck"
+    targeted: "cd frontend && npm run test:changed"
+    confidence: "cd frontend && npm run test:changed:strict"
+    full: "cd frontend && npm test"
+    full_when: "only if shared component contract changed"
+  page_flow:
+    minimal: "cd frontend && npm run typecheck"
+    targeted: "cd frontend && npm run test:changed"
+    confidence: "cd frontend && npm run test:changed:strict"
+    full: "cd frontend && npm run test:e2e:smoke"
+    full_when: "only if navigation or flow changed"
+  seed_demo:
+    minimal: "cd backend && ruff check app/ tests/"
+    targeted: "cd backend && python -c \"from app.seeds.seed_data import *\""
+    confidence: "cd backend && python -m app.seeds.seed_verify"
+    full: "cd backend && python -m pytest tests/ -q"
+    full_when: "only if seed schema changed widely"
+  integration_contract:
+    minimal:
+      - "cd backend && ruff check app/ tests/"
+      - "cd frontend && npm run typecheck"
+    targeted: "cd backend && python -m pytest tests/test_{surface}.py -q"
+    confidence:
+      - "cd backend && python scripts/run_local_test_loop.py confidence"
+      - "cd frontend && npm run test:changed:strict"
+    full:
+      - "cd backend && python -m pytest tests/ -q"
+      - "cd frontend && npm test"
+    full_when: "only if breaking rename or broad contract shift"
+  real_e2e:
+    minimal: "cd frontend && npm run test:e2e:real:preflight"
+    targeted: "cd frontend && npx playwright test {spec-file} --config playwright.real.config.ts"
+    confidence: "cd frontend && npm run test:e2e:smoke"
+    full: "cd frontend && npm run test:e2e:real"
+    full_when: "only for final proof"
+  regression_cluster:
+    workflow:
+      - identify_common_pattern
+      - sweep_cluster
+      - rerun_affected_files_only
+      - rerun_confidence
+      - one_full_rerun_at_end
+    current_example: "unauthenticated assertions expecting 403 while auth layer returns 401"
+
+anti_patterns:
+  - "python -m pytest tests/ -q after a single file edit"
+  - "npm test when changed or related tests are enough"
+  - "real e2e for type-only work"
+  - "full reruns before a homogeneous failure cluster is closed"
