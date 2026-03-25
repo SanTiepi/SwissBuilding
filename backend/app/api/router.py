@@ -135,6 +135,7 @@ from app.api import (
     remediation_post_works,
     remediation_summary,
     remediation_tracking,
+    remediation_workspace,
     renovation_sequencer,
     reporting_metrics,
     requalification,
@@ -249,6 +250,7 @@ api_router.include_router(marketplace.router, prefix="", tags=["Marketplace"])
 api_router.include_router(marketplace_rfq.router, prefix="", tags=["Marketplace RFQ"])
 api_router.include_router(marketplace_trust.router, prefix="", tags=["Marketplace Trust"])
 api_router.include_router(remediation_post_works.router, prefix="", tags=["Remediation Post-Works"])
+api_router.include_router(remediation_workspace.router, prefix="", tags=["Remediation Workspace"])
 api_router.include_router(rollout.router, prefix="", tags=["Rollout"])
 api_router.include_router(public_sector.router, prefix="", tags=["Public Sector"])
 api_router.include_router(partner_trust.router, prefix="", tags=["Partner Trust"])

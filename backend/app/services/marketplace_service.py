@@ -285,3 +285,140 @@ async def update_subscription_status(
     await db.flush()
     await db.refresh(subscription)
     return subscription
+
+
+# ---------------------------------------------------------------------------
+# Subscription lifecycle (Growth Stack)
+# ---------------------------------------------------------------------------
+
+
+async def change_subscription_plan(
+    db: AsyncSession,
+    subscription_id: UUID,
+    new_plan: str,
+    user_id: UUID | None = None,
+    reason: str | None = None,
+) -> CompanySubscription:
+    from app.models.subscription_change import SubscriptionChange
+
+    sub = await get_subscription_by_id(db, subscription_id)
+    if sub is None:
+        raise ValueError("Subscription not found")
+
+    old_plan = sub.plan_type
+    sub.plan_type = new_plan
+
+    change = SubscriptionChange(
+        subscription_id=subscription_id,
+        change_type="plan_changed",
+        old_plan=old_plan,
+        new_plan=new_plan,
+        changed_by_user_id=user_id,
+        reason=reason,
+    )
+    db.add(change)
+    await db.flush()
+    await db.refresh(sub)
+    return sub
+
+
+async def suspend_subscription(
+    db: AsyncSession,
+    subscription_id: UUID,
+    user_id: UUID | None = None,
+    reason: str | None = None,
+) -> CompanySubscription:
+    from app.models.subscription_change import SubscriptionChange
+
+    sub = await get_subscription_by_id(db, subscription_id)
+    if sub is None:
+        raise ValueError("Subscription not found")
+
+    old_status = sub.status
+    sub.status = "suspended"
+
+    change = SubscriptionChange(
+        subscription_id=subscription_id,
+        change_type="suspended",
+        old_plan=sub.plan_type,
+        new_plan=sub.plan_type,
+        changed_by_user_id=user_id,
+        reason=reason or f"Suspended from {old_status}",
+    )
+    db.add(change)
+    await db.flush()
+    await db.refresh(sub)
+    return sub
+
+
+async def reactivate_subscription(
+    db: AsyncSession,
+    subscription_id: UUID,
+    user_id: UUID | None = None,
+) -> CompanySubscription:
+    from app.models.subscription_change import SubscriptionChange
+
+    sub = await get_subscription_by_id(db, subscription_id)
+    if sub is None:
+        raise ValueError("Subscription not found")
+
+    sub.status = "active"
+
+    change = SubscriptionChange(
+        subscription_id=subscription_id,
+        change_type="reactivated",
+        old_plan=sub.plan_type,
+        new_plan=sub.plan_type,
+        changed_by_user_id=user_id,
+    )
+    db.add(change)
+    await db.flush()
+    await db.refresh(sub)
+    return sub
+
+
+async def get_subscription_history(db: AsyncSession, profile_id: UUID) -> list:
+    """Return all subscription changes for a company profile's subscription."""
+    from app.models.subscription_change import SubscriptionChange
+
+    sub = await get_subscription(db, profile_id)
+    if sub is None:
+        return []
+
+    result = await db.execute(
+        select(SubscriptionChange)
+        .where(SubscriptionChange.subscription_id == sub.id)
+        .order_by(SubscriptionChange.created_at.desc())
+    )
+    return list(result.scalars().all())
+
+
+async def get_eligibility_summary(db: AsyncSession, profile_id: UUID) -> dict:
+    """Return structured eligibility summary with blockers."""
+    verif_result = await db.execute(
+        select(CompanyVerification)
+        .where(CompanyVerification.company_profile_id == profile_id)
+        .where(CompanyVerification.status == "approved")
+        .limit(1)
+    )
+    is_verified = verif_result.scalar_one_or_none() is not None
+
+    sub_result = await db.execute(
+        select(CompanySubscription).where(CompanySubscription.company_profile_id == profile_id).limit(1)
+    )
+    subscription = sub_result.scalar_one_or_none()
+    sub_active = subscription is not None and subscription.status == "active"
+
+    blockers: list[str] = []
+    if not is_verified:
+        blockers.append("company_not_verified")
+    if not sub_active:
+        blockers.append("no_active_subscription")
+
+    return {
+        "company_profile_id": profile_id,
+        "verified": is_verified,
+        "subscription_active": sub_active,
+        "eligible": is_verified and sub_active,
+        "blockers": blockers,
+    }

@@ -1,4 +1,5 @@
 from app.models.action_item import ActionItem
+from app.models.ai_extraction_log import AIExtractionLog
 from app.models.ai_feedback import AIFeedback
 from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
@@ -102,6 +103,7 @@ from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
 from app.models.saved_simulation import SavedSimulation
 from app.models.shared_link import SharedLink
+from app.models.subscription_change import SubscriptionChange
 from app.models.swiss_rules_source import RuleSource
 from app.models.tax_context import TaxContext
 from app.models.technical_plan import TechnicalPlan
@@ -114,6 +116,7 @@ from app.models.zone import Zone
 from app.models.zone_safety import OccupantNotice, ZoneSafetyStatus
 
 __all__ = [
+    "AIExtractionLog",
     "AIFeedback",
     "AccountExpansionTrigger",
     "ActionItem",
@@ -223,6 +226,7 @@ __all__ = [
     "Sample",
     "SavedSimulation",
     "SharedLink",
+    "SubscriptionChange",
     "TaxContext",
     "TechnicalPlan",
     "TenantBoundary",

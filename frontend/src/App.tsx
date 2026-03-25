@@ -52,6 +52,8 @@ const AdminGovernanceSignals = lazy(() => import('@/pages/AdminGovernanceSignals
 const MarketplaceCompanies = lazy(() => import('@/pages/MarketplaceCompanies'));
 const MarketplaceRFQ = lazy(() => import('@/pages/MarketplaceRFQ'));
 const MarketplaceReviews = lazy(() => import('@/pages/MarketplaceReviews'));
+const CompanyWorkspace = lazy(() => import('@/pages/CompanyWorkspace'));
+const OperatorWorkspace = lazy(() => import('@/pages/OperatorWorkspace'));
 
 function LoadingSpinner() {
   return (
@@ -498,6 +500,26 @@ export default function App() {
                 <PageErrorBoundary pageName="Marketplace Reviews">
                   <Suspense fallback={<LoadingSpinner />}>
                     <MarketplaceReviews />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/marketplace/company-workspace"
+              element={
+                <PageErrorBoundary pageName="Company Workspace">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <CompanyWorkspace />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/marketplace/operator-workspace"
+              element={
+                <PageErrorBoundary pageName="Operator Workspace">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <OperatorWorkspace />
                   </Suspense>
                 </PageErrorBoundary>
               }
