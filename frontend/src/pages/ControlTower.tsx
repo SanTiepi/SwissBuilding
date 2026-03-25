@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
@@ -7,72 +7,149 @@ import {
   Clock,
   Inbox,
   FileQuestion,
-  UserPlus,
+  Shield,
   RefreshCw,
   ArrowRight,
   Building2,
   Filter,
+  BellOff,
+  User,
+  FileText,
+  Gavel,
+  CalendarClock,
+  UserPlus,
 } from 'lucide-react';
 import { cn, formatDate } from '@/utils/formatters';
-import { fetchControlTowerData, buildNextBestActions, type NextBestAction } from '@/api/controlTower';
+import {
+  getActionFeed,
+  getActionSummary,
+  snoozeAction,
+  filterSnoozed,
+  type ControlTowerAction,
+  type ActionPriority,
+  type ActionSourceType,
+  type ActionFeedFilters,
+} from '@/api/controlTower';
+import { apiClient } from '@/api/client';
 
-const ACTION_TYPE_CONFIG: Record<
-  NextBestAction['type'],
-  { icon: React.ElementType; color: string; bgColor: string; darkBgColor: string }
-> = {
-  overdue_obligation: {
-    icon: AlertTriangle,
-    color: 'text-red-600 dark:text-red-400',
-    bgColor: 'bg-red-50',
-    darkBgColor: 'dark:bg-red-950/30',
-  },
-  unmatched_publication: {
-    icon: FileQuestion,
-    color: 'text-amber-600 dark:text-amber-400',
-    bgColor: 'bg-amber-50',
-    darkBgColor: 'dark:bg-amber-950/30',
-  },
-  pending_inbox: {
-    icon: Inbox,
-    color: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-50',
-    darkBgColor: 'dark:bg-blue-950/30',
-  },
-  intake_request: {
-    icon: UserPlus,
-    color: 'text-purple-600 dark:text-purple-400',
-    bgColor: 'bg-purple-50',
-    darkBgColor: 'dark:bg-purple-950/30',
-  },
-  due_soon_obligation: {
-    icon: Clock,
-    color: 'text-orange-600 dark:text-orange-400',
-    bgColor: 'bg-orange-50',
-    darkBgColor: 'dark:bg-orange-950/30',
-  },
+/* ── Priority config ── */
+
+const PRIORITY_CONFIG: Record<ActionPriority, { color: string; bgColor: string; darkBgColor: string; label: string }> =
+  {
+    P0: {
+      color: 'text-red-700 dark:text-red-300',
+      bgColor: 'bg-red-100',
+      darkBgColor: 'dark:bg-red-950/40',
+      label: 'P0',
+    },
+    P1: {
+      color: 'text-orange-700 dark:text-orange-300',
+      bgColor: 'bg-orange-100',
+      darkBgColor: 'dark:bg-orange-950/40',
+      label: 'P1',
+    },
+    P2: {
+      color: 'text-amber-700 dark:text-amber-300',
+      bgColor: 'bg-amber-100',
+      darkBgColor: 'dark:bg-amber-950/40',
+      label: 'P2',
+    },
+    P3: {
+      color: 'text-blue-700 dark:text-blue-300',
+      bgColor: 'bg-blue-100',
+      darkBgColor: 'dark:bg-blue-950/40',
+      label: 'P3',
+    },
+    P4: {
+      color: 'text-gray-600 dark:text-gray-400',
+      bgColor: 'bg-gray-100',
+      darkBgColor: 'dark:bg-gray-800',
+      label: 'P4',
+    },
+  };
+
+const SOURCE_TYPE_ICONS: Record<ActionSourceType, React.ElementType> = {
+  procedural_blocker: Shield,
+  authority_request: Gavel,
+  obligation: AlertTriangle,
+  inbox: Inbox,
+  intake: UserPlus,
+  publication: FileQuestion,
+  deadline: CalendarClock,
 };
 
 export default function ControlTower() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [buildingFilter, setBuildingFilter] = useState<string>('');
+  const [sourceFilter, setSourceFilter] = useState<string>('');
+  const [priorityFilter, setPriorityFilter] = useState<string>('');
+  const [myQueue, setMyQueue] = useState(false);
+  const [snoozeTick, setSnoozeTick] = useState(0);
+
+  const filters: ActionFeedFilters = useMemo(
+    () => ({
+      building_id: buildingFilter || undefined,
+      source_type: (sourceFilter as ActionSourceType) || undefined,
+      priority: (priorityFilter as ActionPriority) || undefined,
+      my_queue: myQueue || undefined,
+    }),
+    [buildingFilter, sourceFilter, priorityFilter, myQueue],
+  );
 
   const {
-    data: summary,
-    isLoading,
-    isError,
-    isFetching,
+    data: summaryData,
+    isLoading: summaryLoading,
+    isError: summaryError,
   } = useQuery({
-    queryKey: ['control-tower', buildingFilter],
-    queryFn: () => fetchControlTowerData(buildingFilter || undefined),
+    queryKey: ['control-tower-summary'],
+    queryFn: getActionSummary,
     staleTime: 60_000,
   });
 
-  const actions = useMemo(() => (summary ? buildNextBestActions(summary) : []), [summary]);
+  const {
+    data: rawActions,
+    isLoading: actionsLoading,
+    isError: actionsError,
+    isFetching,
+  } = useQuery({
+    queryKey: ['control-tower-actions', filters],
+    queryFn: () => getActionFeed(filters),
+    staleTime: 60_000,
+  });
+
+  // Fetch building list for filter dropdown
+  const { data: buildingsData } = useQuery({
+    queryKey: ['control-tower-buildings'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: { id: string; address: string; city: string }[] }>('/buildings', {
+        params: { limit: 200 },
+      });
+      return res.data.items ?? [];
+    },
+    staleTime: 300_000,
+  });
+
+  // Apply snooze filter client-side
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const actions = useMemo(() => (rawActions ? filterSnoozed(rawActions) : []), [rawActions, snoozeTick]);
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['control-tower'] });
+    queryClient.invalidateQueries({ queryKey: ['control-tower-summary'] });
+    queryClient.invalidateQueries({ queryKey: ['control-tower-actions'] });
   };
+
+  const handleSnooze = useCallback(
+    (actionId: string, days: number) => {
+      snoozeAction(actionId, days);
+      setSnoozeTick((prev) => prev + 1);
+    },
+    [],
+  );
+
+  const isLoading = summaryLoading || actionsLoading;
+  const isError = summaryError || actionsError;
+  const summary = summaryData;
 
   if (isLoading) {
     return (
@@ -111,23 +188,15 @@ export default function ControlTower() {
     );
   }
 
-  const overdueCount = summary?.overdueObligations.length ?? 0;
-  const dueSoonCount = summary?.dueSoonObligations.length ?? 0;
-  const pendingInboxCount = summary?.pendingInboxCount ?? 0;
-  const unmatchedCount = summary?.unmatchedPublications.length ?? 0;
-  const intakeCount = summary?.newIntakeRequests ?? 0;
+  const buildings = buildingsData ?? [];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" data-testid="control-tower-page">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('control_tower.title')}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {t('control_tower.description')}
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('control_tower.title')}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('control_tower.description')}</p>
         </div>
         <button
           onClick={handleRefresh}
@@ -145,10 +214,10 @@ export default function ControlTower() {
         </button>
       </div>
 
-      {/* Building filter */}
-      {summary && summary.buildings.length > 0 && (
-        <div className="flex items-center gap-2" data-testid="control-tower-filter">
-          <Filter className="w-4 h-4 text-gray-400" />
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3" data-testid="control-tower-filters">
+        <Filter className="w-4 h-4 text-gray-400" />
+        {buildings.length > 0 && (
           <select
             value={buildingFilter}
             onChange={(e) => setBuildingFilter(e.target.value)}
@@ -157,57 +226,105 @@ export default function ControlTower() {
               'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100',
               'px-3 py-1.5 focus:ring-2 focus:ring-red-500 focus:border-red-500',
             )}
+            data-testid="filter-building"
           >
             <option value="">{t('control_tower.all_buildings')}</option>
-            {summary.buildings.map((b) => (
+            {buildings.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.address}, {b.city}
               </option>
             ))}
           </select>
-        </div>
-      )}
+        )}
+        <select
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+          className={cn(
+            'text-sm rounded-lg border border-gray-300 dark:border-gray-600',
+            'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100',
+            'px-3 py-1.5 focus:ring-2 focus:ring-red-500 focus:border-red-500',
+          )}
+          data-testid="filter-source"
+        >
+          <option value="">{t('control_tower.filter_all_sources')}</option>
+          <option value="procedural_blocker">{t('control_tower.source_procedural_blocker')}</option>
+          <option value="authority_request">{t('control_tower.source_authority_request')}</option>
+          <option value="obligation">{t('control_tower.source_obligation')}</option>
+          <option value="inbox">{t('control_tower.source_inbox')}</option>
+          <option value="intake">{t('control_tower.source_intake')}</option>
+          <option value="publication">{t('control_tower.source_publication')}</option>
+          <option value="deadline">{t('control_tower.source_deadline')}</option>
+        </select>
+        <select
+          value={priorityFilter}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+          className={cn(
+            'text-sm rounded-lg border border-gray-300 dark:border-gray-600',
+            'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100',
+            'px-3 py-1.5 focus:ring-2 focus:ring-red-500 focus:border-red-500',
+          )}
+          data-testid="filter-priority"
+        >
+          <option value="">{t('control_tower.filter_all_priorities')}</option>
+          <option value="P0">{t('control_tower.priority_p0')}</option>
+          <option value="P1">{t('control_tower.priority_p1')}</option>
+          <option value="P2">{t('control_tower.priority_p2')}</option>
+          <option value="P3">{t('control_tower.priority_p3')}</option>
+          <option value="P4">{t('control_tower.priority_p4')}</option>
+        </select>
+        <label className="inline-flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={myQueue}
+            onChange={(e) => setMyQueue(e.target.checked)}
+            className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500"
+            data-testid="filter-my-queue"
+          />
+          <User className="w-3.5 h-3.5" />
+          {t('control_tower.my_queue')}
+        </label>
+      </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" data-testid="control-tower-summary">
         <SummaryCard
-          testId="card-overdue"
-          label={t('control_tower.card_overdue')}
-          count={overdueCount}
-          icon={AlertTriangle}
+          testId="card-p0"
+          label={t('control_tower.card_p0')}
+          count={summary?.p0_blockers ?? 0}
+          icon={Shield}
           color="red"
         />
         <SummaryCard
-          testId="card-due-soon"
-          label={t('control_tower.card_due_soon')}
-          count={dueSoonCount}
-          icon={Clock}
+          testId="card-p1"
+          label={t('control_tower.card_p1')}
+          count={summary?.p1_authority ?? 0}
+          icon={Gavel}
           color="orange"
         />
         <SummaryCard
-          testId="card-inbox"
-          label={t('control_tower.card_inbox')}
-          count={pendingInboxCount}
+          testId="card-p2"
+          label={t('control_tower.card_p2')}
+          count={summary?.p2_overdue ?? 0}
+          icon={AlertTriangle}
+          color="amber"
+        />
+        <SummaryCard
+          testId="card-p3"
+          label={t('control_tower.card_p3')}
+          count={summary?.p3_pending ?? 0}
           icon={Inbox}
           color="blue"
         />
         <SummaryCard
-          testId="card-unmatched"
-          label={t('control_tower.card_unmatched')}
-          count={unmatchedCount}
-          icon={FileQuestion}
-          color="amber"
-        />
-        <SummaryCard
-          testId="card-intake"
-          label={t('control_tower.card_intake')}
-          count={intakeCount}
-          icon={UserPlus}
-          color="purple"
+          testId="card-p4"
+          label={t('control_tower.card_p4')}
+          count={summary?.p4_upcoming ?? 0}
+          icon={Clock}
+          color="gray"
         />
       </div>
 
-      {/* Next Best Actions */}
+      {/* Action feed */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           {t('control_tower.next_best_actions')}
@@ -222,7 +339,7 @@ export default function ControlTower() {
         ) : (
           <div className="space-y-3" data-testid="control-tower-actions">
             {actions.map((action) => (
-              <ActionRow key={action.id} action={action} />
+              <ActionRow key={action.id} action={action} onSnooze={handleSnooze} />
             ))}
           </div>
         )}
@@ -246,23 +363,23 @@ const CARD_COLORS: Record<string, { bg: string; text: string; icon: string; bord
     icon: 'text-orange-500 dark:text-orange-400',
     border: 'border-orange-200 dark:border-orange-800',
   },
-  blue: {
-    bg: 'bg-blue-50 dark:bg-blue-950/30',
-    text: 'text-blue-700 dark:text-blue-300',
-    icon: 'text-blue-500 dark:text-blue-400',
-    border: 'border-blue-200 dark:border-blue-800',
-  },
   amber: {
     bg: 'bg-amber-50 dark:bg-amber-950/30',
     text: 'text-amber-700 dark:text-amber-300',
     icon: 'text-amber-500 dark:text-amber-400',
     border: 'border-amber-200 dark:border-amber-800',
   },
-  purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950/30',
-    text: 'text-purple-700 dark:text-purple-300',
-    icon: 'text-purple-500 dark:text-purple-400',
-    border: 'border-purple-200 dark:border-purple-800',
+  blue: {
+    bg: 'bg-blue-50 dark:bg-blue-950/30',
+    text: 'text-blue-700 dark:text-blue-300',
+    icon: 'text-blue-500 dark:text-blue-400',
+    border: 'border-blue-200 dark:border-blue-800',
+  },
+  gray: {
+    bg: 'bg-gray-50 dark:bg-gray-800/50',
+    text: 'text-gray-700 dark:text-gray-300',
+    icon: 'text-gray-500 dark:text-gray-400',
+    border: 'border-gray-200 dark:border-gray-700',
   },
 };
 
@@ -281,10 +398,7 @@ function SummaryCard({
 }) {
   const c = CARD_COLORS[color] ?? CARD_COLORS.blue;
   return (
-    <div
-      className={cn('rounded-xl border p-4 flex items-center gap-4', c.bg, c.border)}
-      data-testid={testId}
-    >
+    <div className={cn('rounded-xl border p-4 flex items-center gap-4', c.bg, c.border)} data-testid={testId}>
       <div className={cn('p-2 rounded-lg', c.bg)}>
         <Icon className={cn('w-6 h-6', c.icon)} />
       </div>
@@ -298,14 +412,20 @@ function SummaryCard({
 
 /* ────────────── Action Row ────────────── */
 
-function ActionRow({ action }: { action: NextBestAction }) {
+function ActionRow({
+  action,
+  onSnooze,
+}: {
+  action: ControlTowerAction;
+  onSnooze: (id: string, days: number) => void;
+}) {
   const { t } = useTranslation();
-  const config = ACTION_TYPE_CONFIG[action.type];
-  const Icon = config.icon;
+  const [showSnooze, setShowSnooze] = useState(false);
+  const pConfig = PRIORITY_CONFIG[action.priority] ?? PRIORITY_CONFIG.P3;
+  const SourceIcon = SOURCE_TYPE_ICONS[action.source_type] ?? FileText;
 
   return (
-    <Link
-      to={action.link}
+    <div
       className={cn(
         'flex items-center gap-4 p-4 rounded-lg border transition-all',
         'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800',
@@ -313,37 +433,110 @@ function ActionRow({ action }: { action: NextBestAction }) {
       )}
       data-testid={`action-row-${action.id}`}
     >
-      <div className={cn('p-2 rounded-lg', config.bgColor, config.darkBgColor)}>
-        <Icon className={cn('w-5 h-5', config.color)} />
+      {/* Source icon */}
+      <div className={cn('p-2 rounded-lg', pConfig.bgColor, pConfig.darkBgColor)}>
+        <SourceIcon className={cn('w-5 h-5', pConfig.color)} />
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+
+      {/* Content */}
+      <Link to={action.link} className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Priority badge */}
           <span
             className={cn(
-              'inline-block px-2 py-0.5 rounded text-xs font-medium',
-              config.bgColor,
-              config.darkBgColor,
-              config.color,
+              'inline-block px-2 py-0.5 rounded text-xs font-bold',
+              pConfig.bgColor,
+              pConfig.darkBgColor,
+              pConfig.color,
             )}
-            data-testid={`action-type-badge-${action.id}`}
+            data-testid={`priority-badge-${action.id}`}
           >
-            {t(`control_tower.type_${action.type}`)}
+            {t(`control_tower.priority_${action.priority.toLowerCase()}`)}
+          </span>
+          {/* Source type */}
+          <span className="text-xs text-gray-400 dark:text-gray-500">
+            {t(`control_tower.source_${action.source_type}`)}
           </span>
         </div>
         <p className="text-sm font-medium text-gray-900 dark:text-white mt-1 truncate">{action.title}</p>
-        {action.buildingAddress && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
-            <Building2 className="w-3 h-3" />
-            {action.buildingAddress}
-          </p>
+        {action.description && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{action.description}</p>
         )}
-      </div>
-      {action.dueDate && (
+        <div className="flex items-center gap-3 mt-1 flex-wrap">
+          {action.building_address && (
+            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <Building2 className="w-3 h-3" />
+              {action.building_address}
+            </span>
+          )}
+          {action.assigned_org && (
+            <span className="text-xs text-gray-400 dark:text-gray-500">{action.assigned_org}</span>
+          )}
+          {action.assigned_user && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+              <User className="w-3 h-3" />
+              {action.assigned_user}
+            </span>
+          )}
+          {action.confidence != null && (
+            <span className="text-xs text-gray-400 dark:text-gray-500" data-testid={`confidence-${action.id}`}>
+              {Math.round(action.confidence * 100)}%
+            </span>
+          )}
+          {action.freshness && (
+            <span className="text-xs text-gray-400 dark:text-gray-500" data-testid={`freshness-${action.id}`}>
+              {action.freshness}
+            </span>
+          )}
+        </div>
+      </Link>
+
+      {/* Due date */}
+      {action.due_date && (
         <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:block">
-          {formatDate(action.dueDate)}
+          {formatDate(action.due_date)}
         </span>
       )}
-      <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-    </Link>
+
+      {/* Snooze button */}
+      <div className="relative">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowSnooze(!showSnooze);
+          }}
+          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          title={t('control_tower.snooze')}
+          data-testid={`snooze-btn-${action.id}`}
+        >
+          <BellOff className="w-4 h-4" />
+        </button>
+        {showSnooze && (
+          <div
+            className="absolute right-0 top-full mt-1 z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-[120px]"
+            data-testid={`snooze-menu-${action.id}`}
+          >
+            {[1, 3, 7, 14].map((days) => (
+              <button
+                key={days}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSnooze(action.id, days);
+                  setShowSnooze(false);
+                }}
+                className="block w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                data-testid={`snooze-${days}d-${action.id}`}
+              >
+                {days} {t('control_tower.snooze_days')}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Link to={action.link}>
+        <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+      </Link>
+    </div>
   );
 }

@@ -1,168 +1,101 @@
 import { apiClient } from '@/api/client';
-import type { Obligation } from '@/api/obligations';
-import type { DocumentInboxSummary } from '@/api/documentInbox';
-import type { IntakeListResponse } from '@/api/intake';
-import type { DiagnosticPublication } from '@/components/building-detail/DiagnosticPublicationCard';
-import type { Building } from '@/types';
 
-export interface ControlTowerSummary {
-  overdueObligations: Obligation[];
-  dueSoonObligations: Obligation[];
-  pendingInboxCount: number;
-  unmatchedPublications: DiagnosticPublication[];
-  newIntakeRequests: number;
-  buildings: Building[];
-}
+/* ── Types ── */
 
-export interface NextBestAction {
+export type ActionPriority = 'P0' | 'P1' | 'P2' | 'P3' | 'P4';
+export type ActionSourceType =
+  | 'procedural_blocker'
+  | 'authority_request'
+  | 'obligation'
+  | 'inbox'
+  | 'intake'
+  | 'publication'
+  | 'deadline';
+
+export interface ControlTowerAction {
   id: string;
-  type: 'overdue_obligation' | 'unmatched_publication' | 'pending_inbox' | 'intake_request' | 'due_soon_obligation';
-  priority: number; // 1=highest
+  priority: ActionPriority;
+  source_type: ActionSourceType;
   title: string;
   description: string | null;
-  buildingId: string | null;
-  buildingAddress: string | null;
+  building_id: string | null;
+  building_address: string | null;
+  due_date: string | null;
+  assigned_org: string | null;
+  assigned_user: string | null;
   link: string;
-  dueDate: string | null;
+  confidence: number | null;
+  freshness: string | null;
 }
 
-function isOverdue(dateStr: string | null): boolean {
-  if (!dateStr) return false;
-  return new Date(dateStr) < new Date();
+export interface ControlTowerSummary {
+  p0_blockers: number;
+  p1_authority: number;
+  p2_overdue: number;
+  p3_pending: number;
+  p4_upcoming: number;
+  total: number;
 }
 
-function isDueSoon(dateStr: string | null, days = 30): boolean {
-  if (!dateStr) return false;
-  const d = new Date(dateStr);
-  const now = new Date();
-  const limit = new Date();
-  limit.setDate(now.getDate() + days);
-  return d >= now && d <= limit;
+export interface ActionFeedFilters {
+  building_id?: string;
+  source_type?: ActionSourceType;
+  priority?: ActionPriority;
+  my_queue?: boolean;
 }
 
-export async function fetchControlTowerData(buildingFilter?: string): Promise<ControlTowerSummary> {
-  // Fetch all data sources in parallel
-  const [buildingsRes, inboxRes, unmatchedRes, intakeRes] = await Promise.all([
-    apiClient.get<{ items: Building[]; total: number }>('/buildings', { params: { limit: 200 } }),
-    apiClient.get<DocumentInboxSummary>('/document-inbox').catch(() => ({
-      data: { total: 0, pending: 0, linked: 0, classified: 0, rejected: 0, items: [] } as DocumentInboxSummary,
-    })),
-    apiClient.get<DiagnosticPublication[]>('/diagnostic-publications/unmatched').catch(() => ({ data: [] as DiagnosticPublication[] })),
-    apiClient.get<IntakeListResponse>('/admin/intake', { params: { status: 'new' } }).catch(() => ({
-      data: { items: [], total: 0 } as IntakeListResponse,
-    })),
-  ]);
+/* ── API calls ── */
 
-  const buildings = buildingsRes.data.items ?? [];
-  const targetBuildings = buildingFilter ? buildings.filter((b) => b.id === buildingFilter) : buildings;
+export async function getActionFeed(filters?: ActionFeedFilters): Promise<ControlTowerAction[]> {
+  const params: Record<string, string> = {};
+  if (filters?.building_id) params.building_id = filters.building_id;
+  if (filters?.source_type) params.source_type = filters.source_type;
+  if (filters?.priority) params.priority = filters.priority;
+  if (filters?.my_queue) params.my_queue = 'true';
 
-  // Fetch obligations for all target buildings (cap at 50 to avoid too many requests)
-  const obligationResults = await Promise.all(
-    targetBuildings.slice(0, 50).map((b) =>
-      apiClient
-        .get<Obligation[]>(`/buildings/${b.id}/obligations`)
-        .then((r) => r.data.map((o) => ({ ...o, building_id: b.id })))
-        .catch(() => [] as Obligation[]),
-    ),
-  );
-
-  const allObligations = obligationResults.flat();
-  const activeObligations = allObligations.filter((o) => o.status !== 'completed' && o.status !== 'cancelled');
-  const overdueObligations = activeObligations.filter((o) => isOverdue(o.due_date));
-  const dueSoonObligations = activeObligations.filter((o) => isDueSoon(o.due_date));
-
-  return {
-    overdueObligations,
-    dueSoonObligations,
-    pendingInboxCount: inboxRes.data.pending,
-    unmatchedPublications: unmatchedRes.data,
-    newIntakeRequests: intakeRes.data.total,
-    buildings,
-  };
+  const res = await apiClient.get<{ items: ControlTowerAction[] }>('/control-tower/actions', { params });
+  return res.data.items;
 }
 
-export function buildNextBestActions(summary: ControlTowerSummary): NextBestAction[] {
-  const actions: NextBestAction[] = [];
+export async function getActionSummary(): Promise<ControlTowerSummary> {
+  const res = await apiClient.get<ControlTowerSummary>('/control-tower/summary');
+  return res.data;
+}
 
-  // Priority 1: Overdue obligations
-  for (const obl of summary.overdueObligations) {
-    const building = summary.buildings.find((b) => b.id === obl.building_id);
-    actions.push({
-      id: `overdue-${obl.id}`,
-      type: 'overdue_obligation',
-      priority: 1,
-      title: obl.title,
-      description: obl.description,
-      buildingId: obl.building_id,
-      buildingAddress: building?.address ?? null,
-      link: `/buildings/${obl.building_id}`,
-      dueDate: obl.due_date,
-    });
+/* ── Snooze helpers (localStorage) ── */
+
+const SNOOZE_KEY = 'ct_snoozed';
+
+interface SnoozedEntry {
+  until: string; // ISO date
+}
+
+function loadSnoozed(): Record<string, SnoozedEntry> {
+  try {
+    const raw = localStorage.getItem(SNOOZE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, SnoozedEntry>;
+    // Purge expired entries
+    const now = new Date().toISOString();
+    const clean: Record<string, SnoozedEntry> = {};
+    for (const [id, entry] of Object.entries(parsed)) {
+      if (entry.until > now) clean[id] = entry;
+    }
+    return clean;
+  } catch {
+    return {};
   }
+}
 
-  // Priority 2: Unmatched publications
-  for (const pub of summary.unmatchedPublications) {
-    actions.push({
-      id: `unmatched-${pub.id}`,
-      type: 'unmatched_publication',
-      priority: 2,
-      title: `${pub.source_system} — ${pub.source_mission_id}`,
-      description: null,
-      buildingId: null,
-      buildingAddress: null,
-      link: '/admin/diagnostic-review',
-      dueDate: null,
-    });
-  }
+export function snoozeAction(actionId: string, days: number): void {
+  const snoozed = loadSnoozed();
+  const until = new Date();
+  until.setDate(until.getDate() + days);
+  snoozed[actionId] = { until: until.toISOString() };
+  localStorage.setItem(SNOOZE_KEY, JSON.stringify(snoozed));
+}
 
-  // Priority 3: Pending inbox (single action representing all pending)
-  if (summary.pendingInboxCount > 0) {
-    actions.push({
-      id: 'inbox-pending',
-      type: 'pending_inbox',
-      priority: 3,
-      title: `${summary.pendingInboxCount} document(s) en attente`,
-      description: null,
-      buildingId: null,
-      buildingAddress: null,
-      link: '/documents',
-      dueDate: null,
-    });
-  }
-
-  // Priority 4: Intake requests
-  if (summary.newIntakeRequests > 0) {
-    actions.push({
-      id: 'intake-new',
-      type: 'intake_request',
-      priority: 4,
-      title: `${summary.newIntakeRequests} demande(s) entrante(s)`,
-      description: null,
-      buildingId: null,
-      buildingAddress: null,
-      link: '/admin/intake',
-      dueDate: null,
-    });
-  }
-
-  // Priority 5: Due soon obligations
-  for (const obl of summary.dueSoonObligations) {
-    const building = summary.buildings.find((b) => b.id === obl.building_id);
-    actions.push({
-      id: `due-soon-${obl.id}`,
-      type: 'due_soon_obligation',
-      priority: 5,
-      title: obl.title,
-      description: obl.description,
-      buildingId: obl.building_id,
-      buildingAddress: building?.address ?? null,
-      link: `/buildings/${obl.building_id}`,
-      dueDate: obl.due_date,
-    });
-  }
-
-  // Sort by priority
-  actions.sort((a, b) => a.priority - b.priority);
-
-  return actions;
+export function filterSnoozed(actions: ControlTowerAction[]): ControlTowerAction[] {
+  const snoozed = loadSnoozed();
+  return actions.filter((a) => !snoozed[a.id]);
 }

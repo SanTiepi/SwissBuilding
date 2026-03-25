@@ -19,6 +19,7 @@ import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTrig
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
+import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHistory';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
 import {
@@ -479,6 +480,9 @@ export function OverviewTab({
           </div>
         </Link>
       </div>
+
+      {/* Proof Delivery History */}
+      <ProofDeliveryHistory buildingId={buildingId} />
 
       {/* Dossier Export (handled by DossierStatusPanel above) */}
     </div>

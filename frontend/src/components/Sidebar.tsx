@@ -59,6 +59,7 @@ const navItems: NavItem[] = [
   { to: '/admin/invitations', icon: Mail, labelKey: 'nav.invitations', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/jurisdictions', icon: Scale, labelKey: 'nav.jurisdictions', allowedRoles: ['admin'] as UserRole[] },
   { to: '/rules-studio', icon: BookOpen, labelKey: 'nav.rules_studio', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/procedures', icon: ClipboardCheck, labelKey: 'nav.procedures', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/audit-logs', icon: FileSearch, labelKey: 'nav.audit_logs', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/diagnostic-review', icon: ClipboardCheck, labelKey: 'nav.diagnostic_review', allowedRoles: ['admin'] as UserRole[] },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },

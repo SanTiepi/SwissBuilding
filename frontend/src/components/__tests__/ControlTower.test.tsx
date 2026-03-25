@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import ControlTower from '@/pages/ControlTower';
@@ -19,85 +19,83 @@ vi.mock('@/utils/formatters', () => ({
 }));
 
 const mockSummary: controlTowerApi.ControlTowerSummary = {
-  overdueObligations: [
-    {
-      id: 'obl-1',
-      building_id: 'b-1',
-      title: 'Controle amiante annuel',
-      description: 'Overdue check',
-      obligation_type: 'regulatory',
-      priority: 'high',
-      status: 'pending',
-      due_date: '2025-01-01',
-      completed_at: null,
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z',
-    },
-  ],
-  dueSoonObligations: [
-    {
-      id: 'obl-2',
-      building_id: 'b-1',
-      title: 'Renouvellement contrat',
-      description: null,
-      obligation_type: 'contractual',
-      priority: 'medium',
-      status: 'pending',
-      due_date: '2026-04-10',
-      completed_at: null,
-      created_at: '2024-02-01T00:00:00Z',
-      updated_at: '2024-02-01T00:00:00Z',
-    },
-  ],
-  pendingInboxCount: 3,
-  unmatchedPublications: [
-    {
-      id: 'pub-1',
-      building_id: null,
-      source_system: 'Batiscan',
-      source_mission_id: 'M-001',
-      current_version: 1,
-      match_state: 'unmatched',
-      match_key: null,
-      match_key_type: null,
-      mission_type: 'amiante',
-      report_pdf_url: null,
-      structured_summary: null,
-      annexes: [],
-      payload_hash: 'abc',
-      published_at: '2026-01-01T00:00:00Z',
-      is_immutable: false,
-      versions: [],
-    },
-  ] as any,
-  newIntakeRequests: 2,
-  buildings: [
-    {
-      id: 'b-1',
-      egid: 1234,
-      egrid: null,
-      official_id: null,
-      address: 'Rue du Test 1',
-      postal_code: '1000',
-      city: 'Lausanne',
-      canton: 'VD',
-      latitude: null,
-      longitude: null,
-      parcel_number: null,
-      construction_year: 1960,
-      renovation_year: null,
-      building_type: 'residential',
-      floors_above: 3,
-    },
-  ] as any,
+  p0_blockers: 2,
+  p1_authority: 1,
+  p2_overdue: 3,
+  p3_pending: 5,
+  p4_upcoming: 4,
+  total: 15,
 };
+
+const mockActions: controlTowerApi.ControlTowerAction[] = [
+  {
+    id: 'act-1',
+    priority: 'P0',
+    source_type: 'procedural_blocker',
+    title: 'Missing asbestos clearance',
+    description: 'Cannot proceed without clearance',
+    building_id: 'b-1',
+    building_address: 'Rue du Test 1, Lausanne',
+    due_date: '2026-03-01',
+    assigned_org: 'DiagSwiss',
+    assigned_user: 'Jean Muller',
+    link: '/buildings/b-1',
+    confidence: 0.92,
+    freshness: '2h ago',
+  },
+  {
+    id: 'act-2',
+    priority: 'P1',
+    source_type: 'authority_request',
+    title: 'Canton VD review pending',
+    description: null,
+    building_id: 'b-2',
+    building_address: 'Route de Berne 5',
+    due_date: '2026-04-15',
+    assigned_org: null,
+    assigned_user: null,
+    link: '/buildings/b-2',
+    confidence: null,
+    freshness: null,
+  },
+  {
+    id: 'act-3',
+    priority: 'P2',
+    source_type: 'obligation',
+    title: 'Annual check overdue',
+    description: null,
+    building_id: 'b-1',
+    building_address: 'Rue du Test 1, Lausanne',
+    due_date: '2026-01-01',
+    assigned_org: null,
+    assigned_user: null,
+    link: '/buildings/b-1',
+    confidence: null,
+    freshness: null,
+  },
+];
 
 vi.mock('@/api/controlTower', async () => {
   return {
-    fetchControlTowerData: vi.fn(),
-    buildNextBestActions: (await vi.importActual('@/api/controlTower') as any).buildNextBestActions,
+    getActionFeed: vi.fn(),
+    getActionSummary: vi.fn(),
+    snoozeAction: vi.fn(),
+    filterSnoozed: (actions: controlTowerApi.ControlTowerAction[]) => actions,
   };
 });
+
+vi.mock('@/api/client', () => ({
+  apiClient: {
+    get: vi.fn().mockResolvedValue({
+      data: {
+        items: [
+          { id: 'b-1', address: 'Rue du Test 1', city: 'Lausanne' },
+          { id: 'b-2', address: 'Route de Berne 5', city: 'Bern' },
+        ],
+      },
+    }),
+  },
+}));
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -113,16 +111,18 @@ const createWrapper = () => {
 describe('ControlTower', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(controlTowerApi.fetchControlTowerData).mockResolvedValue(mockSummary);
+    vi.mocked(controlTowerApi.getActionSummary).mockResolvedValue(mockSummary);
+    vi.mocked(controlTowerApi.getActionFeed).mockResolvedValue(mockActions);
   });
 
   it('renders loading state initially', () => {
-    vi.mocked(controlTowerApi.fetchControlTowerData).mockReturnValue(new Promise(() => {}));
+    vi.mocked(controlTowerApi.getActionSummary).mockReturnValue(new Promise(() => {}));
+    vi.mocked(controlTowerApi.getActionFeed).mockReturnValue(new Promise(() => {}));
     render(<ControlTower />, { wrapper: createWrapper() });
     expect(screen.getByTestId('control-tower-loading')).toBeInTheDocument();
   });
 
-  it('renders the page title', async () => {
+  it('renders the page title after loading', async () => {
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
       expect(screen.getByTestId('control-tower-page')).toBeInTheDocument();
@@ -130,75 +130,77 @@ describe('ControlTower', () => {
     expect(screen.getByText('control_tower.title')).toBeInTheDocument();
   });
 
-  it('renders all 5 summary cards', async () => {
+  it('renders all 5 priority summary cards', async () => {
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
-      expect(screen.getByTestId('card-overdue')).toBeInTheDocument();
+      expect(screen.getByTestId('card-p0')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('card-due-soon')).toBeInTheDocument();
-    expect(screen.getByTestId('card-inbox')).toBeInTheDocument();
-    expect(screen.getByTestId('card-unmatched')).toBeInTheDocument();
-    expect(screen.getByTestId('card-intake')).toBeInTheDocument();
+    expect(screen.getByTestId('card-p1')).toBeInTheDocument();
+    expect(screen.getByTestId('card-p2')).toBeInTheDocument();
+    expect(screen.getByTestId('card-p3')).toBeInTheDocument();
+    expect(screen.getByTestId('card-p4')).toBeInTheDocument();
   });
 
   it('displays correct counts on summary cards', async () => {
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
-      expect(screen.getByTestId('card-overdue')).toBeInTheDocument();
+      expect(screen.getByTestId('card-p0')).toBeInTheDocument();
     });
-    // Overdue: 1
-    expect(screen.getByTestId('card-overdue')).toHaveTextContent('1');
-    // Due soon: 1
-    expect(screen.getByTestId('card-due-soon')).toHaveTextContent('1');
-    // Inbox: 3
-    expect(screen.getByTestId('card-inbox')).toHaveTextContent('3');
-    // Unmatched: 1
-    expect(screen.getByTestId('card-unmatched')).toHaveTextContent('1');
-    // Intake: 2
-    expect(screen.getByTestId('card-intake')).toHaveTextContent('2');
+    expect(screen.getByTestId('card-p0')).toHaveTextContent('2');
+    expect(screen.getByTestId('card-p1')).toHaveTextContent('1');
+    expect(screen.getByTestId('card-p2')).toHaveTextContent('3');
+    expect(screen.getByTestId('card-p3')).toHaveTextContent('5');
+    expect(screen.getByTestId('card-p4')).toHaveTextContent('4');
   });
 
-  it('renders next best actions list', async () => {
+  it('renders action rows with priority badges', async () => {
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
-      expect(screen.getByTestId('control-tower-actions')).toBeInTheDocument();
+      expect(screen.getByTestId('action-row-act-1')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('priority-badge-act-1')).toHaveTextContent('control_tower.priority_p0');
+    expect(screen.getByTestId('action-row-act-2')).toBeInTheDocument();
+    expect(screen.getByTestId('action-row-act-3')).toBeInTheDocument();
+  });
+
+  it('shows confidence and freshness indicators when present', async () => {
+    render(<ControlTower />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByTestId('confidence-act-1')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('confidence-act-1')).toHaveTextContent('92%');
+    expect(screen.getByTestId('freshness-act-1')).toHaveTextContent('2h ago');
+  });
+
+  it('renders filter controls', async () => {
+    render(<ControlTower />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByTestId('control-tower-filters')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('filter-source')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-priority')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-my-queue')).toBeInTheDocument();
+  });
+
+  it('renders snooze buttons on action rows', async () => {
+    render(<ControlTower />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByTestId('snooze-btn-act-1')).toBeInTheDocument();
     });
   });
 
-  it('renders action rows with correct types', async () => {
+  it('opens snooze menu on click', async () => {
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
-      expect(screen.getByTestId('action-row-overdue-obl-1')).toBeInTheDocument();
+      expect(screen.getByTestId('snooze-btn-act-1')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('action-row-unmatched-pub-1')).toBeInTheDocument();
-    expect(screen.getByTestId('action-row-inbox-pending')).toBeInTheDocument();
-    expect(screen.getByTestId('action-row-intake-new')).toBeInTheDocument();
-    expect(screen.getByTestId('action-row-due-soon-obl-2')).toBeInTheDocument();
-  });
-
-  it('renders refresh button', async () => {
-    render(<ControlTower />, { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(screen.getByTestId('control-tower-refresh')).toBeInTheDocument();
-    });
-  });
-
-  it('renders building filter dropdown', async () => {
-    render(<ControlTower />, { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(screen.getByTestId('control-tower-filter')).toBeInTheDocument();
-    });
+    fireEvent.click(screen.getByTestId('snooze-btn-act-1'));
+    expect(screen.getByTestId('snooze-menu-act-1')).toBeInTheDocument();
+    expect(screen.getByTestId('snooze-7d-act-1')).toBeInTheDocument();
   });
 
   it('shows empty state when no actions', async () => {
-    vi.mocked(controlTowerApi.fetchControlTowerData).mockResolvedValue({
-      overdueObligations: [],
-      dueSoonObligations: [],
-      pendingInboxCount: 0,
-      unmatchedPublications: [],
-      newIntakeRequests: 0,
-      buildings: [],
-    });
+    vi.mocked(controlTowerApi.getActionFeed).mockResolvedValue([]);
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
       expect(screen.getByTestId('control-tower-empty')).toBeInTheDocument();
@@ -206,34 +208,17 @@ describe('ControlTower', () => {
   });
 
   it('renders error state on fetch failure', async () => {
-    vi.mocked(controlTowerApi.fetchControlTowerData).mockRejectedValue(new Error('fail'));
+    vi.mocked(controlTowerApi.getActionSummary).mockRejectedValue(new Error('fail'));
     render(<ControlTower />, { wrapper: createWrapper() });
     await waitFor(() => {
       expect(screen.getByTestId('control-tower-error')).toBeInTheDocument();
     });
   });
-});
 
-describe('buildNextBestActions', () => {
-  it('sorts actions by priority', () => {
-    const actions = controlTowerApi.buildNextBestActions(mockSummary);
-    expect(actions.length).toBe(5);
-    expect(actions[0].type).toBe('overdue_obligation');
-    expect(actions[1].type).toBe('unmatched_publication');
-    expect(actions[2].type).toBe('pending_inbox');
-    expect(actions[3].type).toBe('intake_request');
-    expect(actions[4].type).toBe('due_soon_obligation');
-  });
-
-  it('returns empty array when no actions', () => {
-    const actions = controlTowerApi.buildNextBestActions({
-      overdueObligations: [],
-      dueSoonObligations: [],
-      pendingInboxCount: 0,
-      unmatchedPublications: [],
-      newIntakeRequests: 0,
-      buildings: [],
+  it('renders refresh button', async () => {
+    render(<ControlTower />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByTestId('control-tower-refresh')).toBeInTheDocument();
     });
-    expect(actions).toEqual([]);
   });
 });

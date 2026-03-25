@@ -29,6 +29,7 @@ const LazyDocumentsTab = lazy(() => import('@/components/building-detail/Documen
 const LazyLeasesTab = lazy(() => import('@/components/building-detail/LeasesTab'));
 const LazyContractsTab = lazy(() => import('@/components/building-detail/ContractsTab'));
 const LazyOwnershipTab = lazy(() => import('@/components/building-detail/OwnershipTab'));
+const LazyProceduresSection = lazy(() => import('@/components/building-detail/ProceduresSection'));
 const LazyTransferPackagePanel = lazy(() =>
   import('@/components/TransferPackagePanel').then((m) => ({ default: m.TransferPackagePanel })),
 );
@@ -47,7 +48,7 @@ const editSchema = z.object({
 
 type EditFormData = z.infer<typeof editSchema>;
 
-type TabKey = 'overview' | 'activity' | 'diagnostics' | 'documents' | 'ownership' | 'leases' | 'contracts' | 'details';
+type TabKey = 'overview' | 'activity' | 'diagnostics' | 'documents' | 'ownership' | 'leases' | 'contracts' | 'procedures' | 'details';
 
 const TabFallback = (
   <div className="flex items-center justify-center py-12">
@@ -134,6 +135,7 @@ export default function BuildingDetail() {
     { key: 'ownership', label: t('building.tab.ownership') || 'Ownership' },
     { key: 'leases', label: t('building.tab.leases') || 'Leases' },
     { key: 'contracts', label: t('building.tab.contracts') || 'Contracts' },
+    { key: 'procedures', label: t('building.tab.procedures') || 'Procedures' },
     { key: 'details', label: t('building.tab.details') },
   ];
 
@@ -383,6 +385,13 @@ export default function BuildingDetail() {
           {activeTab === 'contracts' && (
             <Suspense fallback={TabFallback}>
               <LazyContractsTab buildingId={id!} />
+            </Suspense>
+          )}
+
+          {/* Procedures Tab */}
+          {activeTab === 'procedures' && (
+            <Suspense fallback={TabFallback}>
+              <LazyProceduresSection buildingId={id!} />
             </Suspense>
           )}
 
