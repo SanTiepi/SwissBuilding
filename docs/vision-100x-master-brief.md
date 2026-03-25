@@ -411,17 +411,18 @@ Conditional later boosters:
 - `Docling`
 - `PaddleOCR`
 
-## Remediation Marketplace (Validated 2026-03-25)
+## Remediation Module (validated 2026-03-25, updated v2)
 
-SwissBuilding now includes a remediation marketplace as a validated strategic axis.
+SwissBuilding includes a remediation module as a validated strategic axis.
+This is an internal module of BatiConnect, not a separate product or external network.
 
 ### Purpose
 
-Create a closed, verified network for regulated competition on pollutant remediation works. The marketplace connects property managers who need remediation with verified remediation companies, using the BatiConnect evidence layer as the trust foundation.
+Enable regulated competition on pollutant remediation works within the BatiConnect platform. The module connects property managers who need remediation with verified remediation companies, using the BatiConnect evidence layer as the trust foundation.
 
 ### Positioning
 
-The marketplace is not an open directory. It is a Batiscan-verified closed network where:
+The remediation module is not an open directory. It is a Batiscan-verified closed network where:
 - every participating company is verified before receiving any RFQ
 - ratings apply only to verified, completed contracts (double confirmation: client + company, with Batiscan moderation)
 - the platform does NOT recommend or rank companies -- the client always chooses
@@ -429,8 +430,21 @@ The marketplace is not an open directory. It is a Batiscan-verified closed netwo
 
 ### Two Entry Paths
 
-1. **With diagnostic**: property manager has a BatiConnect diagnostic publication. The marketplace enables direct RFQ creation scoped to building, pollutant type, and work category.
-2. **Without diagnostic**: property manager does not yet have a diagnostic. The marketplace routes them to a Batiscan assessment first, which then feeds into the RFQ flow.
+1. **With diagnostic**: property manager has a BatiConnect diagnostic publication. The module enables direct RFQ creation scoped to building, pollutant type, and work category.
+2. **Without diagnostic**: property manager does not yet have a diagnostic. The module routes them to a Batiscan assessment first, which then feeds into the RFQ flow.
+
+### Closed-Loop Post-Works Value Chain
+
+The remediation module completes the full building lifecycle loop:
+
+1. **Diagnostic** -- pollutant assessment identifies remediation needs
+2. **Dossier** -- evidence-backed dossier defines scope and constraints
+3. **RFQ** -- property manager issues scoped request to verified companies
+4. **Works execution** -- selected company performs remediation
+5. **Post-works confirmation** -- dual sign-off (client + company) with hash-signed completion
+6. **Passport update** -- remediation evidence feeds back into the building passport and digital twin
+
+This closed loop means every remediation event strengthens the building's truth layer. No information is lost between diagnostic and post-works state.
 
 ### Revenue Model
 
@@ -445,26 +459,68 @@ Company subscriptions for network participation and visibility. Subscription tie
 
 ### Integration with BatiConnect
 
-The marketplace shares BatiConnect infrastructure:
+The remediation module is part of BatiConnect infrastructure:
 - consumes diagnostic publications as RFQ context
 - reuses existing auth, document intake, and audit layers
 - remediation evidence feeds back into the building dossier and evidence chain
-- post-works truth from marketplace-sourced interventions enriches the digital twin
+- post-works truth from module-sourced interventions enriches the digital twin
+
+### AI Progressive Learning (3 phases)
+
+The remediation module benefits from a progressive AI layer that improves with platform usage:
+
+**Phase 1 -- Extraction and structuring (now)**
+- AI extracts structured data from uploaded diagnostics, quotes, and completion reports
+- contradiction detection flags inconsistencies between diagnostic findings and remediation scope
+- passport narrative generation summarizes building state in human-readable form
+
+**Phase 2 -- Decision support (next)**
+- readiness advisor evaluates whether a building is ready for remediation (regulatory, evidence, procedural)
+- quote comparison surfaces objective differences across received quotes (cost, scope, timeline) without ranking
+- portfolio intelligence aggregates remediation patterns across buildings for timing and budget decisions
+
+**Phase 3 -- Progressive autonomy (later)**
+- AI learns from completed remediation cycles to improve extraction accuracy
+- pattern recognition across the platform corpus improves contradiction detection and scope validation
+- the system becomes progressively better at identifying incomplete or inconsistent remediation dossiers
+
+Important: AI never recommends companies. AI assists with data quality, decision clarity, and dossier completeness.
+
+### Data Flywheel as Strategic Moat
+
+Every remediation cycle completed on the platform strengthens the system:
+- extraction models improve with more structured remediation data
+- contradiction detection learns from resolved inconsistencies
+- cost and timeline benchmarks become more accurate with each completed project
+- building passports become richer, making the platform more valuable for subsequent interventions
+
+This creates a compounding data advantage: the more the platform is used, the better it becomes at structuring, validating, and contextualizing remediation work. This flywheel is the primary long-term moat of the remediation module.
+
+### Replicable Pattern
+
+The remediation module establishes a pattern replicable to other professional verticals:
+- **Architects renovation** -- same closed-loop (diagnostic, dossier, RFQ, works, confirmation, passport update) applied to architectural renovation mandates
+- **Environmental consultants (bureaux d'etudes environnementaux)** -- environmental assessments feeding into remediation or compliance workflows
+- **Quality controllers (controleurs qualite)** -- inspection, non-conformity tracking, corrective action, and re-inspection loop
+
+Each vertical reuses the same trust model, closed-loop evidence chain, and progressive AI layer. The remediation module is the first instance of this pattern.
 
 ### Strategic Value
 
 - creates a new revenue stream (company subscriptions) alongside SaaS subscriptions
 - strengthens the evidence chain by connecting diagnostics to verified remediation outcomes
 - builds network effects: more verified companies attract more property managers and vice versa
-- reinforces the moat: the combination of diagnostic truth + verified remediation network is hard to replicate
+- reinforces the moat: the combination of diagnostic truth + verified remediation network + data flywheel is hard to replicate
+- establishes a replicable vertical pattern for future professional domains
 
-### Invariants
+### 6 Invariants
 
-- The platform does NOT recommend companies to clients
-- Payment does NOT influence ranking
-- Verified contracts only (no open reviews)
-- No shared database between BatiConnect and external systems
-- BatiConnect is an evidence/readiness layer, not a diagnostic tool itself
+1. The platform does NOT recommend companies to clients
+2. Payment does NOT influence ranking
+3. Verified contracts only (no open reviews)
+4. No shared database between BatiConnect and external systems
+5. BatiConnect is an evidence/readiness layer, not a diagnostic tool itself
+6. AI assists with data quality and decision clarity, never with company selection
 
 ## Relationship to the Roadmap
 

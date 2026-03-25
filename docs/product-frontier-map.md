@@ -1515,24 +1515,50 @@ Rule:
 346. **Integration Regression Sentinel**
      - catch full-chain drift before another backend primitive gets added
 
-### J59. Remediation Marketplace (Validated 2026-03-25)
+### J59. Remediation Module (validated 2026-03-25, updated v2)
 
 Status: `core_now`
 
-Closed verified network for regulated competition on pollutant remediation works. Batiscan-verified companies receive RFQs from property managers. No platform recommendation, no payment-influenced ranking.
+Internal BatiConnect module for regulated competition on pollutant remediation works. Batiscan-verified companies receive RFQs from property managers. No platform recommendation, no payment-influenced ranking. Not a separate product.
 
-**5 Delivery Lots**
+**6 Delivery Lots**
 
-347. **Company Verification and Onboarding (MKT-1)**
+347. **Company Verification and Onboarding (REM-1)**
      - verify remediation companies (certifications, SUVA recognition, trade categories, service regions) before they can receive RFQs
-348. **Neutral RFQ Lifecycle (MKT-2)**
+348. **Neutral RFQ Lifecycle (REM-2)**
      - property managers create ClientRequests scoped to building + pollutant type + work category; verified companies receive RequestInvitations and submit Quotes; no platform ranking or recommendation
-349. **Award, Completion, and Verified Review (MKT-3)**
+349. **Award, Completion, and Verified Review (REM-3)**
      - formal award with hash-signed AwardConfirmation; post-works CompletionConfirmation with dual sign-off (client + company); verified Review only after confirmed completion
-350. **Company Subscription Management (MKT-4)**
+350. **Company Subscription Management (REM-4)**
      - subscription tiers and billing lifecycle; subscription tier does NOT influence visibility or ranking in RFQ results
-351. **Marketplace Workspace Surface (MKT-5)**
-     - public-facing company profiles, RFQ submission forms, and marketplace navigation integrated into BatiConnect Workspace surface
+351. **Module Workspace Surface (REM-5)**
+     - company profiles, RFQ submission forms, and remediation navigation integrated into BatiConnect Workspace surface
+352. **Post-Works Truth (REM-6)**
+     - closed-loop: diagnostic -> dossier -> RFQ -> works -> confirmation -> passport update; every completed remediation feeds back into the building passport and digital twin
+
+**AI Layer**
+
+353. **AI Extraction and Structuring**
+     - extract structured data from uploaded diagnostics, quotes, and completion reports
+354. **AI Contradiction Detection**
+     - flag inconsistencies between diagnostic findings and remediation scope
+355. **AI Passport Narrative**
+     - generate human-readable building state summaries from structured evidence
+356. **AI Readiness Advisor**
+     - evaluate whether a building is ready for remediation (regulatory, evidence, procedural)
+357. **AI Portfolio Intelligence**
+     - aggregate remediation patterns across buildings for timing and budget decisions
+358. **AI Quote Comparison**
+     - surface objective differences across received quotes (cost, scope, timeline) without ranking
+359. **AI Progressive Learning**
+     - extraction and validation models improve with each completed remediation cycle; compounding data advantage over time
+
+**Data Flywheel (structural)**
+
+The remediation module creates a compounding data advantage:
+- every completed cycle improves extraction accuracy, contradiction detection, and cost benchmarks
+- building passports become richer with each intervention, increasing platform value for subsequent workflows
+- the flywheel is the primary long-term moat: the more the platform is used, the better it becomes
 
 **Dependencies**
 
@@ -1547,13 +1573,25 @@ Closed verified network for regulated competition on pollutant remediation works
 - verified network effects (more companies attract more clients and vice versa)
 - remediation evidence chain (post-works truth feeds back into building dossier)
 - closed-loop diagnostic-to-remediation flow
+- replicable pattern for other professional verticals
 
-**Invariants**
+**Replicable Pattern**
 
-- No recommendation: platform never ranks or recommends companies to clients
-- Payment != ranking: subscription tier does not influence visibility in RFQ results
-- Verified contracts only: awards and reviews require completed verification chain
-- No shared database between BatiConnect and external systems
+The remediation module establishes a vertical pattern replicable to:
+- architectes reno (architectural renovation mandates)
+- bureaux d'etudes environnementaux (environmental assessment workflows)
+- controleurs qualite (inspection, non-conformity, corrective action loops)
+
+Each vertical reuses the same trust model, closed-loop evidence chain, and progressive AI layer.
+
+**6 Invariants**
+
+1. No recommendation: platform never ranks or recommends companies to clients
+2. Payment != ranking: subscription tier does not influence visibility in RFQ results
+3. Verified contracts only: awards and reviews require completed verification chain
+4. No shared database between BatiConnect and external systems
+5. BatiConnect is an evidence/readiness layer, not a diagnostic tool itself
+6. AI assists with data quality and decision clarity, never with company selection
 
 ## K. Saturation and Triage Workflow
 

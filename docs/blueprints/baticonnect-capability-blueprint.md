@@ -1161,20 +1161,20 @@ Version: 2.0 | Date: 2026-03-21
 
 ---
 
-## Planned -- Remediation Marketplace
+## Planned -- Remediation Module
 
-> Mise en concurrence encadree for pollutant remediation. Closed verified network with 5 delivery lots.
+> Mise en concurrence encadree for pollutant remediation. Internal module (not marketplace). Closed verified network with 6 delivery lots. Requires 4 architecture contracts (AC-1 through AC-4) as prerequisites.
 
-### MKT-1: Company Verification and Onboarding
+### MKT-1: Company Verification and Onboarding (Lot 1 -- Foundations)
 
 | Field | Value |
 |---|---|
 | **Description** | Verify remediation companies (certifications, SUVA recognition, trade categories, service regions) before they can receive RFQs |
 | **Source entities** | CompanyProfile, CompanyVerification |
 | **Status** | `planned` |
-| **Dependencies** | Organization backbone, Document Intake (1.1) |
+| **Dependencies** | Organization backbone, Document Intake (1.1), AC-1 (Event backbone), AC-3 (Plugin boundary) |
 
-### MKT-2: Neutral RFQ Lifecycle
+### MKT-2: Neutral RFQ Lifecycle (Lot 2 -- Neutral RFQ)
 
 | Field | Value |
 |---|---|
@@ -1183,7 +1183,7 @@ Version: 2.0 | Date: 2026-03-21
 | **Status** | `planned` |
 | **Dependencies** | MKT-1, Building asset, Document Intake (1.1) |
 
-### MKT-3: Award and Trust Chain
+### MKT-3: Award and Trust Chain (Lot 3 -- Award+Trust)
 
 | Field | Value |
 |---|---|
@@ -1192,7 +1192,16 @@ Version: 2.0 | Date: 2026-03-21
 | **Status** | `planned` |
 | **Dependencies** | MKT-2 |
 
-### MKT-4: Subscription Monetization
+### MKT-4: Post-Works Truth (Lot 4 -- Post-works truth)
+
+| Field | Value |
+|---|---|
+| **Description** | Link CompletionConfirmation to PostWorksState. Auto-generate before/after comparison via time_machine snapshots. Feed grade delta into trust score and passport. Closes the evidence loop from RFQ to building state update. |
+| **Source entities** | PostWorksLink, PostWorksState, BuildingSnapshot |
+| **Status** | `planned` |
+| **Dependencies** | MKT-3, PostWorksService, TimeMachineService, PassportService |
+
+### MKT-5: Subscription Monetization (Lot 5 -- Monetization)
 
 | Field | Value |
 |---|---|
@@ -1201,17 +1210,83 @@ Version: 2.0 | Date: 2026-03-21
 | **Status** | `planned` |
 | **Dependencies** | MKT-1 |
 
-### MKT-5: Site Integration
+### MKT-6: Site Integration (Lot 6 -- Site integration)
 
 | Field | Value |
 |---|---|
-| **Description** | Public-facing company profiles, RFQ submission forms, and marketplace navigation integrated into BatiConnect Workspace surface |
+| **Description** | Public-facing company profiles, RFQ submission forms, and module navigation integrated into BatiConnect Workspace surface |
 | **Source entities** | CompanyProfile (read projection) |
 | **Status** | `planned` |
 | **Dependencies** | MKT-1, MKT-2 |
 
-### Marketplace Invariants
+### AI Capabilities (transversal -- serves all modules)
+
+### AI-CAP-1: Document Extraction
+
+| Field | Value |
+|---|---|
+| **Description** | AI-assisted extraction of structured data from uploaded documents (diagnostic reports, quotes, certificates). Confidence scores, human correction loop, extraction accuracy improves with feedback. |
+| **Source entities** | ai_extraction_log, ai_feedback |
+| **Status** | `planned` |
+| **Dependencies** | Document Intake (1.1), AC-4 (AI feedback loop contract) |
+
+### AI-CAP-2: Contradiction Detection Enhancement
+
+| Field | Value |
+|---|---|
+| **Description** | Pattern-based contradiction detection that learns from resolved contradictions. Reduces false positives over time using ai_rule_pattern. |
+| **Source entities** | ai_rule_pattern, ai_feedback |
+| **Status** | `planned` |
+| **Dependencies** | ContradictionDetector (existing), AC-4 |
+
+### AI-CAP-3: Passport Narrative Generation
+
+| Field | Value |
+|---|---|
+| **Description** | Auto-generate human-readable passport summary narratives from structured passport data. Tone and detail level adapt to audience (owner vs authority vs contractor). |
+| **Source entities** | BuildingPassport (existing) |
+| **Status** | `planned` |
+| **Dependencies** | PassportService (existing) |
+
+### AI-CAP-4: Readiness Advisor
+
+| Field | Value |
+|---|---|
+| **Description** | Proactive suggestions for improving readiness scores. Prioritized action recommendations based on impact analysis and historical patterns. |
+| **Source entities** | ReadinessAssessment (existing), ai_rule_pattern |
+| **Status** | `planned` |
+| **Dependencies** | ReadinessReasonerService (existing), AC-4 |
+
+### AI-CAP-5: Portfolio Intelligence
+
+| Field | Value |
+|---|---|
+| **Description** | Cross-building pattern mining, risk prediction, maintenance forecasting. Identifies portfolio-wide trends and anomalies. Network effects: more buildings = better predictions. |
+| **Source entities** | BuildingComparison (existing), ai_feedback |
+| **Status** | `planned` |
+| **Dependencies** | BuildingComparisonService (existing), AC-2 (Projection bus) |
+
+### AI-CAP-6: Quote Comparison
+
+| Field | Value |
+|---|---|
+| **Description** | Structured comparison of submitted quotes on technical scope, pricing, and timeline. No ranking -- presents factual comparison matrix for human decision. |
+| **Source entities** | Quote, ClientRequest |
+| **Status** | `planned` |
+| **Dependencies** | MKT-2 |
+
+### AI-CAP-7: Data Flywheel Engine
+
+| Field | Value |
+|---|---|
+| **Description** | Structural capability: every user action (upload, correction, confirmation, review) enriches the model. Feedback loops: extraction accuracy improves with corrections, trust scores refine with evidence, readiness checks sharpen with regulatory updates. Knowledge density per building increases monotonically. |
+| **Source entities** | ai_feedback, ai_extraction_log, ai_rule_pattern |
+| **Status** | `planned` |
+| **Dependencies** | AC-4, all AI-CAP capabilities |
+
+### Module Invariants
 
 - No recommendation: platform never ranks or recommends companies to clients
 - Payment != ranking: subscription tier does not influence visibility in RFQ results
 - Verified contracts only: awards and reviews require completed verification chain
+- AI assists, never decides: human confirmation required for all write operations

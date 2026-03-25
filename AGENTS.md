@@ -97,22 +97,26 @@ i18n workaround: `t(key) || 'inline fallback'`
 
 ## Ecosystem Invariants (HARD RULES)
 
-BatiConnect carries two product surfaces sharing infrastructure:
-1. **Building Intelligence** — dossier, evidence, completeness, trust, readiness, portfolio
-2. **Remediation Marketplace** — closed verified network for pollutant remediation works (mise en concurrence encadree)
+BatiConnect carries building intelligence + remediation module (internal) + transversal AI layer.
+Remediation is an internal module of BatiConnect, NOT a separate product surface.
 
 Six invariants that must be respected everywhere:
-1. Batiscan V4 is frozen — no features added, consumes via immutable bridge only
-2. Site public (batiscan.ch) carries no transactional workflow — acquisition only
-3. BatiConnect does NOT do diagnostics — consumes Batiscan publications read-only
-4. Remediation marketplace does NOT recommend — client chooses, Batiscan verifies
-5. No shared database between V4 and BatiConnect — immutable bridge (DiagnosticPublicationPackage)
-6. Payment never influences ranking — subscription = visibility, not priority
+1. Batiscan V4 is frozen -- no features added, consumes via immutable bridge only
+2. Site public (batiscan.ch) carries no transactional workflow -- acquisition only
+3. BatiConnect does NOT do diagnostics -- consumes Batiscan publications read-only
+4. Remediation module does NOT recommend -- client chooses, Batiscan verifies
+5. No shared database between V4 and BatiConnect -- immutable bridge (DiagnosticPublicationPackage)
+6. Payment never influences ranking -- subscription = visibility, not priority
+
+AI layer rules:
+- `ai_generated` flag on all AI-produced outputs (extractions, classifications, suggestions)
+- user corrections feed `ai_feedback` table (data flywheel)
+- no personal data sent to external LLM -- anonymize or use local models
+- progressive learning: Phase 1 (LLM does work) -> Phase 2 (deterministic rules) -> Phase 3 (LLM supervises)
 
 Additional rules:
-- models and routes remain separate per surface (building intelligence vs marketplace)
-- auth/docs/audit infrastructure is shared
-- marketplace RFQ requires diagnostic proof — no RFQ without validated report
+- auth/docs/audit infrastructure is shared across all modules
+- remediation RFQ requires diagnostic proof -- no RFQ without validated report
 
 ## Role Split
 

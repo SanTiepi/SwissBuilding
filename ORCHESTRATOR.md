@@ -1228,12 +1228,32 @@ It should stay compact and focus on the next believable product jumps, not the f
 - openBIM / digital logbook convergence
 - ecosystem pull and standards
 
-14. **Remediation marketplace (mise en concurrence encadree)**
+14. **Remediation module (internal -- mise en concurrence encadree)**
 - closed verified network, not open directory
-- 5 lots: foundations, neutral RFQ, award+trust, monetization, site integration
+- 6 lots: 1.Foundations, 2.Neutral RFQ, 3.Award+Trust, 4.Post-works truth, 5.Monetization, 6.Site integration
+- Lot 4 (post-works truth): link CompletionConfirmation to PostWorksState, auto-generate before/after comparison, feed trust score and passport grade
 - shares infra with BatiConnect (auth, docs, audit)
 - own models and routes
 - invariants: no recommendation, payment != ranking, verified contracts only
+- **4 architecture contracts as prerequisites**:
+  - AC-1: Event backbone (domain events for cross-module reactivity)
+  - AC-2: Projection bus (read-model rebuild from event stream)
+  - AC-3: Plugin boundary (module isolation contract -- remediation as first plugin)
+  - AC-4: AI feedback loop contract (structured feedback ingestion for learning layer)
+
+15. **AI progressive learning layer (transversal capability)**
+- Phase 1: Supervised extraction -- document parsing confidence scores, human correction loop, ai_extraction_log table
+- Phase 2: Pattern recognition -- contradiction detection improvements, ai_rule_pattern table, readiness advisor suggestions
+- Phase 3: Portfolio intelligence -- cross-building pattern mining, risk prediction, maintenance forecasting, ai_feedback table
+- transversal: serves all modules (diagnostics, remediation, passport, readiness, portfolio)
+- invariant: AI assists, never decides -- human confirmation required for all write operations
+
+16. **Data flywheel (structural capability)**
+- every user action (upload, correction, confirmation, review) enriches the model
+- feedback loops: extraction accuracy improves with corrections, trust scores refine with evidence, readiness checks sharpen with regulatory updates
+- network effects: more buildings = better pattern recognition, more companies = better benchmarking, more cantons = broader regulatory coverage
+- flywheel stages: capture -> enrich -> learn -> predict -> capture (continuous)
+- metric: knowledge density per building increases monotonically over time
 
 ### Promotion rule
 

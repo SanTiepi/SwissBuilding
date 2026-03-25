@@ -9,12 +9,22 @@ Read [ORCHESTRATOR.md](./ORCHESTRATOR.md) for active execution board (large/mult
 ## Ecosystem
 
 BatiConnect is a **standalone brand** (Batiscan Sarl is founder/operator).
-This repo carries **two product surfaces**:
-1. **Building intelligence** — dossier, evidence, completeness, trust, readiness, portfolio
-2. **Remediation marketplace** — mise en concurrence encadree for pollutant remediation works
 
-Both share infra (auth, docs, audit) but have separate models and routes.
-See `docs/vision-100x-master-brief.md` (section "Remediation Marketplace") for the full ecosystem map.
+### 3 Products
+| Product | Role | Status |
+|---|---|---|
+| Site public (batiscan.ch) | Acquisition, SEO, CTA | Active |
+| Batiscan V4 (app.batiscan.ch) | ERP diagnostic interne | Frozen |
+| BatiConnect (this repo) | Building intelligence + remediation module + AI layer | Active |
+
+BatiConnect carries:
+1. **Building intelligence** -- dossier, evidence, completeness, trust, readiness, portfolio
+2. **Remediation module** (internal) -- mise en concurrence encadree for pollutant remediation works (NOT a separate product)
+3. **Transversal AI layer** -- progressive learning: Phase 1 (LLM does work) -> Phase 2 (deterministic rules) -> Phase 3 (LLM supervises)
+
+**Data flywheel**: every use improves the platform (corrections feed ai_feedback, usage trains rules).
+
+See `docs/vision-100x-master-brief.md` for the full ecosystem map.
 See `AGENTS.md` (section "Ecosystem Invariants") for the 6 hard rules.
 
 ## Hard Rules

@@ -1219,9 +1219,9 @@ Auto-resolve pattern: when triggering condition is resolved, issue is automatica
 
 ---
 
-## Planned -- Remediation Marketplace
+## Planned -- Remediation Module
 
-> Mise en concurrence encadree for pollutant remediation. Closed verified network, not open directory. Shares BatiConnect infra (auth, docs, audit) but owns its own models and routes.
+> Mise en concurrence encadree for pollutant remediation. Internal module (not marketplace). Closed verified network, not open directory. Shares BatiConnect infra (auth, docs, audit) but owns its own models and routes. 6 delivery lots. Requires 4 architecture contracts (AC-1 through AC-4) as prerequisites.
 
 ### New Entities
 
@@ -1236,10 +1236,24 @@ Auto-resolve pattern: when triggering condition is resolved, issue is automatica
 | Quote | Company response to an RFQ | id, client_request_id, company_profile_id, amount, currency, validity_days, technical_description, status (draft/submitted/withdrawn/accepted/rejected) |
 | AwardConfirmation | Formal award of an RFQ to a company | id, client_request_id, quote_id, company_profile_id, awarded_by, awarded_at, confirmation_hash |
 | CompletionConfirmation | Post-works completion confirmation | id, award_confirmation_id, completed_at, confirmed_by_client, confirmed_by_company, completion_hash |
+| PostWorksLink | Links CompletionConfirmation to PostWorksState | id, completion_confirmation_id, post_works_state_id, before_snapshot_id, after_snapshot_id, grade_delta |
 | Review | Verified post-completion rating | id, completion_confirmation_id, reviewer_user_id, company_profile_id, rating, comment, is_verified |
+
+### AI Entities
+
+| Entity | Purpose | Key Fields |
+|---|---|---|
+| ai_feedback | Structured user feedback on AI outputs (corrections, confirmations, rejections) | id, source_type, source_id, feedback_type (confirm/correct/reject), original_value, corrected_value, user_id, created_at |
+| ai_extraction_log | Audit trail of AI document extraction attempts with confidence scores | id, document_id, extraction_type, confidence_score, extracted_data, human_verified, verified_by, created_at |
+| ai_rule_pattern | Learned regulatory patterns from contradiction detection and readiness evaluation | id, pattern_type, pattern_data, frequency, accuracy_score, canton_scope, last_seen_at, is_active |
+
+### Structural Patterns
+
+- **Data flywheel**: every user action (upload, correction, confirmation, review) feeds back into model accuracy. Extraction improves with corrections, trust scores refine with evidence, readiness checks sharpen with regulatory updates. Knowledge density per building increases monotonically.
 
 ### Invariants
 
 - No recommendation: the platform never ranks or recommend companies to clients
 - Payment != ranking: subscription tier does not influence visibility in RFQ results
 - Verified contracts only: awards and reviews require completed verification chain (CompanyVerification approved, AwardConfirmation signed, CompletionConfirmation confirmed)
+- AI assists, never decides: human confirmation required for all write operations

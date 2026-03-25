@@ -294,10 +294,13 @@ These are enablers for the product thesis. They are not independent side project
 
 ### Validated new axis (2026-03-25)
 
-- **Remediation marketplace (mise en concurrence encadree)** — closed verified network for pollutant remediation works
+- **Remediation module (mise en concurrence encadree)** -- internal BatiConnect module for pollutant remediation works (not a separate product)
   - lives in same repo as building intelligence, separate models and routes
-  - 5 lots: foundations, neutral RFQ, award+trust, monetization, site integration
-  - invariants: no recommendation, payment != ranking, verified contracts only
+  - 6 lots: foundations, neutral RFQ, award+trust, post-works truth, monetization, site integration
+  - AI layer: extraction, contradiction detection, passport narrative, readiness advisor, portfolio intelligence, quote comparison, progressive learning
+  - data flywheel: platform improves with every completed remediation cycle
+  - invariants: no recommendation, payment != ranking, verified contracts only, AI never selects companies
+  - pattern replicable to: architectes reno, bureaux d'etudes environnementaux, controleurs qualite
   - see `docs/vision-100x-master-brief.md` for strategic details
 
 ## Mega-Program 1 - Living and Actionable Building Dossier
@@ -497,6 +500,5 @@ The roadmap must explicitly preserve these underrepresented families:
 
 - generic chatbot
 - real-time comments/chat
-- marketplace of providers
 - native mobile app
 - public customer portal
