@@ -29,6 +29,8 @@ import {
   TrendingUp,
   Trophy,
   Landmark,
+  Briefcase,
+  FileBox,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import { useAuthStore } from '@/store/authStore';
@@ -59,6 +61,8 @@ const navItems: NavItem[] = [
   { to: '/campaigns', icon: Megaphone, labelKey: 'campaign.title' },
   { to: '/exports', icon: Download, labelKey: 'nav.exports' },
   { to: '/authority-packs', icon: ShieldCheck, labelKey: 'nav.authority_packs' },
+  { to: '/marketplace/companies', icon: Briefcase, labelKey: 'nav.marketplace_companies' },
+  { to: '/marketplace/rfq', icon: FileBox, labelKey: 'nav.marketplace_rfq' },
   { to: '/documents', icon: FileText, labelKey: 'nav.documents' },
   { to: '/admin/users', icon: Users, labelKey: 'nav.users', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/organizations', icon: Building2, labelKey: 'nav.organizations', allowedRoles: ['admin'] as UserRole[] },
@@ -74,6 +78,7 @@ const navItems: NavItem[] = [
   { to: '/admin/expansion', icon: TrendingUp, labelKey: 'nav.expansion', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/customer-success', icon: Trophy, labelKey: 'nav.customer_success', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/governance-signals', icon: Landmark, labelKey: 'nav.governance_signals', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/marketplace-reviews', icon: ClipboardCheck, labelKey: 'nav.marketplace_reviews', allowedRoles: ['admin'] as UserRole[] },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 

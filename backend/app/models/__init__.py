@@ -3,6 +3,7 @@ from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
 from app.models.authority_request import AuthorityRequest
+from app.models.award_confirmation import AwardConfirmation
 from app.models.background_job import BackgroundJob
 from app.models.bounded_embed import BoundedEmbedToken, ExternalViewerProfile
 from app.models.building import Building
@@ -23,6 +24,7 @@ from app.models.communal_override import CommunalRuleOverride
 from app.models.company_profile import CompanyProfile
 from app.models.company_subscription import CompanySubscription
 from app.models.company_verification import CompanyVerification
+from app.models.completion_confirmation import CompletionConfirmation
 from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
@@ -92,6 +94,7 @@ from app.models.redaction_profile import DecisionCaveatProfile, ExternalAudience
 from app.models.regulatory_pack import RegulatoryPack
 from app.models.request_document import RequestDocument
 from app.models.request_invitation import RequestInvitation
+from app.models.review import Review
 from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
 from app.models.saved_simulation import SavedSimulation
@@ -114,6 +117,7 @@ __all__ = [
     "AudiencePack",
     "AuditLog",
     "AuthorityRequest",
+    "AwardConfirmation",
     "BackgroundJob",
     "BoundedEmbedToken",
     "Building",
@@ -134,6 +138,7 @@ __all__ = [
     "CompanyProfile",
     "CompanySubscription",
     "CompanyVerification",
+    "CompletionConfirmation",
     "ComplianceArtefact",
     "Contact",
     "Contract",
@@ -205,6 +210,7 @@ __all__ = [
     "RegulatoryPack",
     "RequestDocument",
     "RequestInvitation",
+    "Review",
     "ReviewDecisionTrace",
     "RuleChangeEvent",
     "RuleSource",

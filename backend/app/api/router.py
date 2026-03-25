@@ -93,6 +93,7 @@ from app.api import (
     maintenance_forecast,
     marketplace,
     marketplace_rfq,
+    marketplace_trust,
     material_inventory,
     material_recommendations,
     materials,
@@ -245,6 +246,7 @@ api_router.include_router(package_presets.router, prefix="", tags=["Package Pres
 api_router.include_router(audience_packs.router, prefix="", tags=["Audience Packs"])
 api_router.include_router(marketplace.router, prefix="", tags=["Marketplace"])
 api_router.include_router(marketplace_rfq.router, prefix="", tags=["Marketplace RFQ"])
+api_router.include_router(marketplace_trust.router, prefix="", tags=["Marketplace Trust"])
 api_router.include_router(rollout.router, prefix="", tags=["Rollout"])
 api_router.include_router(public_sector.router, prefix="", tags=["Public Sector"])
 api_router.include_router(partner_trust.router, prefix="", tags=["Partner Trust"])

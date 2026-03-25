@@ -105,6 +105,11 @@ from app.models.quote import Quote as _Q  # noqa: E402, F401
 from app.models.request_document import RequestDocument as _RD  # noqa: E402, F401
 from app.models.request_invitation import RequestInvitation as _RI  # noqa: E402, F401
 
+# Marketplace Trust models
+from app.models.award_confirmation import AwardConfirmation as _AC  # noqa: E402, F401
+from app.models.completion_confirmation import CompletionConfirmation as _CC  # noqa: E402, F401
+from app.models.review import Review as _Rev  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
