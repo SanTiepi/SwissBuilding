@@ -23,6 +23,7 @@ import ObligationsCard from '@/components/building-detail/ObligationsCard';
 import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHistory';
 import SwissRulesWatchPanel from '@/components/building-detail/SwissRulesWatchPanel';
 import ExchangeHistoryPanel from '@/components/building-detail/ExchangeHistoryPanel';
+import { PackagePresetPreview } from '@/components/building-detail/PackagePresetPreview';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
 import {
@@ -486,6 +487,9 @@ export function OverviewTab({
           </div>
         </Link>
       </div>
+
+      {/* Package Preset Preview */}
+      <PackagePresetPreview buildingId={buildingId} />
 
       {/* Swiss Rules Watch + Exchange History */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

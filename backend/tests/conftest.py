@@ -30,6 +30,8 @@ from jose import jwt  # noqa: E402
 from passlib.context import CryptContext  # noqa: E402
 
 from app.models.authority_request import AuthorityRequest as _AR  # noqa: E402, F401
+from app.models.bounded_embed import BoundedEmbedToken as _BET  # noqa: E402, F401
+from app.models.bounded_embed import ExternalViewerProfile as _EVP  # noqa: E402, F401
 from app.models.building import Building  # noqa: E402
 from app.models.building_portfolio import BuildingPortfolio as _BP  # noqa: E402, F401
 from app.models.case_study_template import CaseStudyTemplate as _CST  # noqa: E402, F401
@@ -44,10 +46,17 @@ from app.models.communal_override import CommunalRuleOverride as _CRO  # noqa: E
 # Use from-imports to avoid shadowing the FastAPI `app` instance.
 from app.models.contact import Contact as _Contact  # noqa: E402, F401
 from app.models.contract import Contract as _Contract2  # noqa: E402, F401
+from app.models.customer_success import CustomerSuccessMilestone as _CSM  # noqa: E402, F401
+from app.models.delegated_access import DelegatedAccessGrant as _DAG  # noqa: E402, F401
+from app.models.delegated_access import PrivilegedAccessEvent as _PAE  # noqa: E402, F401
+from app.models.delegated_access import TenantBoundary as _TB  # noqa: E402, F401
 from app.models.demo_scenario import DemoScenario as _DS  # noqa: E402, F401
 from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
 from app.models.document_link import DocumentLink as _DL  # noqa: E402, F401
 from app.models.exchange_contract import ExchangeContractVersion as _ECV  # noqa: E402, F401
+from app.models.expansion_signal import AccountExpansionTrigger as _AET  # noqa: E402, F401
+from app.models.expansion_signal import DistributionLoopSignal as _DLS  # noqa: E402, F401
+from app.models.expansion_signal import ExpansionOpportunity as _EO  # noqa: E402, F401
 from app.models.financial_entry import FinancialEntry as _FE  # noqa: E402, F401
 from app.models.import_receipt import PassportImportReceipt as _PIR  # noqa: E402, F401
 from app.models.insurance_policy import InsurancePolicy as _IP  # noqa: E402, F401
@@ -56,6 +65,7 @@ from app.models.inventory_item import InventoryItem as _II  # noqa: E402, F401
 from app.models.lease import Lease as _Lease  # noqa: E402, F401
 from app.models.obligation import Obligation as _Obligation  # noqa: E402, F401
 from app.models.ownership_record import OwnershipRecord as _OR  # noqa: E402, F401
+from app.models.package_preset import PackagePreset as _PPr  # noqa: E402, F401
 from app.models.partner_trust import PartnerTrustProfile as _PTP  # noqa: E402, F401
 from app.models.partner_trust import PartnerTrustSignal as _PTS  # noqa: E402, F401
 from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa: E402, F401

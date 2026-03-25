@@ -74,6 +74,7 @@ from app.api import (
     evidence_summary,
     exchange,
     execution_quality,
+    expansion,
     expert_reviews,
     exports,
     field_observations,
@@ -104,6 +105,7 @@ from app.api import (
     organizations,
     ownership,
     pack_impact,
+    package_presets,
     partner_trust,
     passport,
     passport_export,
@@ -134,6 +136,7 @@ from app.api import (
     risk_analysis,
     risk_communication,
     risk_mitigation,
+    rollout,
     sample_optimization,
     samples,
     sampling_planner,
@@ -233,6 +236,9 @@ api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Pro
 api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
 api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
 api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
+api_router.include_router(expansion.router, prefix="", tags=["Expansion"])
+api_router.include_router(package_presets.router, prefix="", tags=["Package Presets"])
+api_router.include_router(rollout.router, prefix="", tags=["Rollout"])
 api_router.include_router(partner_trust.router, prefix="", tags=["Partner Trust"])
 api_router.include_router(swiss_rules_watch.router, prefix="", tags=["Swiss Rules Watch"])
 api_router.include_router(compliance_calendar.router, prefix="", tags=["Compliance Calendar"])

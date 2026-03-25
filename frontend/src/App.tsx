@@ -45,6 +45,9 @@ const ControlTower = lazy(() => import('@/pages/ControlTower'));
 const AuthoritySubmissionRoom = lazy(() => import('@/pages/AuthoritySubmissionRoom'));
 const DemoRunbook = lazy(() => import('@/pages/DemoRunbook'));
 const PilotDashboard = lazy(() => import('@/pages/PilotDashboard'));
+const AdminRollout = lazy(() => import('@/pages/AdminRollout'));
+const AdminExpansion = lazy(() => import('@/pages/AdminExpansion'));
+const AdminCustomerSuccess = lazy(() => import('@/pages/AdminCustomerSuccess'));
 
 function LoadingSpinner() {
   return (
@@ -421,6 +424,36 @@ export default function App() {
                 <PageErrorBoundary pageName="Pilot Dashboard">
                   <Suspense fallback={<LoadingSpinner />}>
                     <PilotDashboard />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/rollout"
+              element={
+                <PageErrorBoundary pageName="Rollout">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminRollout />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/expansion"
+              element={
+                <PageErrorBoundary pageName="Expansion">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminExpansion />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/customer-success"
+              element={
+                <PageErrorBoundary pageName="Customer Success">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminCustomerSuccess />
                   </Suspense>
                 </PageErrorBoundary>
               }

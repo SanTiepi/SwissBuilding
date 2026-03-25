@@ -3,6 +3,7 @@ from app.models.assignment import Assignment
 from app.models.audit_log import AuditLog
 from app.models.authority_request import AuthorityRequest
 from app.models.background_job import BackgroundJob
+from app.models.bounded_embed import BoundedEmbedToken, ExternalViewerProfile
 from app.models.building import Building
 from app.models.building_element import BuildingElement
 from app.models.building_passport_state import BuildingPassportState
@@ -20,8 +21,14 @@ from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
 from app.models.contractor_acknowledgment import ContractorAcknowledgment
+from app.models.customer_success import CustomerSuccessMilestone
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.decision_record import DecisionRecord
+from app.models.delegated_access import (
+    DelegatedAccessGrant,
+    PrivilegedAccessEvent,
+    TenantBoundary,
+)
 from app.models.demo_scenario import DemoRunbookStep, DemoScenario
 from app.models.diagnostic import Diagnostic
 from app.models.diagnostic_mission_order import DiagnosticMissionOrder
@@ -35,6 +42,11 @@ from app.models.event import Event
 from app.models.evidence_link import EvidenceLink
 from app.models.evidence_pack import EvidencePack
 from app.models.exchange_contract import ExchangeContractVersion
+from app.models.expansion_signal import (
+    AccountExpansionTrigger,
+    DistributionLoopSignal,
+    ExpansionOpportunity,
+)
 from app.models.expert_review import ExpertReview
 from app.models.export_job import ExportJob
 from app.models.field_observation import FieldObservation
@@ -52,6 +64,7 @@ from app.models.notification import Notification, NotificationPreference
 from app.models.obligation import Obligation
 from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
+from app.models.package_preset import PackagePreset
 from app.models.partner_trust import PartnerTrustProfile, PartnerTrustSignal
 from app.models.party_role_assignment import PartyRoleAssignment
 from app.models.passport_publication import PassportPublication
@@ -82,11 +95,13 @@ from app.models.zone import Zone
 from app.models.zone_safety import OccupantNotice, ZoneSafetyStatus
 
 __all__ = [
+    "AccountExpansionTrigger",
     "ActionItem",
     "Assignment",
     "AuditLog",
     "AuthorityRequest",
     "BackgroundJob",
+    "BoundedEmbedToken",
     "Building",
     "BuildingElement",
     "BuildingPassportState",
@@ -104,14 +119,17 @@ __all__ = [
     "Contact",
     "Contract",
     "ContractorAcknowledgment",
+    "CustomerSuccessMilestone",
     "DataQualityIssue",
     "DecisionRecord",
+    "DelegatedAccessGrant",
     "DemoRunbookStep",
     "DemoScenario",
     "Diagnostic",
     "DiagnosticMissionOrder",
     "DiagnosticPublicationVersion",
     "DiagnosticReportPublication",
+    "DistributionLoopSignal",
     "Document",
     "DocumentInboxItem",
     "DocumentLink",
@@ -120,8 +138,10 @@ __all__ = [
     "EvidenceLink",
     "EvidencePack",
     "ExchangeContractVersion",
+    "ExpansionOpportunity",
     "ExpertReview",
     "ExportJob",
+    "ExternalViewerProfile",
     "FieldObservation",
     "FinancialEntry",
     "InsurancePolicy",
@@ -139,6 +159,7 @@ __all__ = [
     "OccupantNotice",
     "Organization",
     "OwnershipRecord",
+    "PackagePreset",
     "PartnerTrustProfile",
     "PartnerTrustSignal",
     "PartyRoleAssignment",
@@ -153,6 +174,7 @@ __all__ = [
     "Portfolio",
     "PostWorksState",
     "PreworkTrigger",
+    "PrivilegedAccessEvent",
     "ProofDelivery",
     "ReadinessAssessment",
     "RegulatoryPack",
@@ -163,6 +185,7 @@ __all__ = [
     "SharedLink",
     "TaxContext",
     "TechnicalPlan",
+    "TenantBoundary",
     "Unit",
     "UnitZone",
     "UnknownIssue",

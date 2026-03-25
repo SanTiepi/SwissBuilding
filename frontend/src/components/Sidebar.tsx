@@ -25,6 +25,9 @@ import {
   Radar,
   Presentation,
   Gauge,
+  Rocket,
+  TrendingUp,
+  Trophy,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import { useAuthStore } from '@/store/authStore';
@@ -66,6 +69,9 @@ const navItems: NavItem[] = [
   { to: '/admin/diagnostic-review', icon: ClipboardCheck, labelKey: 'nav.diagnostic_review', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/demo-runbook', icon: Presentation, labelKey: 'nav.demo_runbook', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/pilot-dashboard', icon: Gauge, labelKey: 'nav.pilot_dashboard', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/rollout', icon: Rocket, labelKey: 'nav.rollout', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/expansion', icon: TrendingUp, labelKey: 'nav.expansion', allowedRoles: ['admin'] as UserRole[] },
+  { to: '/admin/customer-success', icon: Trophy, labelKey: 'nav.customer_success', allowedRoles: ['admin'] as UserRole[] },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 
