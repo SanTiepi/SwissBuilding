@@ -3,8 +3,8 @@ from fastapi import APIRouter
 from app.api import (
     access_control,
     actions,
-    artifact_custody,
     anomaly_detection,
+    artifact_custody,
     assignments,
     audience_packs,
     audit_export,
@@ -52,6 +52,7 @@ from app.api import (
     data_provenance,
     data_quality,
     decision_replay,
+    decision_view,
     demo_pilot,
     diagnostic_integration,
     diagnostic_quality,
@@ -246,6 +247,7 @@ api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Pro
 api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
 api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
 api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
+api_router.include_router(decision_view.router, prefix="", tags=["Decision View"])
 api_router.include_router(exchange_hardening.router, prefix="", tags=["Exchange Hardening"])
 api_router.include_router(expansion.router, prefix="", tags=["Expansion"])
 api_router.include_router(package_presets.router, prefix="", tags=["Package Presets"])

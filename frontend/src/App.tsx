@@ -57,6 +57,7 @@ const OperatorWorkspace = lazy(() => import('@/pages/OperatorWorkspace'));
 const RemediationIntelligence = lazy(() => import('@/pages/RemediationIntelligence'));
 const AdminImportReview = lazy(() => import('@/pages/AdminImportReview'));
 const AdminContributorGateway = lazy(() => import('@/pages/AdminContributorGateway'));
+const BuildingDecisionView = lazy(() => import('@/pages/BuildingDecisionView'));
 
 function LoadingSpinner() {
   return (
@@ -203,6 +204,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Authority Submission Room">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AuthoritySubmissionRoom />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/buildings/:buildingId/decision"
+              element={
+                <PageErrorBoundary pageName="Building Decision View">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <BuildingDecisionView />
                   </Suspense>
                 </PageErrorBoundary>
               }
