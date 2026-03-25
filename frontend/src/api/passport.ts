@@ -1,5 +1,21 @@
 import { apiClient } from '@/api/client';
 
+export interface ImportedDossierSummary {
+  source_system: string;
+  mission_ref: string;
+  published_at: string | null;
+  local_ingestion_status: string;
+  building_match_status: string;
+  report_readiness_status: string | null;
+  snapshot_version: number;
+  snapshot_ref: null;
+  payload_hash: string;
+  sample_count: number | null;
+  positive_sample_count: number | null;
+  ai_summary_text: string | null;
+  flags: string[];
+}
+
 export interface PassportSummary {
   building_id: string;
   knowledge_state: {
@@ -28,6 +44,7 @@ export interface PassportSummary {
     count: number;
     pollutants_covered: string[];
     latest_published_at: string | null;
+    latest_imported_summary?: ImportedDossierSummary;
   };
   pollutant_coverage: {
     total_pollutants: number;

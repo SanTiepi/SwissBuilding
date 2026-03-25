@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { passportApi, type PassportSummary } from '@/api/passport';
+import { passportApi, type PassportSummary, type ImportedDossierSummary } from '@/api/passport';
 import { sharedLinksApi } from '@/api/sharedLinks';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
@@ -343,6 +343,112 @@ function PollutantCoverageSection({ pollutantCoverage }: { pollutantCoverage: Pa
   );
 }
 
+/* ---------- Imported Dossier Summary ---------- */
+const READINESS_BADGE: Record<string, { bg: string; text: string }> = {
+  ready: { bg: 'bg-green-100 dark:bg-green-900/20', text: 'text-green-700 dark:text-green-300' },
+  blocked: { bg: 'bg-red-100 dark:bg-red-900/20', text: 'text-red-700 dark:text-red-300' },
+  partial: { bg: 'bg-orange-100 dark:bg-orange-900/20', text: 'text-orange-700 dark:text-orange-300' },
+};
+const READINESS_BADGE_DEFAULT = { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-600 dark:text-slate-400' };
+
+const FLAG_STYLES: Record<string, { bg: string; text: string }> = {
+  no_ai: { bg: 'bg-amber-100 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300' },
+  no_remediation: { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-600 dark:text-slate-400' },
+  partial_package: { bg: 'bg-orange-100 dark:bg-orange-900/20', text: 'text-orange-700 dark:text-orange-300' },
+};
+
+function ImportedDossierBlock({ summary }: { summary: ImportedDossierSummary }) {
+  const [expanded, setExpanded] = useState(false);
+  const readinessColors =
+    READINESS_BADGE[summary.report_readiness_status ?? ''] ?? READINESS_BADGE_DEFAULT;
+
+  const aiText = summary.ai_summary_text;
+  const isLongAi = aiText && aiText.length > 120;
+
+  return (
+    <div
+      className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700"
+      data-testid="imported-dossier-block"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <ClipboardList className="w-4 h-4 text-indigo-500" />
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-slate-500">
+          Imported from Batiscan V4
+        </span>
+      </div>
+
+      <div className="space-y-1.5 text-xs text-gray-600 dark:text-slate-300">
+        {/* Mission ref + date */}
+        <div className="flex items-center justify-between">
+          <span>Mission {summary.mission_ref}</span>
+          {summary.published_at && (
+            <span className="text-gray-400 dark:text-slate-500">
+              {new Date(summary.published_at).toLocaleDateString()}
+            </span>
+          )}
+        </div>
+
+        {/* Readiness badge */}
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              'px-2 py-0.5 rounded text-[10px] font-medium',
+              readinessColors.bg,
+              readinessColors.text,
+            )}
+            data-testid="imported-readiness-badge"
+          >
+            {summary.report_readiness_status ?? 'unknown'}
+          </span>
+
+          {/* Sample summary */}
+          {summary.sample_count != null && (
+            <span className="text-gray-500 dark:text-slate-400">
+              {summary.sample_count} samples
+              {summary.positive_sample_count != null && `, ${summary.positive_sample_count} positive`}
+            </span>
+          )}
+        </div>
+
+        {/* AI summary */}
+        {aiText && (
+          <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+            <p className={!expanded && isLongAi ? 'line-clamp-2' : ''}>
+              {aiText}
+            </p>
+            {isLongAi && (
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className="text-indigo-500 hover:text-indigo-600 text-[10px] font-medium mt-0.5"
+              >
+                {expanded ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Flag badges */}
+        {summary.flags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-1" data-testid="imported-flags">
+            {summary.flags.map((flag) => {
+              const style = FLAG_STYLES[flag] ?? FLAG_STYLES.no_remediation;
+              return (
+                <span
+                  key={flag}
+                  className={cn('px-1.5 py-0.5 rounded text-[10px] font-medium', style.bg, style.text)}
+                  data-testid={`imported-flag-${flag}`}
+                >
+                  {flag.replace(/_/g, ' ')}
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Main PassportCard ---------- */
 export function PassportCard({ buildingId }: { buildingId: string }) {
   const { t } = useTranslation();
@@ -638,6 +744,11 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
             </div>
           </ExpandableSection>
         </div>
+
+        {/* Imported diagnostic dossier */}
+        {diagnostic_publications.latest_imported_summary && (
+          <ImportedDossierBlock summary={diagnostic_publications.latest_imported_summary} />
+        )}
 
         {/* Pollutant coverage */}
         {pollutant_coverage && <PollutantCoverageSection pollutantCoverage={pollutant_coverage} />}

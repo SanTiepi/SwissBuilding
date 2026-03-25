@@ -29,6 +29,7 @@ from app.models.intervention import Intervention
 from app.models.readiness_assessment import ReadinessAssessment
 from app.models.sample import Sample
 from app.models.unknown_issue import UnknownIssue
+from app.services.imported_diagnostic_dossier import project_dossier_summary
 
 # ---------------------------------------------------------------------------
 # Grade thresholds
@@ -272,10 +273,22 @@ async def get_passport_summary(
         if latest_pub_date is None or (pub.published_at and pub.published_at > latest_pub_date):
             latest_pub_date = pub.published_at
 
+    # Find the latest matched publication for dossier summary
+    latest_matched_pub = None
+    for pub in publications:
+        if latest_matched_pub is None or (
+            pub.published_at
+            and (latest_matched_pub.published_at is None or pub.published_at > latest_matched_pub.published_at)
+        ):
+            latest_matched_pub = pub
+
+    latest_imported_summary = project_dossier_summary(latest_matched_pub) if latest_matched_pub else None
+
     diagnostic_publications = {
         "count": len(publications),
         "pollutants_covered": sorted(pub_pollutants),
         "latest_published_at": (latest_pub_date.isoformat() if latest_pub_date else None),
+        "latest_imported_summary": latest_imported_summary,
     }
 
     # ── 5b. Pollutant coverage ─────────────────────────────────────

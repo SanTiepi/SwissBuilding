@@ -300,6 +300,8 @@ async def generate_transfer_package(
     # ── Diagnostic publications (external reports) ─────────────────
     diagnostic_publications: list[dict] | None = None
     if _should_include("diagnostic_publications", include_sections):
+        from app.services.imported_diagnostic_dossier import project_dossier_summary
+
         pub_result = await db.execute(
             select(DiagnosticReportPublication).where(
                 and_(
@@ -311,14 +313,10 @@ async def generate_transfer_package(
         pubs = list(pub_result.scalars().all())
         diagnostic_publications = [
             {
+                **project_dossier_summary(p),
                 "id": str(p.id),
                 "mission_type": p.mission_type,
-                "source_system": p.source_system,
-                "published_at": p.published_at.isoformat() if p.published_at else None,
                 "report_pdf_url": p.report_pdf_url,
-                "structured_summary": p.structured_summary,
-                "source_mission_id": p.source_mission_id,
-                "current_version": p.current_version,
             }
             for p in pubs
         ]

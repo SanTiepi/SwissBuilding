@@ -168,6 +168,7 @@ async def get_building_timeline(
 
     # --- Diagnostic Publications ---
     from app.models.diagnostic_publication import DiagnosticReportPublication
+    from app.services.imported_diagnostic_dossier import project_dossier_summary
 
     pub_result = await db.execute(
         select(DiagnosticReportPublication).where(
@@ -176,20 +177,29 @@ async def get_building_timeline(
         )
     )
     for pub in pub_result.scalars().all():
+        dossier = project_dossier_summary(pub)
+        sample_info = f" — {dossier['sample_count']} samples" if dossier["sample_count"] else ""
+        description = f"Imported from {pub.source_system} — Mission {pub.source_mission_id}{sample_info}"
         items.append(
             TimelineEntryRead(
                 id=str(pub.id),
                 date=pub.published_at,
                 event_type="diagnostic_publication",
                 title=f"Diagnostic publication ({pub.mission_type})",
-                description=f"Report from {pub.source_system}, version {pub.current_version}",
+                description=description,
                 icon_hint="clipboard",
                 metadata={
                     "mission_type": pub.mission_type,
-                    "source_system": pub.source_system,
+                    "source_system": dossier["source_system"],
                     "current_version": pub.current_version,
                     "match_state": pub.match_state,
-                    "source_mission_id": pub.source_mission_id,
+                    "source_mission_id": dossier["mission_ref"],
+                    "report_readiness_status": dossier["report_readiness_status"],
+                    "local_ingestion_status": dossier["local_ingestion_status"],
+                    "building_match_status": dossier["building_match_status"],
+                    "sample_count": dossier["sample_count"],
+                    "positive_sample_count": dossier["positive_sample_count"],
+                    "flags": dossier["flags"],
                 },
                 source_id=str(pub.id),
                 source_type="diagnostic_publication",
