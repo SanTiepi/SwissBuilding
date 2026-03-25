@@ -74,6 +74,7 @@ from app.api import (
     evidence_packs,
     evidence_summary,
     exchange,
+    exchange_hardening,
     execution_quality,
     expansion,
     expert_reviews,
@@ -244,6 +245,7 @@ api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Pro
 api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
 api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
 api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
+api_router.include_router(exchange_hardening.router, prefix="", tags=["Exchange Hardening"])
 api_router.include_router(expansion.router, prefix="", tags=["Expansion"])
 api_router.include_router(package_presets.router, prefix="", tags=["Package Presets"])
 api_router.include_router(audience_packs.router, prefix="", tags=["Audience Packs"])

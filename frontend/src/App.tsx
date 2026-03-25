@@ -55,6 +55,8 @@ const MarketplaceReviews = lazy(() => import('@/pages/MarketplaceReviews'));
 const CompanyWorkspace = lazy(() => import('@/pages/CompanyWorkspace'));
 const OperatorWorkspace = lazy(() => import('@/pages/OperatorWorkspace'));
 const RemediationIntelligence = lazy(() => import('@/pages/RemediationIntelligence'));
+const AdminImportReview = lazy(() => import('@/pages/AdminImportReview'));
+const AdminContributorGateway = lazy(() => import('@/pages/AdminContributorGateway'));
 
 function LoadingSpinner() {
   return (
@@ -531,6 +533,26 @@ export default function App() {
                 <PageErrorBoundary pageName="Remediation Intelligence">
                   <Suspense fallback={<LoadingSpinner />}>
                     <RemediationIntelligence />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/import-review"
+              element={
+                <PageErrorBoundary pageName="Import Review">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminImportReview />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/contributor-gateway"
+              element={
+                <PageErrorBoundary pageName="Contributor Gateway">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminContributorGateway />
                   </Suspense>
                 </PageErrorBoundary>
               }

@@ -122,6 +122,16 @@ from app.models.subscription_change import SubscriptionChange as _SC  # noqa: E4
 # Intelligence Stack models
 from app.models.ai_rule_pattern import AIRulePattern as _ARP  # noqa: E402, F401
 
+# Exchange Hardening + Contributor Gateway models
+from app.models.contributor_gateway import ContributorGatewayRequest as _CGR  # noqa: E402, F401
+from app.models.contributor_gateway import ContributorReceipt as _CRcpt  # noqa: E402, F401
+from app.models.contributor_gateway import ContributorSubmission as _CSub  # noqa: E402, F401
+from app.models.exchange_validation import ExchangeValidationReport as _EVR  # noqa: E402, F401
+from app.models.exchange_validation import ExternalRelianceSignal as _ERS  # noqa: E402, F401
+from app.models.partner_webhook import PartnerDeliveryAttempt as _PDA  # noqa: E402, F401
+from app.models.partner_webhook import PartnerWebhookSubscription as _PWS  # noqa: E402, F401
+from app.models.passport_state_diff import PassportStateDiff as _PSD  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

@@ -32,6 +32,11 @@ from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
 from app.models.contractor_acknowledgment import ContractorAcknowledgment
+from app.models.contributor_gateway import (
+    ContributorGatewayRequest,
+    ContributorReceipt,
+    ContributorSubmission,
+)
 from app.models.customer_success import CustomerSuccessMilestone
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.decision_record import DecisionRecord
@@ -54,6 +59,7 @@ from app.models.event import Event
 from app.models.evidence_link import EvidenceLink
 from app.models.evidence_pack import EvidencePack
 from app.models.exchange_contract import ExchangeContractVersion
+from app.models.exchange_validation import ExchangeValidationReport, ExternalRelianceSignal
 from app.models.expansion_signal import (
     AccountExpansionTrigger,
     DistributionLoopSignal,
@@ -80,8 +86,10 @@ from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
 from app.models.package_preset import PackagePreset
 from app.models.partner_trust import PartnerTrustProfile, PartnerTrustSignal
+from app.models.partner_webhook import PartnerDeliveryAttempt, PartnerWebhookSubscription
 from app.models.party_role_assignment import PartyRoleAssignment
 from app.models.passport_publication import PassportPublication
+from app.models.passport_state_diff import PassportStateDiff
 from app.models.permit_procedure import PermitProcedure
 from app.models.permit_step import PermitStep
 from app.models.pilot_scorecard import PilotMetric, PilotScorecard
@@ -152,6 +160,9 @@ __all__ = [
     "Contact",
     "Contract",
     "ContractorAcknowledgment",
+    "ContributorGatewayRequest",
+    "ContributorReceipt",
+    "ContributorSubmission",
     "CustomerSuccessMilestone",
     "DataQualityIssue",
     "DecisionCaveatProfile",
@@ -173,10 +184,12 @@ __all__ = [
     "EvidenceLink",
     "EvidencePack",
     "ExchangeContractVersion",
+    "ExchangeValidationReport",
     "ExpansionOpportunity",
     "ExpertReview",
     "ExportJob",
     "ExternalAudienceRedactionProfile",
+    "ExternalRelianceSignal",
     "ExternalViewerProfile",
     "FieldObservation",
     "FinancialEntry",
@@ -197,11 +210,14 @@ __all__ = [
     "Organization",
     "OwnershipRecord",
     "PackagePreset",
+    "PartnerDeliveryAttempt",
     "PartnerTrustProfile",
     "PartnerTrustSignal",
+    "PartnerWebhookSubscription",
     "PartyRoleAssignment",
     "PassportImportReceipt",
     "PassportPublication",
+    "PassportStateDiff",
     "PermitProcedure",
     "PermitStep",
     "PilotMetric",

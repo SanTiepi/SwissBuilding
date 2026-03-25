@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { cn, formatDate } from '@/utils/formatters';
 import { exchangeApi, type Publication, type ImportReceipt } from '@/api/exchange';
-import { ArrowUpRight, ArrowDownLeft, FileText, Package, Hash } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, FileText, Package, Hash, GitCompare, Shield } from 'lucide-react';
+import PublicationDiffView from './PublicationDiffView';
 
 interface ExchangeHistoryPanelProps {
   buildingId: string;
@@ -110,29 +112,45 @@ export default function ExchangeHistoryPanel({ buildingId }: ExchangeHistoryPane
 }
 
 function PublicationRow({ pub }: { pub: Publication }) {
+  const [showDiff, setShowDiff] = useState(false);
   const stateStyle = DELIVERY_STATE_STYLE[pub.delivery_state] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
 
   return (
-    <div
-      className="flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-900/30"
-      data-testid={`pub-row-${pub.id}`}
-    >
-      <ArrowUpRight className="w-4 h-4 text-blue-500 flex-shrink-0" />
-      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{pub.audience_type}</span>
-      <span className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', stateStyle)} data-testid={`pub-state-${pub.id}`}>
-        {pub.delivery_state}
-      </span>
-      <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{formatDate(pub.published_at)}</span>
-      <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-        <Hash className="w-3 h-3" />
-        <span title={pub.content_hash} data-testid={`pub-hash-${pub.id}`}>
-          {pub.content_hash.slice(0, 8)}
+    <div>
+      <div
+        className="flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-900/30"
+        data-testid={`pub-row-${pub.id}`}
+      >
+        <ArrowUpRight className="w-4 h-4 text-blue-500 flex-shrink-0" />
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{pub.audience_type}</span>
+        <span className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', stateStyle)} data-testid={`pub-state-${pub.id}`}>
+          {pub.delivery_state}
         </span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{formatDate(pub.published_at)}</span>
+        <button
+          onClick={() => setShowDiff(!showDiff)}
+          className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
+          title="View diff"
+          data-testid={`pub-diff-toggle-${pub.id}`}
+        >
+          <GitCompare className="w-3 h-3" />
+        </button>
+        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+          <Hash className="w-3 h-3" />
+          <span title={pub.content_hash} data-testid={`pub-hash-${pub.id}`}>
+            {pub.content_hash.slice(0, 8)}
+          </span>
+        </div>
+        {pub.superseded_by_id && (
+          <span className="text-xs text-gray-400 dark:text-gray-500 italic" data-testid={`pub-superseded-${pub.id}`}>
+            superseded
+          </span>
+        )}
       </div>
-      {pub.superseded_by_id && (
-        <span className="text-xs text-gray-400 dark:text-gray-500 italic" data-testid={`pub-superseded-${pub.id}`}>
-          superseded
-        </span>
+      {showDiff && (
+        <div className="mt-1 ml-6">
+          <PublicationDiffView publicationId={pub.id} />
+        </div>
       )}
     </div>
   );
@@ -140,6 +158,7 @@ function PublicationRow({ pub }: { pub: Publication }) {
 
 function ImportRow({ receipt }: { receipt: ImportReceipt }) {
   const statusStyle = IMPORT_STATUS_STYLE[receipt.status] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
+  const isValidated = receipt.status === 'validated' || receipt.status === 'integrated';
 
   return (
     <div
@@ -152,6 +171,9 @@ function ImportRow({ receipt }: { receipt: ImportReceipt }) {
       <span className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', statusStyle)} data-testid={`import-status-${receipt.id}`}>
         {receipt.status}
       </span>
+      {isValidated && (
+        <Shield className="w-3 h-3 text-green-500" data-testid={`import-validated-${receipt.id}`} />
+      )}
       <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{formatDate(receipt.imported_at)}</span>
     </div>
   );
