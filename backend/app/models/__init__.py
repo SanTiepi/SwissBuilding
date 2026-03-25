@@ -19,6 +19,9 @@ from app.models.claim import Claim
 from app.models.committee_decision import CommitteeDecisionPack, ReviewDecisionTrace
 from app.models.communal_adapter import CommunalAdapterProfile
 from app.models.communal_override import CommunalRuleOverride
+from app.models.company_profile import CompanyProfile
+from app.models.company_subscription import CompanySubscription
+from app.models.company_verification import CompanyVerification
 from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
@@ -123,6 +126,9 @@ __all__ = [
     "CommitteeDecisionPack",
     "CommunalAdapterProfile",
     "CommunalRuleOverride",
+    "CompanyProfile",
+    "CompanySubscription",
+    "CompanyVerification",
     "ComplianceArtefact",
     "Contact",
     "Contract",

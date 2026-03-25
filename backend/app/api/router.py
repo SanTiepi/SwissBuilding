@@ -91,6 +91,7 @@ from app.api import (
     lab_result,
     leases,
     maintenance_forecast,
+    marketplace,
     material_inventory,
     material_recommendations,
     materials,
@@ -241,6 +242,7 @@ api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
 api_router.include_router(expansion.router, prefix="", tags=["Expansion"])
 api_router.include_router(package_presets.router, prefix="", tags=["Package Presets"])
 api_router.include_router(audience_packs.router, prefix="", tags=["Audience Packs"])
+api_router.include_router(marketplace.router, prefix="", tags=["Marketplace"])
 api_router.include_router(rollout.router, prefix="", tags=["Rollout"])
 api_router.include_router(public_sector.router, prefix="", tags=["Public Sector"])
 api_router.include_router(partner_trust.router, prefix="", tags=["Partner Trust"])

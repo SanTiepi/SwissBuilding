@@ -94,6 +94,11 @@ from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
 
+# Marketplace models
+from app.models.company_profile import CompanyProfile as _CP  # noqa: E402, F401
+from app.models.company_subscription import CompanySubscription as _CS  # noqa: E402, F401
+from app.models.company_verification import CompanyVerification as _CV  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
