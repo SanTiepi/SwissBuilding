@@ -1,33 +1,58 @@
-{$DOMAIN} {
-    # Frontend
-    handle {
-        reverse_proxy frontend:80
+# SwissBuilding / BatiConnect — Caddy snippet (STAGING / PREVIEW)
+# This block must be ADDED to the Batiscan Caddyfile (/home/ubuntu/Batiscan-V4/Caddyfile)
+# The Batiscan Caddy container must also join the swissbuilding Docker network:
+#   docker network connect swissbuilding batiscan_caddy
+#
+# Then reload: docker exec batiscan_caddy caddy reload --config /etc/caddy/Caddyfile
+#
+# STAGING MODE: basic auth + noindex until ready for public launch
+
+app.swissbuilding.ch {
+    # Anti-indexation — not public yet
+    header X-Robots-Tag "noindex, nofollow, noarchive"
+    header X-Frame-Options "DENY"
+    header X-Content-Type-Options "nosniff"
+    header Referrer-Policy "no-referrer"
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    header -Server
+
+    # Basic auth — staging only, remove for public launch
+    basic_auth * {
+        # Usage: htpasswd hash — generate with: caddy hash-password
+        review $2a$14$A77frOedKb9/4p4YjP.wx.7gu8e2s6rYVrb0ugIMFdC.V2A7853rG
     }
 
-    # API
+    # Block robots explicitly
+    handle /robots.txt {
+        respond "User-agent: *
+Disallow: /" 200
+    }
+
+    # API routes
     handle /api/* {
-        reverse_proxy backend:8000
+        reverse_proxy swissbuilding-backend:8000
     }
 
-    # Health check
-    handle /health {
-        reverse_proxy backend:8000
+    # Health check (no auth)
+    @health path /health
+    handle @health {
+        reverse_proxy swissbuilding-backend:8000
     }
 
-    # OpenAPI docs
-    handle /docs {
-        reverse_proxy backend:8000
-    }
-    handle /openapi.json {
-        reverse_proxy backend:8000
+    # Frontend (catch-all)
+    handle {
+        reverse_proxy swissbuilding-frontend:80
     }
 
-    # Security headers
-    header {
-        X-Frame-Options SAMEORIGIN
-        X-Content-Type-Options nosniff
-        X-XSS-Protection "1; mode=block"
-        Referrer-Policy strict-origin-when-cross-origin
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    # Compression
+    encode gzip zstd
+
+    # Logging
+    log {
+        output file /var/log/caddy/swissbuilding.log {
+            roll_size 5mb
+            roll_keep 3
+        }
+        format json
     }
 }
