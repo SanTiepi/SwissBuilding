@@ -11,7 +11,7 @@ class SampleCreate(BaseModel):
     location_floor: str | None = None
     location_room: str | None = None
     location_detail: str | None = None
-    material_category: str
+    material_category: str | None = None
     material_description: str | None = None
     material_state: str | None = None  # bon, moyen, mauvais, degrade
     pollutant_type: str  # asbestos, pcb, lead, hap, radon
@@ -55,7 +55,7 @@ class SampleRead(BaseModel):
     location_floor: str | None
     location_room: str | None
     location_detail: str | None
-    material_category: str
+    material_category: str | None
     material_description: str | None
     material_state: str | None
     pollutant_type: str
