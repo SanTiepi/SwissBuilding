@@ -197,3 +197,8 @@ register_handler("remediation_post_works_finalized", _handle_post_works_finalize
 register_handler("ai_feedback_recorded", _handle_ai_feedback_recorded)
 register_handler("diagnostic_publication_received", _handle_publication_received)
 register_handler("diagnostic_publication_matched", _handle_publication_matched)
+
+# Register flywheel hooks (Lot D)
+from app.services.flywheel_hooks import register_flywheel_hooks  # noqa: E402
+
+register_flywheel_hooks()
