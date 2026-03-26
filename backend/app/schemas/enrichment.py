@@ -27,6 +27,19 @@ class EnrichmentResult(BaseModel):
     egrid_found: bool = False
     image_url: str | None = None
     ai_enriched: bool = False
+    # New enrichment sources
+    radon_fetched: bool = False
+    natural_hazards_fetched: bool = False
+    noise_fetched: bool = False
+    solar_fetched: bool = False
+    heritage_fetched: bool = False
+    transport_fetched: bool = False
+    seismic_fetched: bool = False
+    water_protection_fetched: bool = False
+    neighborhood_score: float | None = None
+    pollutant_risk_computed: bool = False
+    accessibility_computed: bool = False
+    subsidies_computed: bool = False
     fields_updated: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
 

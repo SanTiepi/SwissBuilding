@@ -17,9 +17,21 @@ from app.schemas.enrichment import (
 from app.services.building_enrichment_service import (
     _build_ai_prompt,
     _lat_lon_to_tile,
+    compute_accessibility_assessment,
+    compute_neighborhood_score,
+    compute_pollutant_risk_prediction,
+    estimate_subsidy_eligibility,
     fetch_cadastre_egrid,
+    fetch_heritage_status,
+    fetch_natural_hazards,
+    fetch_noise_data,
+    fetch_radon_risk,
     fetch_regbl_data,
+    fetch_seismic_zone,
+    fetch_solar_potential,
     fetch_swisstopo_image_url,
+    fetch_transport_quality,
+    fetch_water_protection,
     geocode_address,
 )
 
@@ -146,16 +158,23 @@ class TestRegBL:
     @pytest.mark.asyncio
     async def test_regbl_data_parsing(self):
         """RegBL response is correctly parsed into standard fields."""
+        # geo.admin.ch GWR layer uses these field names
         mock_data = {
-            "constructionYear": 1965,
-            "numberOfFloors": 5,
-            "numberOfDwellings": 12,
-            "livingArea": 850.5,
-            "heatingType": "Oil",
-            "energySource": "Heating oil",
-            "buildingClass": "1020",
-            "buildingCategory": "Multi-family house",
-            "renovationYear": 2005,
+            "feature": {
+                "attributes": {
+                    "gbauj": 1965,
+                    "gastw": 5,
+                    "ganzwhg": 12,
+                    "gebf": 850.5,
+                    "gwaerzh1": "7520",
+                    "genh1": "7200",
+                    "gklas": "1020",
+                    "gkat": "1025",
+                    "gbaup": 2005,
+                    "egrid": "CH123",
+                    "lparz": "456",
+                }
+            }
         }
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -175,8 +194,8 @@ class TestRegBL:
         assert result["floors"] == 5
         assert result["dwellings"] == 12
         assert result["living_area_m2"] == 850.5
-        assert result["heating_type"] == "Oil"
-        assert result["renovation_year"] == 2005
+        assert result["heating_type_code"] == "7520"
+        assert result["renovation_period_code"] == 2005
 
     @pytest.mark.asyncio
     async def test_regbl_404(self):
@@ -447,7 +466,14 @@ class TestEnrichBuildingOrchestration:
         mock_geo.assert_not_called()
         mock_regbl.assert_not_called()
         mock_ai.assert_not_called()
-        assert result.fields_updated == []
+        # Pure computations (neighborhood_score, pollutant_risk, accessibility, subsidies)
+        # always run even when all external sources are skipped
+        assert "latitude" not in result.fields_updated
+        assert "longitude" not in result.fields_updated
+        assert "egid" not in result.fields_updated
+        assert result.pollutant_risk_computed is True
+        assert result.accessibility_computed is True
+        assert result.subsidies_computed is True
 
 
 # ---------------------------------------------------------------------------
@@ -546,3 +572,547 @@ class TestEnrichmentResultAggregation:
         )
         assert r.skip_geocode is True
         assert r.skip_cadastre is True
+
+    def test_enrichment_result_new_fields(self):
+        """EnrichmentResult supports all new source flags."""
+        r = EnrichmentResult(
+            building_id=uuid.uuid4(),
+            radon_fetched=True,
+            natural_hazards_fetched=True,
+            noise_fetched=True,
+            solar_fetched=True,
+            heritage_fetched=True,
+            transport_fetched=True,
+            seismic_fetched=True,
+            water_protection_fetched=True,
+            neighborhood_score=7.5,
+            pollutant_risk_computed=True,
+            accessibility_computed=True,
+            subsidies_computed=True,
+        )
+        assert r.radon_fetched is True
+        assert r.neighborhood_score == 7.5
+        assert r.subsidies_computed is True
+
+
+# ---------------------------------------------------------------------------
+# Radon risk tests
+# ---------------------------------------------------------------------------
+
+
+class TestRadonRisk:
+    @pytest.mark.asyncio
+    async def test_radon_risk_high_zone(self):
+        """Radon fetch returns high risk for high zone."""
+        mock_data = {"results": [{"attributes": {"zone": "3", "probability": 0.75}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_radon_risk(46.52, 6.63)
+
+        assert result["radon_zone"] == "3"
+        assert result["radon_level"] == "high"
+        assert result["radon_probability"] == 0.75
+
+    @pytest.mark.asyncio
+    async def test_radon_risk_empty_results(self):
+        """Radon fetch returns empty dict when no results."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"results": []}
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_radon_risk(46.52, 6.63)
+
+        assert result == {}
+
+    @pytest.mark.asyncio
+    async def test_radon_risk_network_error(self):
+        """Radon fetch returns empty dict on network error."""
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(side_effect=httpx.ConnectError("timeout"))
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_radon_risk(46.52, 6.63)
+
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# Natural hazards tests
+# ---------------------------------------------------------------------------
+
+
+class TestNaturalHazards:
+    @pytest.mark.asyncio
+    async def test_natural_hazards_multi_layer(self):
+        """Natural hazards parses multiple layer results."""
+        mock_data = {
+            "results": [
+                {"layerBodId": "ch.bafu.showme-gemeinden_hochwasser", "attributes": {"stufe": "medium"}},
+                {"layerBodId": "ch.bafu.showme-gemeinden_rutschungen", "attributes": {"stufe": "low"}},
+                {"layerBodId": "ch.bafu.showme-gemeinden_sturzprozesse", "attributes": {"stufe": "high"}},
+            ]
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_natural_hazards(46.52, 6.63)
+
+        assert result["flood_risk"] == "medium"
+        assert result["landslide_risk"] == "low"
+        assert result["rockfall_risk"] == "high"
+
+
+# ---------------------------------------------------------------------------
+# Noise tests
+# ---------------------------------------------------------------------------
+
+
+class TestNoise:
+    @pytest.mark.asyncio
+    async def test_noise_loud(self):
+        """Noise fetch correctly classifies loud noise."""
+        mock_data = {"results": [{"attributes": {"dblr": 62.5}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_noise_data(46.52, 6.63)
+
+        assert result["road_noise_day_db"] == 62.5
+        assert result["noise_level"] == "loud"
+
+
+# ---------------------------------------------------------------------------
+# Solar potential tests
+# ---------------------------------------------------------------------------
+
+
+class TestSolarPotential:
+    @pytest.mark.asyncio
+    async def test_solar_high_suitability(self):
+        """Solar fetch returns high suitability."""
+        mock_data = {"results": [{"attributes": {"stromertrag": 1500, "flaeche": 80, "klasse": "gut geeignet"}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_solar_potential(46.52, 6.63)
+
+        assert result["solar_potential_kwh"] == 1500.0
+        assert result["roof_area_m2"] == 80.0
+        assert result["suitability"] == "high"
+
+
+# ---------------------------------------------------------------------------
+# Heritage / ISOS tests
+# ---------------------------------------------------------------------------
+
+
+class TestHeritage:
+    @pytest.mark.asyncio
+    async def test_heritage_protected(self):
+        """Heritage fetch returns protected site."""
+        mock_data = {"results": [{"attributes": {"kategorie": "A", "ortsbildname": "Vieille Ville de Lausanne"}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_heritage_status(46.52, 6.63)
+
+        assert result["isos_protected"] is True
+        assert result["isos_category"] == "A"
+        assert "Lausanne" in result["site_name"]
+
+    @pytest.mark.asyncio
+    async def test_heritage_not_protected(self):
+        """Heritage fetch returns not protected when no results."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"results": []}
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_heritage_status(46.52, 6.63)
+
+        assert result["isos_protected"] is False
+
+
+# ---------------------------------------------------------------------------
+# Transport quality tests
+# ---------------------------------------------------------------------------
+
+
+class TestTransportQuality:
+    @pytest.mark.asyncio
+    async def test_transport_quality_a(self):
+        """Transport fetch returns class A."""
+        mock_data = {"results": [{"attributes": {"klasse": "A"}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_transport_quality(46.52, 6.63)
+
+        assert result["transport_quality_class"] == "A"
+        assert "Excellent" in result["description"]
+
+
+# ---------------------------------------------------------------------------
+# Seismic zone tests
+# ---------------------------------------------------------------------------
+
+
+class TestSeismicZone:
+    @pytest.mark.asyncio
+    async def test_seismic_zone_parsing(self):
+        """Seismic fetch parses zone and derives class."""
+        mock_data = {"results": [{"attributes": {"zone": "2"}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_seismic_zone(46.52, 6.63)
+
+        assert result["seismic_zone"] == "2"
+        assert result["seismic_class"] == "Z2"
+
+
+# ---------------------------------------------------------------------------
+# Water protection tests
+# ---------------------------------------------------------------------------
+
+
+class TestWaterProtection:
+    @pytest.mark.asyncio
+    async def test_water_protection_zone(self):
+        """Water protection fetch returns zone info."""
+        mock_data = {"results": [{"attributes": {"zone": "S2", "typ": "Schutzzone"}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_water_protection(46.52, 6.63)
+
+        assert result["protection_zone"] == "S2"
+        assert result["zone_type"] == "Schutzzone"
+
+
+# ---------------------------------------------------------------------------
+# Neighborhood score tests
+# ---------------------------------------------------------------------------
+
+
+class TestNeighborhoodScore:
+    def test_score_excellent_neighborhood(self):
+        """High quality transport + quiet + no hazards + good solar = high score."""
+        data = {
+            "transport": {"transport_quality_class": "A"},
+            "noise": {"road_noise_day_db": 40},
+            "natural_hazards": {"flood_risk": "none", "landslide_risk": "none", "rockfall_risk": "none"},
+            "solar": {"suitability": "high"},
+        }
+        score = compute_neighborhood_score(data)
+        assert score >= 9.0
+
+    def test_score_poor_neighborhood(self):
+        """Poor transport + loud + high hazards = low score."""
+        data = {
+            "transport": {"transport_quality_class": "D"},
+            "noise": {"road_noise_day_db": 70},
+            "natural_hazards": {"flood_risk": "high", "landslide_risk": "high", "rockfall_risk": "high"},
+            "solar": {"suitability": "low"},
+        }
+        score = compute_neighborhood_score(data)
+        assert score <= 3.0
+
+    def test_score_heritage_bonus(self):
+        """Heritage protection adds +2 bonus."""
+        base_data = {
+            "transport": {"transport_quality_class": "C"},
+            "heritage": {"isos_protected": False},
+        }
+        base_score = compute_neighborhood_score(base_data)
+
+        heritage_data = {
+            "transport": {"transport_quality_class": "C"},
+            "heritage": {"isos_protected": True},
+        }
+        heritage_score = compute_neighborhood_score(heritage_data)
+
+        assert heritage_score == base_score + 2.0
+
+    def test_score_empty_data_returns_neutral(self):
+        """Empty enrichment data returns neutral 5.0."""
+        assert compute_neighborhood_score({}) == 5.0
+
+
+# ---------------------------------------------------------------------------
+# Pollutant risk prediction tests
+# ---------------------------------------------------------------------------
+
+
+class TestPollutantRiskPrediction:
+    def test_1965_residential_high_asbestos(self):
+        """1965 residential building has high asbestos probability."""
+        result = compute_pollutant_risk_prediction(
+            {
+                "construction_year": 1965,
+                "building_type": "residential",
+                "floors_above": 5,
+                "canton": "VD",
+            }
+        )
+        assert result["asbestos_probability"] >= 0.85
+        assert result["pcb_probability"] == 0.60
+        assert result["lead_probability"] == 0.30
+        assert result["hap_probability"] == 0.40
+        assert result["overall_risk_score"] > 0.0
+        assert len(result["risk_factors"]) > 0
+
+    def test_2010_building_no_risk(self):
+        """2010 building has zero pollutant probability."""
+        result = compute_pollutant_risk_prediction(
+            {
+                "construction_year": 2010,
+                "building_type": "residential",
+            }
+        )
+        assert result["asbestos_probability"] == 0.0
+        assert result["pcb_probability"] == 0.0
+        assert result["lead_probability"] == 0.0
+
+    def test_renovation_reduces_risk(self):
+        """Post-2000 renovation reduces all probabilities."""
+        base = compute_pollutant_risk_prediction(
+            {
+                "construction_year": 1965,
+                "building_type": "residential",
+                "floors_above": 5,
+            }
+        )
+        renovated = compute_pollutant_risk_prediction(
+            {
+                "construction_year": 1965,
+                "building_type": "residential",
+                "floors_above": 5,
+                "renovation_year": 2015,
+            }
+        )
+        assert renovated["asbestos_probability"] < base["asbestos_probability"]
+        assert renovated["pcb_probability"] < base["pcb_probability"]
+
+    def test_unknown_year(self):
+        """Unknown construction year returns moderate risk with explanation."""
+        result = compute_pollutant_risk_prediction({})
+        assert result["overall_risk_score"] == 0.5
+        assert any("unknown" in f for f in result["risk_factors"])
+
+    def test_high_radon_level(self):
+        """High radon level increases radon probability."""
+        result = compute_pollutant_risk_prediction(
+            {
+                "construction_year": 2000,
+                "radon_level": "high",
+            }
+        )
+        assert result["radon_probability"] == 0.70
+
+
+# ---------------------------------------------------------------------------
+# Accessibility assessment tests
+# ---------------------------------------------------------------------------
+
+
+class TestAccessibilityAssessment:
+    def test_post_2004_large_building(self):
+        """Post-2004 building with 8+ dwellings requires full compliance."""
+        result = compute_accessibility_assessment(
+            {
+                "construction_year": 2010,
+                "floors_above": 4,
+                "dwellings": 12,
+            }
+        )
+        assert result["compliance_status"] == "full_compliance_required"
+        assert len(result["requirements"]) >= 2
+
+    def test_pre_2004_major_renovation(self):
+        """Pre-2004 building with major renovation requires adaptation."""
+        result = compute_accessibility_assessment(
+            {
+                "construction_year": 1980,
+                "renovation_year": 2010,
+                "dwellings": 10,
+            }
+        )
+        assert result["compliance_status"] == "adaptation_required"
+
+    def test_old_building_no_renovation(self):
+        """Old building without renovation has no legal requirement."""
+        result = compute_accessibility_assessment(
+            {
+                "construction_year": 1960,
+                "floors_above": 2,
+                "dwellings": 4,
+            }
+        )
+        assert result["compliance_status"] == "no_legal_requirement"
+
+    def test_elevator_recommendation(self):
+        """Building with >3 floors and no elevator gets recommendation."""
+        result = compute_accessibility_assessment(
+            {
+                "construction_year": 1980,
+                "floors_above": 5,
+                "has_elevator": False,
+            }
+        )
+        assert any("Elevator" in r for r in result["recommendations"])
+
+
+# ---------------------------------------------------------------------------
+# Subsidy eligibility tests
+# ---------------------------------------------------------------------------
+
+
+class TestSubsidyEligibility:
+    def test_oil_heating_eligible(self):
+        """Oil-heated building is eligible for heating replacement subsidy."""
+        result = estimate_subsidy_eligibility(
+            {
+                "construction_year": 1975,
+                "heating_type_code": "7520",  # oil
+                "canton": "VD",
+                "surface_area_m2": 150,
+            }
+        )
+        programs = [p["name"] for p in result["eligible_programs"]]
+        assert any("chauffage" in p.lower() for p in programs)
+        assert result["total_estimated_chf"] > 0
+
+    def test_old_building_insulation(self):
+        """Pre-2000 building is eligible for insulation subsidy."""
+        result = estimate_subsidy_eligibility(
+            {
+                "construction_year": 1970,
+            }
+        )
+        programs = [p["name"] for p in result["eligible_programs"]]
+        assert any("isolation" in p.lower() or "fenetre" in p.lower() for p in programs)
+
+    def test_solar_eligible(self):
+        """Building with high solar suitability gets solar subsidy."""
+        result = estimate_subsidy_eligibility(
+            {
+                "construction_year": 2005,
+                "solar_suitability": "high",
+            }
+        )
+        programs = [p["name"] for p in result["eligible_programs"]]
+        assert any("photovoltaique" in p.lower() or "pronovo" in p.lower() for p in programs)
+
+    def test_asbestos_vd_subsidy(self):
+        """Asbestos-positive building in VD gets decontamination subsidy."""
+        result = estimate_subsidy_eligibility(
+            {
+                "construction_year": 1970,
+                "canton": "VD",
+                "asbestos_positive": True,
+            }
+        )
+        programs = [p["name"] for p in result["eligible_programs"]]
+        assert any("desamiantage" in p.lower() for p in programs)
+
+    def test_new_building_minimal_subsidies(self):
+        """New building with modern heating has minimal subsidies."""
+        result = estimate_subsidy_eligibility(
+            {
+                "construction_year": 2020,
+                "heating_type_code": "pac",
+            }
+        )
+        assert result["total_estimated_chf"] == 0

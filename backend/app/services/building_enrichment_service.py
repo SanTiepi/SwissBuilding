@@ -340,6 +340,801 @@ async def _call_openai(api_key: str, prompt: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# 5b. Radon risk
+# ---------------------------------------------------------------------------
+
+
+async def fetch_radon_risk(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch radon risk data from BAG radon map via geo.admin.ch.
+
+    Returns dict with radon_zone, radon_probability, radon_level.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.bag.radonkarte",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {}
+
+        radon_zone = attrs.get("zone") or attrs.get("radon_zone") or attrs.get("klasse")
+        if radon_zone is not None:
+            result["radon_zone"] = str(radon_zone)
+
+        probability = attrs.get("probability") or attrs.get("wahrscheinlichkeit")
+        if probability is not None:
+            with contextlib.suppress(ValueError, TypeError):
+                result["radon_probability"] = float(probability)
+
+        # Derive level from zone
+        zone_str = str(radon_zone).lower() if radon_zone else ""
+        if "hoch" in zone_str or "high" in zone_str or zone_str in ("3", "4"):
+            result["radon_level"] = "high"
+        elif "mittel" in zone_str or "medium" in zone_str or zone_str == "2":
+            result["radon_level"] = "medium"
+        else:
+            result["radon_level"] = "low"
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Radon risk fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5c. Natural hazards
+# ---------------------------------------------------------------------------
+
+
+async def fetch_natural_hazards(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch natural hazard data (flood, landslide, rockfall) via geo.admin.ch.
+
+    Returns dict with flood_risk, landslide_risk, rockfall_risk.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": (
+            "all:ch.bafu.showme-gemeinden_hochwasser,"
+            "ch.bafu.showme-gemeinden_rutschungen,"
+            "ch.bafu.showme-gemeinden_sturzprozesse"
+        ),
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        result: dict[str, Any] = {
+            "flood_risk": "unknown",
+            "landslide_risk": "unknown",
+            "rockfall_risk": "unknown",
+        }
+
+        for item in results:
+            layer = item.get("layerBodId", "") or item.get("layerId", "")
+            attrs = item.get("attributes", {})
+            level = attrs.get("stufe") or attrs.get("level") or attrs.get("intensitaet") or "unknown"
+
+            if "hochwasser" in layer:
+                result["flood_risk"] = str(level)
+            elif "rutschungen" in layer:
+                result["landslide_risk"] = str(level)
+            elif "sturzprozesse" in layer:
+                result["rockfall_risk"] = str(level)
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Natural hazards fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5d. Noise exposure
+# ---------------------------------------------------------------------------
+
+
+async def fetch_noise_data(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch road noise exposure data via geo.admin.ch.
+
+    Returns dict with road_noise_day_db, noise_level.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.bafu.laerm-strassenlaerm_tag",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {}
+
+        db_value = attrs.get("dblr") or attrs.get("db") or attrs.get("lrpegel")
+        if db_value is not None:
+            with contextlib.suppress(ValueError, TypeError):
+                db_float = float(db_value)
+                result["road_noise_day_db"] = db_float
+                if db_float < 45:
+                    result["noise_level"] = "quiet"
+                elif db_float < 55:
+                    result["noise_level"] = "moderate"
+                elif db_float < 65:
+                    result["noise_level"] = "loud"
+                else:
+                    result["noise_level"] = "very_loud"
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Noise data fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5e. Solar potential
+# ---------------------------------------------------------------------------
+
+
+async def fetch_solar_potential(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch solar energy potential for rooftops via geo.admin.ch.
+
+    Returns dict with solar_potential_kwh, roof_area_m2, suitability.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.bfe.solarenergie-eignung-daecher",
+        "tolerance": 20,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {}
+
+        kwh = attrs.get("stromertrag") or attrs.get("gstrahlung") or attrs.get("mstrahlung")
+        if kwh is not None:
+            with contextlib.suppress(ValueError, TypeError):
+                result["solar_potential_kwh"] = float(kwh)
+
+        area = attrs.get("flaeche") or attrs.get("df_uid")
+        if area is not None:
+            with contextlib.suppress(ValueError, TypeError):
+                result["roof_area_m2"] = float(area)
+
+        eignung = attrs.get("klasse") or attrs.get("eignung")
+        if eignung is not None:
+            eignung_str = str(eignung).lower()
+            if "gut" in eignung_str or "sehr" in eignung_str or "hoch" in eignung_str:
+                result["suitability"] = "high"
+            elif "mittel" in eignung_str or "medium" in eignung_str:
+                result["suitability"] = "medium"
+            else:
+                result["suitability"] = "low"
+        elif result.get("solar_potential_kwh"):
+            # Derive suitability from kWh
+            kwh_val = result["solar_potential_kwh"]
+            if kwh_val > 1000:
+                result["suitability"] = "high"
+            elif kwh_val > 500:
+                result["suitability"] = "medium"
+            else:
+                result["suitability"] = "low"
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Solar potential fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5f. Heritage / ISOS
+# ---------------------------------------------------------------------------
+
+
+async def fetch_heritage_status(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch heritage/ISOS protection status via geo.admin.ch.
+
+    Returns dict with isos_protected, isos_category, site_name.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.bak.bundesinventar-schuetzenswerte-ortsbilder",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {"isos_protected": False}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {"isos_protected": True}
+
+        category = attrs.get("kategorie") or attrs.get("category") or attrs.get("isos_kategorie")
+        if category is not None:
+            result["isos_category"] = str(category)
+
+        name = attrs.get("ortsbildname") or attrs.get("name") or attrs.get("bezeichnung")
+        if name is not None:
+            result["site_name"] = str(name)
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Heritage status fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5g. Public transport quality
+# ---------------------------------------------------------------------------
+
+
+async def fetch_transport_quality(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch public transport quality class via geo.admin.ch.
+
+    Returns dict with transport_quality_class (A-D), description.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.are.gueteklassen_oev",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {}
+
+        klasse = attrs.get("klasse") or attrs.get("gueteklasse") or attrs.get("class")
+        if klasse is not None:
+            klasse_str = str(klasse).upper().strip()
+            # Normalize to A/B/C/D
+            for letter in ("A", "B", "C", "D"):
+                if letter in klasse_str:
+                    result["transport_quality_class"] = letter
+                    break
+            else:
+                result["transport_quality_class"] = klasse_str
+
+        desc = attrs.get("beschreibung") or attrs.get("description") or attrs.get("label")
+        if desc is not None:
+            result["description"] = str(desc)
+        elif result.get("transport_quality_class"):
+            _desc_map = {
+                "A": "Excellent public transport access",
+                "B": "Good public transport access",
+                "C": "Moderate public transport access",
+                "D": "Poor public transport access",
+            }
+            result["description"] = _desc_map.get(result["transport_quality_class"], "Unknown quality")
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Transport quality fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5h. Seismic zone
+# ---------------------------------------------------------------------------
+
+
+async def fetch_seismic_zone(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch seismic zone classification via geo.admin.ch.
+
+    Returns dict with seismic_zone, seismic_class.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.bafu.erdbeben-erdbebenzonen",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {}
+
+        zone = attrs.get("zone") or attrs.get("erdbebenzone")
+        if zone is not None:
+            result["seismic_zone"] = str(zone)
+
+        klasse = attrs.get("klasse") or attrs.get("bauwerksklasse") or attrs.get("class")
+        if klasse is not None:
+            result["seismic_class"] = str(klasse)
+        elif zone is not None:
+            # SIA 261 mapping
+            zone_str = str(zone)
+            _class_map = {"1": "Z1", "2": "Z2", "3a": "Z3a", "3b": "Z3b"}
+            result["seismic_class"] = _class_map.get(zone_str.lower(), f"Z{zone_str}")
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Seismic zone fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5i. Water protection
+# ---------------------------------------------------------------------------
+
+
+async def fetch_water_protection(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch groundwater protection zone via geo.admin.ch.
+
+    Returns dict with protection_zone, zone_type.
+    Returns empty dict on failure.
+    """
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": "all:ch.bafu.grundwasserschutzareale",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        results = data.get("results", [])
+        if not results:
+            return {}
+
+        attrs = results[0].get("attributes", {})
+        result: dict[str, Any] = {}
+
+        zone = attrs.get("zone") or attrs.get("schutzzone") or attrs.get("azone")
+        if zone is not None:
+            result["protection_zone"] = str(zone)
+
+        zone_type = attrs.get("typ") or attrs.get("zone_type") or attrs.get("art")
+        if zone_type is not None:
+            result["zone_type"] = str(zone_type)
+
+        return result
+
+    except Exception as exc:
+        logger.warning("Water protection fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5j. Neighborhood attractiveness score (pure computation)
+# ---------------------------------------------------------------------------
+
+
+def compute_neighborhood_score(enrichment_data: dict[str, Any]) -> float:
+    """Compute a neighborhood attractiveness score (0-10) from enriched data.
+
+    Weighted average of transport, noise, hazards, solar, with heritage bonus.
+    Pure function — no API calls.
+    """
+    scores: dict[str, float] = {}
+    weights: dict[str, float] = {
+        "transport": 3.0,
+        "noise": 2.0,
+        "hazards": 2.5,
+        "solar": 1.5,
+    }
+
+    # Transport quality: A=10, B=8, C=5, D=2
+    transport = enrichment_data.get("transport", {})
+    tclass = transport.get("transport_quality_class", "").upper() if transport else ""
+    _transport_scores = {"A": 10.0, "B": 8.0, "C": 5.0, "D": 2.0}
+    if tclass in _transport_scores:
+        scores["transport"] = _transport_scores[tclass]
+
+    # Noise: <45dB=10, 45-55=7, 55-65=4, >65=1
+    noise = enrichment_data.get("noise", {})
+    noise_db = noise.get("road_noise_day_db") if noise else None
+    if noise_db is not None:
+        if noise_db < 45:
+            scores["noise"] = 10.0
+        elif noise_db < 55:
+            scores["noise"] = 7.0
+        elif noise_db < 65:
+            scores["noise"] = 4.0
+        else:
+            scores["noise"] = 1.0
+
+    # Natural hazards: no risk=10, low=7, medium=4, high=1
+    hazards = enrichment_data.get("natural_hazards", {})
+    if hazards:
+        risk_values = [
+            hazards.get("flood_risk", "unknown"),
+            hazards.get("landslide_risk", "unknown"),
+            hazards.get("rockfall_risk", "unknown"),
+        ]
+        _risk_scores = {"unknown": 8.0, "keine": 10.0, "none": 10.0, "low": 7.0, "medium": 4.0, "high": 1.0}
+        hazard_scores = []
+        for rv in risk_values:
+            rv_lower = str(rv).lower()
+            for key, val in _risk_scores.items():
+                if key in rv_lower:
+                    hazard_scores.append(val)
+                    break
+            else:
+                hazard_scores.append(8.0)  # unknown defaults to neutral
+        scores["hazards"] = sum(hazard_scores) / len(hazard_scores) if hazard_scores else 8.0
+
+    # Solar: high=10, medium=7, low=4
+    solar = enrichment_data.get("solar", {})
+    if solar:
+        _solar_scores = {"high": 10.0, "medium": 7.0, "low": 4.0}
+        suitability = solar.get("suitability", "")
+        if suitability in _solar_scores:
+            scores["solar"] = _solar_scores[suitability]
+
+    if not scores:
+        return 5.0  # neutral default
+
+    total_weight = sum(weights.get(k, 1.0) for k in scores)
+    weighted_sum = sum(scores[k] * weights.get(k, 1.0) for k in scores)
+    base_score = weighted_sum / total_weight
+
+    # Heritage bonus: protected = +2 (capped at 10)
+    heritage = enrichment_data.get("heritage", {})
+    if heritage and heritage.get("isos_protected"):
+        base_score = min(10.0, base_score + 2.0)
+
+    return round(base_score, 1)
+
+
+# ---------------------------------------------------------------------------
+# 5k. Predictive pollutant risk (pure computation)
+# ---------------------------------------------------------------------------
+
+
+def compute_pollutant_risk_prediction(building_data: dict[str, Any]) -> dict[str, Any]:
+    """Predict pollutant probabilities based on building characteristics.
+
+    Uses known correlations between construction era, building type,
+    and pollutant presence in Swiss buildings.
+    Pure function — no API calls.
+    """
+    year = building_data.get("construction_year")
+    btype = str(building_data.get("building_type", "")).lower()
+    floors = building_data.get("floors_above") or building_data.get("floors") or 0
+    canton = str(building_data.get("canton", "")).upper()
+    renovation_year = building_data.get("renovation_year")
+    radon_level = building_data.get("radon_level", "low")
+
+    result: dict[str, Any] = {
+        "asbestos_probability": 0.0,
+        "pcb_probability": 0.0,
+        "lead_probability": 0.0,
+        "hap_probability": 0.0,
+        "radon_probability": 0.0,
+        "overall_risk_score": 0.0,
+        "risk_factors": [],
+    }
+
+    if year is None:
+        result["risk_factors"].append("construction_year_unknown — cannot assess age-based risk")
+        result["overall_risk_score"] = 0.5
+        return result
+
+    # Asbestos: peak usage 1960-1990 in Switzerland
+    if year < 1990:
+        base = 0.85 if btype in ("residential", "mixed", "") else 0.70
+        if 1960 <= year <= 1980:
+            base = min(1.0, base + 0.10)  # peak years
+        # VD historically higher
+        if canton in ("VD", "GE", "VS"):
+            base = min(1.0, base + 0.05)
+        result["asbestos_probability"] = round(base, 2)
+        result["risk_factors"].append(f"construction_year={year} (pre-1990 asbestos era)")
+
+    # PCB: primarily 1955-1975 (joints, condensateurs, peintures)
+    if 1955 <= year <= 1975:
+        result["pcb_probability"] = 0.60
+        result["risk_factors"].append(f"construction_year={year} (PCB peak era 1955-1975)")
+    elif year < 1985:
+        result["pcb_probability"] = 0.30
+        result["risk_factors"].append(f"construction_year={year} (late PCB era)")
+
+    # Lead: pre-1960 paints
+    if year < 1960:
+        result["lead_probability"] = 0.70
+        result["risk_factors"].append(f"construction_year={year} (pre-1960 lead paint era)")
+    elif year < 1980:
+        result["lead_probability"] = 0.30
+
+    # HAP: pre-1991 etancheite in taller buildings
+    if year < 1991 and floors > 3:
+        result["hap_probability"] = 0.40
+        result["risk_factors"].append(f"construction_year={year}, floors={floors} (HAP risk in waterproofing)")
+    elif year < 1991:
+        result["hap_probability"] = 0.20
+
+    # Radon: based on radon data if available
+    _radon_map = {"high": 0.70, "medium": 0.40, "low": 0.10}
+    result["radon_probability"] = _radon_map.get(radon_level, 0.10)
+    if radon_level in ("high", "medium"):
+        result["risk_factors"].append(f"radon_level={radon_level}")
+
+    # Renovation reduces probabilities
+    if renovation_year and renovation_year > 2000:
+        reduction = 0.30
+        result["asbestos_probability"] = round(max(0, result["asbestos_probability"] - reduction), 2)
+        result["pcb_probability"] = round(max(0, result["pcb_probability"] - reduction), 2)
+        result["lead_probability"] = round(max(0, result["lead_probability"] - reduction), 2)
+        result["hap_probability"] = round(max(0, result["hap_probability"] - reduction), 2)
+        result["risk_factors"].append(f"renovation_year={renovation_year} (probabilities reduced)")
+
+    # Overall risk score: weighted average
+    weights = {"asbestos": 3.0, "pcb": 2.0, "lead": 2.0, "hap": 1.5, "radon": 1.5}
+    total = (
+        result["asbestos_probability"] * weights["asbestos"]
+        + result["pcb_probability"] * weights["pcb"]
+        + result["lead_probability"] * weights["lead"]
+        + result["hap_probability"] * weights["hap"]
+        + result["radon_probability"] * weights["radon"]
+    )
+    result["overall_risk_score"] = round(total / sum(weights.values()), 2)
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5l. Accessibility assessment (pure computation, LHand)
+# ---------------------------------------------------------------------------
+
+
+def compute_accessibility_assessment(building_data: dict[str, Any]) -> dict[str, Any]:
+    """Assess accessibility compliance based on LHand (Swiss disability law).
+
+    Pure function — no API calls.
+    """
+    year = building_data.get("construction_year")
+    floors = building_data.get("floors_above") or building_data.get("floors") or 0
+    dwellings = building_data.get("dwellings") or 0
+    renovation_year = building_data.get("renovation_year")
+    has_elevator = building_data.get("has_elevator", False)
+
+    requirements: list[str] = []
+    recommendations: list[str] = []
+    compliance_status = "unknown"
+
+    post_2004 = year is not None and year >= 2004
+    major_renovation = renovation_year is not None and renovation_year >= 2004
+
+    if post_2004 and dwellings >= 8:
+        compliance_status = "full_compliance_required"
+        requirements.append("LHand Art. 3: buildings with 8+ dwellings built after 2004 must be fully accessible")
+        requirements.append("Wheelchair-accessible entrance and common areas required")
+        if floors > 1:
+            requirements.append("Elevator required for multi-story accessible buildings")
+    elif post_2004:
+        compliance_status = "partial_compliance_required"
+        requirements.append("LHand: new buildings must meet basic accessibility standards")
+    elif major_renovation:
+        compliance_status = "adaptation_required"
+        requirements.append("LHand: major renovation triggers accessibility adaptation requirements")
+        if dwellings >= 8:
+            requirements.append("Adaptation to accessibility standards required for 8+ dwelling buildings")
+    else:
+        compliance_status = "no_legal_requirement"
+
+    # Recommendations regardless of legal status
+    if floors > 3 and not has_elevator:
+        recommendations.append("Elevator recommended for buildings with more than 3 floors")
+    if floors > 1 and not has_elevator:
+        recommendations.append("Consider stairlift or platform lift for upper floors")
+    if dwellings >= 4:
+        recommendations.append("Consider accessible design for aging-in-place readiness")
+
+    return {
+        "compliance_status": compliance_status,
+        "requirements": requirements,
+        "recommendations": recommendations,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 5m. Subsidy eligibility (pure computation)
+# ---------------------------------------------------------------------------
+
+
+def estimate_subsidy_eligibility(building_data: dict[str, Any]) -> dict[str, Any]:
+    """Estimate subsidy eligibility based on Programme Batiments + cantonal programs.
+
+    Pure function — no API calls.
+    """
+    year = building_data.get("construction_year")
+    heating_type = str(
+        building_data.get("heating_type", "") or building_data.get("heating_type_code", "") or ""
+    ).lower()
+    canton = str(building_data.get("canton", "")).upper()
+    solar_suitability = building_data.get("solar_suitability", "")
+    solar_kwh = building_data.get("solar_potential_kwh")
+    asbestos_positive = building_data.get("asbestos_positive", False)
+    surface_area = building_data.get("surface_area_m2") or 0
+
+    eligible_programs: list[dict[str, Any]] = []
+
+    # 1. Heating replacement (Programme Batiments)
+    oil_gas_indicators = ("oil", "gas", "mazout", "gaz", "heizol", "erdgas", "7520", "7530", "7500", "7510")
+    if any(ind in heating_type for ind in oil_gas_indicators):
+        amount = 10_000 if surface_area < 200 else 15_000
+        eligible_programs.append(
+            {
+                "name": "Programme Batiments — Remplacement chauffage fossile",
+                "estimated_amount_chf": amount,
+                "requirements": [
+                    "Remplacement du chauffage fossile par pompe a chaleur, bois, ou raccordement CAD",
+                    "Batiment existant avec chauffage mazout ou gaz",
+                ],
+            }
+        )
+
+    # 2. Envelope insulation (Programme Batiments)
+    if year and year < 2000:
+        base_amount = int(surface_area * 40) if surface_area else 8_000
+        amount = max(5_000, min(base_amount, 30_000))
+        eligible_programs.append(
+            {
+                "name": "Programme Batiments — Isolation enveloppe",
+                "estimated_amount_chf": amount,
+                "requirements": [
+                    "Batiment construit avant 2000",
+                    "Isolation facade, toiture ou dalle sur sous-sol",
+                    "Valeur U amelioree selon exigences cantonales",
+                ],
+            }
+        )
+
+    # 3. Solar installation
+    if solar_suitability in ("high", "medium") or (solar_kwh and solar_kwh > 500):
+        eligible_programs.append(
+            {
+                "name": "Pronovo — Installation photovoltaique (retribution unique)",
+                "estimated_amount_chf": 3_000,
+                "requirements": [
+                    "Installation PV sur toiture existante",
+                    "Puissance minimale 2 kWp",
+                    "Raccordement au reseau confirme par GRD",
+                ],
+            }
+        )
+
+    # 4. Asbestos decontamination (VD cantonal)
+    if asbestos_positive and canton == "VD":
+        eligible_programs.append(
+            {
+                "name": "Canton de Vaud — Subvention desamiantage",
+                "estimated_amount_chf": 5_000,
+                "requirements": [
+                    "Diagnostic amiante positif confirme",
+                    "Travaux realises par entreprise certifiee SUVA",
+                    "Batiment situe dans le canton de Vaud",
+                ],
+            }
+        )
+
+    # 5. Window replacement
+    if year and year < 1990:
+        eligible_programs.append(
+            {
+                "name": "Programme Batiments — Remplacement fenetres",
+                "estimated_amount_chf": 5_000,
+                "requirements": [
+                    "Fenetres existantes simple ou double vitrage ancien",
+                    "Remplacement par triple vitrage certifie Minergie",
+                ],
+            }
+        )
+
+    total = sum(p["estimated_amount_chf"] for p in eligible_programs)
+
+    return {
+        "eligible_programs": eligible_programs,
+        "total_estimated_chf": total,
+    }
+
+
+# ---------------------------------------------------------------------------
 # 6. Main orchestrator — enrich single building
 # ---------------------------------------------------------------------------
 
@@ -361,8 +1156,12 @@ async def enrich_building(
     3. Fetch EGRID if missing
     4. Get Swisstopo image URL
     5. Run AI enrichment
-    6. Update building record
-    7. Create timeline event
+    6-13. Fetch geo.admin.ch layers (radon, hazards, noise, solar, heritage, transport, seismic, water)
+    14. Compute neighborhood score
+    15. Compute pollutant risk prediction
+    16. Compute accessibility assessment
+    17. Compute subsidy eligibility
+    18. Persist + 19. Timeline event
     """
     from app.models.building import Building
     from app.models.event import Event
@@ -470,7 +1269,119 @@ async def enrich_building(
             result.ai_enriched = True
             fields_updated.append("ai_enrichment")
 
-    # --- Step 6: Persist ---
+    has_coords = building.latitude is not None and building.longitude is not None
+
+    # --- Step 6: Radon risk ---
+    if has_coords:
+        radon = await fetch_radon_risk(building.latitude, building.longitude)
+        if radon:
+            enrichment_meta["radon"] = radon
+            result.radon_fetched = True
+            fields_updated.append("radon")
+
+    # --- Step 7: Natural hazards ---
+    if has_coords:
+        hazards = await fetch_natural_hazards(building.latitude, building.longitude)
+        if hazards:
+            enrichment_meta["natural_hazards"] = hazards
+            result.natural_hazards_fetched = True
+            fields_updated.append("natural_hazards")
+
+    # --- Step 8: Noise ---
+    if has_coords:
+        noise = await fetch_noise_data(building.latitude, building.longitude)
+        if noise:
+            enrichment_meta["noise"] = noise
+            result.noise_fetched = True
+            fields_updated.append("noise")
+
+    # --- Step 9: Solar potential ---
+    if has_coords:
+        solar = await fetch_solar_potential(building.latitude, building.longitude)
+        if solar:
+            enrichment_meta["solar"] = solar
+            result.solar_fetched = True
+            fields_updated.append("solar")
+
+    # --- Step 10: Heritage / ISOS ---
+    if has_coords:
+        heritage = await fetch_heritage_status(building.latitude, building.longitude)
+        if heritage:
+            enrichment_meta["heritage"] = heritage
+            result.heritage_fetched = True
+            fields_updated.append("heritage")
+
+    # --- Step 11: Transport quality ---
+    if has_coords:
+        transport = await fetch_transport_quality(building.latitude, building.longitude)
+        if transport:
+            enrichment_meta["transport"] = transport
+            result.transport_fetched = True
+            fields_updated.append("transport")
+
+    # --- Step 12: Seismic zone ---
+    if has_coords:
+        seismic = await fetch_seismic_zone(building.latitude, building.longitude)
+        if seismic:
+            enrichment_meta["seismic"] = seismic
+            result.seismic_fetched = True
+            fields_updated.append("seismic")
+
+    # --- Step 13: Water protection ---
+    if has_coords:
+        water = await fetch_water_protection(building.latitude, building.longitude)
+        if water:
+            enrichment_meta["water_protection"] = water
+            result.water_protection_fetched = True
+            fields_updated.append("water_protection")
+
+    # --- Step 14: Neighborhood score (pure computation) ---
+    n_score = compute_neighborhood_score(enrichment_meta)
+    enrichment_meta["neighborhood_score"] = n_score
+    result.neighborhood_score = n_score
+    fields_updated.append("neighborhood_score")
+
+    # --- Step 15: Pollutant risk prediction (pure computation) ---
+    risk_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "building_type": building.building_type,
+        "floors_above": building.floors_above,
+        "canton": building.canton,
+        "renovation_year": building.renovation_year,
+        "radon_level": enrichment_meta.get("radon", {}).get("radon_level", "low"),
+    }
+    pollutant_risk = compute_pollutant_risk_prediction(risk_input)
+    enrichment_meta["pollutant_risk"] = pollutant_risk
+    result.pollutant_risk_computed = True
+    fields_updated.append("pollutant_risk")
+
+    # --- Step 16: Accessibility assessment (pure computation) ---
+    accessibility_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "floors_above": building.floors_above,
+        "dwellings": enrichment_meta.get("regbl_data", {}).get("dwellings"),
+        "renovation_year": building.renovation_year,
+    }
+    accessibility = compute_accessibility_assessment(accessibility_input)
+    enrichment_meta["accessibility"] = accessibility
+    result.accessibility_computed = True
+    fields_updated.append("accessibility")
+
+    # --- Step 17: Subsidy eligibility (pure computation) ---
+    subsidy_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "heating_type_code": enrichment_meta.get("regbl_data", {}).get("heating_type_code"),
+        "canton": building.canton,
+        "solar_suitability": enrichment_meta.get("solar", {}).get("suitability"),
+        "solar_potential_kwh": enrichment_meta.get("solar", {}).get("solar_potential_kwh"),
+        "surface_area_m2": building.surface_area_m2,
+    }
+    subsidies = estimate_subsidy_eligibility(subsidy_input)
+    enrichment_meta["subsidies"] = subsidies
+    result.subsidies_computed = True
+    fields_updated.append("subsidies")
+
+    # --- Step 18: Persist ---
     if fields_updated or result.image_url:
         enrichment_meta["last_enriched_at"] = datetime.now(UTC).isoformat()
         building.source_metadata_json = enrichment_meta
@@ -479,7 +1390,7 @@ async def enrich_building(
 
     result.fields_updated = fields_updated
 
-    # --- Step 7: Timeline event ---
+    # --- Step 19: Timeline event ---
     if fields_updated:
         event = Event(
             building_id=building_id,
