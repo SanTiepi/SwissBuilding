@@ -120,6 +120,21 @@ class TrustMeta(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Evidence by nature (source_class grouping)
+# ---------------------------------------------------------------------------
+
+
+class EvidenceByNature(BaseModel):
+    """Evidence grouped by source_class taxonomy."""
+
+    official_truth: dict[str, Any] = Field(default_factory=dict)
+    documentary_proof: dict[str, Any] = Field(default_factory=dict)
+    observations: dict[str, Any] = Field(default_factory=dict)
+    signals: dict[str, Any] = Field(default_factory=dict)
+    inferences: dict[str, Any] = Field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
 # Main InstantCard
 # ---------------------------------------------------------------------------
 
@@ -130,6 +145,8 @@ class InstantCardResult(BaseModel):
     building_id: _uuid.UUID
     passport_grade: str = "F"
     what_we_know: WhatWeKnow = Field(default_factory=WhatWeKnow)
+    evidence_by_nature: EvidenceByNature = Field(default_factory=EvidenceByNature)
+    safe_to_start: dict[str, Any] = Field(default_factory=dict)
     what_is_risky: WhatIsRisky = Field(default_factory=WhatIsRisky)
     what_blocks: WhatBlocks = Field(default_factory=WhatBlocks)
     what_to_do_next: WhatToDoNext = Field(default_factory=WhatToDoNext)

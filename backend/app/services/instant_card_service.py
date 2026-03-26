@@ -22,6 +22,7 @@ from app.models.post_works_link import PostWorksLink
 from app.models.sample import Sample
 from app.models.source_snapshot import BuildingSourceSnapshot
 from app.schemas.instant_card import (
+    EvidenceByNature,
     ExecutionSection,
     InstantCardResult,
     NextAction,
@@ -427,6 +428,85 @@ async def _build_execution(
     return execution
 
 
+async def _build_evidence_by_nature(
+    db: AsyncSession,
+    building: Building,
+) -> EvidenceByNature:
+    """Group building evidence by source_class taxonomy."""
+    official_truth: dict = {}
+    documentary_proof: dict = {}
+    observations: dict = {}
+    signals: dict = {}
+    inferences: dict = {}
+
+    # Identity + physical from building model = official
+    official_truth["identity"] = {
+        "egid": building.egid,
+        "egrid": building.egrid,
+        "address": building.address,
+        "postal_code": building.postal_code,
+        "city": building.city,
+        "canton": building.canton,
+    }
+    official_truth["physical"] = {
+        "construction_year": building.construction_year,
+        "floors_above": building.floors_above,
+        "floors_below": building.floors_below,
+        "parcel_number": building.parcel_number,
+    }
+
+    # Source metadata entries → classify by source_class
+    source_meta = building.source_metadata_json or {}
+    source_entries = source_meta.get("_source_entries", [])
+    for entry in source_entries:
+        sc = entry.get("source_class", "derived")
+        name = entry.get("source_name", "unknown")
+        if sc == "official":
+            official_truth[name] = {"status": entry.get("status"), "confidence": entry.get("confidence")}
+        elif sc == "documentary":
+            documentary_proof[name] = {"status": entry.get("status"), "confidence": entry.get("confidence")}
+        elif sc == "observed":
+            observations[name] = {"status": entry.get("status"), "confidence": entry.get("confidence")}
+        elif sc == "commercial":
+            signals[name] = {"status": entry.get("status"), "confidence": entry.get("confidence")}
+        elif sc == "derived":
+            inferences[name] = {"status": entry.get("status"), "confidence": entry.get("confidence")}
+
+    # Snapshots → classify by source_category
+    snap_result = await db.execute(
+        select(BuildingSourceSnapshot)
+        .where(BuildingSourceSnapshot.building_id == building.id)
+        .order_by(BuildingSourceSnapshot.fetched_at.desc())
+    )
+    for snap in snap_result.scalars().all():
+        cat = snap.source_category or "unknown"
+        if cat in ("environment", "energy"):
+            observations[cat] = snap.normalized_data or {}
+        elif cat in ("cadastre", "regulatory"):
+            official_truth[cat] = snap.normalized_data or {}
+        elif cat in ("market", "neighborhood"):
+            signals[cat] = snap.normalized_data or {}
+
+    # Diagnostics → documentary proof
+    diag_result = await db.execute(
+        select(Diagnostic).where(Diagnostic.building_id == building.id).order_by(Diagnostic.created_at.desc()).limit(5)
+    )
+    diags = diag_result.scalars().all()
+    if diags:
+        documentary_proof["diagnostics"] = {
+            "count": len(list(diags)),
+            "latest_status": diags[0].status if diags else None,
+        }
+
+    return EvidenceByNature(
+        official_truth=official_truth,
+        documentary_proof=documentary_proof,
+        observations=observations,
+        signals=signals,
+        inferences=inferences,
+    )
+
+
 async def _find_neighbor_signals(
     db: AsyncSession,
     building: Building,
@@ -554,13 +634,29 @@ async def build_instant_card(
         trend=trust_trend,
     )
 
-    # 7. Neighbor signals
+    # 7. Evidence by nature (source_class grouping)
+    evidence_by_nature = await _build_evidence_by_nature(db, building)
+
+    # 8. Safe-to-start status
+    safe_to_start_data: dict = {}
+    try:
+        from app.services.safe_to_start_service import compute_safe_to_start
+
+        sts_result = await compute_safe_to_start(db, building_id)
+        if sts_result:
+            safe_to_start_data = sts_result.model_dump(mode="json")
+    except Exception:
+        logger.debug("Safe-to-start unavailable for %s", building_id, exc_info=True)
+
+    # 9. Neighbor signals
     neighbor_signals = await _find_neighbor_signals(db, building)
 
     return InstantCardResult(
         building_id=building_id,
         passport_grade=passport_grade,
         what_we_know=what_we_know,
+        evidence_by_nature=evidence_by_nature,
+        safe_to_start=safe_to_start_data,
         what_is_risky=what_is_risky,
         what_blocks=what_blocks,
         what_to_do_next=what_to_do_next,

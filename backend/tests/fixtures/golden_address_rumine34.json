@@ -1,0 +1,34 @@
+{
+    "searchserver_response": {
+        "results": [{
+            "attrs": {
+                "lat": 46.516136,
+                "lon": 6.641988,
+                "label": "Avenue Gabriel-de-Rumine 34 <b>1005 Lausanne</b>",
+                "featureId": "884846_0",
+                "detail": "avenue gabriel-de-rumine 34 1005 lausanne"
+            },
+            "links": [
+                {"href": "/rest/services/ech/MapServer/ch.bfs.gebaeude_wohnungs_register/884846_0", "rel": "related"}
+            ]
+        }]
+    },
+    "gwr_response": {
+        "feature": {
+            "attributes": {
+                "egid": "884846",
+                "egrid": "CH656183944565",
+                "lparz": "6289",
+                "gebnr": "10438",
+                "gbauj": 1933,
+                "gastw": 9,
+                "ganzwhg": 8,
+                "gebf": 1269,
+                "garea": 569,
+                "strname_deinr": "Avenue Gabriel-de-Rumine 34",
+                "ggdename": "Lausanne",
+                "gdekt": "VD"
+            }
+        }
+    }
+}

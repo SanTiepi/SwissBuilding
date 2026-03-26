@@ -292,6 +292,75 @@ def verify_egid_address(
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Source class taxonomy — every piece of data is tagged by nature
+# ---------------------------------------------------------------------------
+
+SOURCE_CLASSES: dict[str, str] = {
+    "geo.admin.ch/geocode": "official",
+    "geo.admin.ch/gwr": "official",
+    "geocode": "official",
+    "regbl": "official",
+    "cadastre": "official",
+    "ch.bag.radonkarte": "observed",
+    "ch.bafu.laerm-strassenlaerm_tag": "observed",
+    "ch.bfe.solarenergie-eignung-daecher": "observed",
+    "ch.are.gueteklassen_oev": "official",
+    "ch.bak.bundesinventar-schuetzenswerte-ortsbilder": "official",
+    "ch.bafu.erdbeben-erdbebenzonen": "official",
+    "radon": "observed",
+    "noise": "observed",
+    "solar": "observed",
+    "railway_noise": "observed",
+    "aircraft_noise": "observed",
+    "natural_hazards": "observed",
+    "heritage": "official",
+    "transport": "official",
+    "seismic": "official",
+    "water_protection": "official",
+    "building_zones": "official",
+    "contaminated_sites": "official",
+    "groundwater_zones": "official",
+    "flood_zones": "official",
+    "protected_monuments": "official",
+    "agricultural_zones": "official",
+    "forest_reserves": "official",
+    "military_zones": "official",
+    "mobile_coverage": "observed",
+    "broadband": "observed",
+    "ev_charging": "commercial",
+    "thermal_networks": "observed",
+    "swisstopo_image": "official",
+    "osm/amenities": "commercial",
+    "osm_amenities": "commercial",
+    "osm_building": "commercial",
+    "transport.opendata.ch": "commercial",
+    "nearest_stops": "commercial",
+    "climate": "observed",
+    "ai_enrichment": "derived",
+    "risk_prediction": "derived",
+    "neighborhood_score": "derived",
+    "lifecycle_prediction": "derived",
+    "renovation_plan": "derived",
+    "compliance_check": "derived",
+    "financial_impact": "derived",
+    "narrative": "derived",
+    "connectivity_score": "derived",
+    "environmental_risk_score": "derived",
+    "livability_score": "derived",
+    "renovation_potential": "derived",
+    "intelligence_score": "derived",
+    "accessibility": "derived",
+    "subsidies": "derived",
+    "pollutant_risk": "derived",
+}
+
+
+def _get_source_class(source_name: str) -> str:
+    """Resolve source_class for a given source_name."""
+    return SOURCE_CLASSES.get(source_name, "derived")
+
+
 def _source_entry(
     source_name: str,
     *,
@@ -300,10 +369,13 @@ def _source_entry(
     match_quality: str | None = None,
     retry_count: int = 0,
     error: str | None = None,
+    source_class: str | None = None,
 ) -> dict[str, Any]:
-    """Create a standardized per-source metadata entry."""
+    """Create a standardized per-source metadata entry with source_class."""
+    resolved_class = source_class or _get_source_class(source_name)
     entry: dict[str, Any] = {
         "source_name": source_name,
+        "source_class": resolved_class,
         "status": status,
         "confidence": confidence,
         "fetched_at": datetime.now(UTC).isoformat(),
@@ -480,6 +552,14 @@ async def geocode_address(address: str, npa: str, city: str = "") -> dict[str, A
         result["label"] = attrs.get("label", "")
         result["detail"] = attrs.get("detail", "")
 
+        # Extract GWR feature URL from links array (canonical chain)
+        links = results[0].get("links", [])
+        for link in links:
+            href = link.get("href", "")
+            if "ch.bfs.gebaeude_wohnungs_register" in href:
+                result["gwr_feature_url"] = href
+                break
+
         # Verify match quality
         match_quality = verify_geocode_match(address, npa, result.get("label", ""))
         result["match_quality"] = match_quality
@@ -522,18 +602,32 @@ async def geocode_address(address: str, npa: str, city: str = "") -> dict[str, A
 # ---------------------------------------------------------------------------
 
 
-async def fetch_regbl_data(egid: int, building_address: str = "") -> dict[str, Any]:
+async def fetch_regbl_data(
+    egid: int,
+    building_address: str = "",
+    *,
+    gwr_feature_url: str | None = None,
+) -> dict[str, Any]:
     """Fetch building data from the Swiss Register of Buildings via geo.admin.ch.
 
     Uses the GWR layer on geo.admin.ch which returns comprehensive building data
     including EGRID, parcel number, construction year, floors, dwellings, surface,
     heating type, energy source, and individual dwelling details.
 
+    If ``gwr_feature_url`` is provided (from SearchServer canonical chain), fetch
+    directly from that URL — no guessing needed.  Otherwise, fall back to the
+    ``{egid}_0`` pattern.
+
     Returns dict with construction_year, floors, dwellings, egid_confidence, etc.
     Returns empty dict on 404 or error.
     """
     await _throttle()
-    url = f"https://api3.geo.admin.ch/rest/services/ech/MapServer/ch.bfs.gebaeude_wohnungs_register/{egid}_0"
+    if gwr_feature_url:
+        # Canonical chain: URL from SearchServer links array
+        url = f"https://api3.geo.admin.ch{gwr_feature_url}"
+    else:
+        # Fallback: construct URL from EGID
+        url = f"https://api3.geo.admin.ch/rest/services/ech/MapServer/ch.bfs.gebaeude_wohnungs_register/{egid}_0"
     retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
@@ -3679,6 +3773,7 @@ async def enrich_building(
     source_entries: list[dict[str, Any]] = []
     geocode_quality: str | None = None
     egid_confidence: str | None = None
+    geo: dict[str, Any] = {}  # geocode result, used by RegBL canonical chain
 
     # --- Step 1: Geocode (always re-geocode to get precise coords + EGID) ---
     if not skip_geocode:
@@ -3716,7 +3811,12 @@ async def enrich_building(
 
     # --- Step 2: RegBL ---
     if not skip_regbl and building.egid is not None:
-        regbl = await fetch_regbl_data(building.egid, building.address or "")
+        # Prefer canonical chain: use gwr_feature_url from geocode if available
+        regbl = await fetch_regbl_data(
+            building.egid,
+            building.address or "",
+            gwr_feature_url=geo.get("gwr_feature_url"),
+        )
         if regbl.get("_source_entry"):
             source_entries.append(regbl["_source_entry"])
 
