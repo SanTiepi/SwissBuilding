@@ -180,8 +180,8 @@ function filterRisks(role: AudienceRole, card: InstantCardResult, decisionView: 
   }
 
   // Add blocker count from decision view for context
-  if (decisionView && decisionView.blockers.length > 0 && ['authority', 'property_manager'].includes(role)) {
-    items.push(`${decisionView.blockers.length} blocage(s) actif(s)`);
+  if (decisionView && (decisionView.blockers || []).length > 0 && ['authority', 'property_manager'].includes(role)) {
+    items.push(`${(decisionView.blockers || []).length} blocage(s) actif(s)`);
   }
 
   if (items.length === 0) items.push('Aucun risque significatif identifie');
@@ -217,7 +217,7 @@ function filterBlockers(role: AudienceRole, card: InstantCardResult, decisionVie
 
   // Add relevant decision view blockers
   if (decisionView) {
-    decisionView.blockers
+    (decisionView.blockers || [])
       .filter((bl) => {
         if (role === 'authority') return true;
         if (role === 'property_manager') return true;

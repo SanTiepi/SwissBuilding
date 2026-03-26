@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { Component, useState, useEffect, lazy, Suspense } from 'react';
+import type { ReactNode, ErrorInfo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +34,62 @@ const LazyProceduresSection = lazy(() => import('@/components/building-detail/Pr
 const LazyTransferPackagePanel = lazy(() =>
   import('@/components/TransferPackagePanel').then((m) => ({ default: m.TransferPackagePanel })),
 );
+
+// ErrorBoundary to catch crashes in individual tab content
+interface TabErrorBoundaryProps {
+  children: ReactNode;
+  tabKey: string;
+}
+
+interface TabErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class TabErrorBoundary extends Component<TabErrorBoundaryProps, TabErrorBoundaryState> {
+  constructor(props: TabErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): TabErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error(`[TabErrorBoundary] Tab "${this.props.tabKey}" crashed:`, error, info.componentStack);
+  }
+
+  componentDidUpdate(prevProps: TabErrorBoundaryProps) {
+    // Reset error state when switching tabs
+    if (prevProps.tabKey !== this.props.tabKey && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
+          <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+            Something went wrong in this tab
+          </h3>
+          <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+            {this.state.error?.message || 'An unexpected error occurred'}
+          </p>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const editSchema = z.object({
   address: z.string().min(1),
@@ -324,6 +381,7 @@ export default function BuildingDetail() {
         </div>
 
         <div className="p-6">
+          <TabErrorBoundary tabKey={activeTab}>
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <Suspense fallback={TabFallback}>
@@ -470,6 +528,7 @@ export default function BuildingDetail() {
               </div>
             </>
           )}
+          </TabErrorBoundary>
         </div>
       </div>
 

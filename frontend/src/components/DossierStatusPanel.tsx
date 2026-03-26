@@ -125,7 +125,7 @@ function OverallBanner({
       bg: 'bg-amber-50 dark:bg-amber-900/20',
       text: 'text-amber-700 dark:text-amber-300',
       border: 'border-amber-200 dark:border-amber-800',
-      label: t('dossier.status_near_complete', { count: report.top_blockers.length }),
+      label: t('dossier.status_near_complete', { count: (report.top_blockers || []).length }),
     },
     incomplete: {
       bg: 'bg-red-50 dark:bg-red-900/20',
@@ -301,13 +301,13 @@ export function DossierStatusPanel({ buildingId, stage = 'avt' }: DossierStatusP
         {report && <OverallBanner report={report} t={t} />}
 
         {/* Top Blockers */}
-        {report && report.top_blockers.length > 0 && (
+        {report && (report.top_blockers || []).length > 0 && (
           <div className="mt-4">
             <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               {t('dossier.blockers')}
             </p>
             <ul className="space-y-1.5">
-              {report.top_blockers.slice(0, 5).map((blocker, i) => (
+              {(report.top_blockers || []).slice(0, 5).map((blocker, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <StepIndicator status="partial" />
                   <div className="min-w-0 flex-1">
@@ -323,13 +323,13 @@ export function DossierStatusPanel({ buildingId, stage = 'avt' }: DossierStatusP
         )}
 
         {/* Recommended Actions */}
-        {report && report.recommended_actions.length > 0 && (
+        {report && (report.recommended_actions || []).length > 0 && (
           <div className="mt-4">
             <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               {t('dossier.recommended_actions')}
             </p>
             <ul className="space-y-1.5">
-              {report.recommended_actions.slice(0, 3).map((action, i) => (
+              {(report.recommended_actions || []).slice(0, 3).map((action, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <ArrowRight className="w-4 h-4 text-gray-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
                   <div className="min-w-0 flex-1">

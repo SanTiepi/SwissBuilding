@@ -74,8 +74,8 @@ function StepTimeline({ steps }: { steps: ProcedureStep[] }) {
       {sorted.map((step, idx) => {
         const isLast = idx === sorted.length - 1;
         const isActive = step.status === 'active';
-        const linkedCount = step.linked_document_ids.length;
-        const requiredCount = step.required_documents.length;
+        const linkedCount = (step.linked_document_ids || []).length;
+        const requiredCount = (step.required_documents || []).length;
         const missingDocs = requiredCount - linkedCount;
 
         return (
@@ -124,7 +124,7 @@ function StepTimeline({ steps }: { steps: ProcedureStep[] }) {
               {/* Required documents */}
               {requiredCount > 0 && (
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {step.required_documents.map((doc, di) => {
+                  {(step.required_documents || []).map((doc, di) => {
                     const isLinked = di < linkedCount;
                     return (
                       <span
@@ -258,23 +258,23 @@ export default function ProcedureCard({
           </div>
 
           {/* Step timeline */}
-          {procedure.steps.length > 0 && (
+          {(procedure.steps || []).length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-gray-700 dark:text-slate-200 mb-3">
                 {t('procedure.steps') || 'Steps'}
               </h4>
-              <StepTimeline steps={procedure.steps} />
+              <StepTimeline steps={procedure.steps || []} />
             </div>
           )}
 
           {/* Authority requests */}
-          {procedure.authority_requests.length > 0 && (
+          {(procedure.authority_requests || []).length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-gray-700 dark:text-slate-200 mb-3">
                 {t('procedure.authority_requests') || 'Authority Requests'}
               </h4>
               <div className="space-y-3">
-                {procedure.authority_requests.map((req) => (
+                {(procedure.authority_requests || []).map((req) => (
                   <AuthorityRequestCard key={req.id} request={req} onRespond={onRespondToRequest} />
                 ))}
               </div>

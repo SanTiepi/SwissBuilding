@@ -133,14 +133,14 @@ export function MaterialRecommendationsCard({ recommendations }: MaterialRecomme
                   </div>
 
                   {/* Risk flags */}
-                  {rec.risk_flags.length > 0 && (
+                  {(rec.risk_flags || []).length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">
                         <AlertTriangle className="w-3 h-3 inline mr-1" />
                         {t('material_rec.risk_flags') || 'Risk Flags'}
                       </p>
                       <ul className="space-y-1">
-                        {rec.risk_flags.map((flag, fi) => (
+                        {(rec.risk_flags || []).map((flag, fi) => (
                           <li key={fi} className="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-1.5">
                             <Shield className="w-3 h-3 mt-0.5 flex-shrink-0" />
                             {flag}
@@ -151,14 +151,14 @@ export function MaterialRecommendationsCard({ recommendations }: MaterialRecomme
                   )}
 
                   {/* Evidence requirements */}
-                  {rec.evidence_requirements.length > 0 && (
+                  {(rec.evidence_requirements || []).length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">
                         <FileCheck className="w-3 h-3 inline mr-1" />
                         {t('material_rec.evidence_requirements') || 'Evidence Requirements'}
                       </p>
                       <ul className="space-y-1.5">
-                        {rec.evidence_requirements.map((ev, ei) => (
+                        {(rec.evidence_requirements || []).map((ev, ei) => (
                           <li key={ei} className="text-sm text-gray-700 dark:text-slate-300 flex items-start gap-2">
                             <span
                               className={cn(

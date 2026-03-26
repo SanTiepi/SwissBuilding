@@ -71,13 +71,13 @@ export function PackagePresetPreview({ buildingId }: PackagePresetPreviewProps) 
       {preview && (
         <div className="space-y-3">
           {/* Included */}
-          {preview.included.length > 0 && (
+          {(preview.included || []).length > 0 && (
             <div>
               <h4 className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">
                 {t('package_preset.included')}
               </h4>
               <ul className="space-y-1">
-                {preview.included.map((item) => (
+                {(preview.included || []).map((item) => (
                   <li
                     key={item}
                     className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300"
@@ -92,13 +92,13 @@ export function PackagePresetPreview({ buildingId }: PackagePresetPreviewProps) 
           )}
 
           {/* Excluded */}
-          {preview.excluded.length > 0 && (
+          {(preview.excluded || []).length > 0 && (
             <div>
               <h4 className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
                 {t('package_preset.excluded')}
               </h4>
               <ul className="space-y-1">
-                {preview.excluded.map((item) => (
+                {(preview.excluded || []).map((item) => (
                   <li
                     key={item}
                     className="flex items-center gap-2 text-sm text-gray-400 dark:text-slate-500"
@@ -113,13 +113,13 @@ export function PackagePresetPreview({ buildingId }: PackagePresetPreviewProps) 
           )}
 
           {/* Unknown */}
-          {preview.unknown.length > 0 && (
+          {(preview.unknown || []).length > 0 && (
             <div>
               <h4 className="text-xs font-medium text-orange-600 dark:text-orange-400 mb-1">
                 {t('package_preset.unknown')}
               </h4>
               <ul className="space-y-1">
-                {preview.unknown.map((item) => (
+                {(preview.unknown || []).map((item) => (
                   <li
                     key={item}
                     className={cn('flex items-center gap-2 text-sm text-orange-600 dark:text-orange-400')}

@@ -387,7 +387,7 @@ export function AudiencePackPreview({ buildingId }: AudiencePackPreviewProps) {
           <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
             <span className="flex items-center gap-1" data-testid="content-hash">
               <Hash className="w-3 h-3" />
-              {packDetail.content_hash.slice(0, 12)}...
+              {(packDetail.content_hash || '').slice(0, 12)}...
             </span>
             <span>v{packDetail.pack_version}</span>
           </div>

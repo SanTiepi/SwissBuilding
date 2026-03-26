@@ -116,7 +116,7 @@ function GateCard({
 
       {/* Prerequisites */}
       <ul className="space-y-1.5">
-        {gate.prerequisites.map((prereq, i) => (
+        {(gate.prerequisites || []).map((prereq, i) => (
           <li key={i} className="flex items-center gap-2 text-xs">
             {prereq.satisfied ? (
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />

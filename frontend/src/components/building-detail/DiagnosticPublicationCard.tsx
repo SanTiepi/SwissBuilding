@@ -218,7 +218,7 @@ function PublicationRow({ publication: pub, t }: { publication: DiagnosticPublic
       )}
 
       {/* Annexes (collapsible) */}
-      {pub.annexes.length > 0 && (
+      {(pub.annexes || []).length > 0 && (
         <div>
           <button
             onClick={() => setAnnexesOpen((v) => !v)}
@@ -227,13 +227,13 @@ function PublicationRow({ publication: pub, t }: { publication: DiagnosticPublic
           >
             <Paperclip className="w-4 h-4" />
             <span>
-              {t('diag_pub.annexes') || 'Annexes'} ({pub.annexes.length})
+              {t('diag_pub.annexes') || 'Annexes'} ({(pub.annexes || []).length})
             </span>
             {annexesOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
           {annexesOpen && (
             <ul className="mt-2 space-y-1 pl-6" data-testid="diag-pub-annexes-list">
-              {pub.annexes.map((annex, i) => {
+              {(pub.annexes || []).map((annex, i) => {
                 const a = annex as Record<string, unknown>;
                 const name = String(a.name ?? `Annex ${i + 1}`);
                 const type = a.type ? String(a.type) : undefined;

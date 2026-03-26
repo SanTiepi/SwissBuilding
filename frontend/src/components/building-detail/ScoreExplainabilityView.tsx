@@ -155,8 +155,8 @@ function ScoreCard({ score }: { score: ExplainedScore }) {
 
           {/* Line items */}
           <div className="px-2 py-1 max-h-80 overflow-y-auto">
-            {score.line_items.length > 0 ? (
-              score.line_items.map((item, i) => <LineItemRow key={i} item={item} onNavigate={handleNavigate} />)
+            {(score.line_items || []).length > 0 ? (
+              (score.line_items || []).map((item, i) => <LineItemRow key={i} item={item} onNavigate={handleNavigate} />)
             ) : (
               <div className="flex items-center gap-2 px-3 py-4 text-xs text-slate-400 dark:text-slate-500">
                 <AlertTriangle className="w-4 h-4" />
@@ -207,7 +207,7 @@ export default function ScoreExplainabilityView({ buildingId }: ScoreExplainabil
 
       {/* Score cards */}
       <div className="space-y-3">
-        {data.scores.map((score, i) => (
+        {(data.scores || []).map((score, i) => (
           <ScoreCard key={i} score={score} />
         ))}
       </div>

@@ -116,7 +116,7 @@ function SummaryCard({ summary }: { summary: ImportedDiagnosticSummaryDto }) {
             {t('imported_diagnostic.source_label')}
           </span>
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
-            {summary.flags.map((flag) => (
+            {(summary.flags || []).map((flag) => (
               <FlagBadge key={flag} flag={flag} />
             ))}
           </div>

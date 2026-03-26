@@ -293,13 +293,13 @@ export default function MemoryTransferView({ buildingId }: MemoryTransferViewPro
             </div>
 
             <ul className="space-y-2">
-              {readiness.missing_sections.length === 0 ? (
+              {(readiness.missing_sections || []).length === 0 ? (
                 <li className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                   {t('memory_transfer.all_sections_complete') || 'Toutes les sections completes'}
                 </li>
               ) : (
-                readiness.missing_sections.map((section, i) => (
+                (readiness.missing_sections || []).map((section, i) => (
                   <li key={i} className="flex items-center gap-2 text-xs text-red-700 dark:text-red-400">
                     <XCircle className="w-3.5 h-3.5 shrink-0" />
                     {section}
@@ -314,7 +314,7 @@ export default function MemoryTransferView({ buildingId }: MemoryTransferViewPro
                 </li>
               )}
 
-              {readiness.incomplete_engagements.length > 0 && (
+              {(readiness.incomplete_engagements || []).length > 0 && (
                 <li className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400">
                   <XCircle className="w-3.5 h-3.5 shrink-0" />
                   {readiness.incomplete_engagements.length}{' '}

@@ -126,9 +126,11 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
 
   if (isError || !data) return null;
 
-  const { fragmentation, defensibility, counterfactual } = data;
-  const withP = counterfactual.with_platform;
-  const withoutP = counterfactual.without_platform;
+  const fragmentation = data.fragmentation || {} as any;
+  const defensibility = data.defensibility || {} as any;
+  const counterfactual = data.counterfactual || {} as any;
+  const withP = counterfactual.with_platform || {} as any;
+  const withoutP = counterfactual.without_platform || {} as any;
 
   return (
     <div className="space-y-5" data-testid="indispensability-view">
@@ -302,7 +304,7 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
       </div>
 
       {/* Vulnerability points */}
-      {defensibility.vulnerability_points.length > 0 && (
+      {(defensibility.vulnerability_points || []).length > 0 && (
         <div
           className="rounded-xl border border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-900/10 p-4"
           data-testid="vulnerability-points"
@@ -314,7 +316,7 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
             </h3>
           </div>
           <ul className="space-y-1.5">
-            {defensibility.vulnerability_points.map((point, i) => (
+            {(defensibility.vulnerability_points || []).map((point: string, i: number) => (
               <li key={i} className="flex items-start gap-2 text-xs text-red-700 dark:text-red-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1 shrink-0" />
                 {point}
@@ -325,7 +327,7 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
       )}
 
       {/* Systems replaced */}
-      {fragmentation.systems_replaced.length > 0 && (
+      {(fragmentation.systems_replaced || []).length > 0 && (
         <div
           className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4"
           data-testid="systems-replaced"
@@ -337,7 +339,7 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
             </h3>
           </div>
           <div className="flex flex-wrap gap-2">
-            {fragmentation.systems_replaced.map((sys, i) => (
+            {(fragmentation.systems_replaced || []).map((sys: string, i: number) => (
               <SystemBadge key={i} label={sys} />
             ))}
           </div>
@@ -388,13 +390,13 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
       </div>
 
       {/* Delta highlights */}
-      {counterfactual.delta.length > 0 && (
+      {(counterfactual.delta || []).length > 0 && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
           <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
             {t('indispensability.delta_highlights') || 'Ce que SwissBuilding change'}
           </h3>
           <ul className="space-y-1">
-            {counterfactual.delta.map((d, i) => (
+            {(counterfactual.delta || []).map((d: string, i: number) => (
               <li key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
                 {d}

@@ -79,13 +79,13 @@ export function ContractorEcoClausePreview({ ecoClauses }: ContractorEcoClausePr
       </div>
 
       {/* Detected pollutants */}
-      {ecoClauses.detected_pollutants.length > 0 && (
+      {(ecoClauses.detected_pollutants || []).length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
           <span className="text-sm text-gray-600 dark:text-slate-400">
             {t('eco_clause.detected_pollutants') || 'Detected pollutants'}:
           </span>
-          {ecoClauses.detected_pollutants.map((p) => (
+          {(ecoClauses.detected_pollutants || []).map((p) => (
             <span
               key={p}
               className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${POLLUTANT_COLORS[p] || 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'}`}
@@ -98,7 +98,7 @@ export function ContractorEcoClausePreview({ ecoClauses }: ContractorEcoClausePr
 
       {/* Sections */}
       <div className="space-y-3">
-        {ecoClauses.sections.map((section) => (
+        {(ecoClauses.sections || []).map((section) => (
           <PreviewSectionCard
             key={section.section_id}
             section={section}
@@ -134,7 +134,7 @@ function PreviewSectionCard({
           <Scale className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span className="text-sm font-medium text-gray-900 dark:text-white">{section.title}</span>
           <span className="text-xs text-gray-500 dark:text-slate-400">
-            ({section.clauses.length} {t('eco_clause.clauses_count') || 'clause(s)'})
+            ({(section.clauses || []).length} {t('eco_clause.clauses_count') || 'clause(s)'})
           </span>
         </div>
         {isExpanded ? (
@@ -147,7 +147,7 @@ function PreviewSectionCard({
       {/* Clauses */}
       {isExpanded && (
         <div className="divide-y divide-gray-100 dark:divide-slate-700">
-          {section.clauses.map((clause) => (
+          {(section.clauses || []).map((clause) => (
             <div key={clause.clause_id} className="p-4 space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-gray-400 dark:text-slate-500">{clause.clause_id}</span>
@@ -157,10 +157,10 @@ function PreviewSectionCard({
               <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed">{clause.body}</p>
 
               {/* Legal references */}
-              {clause.legal_references.length > 0 && (
+              {(clause.legal_references || []).length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
                   <FileText className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                  {clause.legal_references.map((ref, i) => (
+                  {(clause.legal_references || []).map((ref, i) => (
                     <span
                       key={i}
                       className="inline-block px-2 py-0.5 text-xs rounded bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
