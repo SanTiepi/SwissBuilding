@@ -11,7 +11,7 @@ import hashlib
 import json
 import logging
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import and_, func, select
@@ -68,7 +68,7 @@ async def _emit_domain_event(
         aggregate_id=transfer.id,
         payload=payload or {"transfer_type": transfer.transfer_type, "status": transfer.status},
         actor_user_id=actor_user_id,
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime.utcnow(),
     )
     db.add(event)
 
@@ -332,7 +332,7 @@ async def compile_memory(db: AsyncSession, transfer_id: UUID) -> MemoryCompilati
     transfer.memory_snapshot_id = snapshot.id
     transfer.transfer_package_hash = content_hash
     transfer.integrity_verified = True
-    transfer.integrity_verified_at = datetime.now(UTC)
+    transfer.integrity_verified_at = datetime.utcnow()
     transfer.status = "memory_compiled"
 
     await _emit_domain_event(
@@ -346,7 +346,7 @@ async def compile_memory(db: AsyncSession, transfer_id: UUID) -> MemoryCompilati
         },
     )
 
-    compiled_at = datetime.now(UTC)
+    compiled_at = datetime.utcnow()
 
     return MemoryCompilation(
         transfer_id=transfer.id,
@@ -538,7 +538,7 @@ async def accept_transfer(
         raise ValueError("Le transfert doit etre en attente de revue pour etre accepte")
 
     transfer.status = "accepted"
-    transfer.accepted_at = datetime.now(UTC)
+    transfer.accepted_at = datetime.utcnow()
     transfer.accepted_by_id = user_id
     transfer.acceptance_comment = comment
 
@@ -575,7 +575,7 @@ async def contest_transfer(db: AsyncSession, transfer_id: UUID, user_id: UUID, c
         raise ValueError("Le transfert doit etre en attente de revue pour etre conteste")
 
     transfer.status = "contested"
-    transfer.contested_at = datetime.now(UTC)
+    transfer.contested_at = datetime.utcnow()
     transfer.contested_by_id = user_id
     transfer.contest_comment = comment
 
@@ -612,7 +612,7 @@ async def complete_transfer(db: AsyncSession, transfer_id: UUID, user_id: UUID) 
         raise ValueError("Le transfert doit etre accepte avant d'etre finalise")
 
     transfer.status = "completed"
-    transfer.completed_at = datetime.now(UTC)
+    transfer.completed_at = datetime.utcnow()
 
     await _emit_domain_event(
         db,

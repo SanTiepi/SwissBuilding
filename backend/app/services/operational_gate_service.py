@@ -9,7 +9,7 @@ Idempotent gate creation, real-time prerequisite evaluation, audit-trailed overr
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -279,7 +279,7 @@ async def override_gate(db: AsyncSession, gate_id: UUID, user_id: UUID, reason: 
     if gate.status in ("cleared",):
         raise ValueError("Cannot override a gate that is already cleared")
 
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
     gate.status = "overridden"
     gate.overridden_by_id = user_id
     gate.override_reason = reason
@@ -315,7 +315,7 @@ async def clear_gate(db: AsyncSession, gate_id: UUID, user_id: UUID) -> Operatio
     if gate.status not in ("clearable", "conditions_pending"):
         raise ValueError(f"Cannot clear gate with status '{gate.status}' — must be clearable or conditions_pending")
 
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
     gate.status = "cleared"
     gate.cleared_at = now
     gate.cleared_by_id = user_id

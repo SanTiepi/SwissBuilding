@@ -11,7 +11,7 @@ de l'acteur dans l'ecosysteme immobilier.
 import hashlib
 import json
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import func as sa_func
@@ -99,7 +99,7 @@ async def create_engagement(
         conditions=data.conditions,
         content_hash=data.content_hash or _compute_content_hash(data.conditions),
         content_version=data.content_version,
-        engaged_at=datetime.now(UTC),
+        engaged_at=datetime.utcnow(),
         expires_at=data.expires_at,
         ip_address=ip_address,
         user_agent=user_agent,
@@ -282,7 +282,7 @@ async def contest_engagement(
         comment=comment,
         content_hash=original.content_hash,
         content_version=original.content_version,
-        engaged_at=datetime.now(UTC),
+        engaged_at=datetime.utcnow(),
         ip_address=ip_address,
         source_type="manual",
         confidence="declared",
@@ -326,7 +326,7 @@ async def supersede_engagement(
         conditions=new_data.conditions,
         content_hash=new_data.content_hash or _compute_content_hash(new_data.conditions),
         content_version=new_data.content_version,
-        engaged_at=datetime.now(UTC),
+        engaged_at=datetime.utcnow(),
         expires_at=new_data.expires_at,
         ip_address=ip_address,
         source_type="manual",

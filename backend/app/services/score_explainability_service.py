@@ -8,7 +8,7 @@ contradictions, evidence links, enrichment sources, actions, custody events.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import and_, func, select
@@ -111,7 +111,7 @@ async def explain_building_scores(
 
     return ExplainedReport(
         building_id=building_id,
-        generated_at=datetime.now(UTC),
+        generated_at=datetime.utcnow(),
         scores=scores,
         total_line_items=total_line_items,
         methodology_summary=_METHODOLOGY_SUMMARY,

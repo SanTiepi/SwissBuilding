@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 import uuid as _uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import and_, func, select
@@ -55,7 +55,7 @@ async def get_value_ledger(db: AsyncSession, org_id: UUID) -> ValueLedger | None
         return None
 
     building_ids = [r[0] for r in building_rows]
-    earliest_created = min(r[1] for r in building_rows if r[1] is not None) if building_rows else datetime.now(UTC)
+    earliest_created = min(r[1] for r in building_rows if r[1] is not None) if building_rows else datetime.utcnow()
 
     # 1. Sources unified: distinct source_dataset values across buildings
     sources_result = await db.execute(
@@ -145,7 +145,7 @@ async def get_value_ledger(db: AsyncSession, org_id: UUID) -> ValueLedger | None
     value_chf = hours_saved * _RATE_CHF_PER_HOUR
 
     # Days active
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
     if earliest_created and earliest_created.tzinfo is None:
         days_active = max(1, (now.replace(tzinfo=None) - earliest_created).days)
     else:
@@ -245,7 +245,7 @@ async def record_value_event(
             "building_id": str(building_id) if building_id else None,
             "delta": delta_description,
         },
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime.utcnow(),
     )
     db.add(event)
     await db.flush()

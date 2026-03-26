@@ -12,7 +12,7 @@ Two scopes:
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -77,7 +77,7 @@ async def generate_indispensability_export(
 
     return IndispensabilityExport(
         title=f"Rapport d'indispensabilité — {address}",
-        generated_at=datetime.now(UTC),
+        generated_at=datetime.utcnow(),
         generated_by="SwissBuilding",
         executive_summary=executive_summary,
         fragmentation_section=IndispensabilitySection(
@@ -194,7 +194,7 @@ async def generate_portfolio_indispensability_export(
 
     return PortfolioIndispensabilityExport(
         title=f"Rapport d'indispensabilité — Portefeuille {org_name}",
-        generated_at=datetime.now(UTC),
+        generated_at=datetime.utcnow(),
         generated_by="SwissBuilding",
         executive_summary=executive_summary,
         buildings_count=n,

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import uuid as _uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -58,7 +58,7 @@ async def _create_value_notification(
             body=body,
             link=link,
             status="unread",
-            created_at=datetime.now(UTC),
+            created_at=datetime.utcnow(),
         )
         db.add(notification)
     await db.flush()

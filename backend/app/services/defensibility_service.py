@@ -10,7 +10,7 @@ opinions — with it, they become provable facts.
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import and_, func, select
@@ -323,7 +323,7 @@ async def _compute_temporal_defensibility(
     # Time coverage
     earliest = snapshots[0].captured_at
     latest = snapshots[-1].captured_at
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
 
     if earliest and latest:
         coverage_days = (now - earliest).days
