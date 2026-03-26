@@ -800,6 +800,856 @@ async def fetch_water_protection(lat: float, lon: float) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Generic geo.admin.ch identify helper
+# ---------------------------------------------------------------------------
+
+
+async def _geo_identify(lat: float, lon: float, layer: str) -> dict[str, Any]:
+    """Generic geo.admin.ch identify call for any layer."""
+    await _throttle()
+    url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
+    params = {
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "layers": f"all:{layer}",
+        "tolerance": 50,
+        "sr": 4326,
+        "returnGeometry": "false",
+        "limit": 1,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+        results = data.get("results", [])
+        if results:
+            return results[0].get("attributes", results[0].get("properties", {}))
+        return {}
+    except Exception as exc:
+        logger.warning("geo.admin.ch identify failed for layer %s: %s", layer, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5i-2. Railway noise
+# ---------------------------------------------------------------------------
+
+
+async def fetch_railway_noise(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch railway noise exposure (day) via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bafu.laerm-bahnlaerm_tag")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    db_val = attrs.get("lr_tag") or attrs.get("dblr") or attrs.get("db")
+    if db_val is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["railway_noise_day_db"] = float(db_val)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-3. Aircraft noise
+# ---------------------------------------------------------------------------
+
+
+async def fetch_aircraft_noise(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch aircraft noise from civil airfield noise cadastre via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bazl.laermbelastungskataster-zivilflugplaetze")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    db_val = attrs.get("lr_tag") or attrs.get("db") or attrs.get("lrpegel")
+    if db_val is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["aircraft_noise_db"] = float(db_val)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-4. Building zones
+# ---------------------------------------------------------------------------
+
+
+async def fetch_building_zones(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch building zone classification via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.are.bauzonen")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    zone_type = attrs.get("zone_type") or attrs.get("zonentyp") or attrs.get("typ")
+    if zone_type is not None:
+        result["zone_type"] = str(zone_type)
+    zone_code = attrs.get("zone_code") or attrs.get("ch_code") or attrs.get("code")
+    if zone_code is not None:
+        result["zone_code"] = str(zone_code)
+    desc = attrs.get("zone_description") or attrs.get("bezeichnung") or attrs.get("description") or attrs.get("label")
+    if desc is not None:
+        result["zone_description"] = str(desc)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-5. Contaminated sites
+# ---------------------------------------------------------------------------
+
+
+async def fetch_contaminated_sites(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch contaminated site (Altlasten) info via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bafu.altlasten-kataster")
+    if not attrs:
+        return {"is_contaminated": False}
+    result: dict[str, Any] = {"is_contaminated": True}
+    site_type = attrs.get("standorttyp") or attrs.get("site_type") or attrs.get("typ")
+    if site_type is not None:
+        result["site_type"] = str(site_type)
+    status = attrs.get("untersuchungsstand") or attrs.get("investigation_status") or attrs.get("status")
+    if status is not None:
+        result["investigation_status"] = str(status)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-6. Groundwater protection zones
+# ---------------------------------------------------------------------------
+
+
+async def fetch_groundwater_zones(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch groundwater protection zone (S1/S2/S3) via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bafu.grundwasserschutzzonen")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    zone = attrs.get("zone") or attrs.get("schutzzone") or attrs.get("azone")
+    if zone is not None:
+        result["protection_zone"] = str(zone)
+    zone_type = attrs.get("typ") or attrs.get("zone_type") or attrs.get("art")
+    if zone_type is not None:
+        result["zone_type"] = str(zone_type)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-7. Flood zones
+# ---------------------------------------------------------------------------
+
+
+async def fetch_flood_zones(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch flood danger map data via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bafu.gefahrenkarte-hochwasser")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    level = attrs.get("gefahrenstufe") or attrs.get("stufe") or attrs.get("danger_level")
+    if level is not None:
+        result["flood_danger_level"] = str(level)
+    period = attrs.get("wiederkehrperiode") or attrs.get("return_period") or attrs.get("jt")
+    if period is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["flood_return_period"] = int(period)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-8. Mobile coverage (5G)
+# ---------------------------------------------------------------------------
+
+
+async def fetch_mobile_coverage(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch 5G mobile coverage via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bakom.mobilnetz-5g")
+    return {"has_5g_coverage": bool(attrs)}
+
+
+# ---------------------------------------------------------------------------
+# 5i-9. Broadband technologies
+# ---------------------------------------------------------------------------
+
+
+async def fetch_broadband(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch broadband technology info via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bakom.breitband-technologien")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    tech = attrs.get("technology") or attrs.get("technologie") or attrs.get("typ")
+    if tech is not None:
+        result["broadband_technology"] = str(tech)
+    speed = attrs.get("max_speed") or attrs.get("geschwindigkeit") or attrs.get("speed_down")
+    if speed is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["max_speed_mbps"] = float(speed)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-10. EV charging stations
+# ---------------------------------------------------------------------------
+
+
+async def fetch_ev_charging(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch EV charging station proximity via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bfe.ladestellen-elektromobilitaet")
+    if not attrs:
+        return {"ev_stations_nearby": 0}
+    result: dict[str, Any] = {"ev_stations_nearby": 1}
+    dist = attrs.get("distance") or attrs.get("entfernung")
+    if dist is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["nearest_distance_m"] = float(dist)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-11. Thermal / district heating networks
+# ---------------------------------------------------------------------------
+
+
+async def fetch_thermal_networks(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch district heating / thermal network info via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bfe.thermische-netze")
+    if not attrs:
+        return {"has_district_heating": False}
+    result: dict[str, Any] = {"has_district_heating": True}
+    name = attrs.get("name") or attrs.get("bezeichnung") or attrs.get("netzname")
+    if name is not None:
+        result["network_name"] = str(name)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-12. Protected monuments (Bundesinventar)
+# ---------------------------------------------------------------------------
+
+
+async def fetch_protected_monuments(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch listed monument status via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bak.bundesinventar-schuetzenswerte-denkmaler")
+    if not attrs:
+        return {"is_listed_monument": False}
+    result: dict[str, Any] = {"is_listed_monument": True}
+    cat = attrs.get("kategorie") or attrs.get("category") or attrs.get("klasse")
+    if cat is not None:
+        result["monument_category"] = str(cat)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-13. Agricultural zones / soil quality
+# ---------------------------------------------------------------------------
+
+
+async def fetch_agricultural_zones(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch soil quality / agricultural zone info via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.blw.bodeneignungskarte")
+    if not attrs:
+        return {}
+    result: dict[str, Any] = {}
+    quality = attrs.get("eignung") or attrs.get("soil_quality") or attrs.get("klasse")
+    if quality is not None:
+        result["soil_quality"] = str(quality)
+    zone = attrs.get("zone") or attrs.get("agricultural_zone") or attrs.get("typ")
+    if zone is not None:
+        result["agricultural_zone"] = str(zone)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-14. Forest reserves
+# ---------------------------------------------------------------------------
+
+
+async def fetch_forest_reserves(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch forest reserve status via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bafu.waldreservate")
+    if not attrs:
+        return {"in_forest_reserve": False}
+    result: dict[str, Any] = {"in_forest_reserve": True}
+    name = attrs.get("name") or attrs.get("bezeichnung") or attrs.get("reservatname")
+    if name is not None:
+        result["reserve_name"] = str(name)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-15. Military zones (shooting ranges)
+# ---------------------------------------------------------------------------
+
+
+async def fetch_military_zones(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch military shooting range proximity via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.vbs.schiessplaetze")
+    if not attrs:
+        return {"near_shooting_range": False}
+    result: dict[str, Any] = {"near_shooting_range": True}
+    dist = attrs.get("distance") or attrs.get("entfernung")
+    if dist is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["distance_m"] = float(dist)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-16. Accident (Seveso) sites
+# ---------------------------------------------------------------------------
+
+
+async def fetch_accident_sites(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch Seveso / major accident site proximity via geo.admin.ch."""
+    attrs = await _geo_identify(lat, lon, "ch.bafu.stoerfallverordnung")
+    if not attrs:
+        return {"near_seveso_site": False}
+    result: dict[str, Any] = {"near_seveso_site": True}
+    name = attrs.get("name") or attrs.get("bezeichnung") or attrs.get("betrieb")
+    if name is not None:
+        result["site_name"] = str(name)
+    dist = attrs.get("distance") or attrs.get("entfernung")
+    if dist is not None:
+        with contextlib.suppress(ValueError, TypeError):
+            result["distance_m"] = float(dist)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 5i-17. OSM amenities via Overpass API
+# ---------------------------------------------------------------------------
+
+
+async def fetch_osm_amenities(lat: float, lon: float, radius: int = 500) -> dict[str, Any]:
+    """Count amenities by type within radius using Overpass API."""
+    await _throttle()
+    query = f"[out:json][timeout:15];(node[amenity](around:{radius},{lat},{lon}););out body;"
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.post(
+                "https://overpass-api.de/api/interpreter",
+                data={"data": query},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        elements = data.get("elements", [])
+        counts: dict[str, int] = {}
+        _amenity_map = {
+            "school": "schools",
+            "hospital": "hospitals",
+            "pharmacy": "pharmacies",
+            "supermarket": "supermarkets",
+            "restaurant": "restaurants",
+            "cafe": "cafes",
+            "bank": "banks",
+            "post_office": "post_offices",
+            "park": "parks",
+            "kindergarten": "kindergartens",
+        }
+        for el in elements:
+            amenity = el.get("tags", {}).get("amenity", "")
+            key = _amenity_map.get(amenity)
+            if key:
+                counts[key] = counts.get(key, 0) + 1
+
+        result: dict[str, Any] = {k: counts.get(k, 0) for k in _amenity_map.values()}
+        result["total_amenities"] = len(elements)
+        return result
+
+    except Exception as exc:
+        logger.warning("Overpass amenities fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5i-18. OSM building details via Overpass API
+# ---------------------------------------------------------------------------
+
+
+async def fetch_osm_building_details(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch building footprint details from OSM via Overpass."""
+    await _throttle()
+    query = f"[out:json][timeout:15];(way[building](around:30,{lat},{lon}););out body 1;"
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.post(
+                "https://overpass-api.de/api/interpreter",
+                data={"data": query},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        elements = data.get("elements", [])
+        if not elements:
+            return {}
+
+        tags = elements[0].get("tags", {})
+        result: dict[str, Any] = {}
+        if tags.get("height"):
+            with contextlib.suppress(ValueError, TypeError):
+                result["height"] = float(tags["height"])
+        if tags.get("building:levels"):
+            with contextlib.suppress(ValueError, TypeError):
+                result["levels"] = int(tags["building:levels"])
+        if tags.get("building:material"):
+            result["material"] = str(tags["building:material"])
+        if tags.get("roof:shape"):
+            result["roof_type"] = str(tags["roof:shape"])
+        if tags.get("wheelchair"):
+            result["wheelchair_access"] = str(tags["wheelchair"])
+        return result
+
+    except Exception as exc:
+        logger.warning("Overpass building details fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# 5i-19. Climate data (estimate from altitude + canton)
+# ---------------------------------------------------------------------------
+
+
+def fetch_climate_data(lat: float, lon: float) -> dict[str, Any]:
+    """Estimate climate data from coordinates using Swiss climate zone heuristics.
+
+    Pure function — no API calls. Uses latitude/altitude approximation.
+    """
+    # Rough altitude estimate from latitude in Switzerland
+    # (higher altitude in the south / Alps)
+    # Swiss plateau ~400-600m, Jura ~800-1000m, Alps ~1500-3000m
+    # Latitude range: 45.8 (Chiasso) to 47.8 (Schaffhausen)
+    estimated_alt = max(300, int((47.5 - lat) * 800 + 400))
+    estimated_alt = min(estimated_alt, 3000)
+
+    # Temperature: roughly -6.5C per 1000m altitude
+    base_temp = 10.5  # Swiss mean at 500m
+    avg_temp = round(base_temp - (estimated_alt - 500) * 0.0065, 1)
+
+    # Precipitation: varies 800-2000mm, higher in Alps
+    precip = int(900 + (estimated_alt - 500) * 0.6)
+    precip = max(800, min(precip, 2200))
+
+    # Frost days: ~80 at 500m, +15 per 500m altitude
+    frost_days = int(80 + (estimated_alt - 500) * 0.03)
+    frost_days = max(40, min(frost_days, 200))
+
+    # Sunshine hours: ~1600 at plateau, less in Alps due to fog but more at high alt
+    sunshine = int(1600 - abs(estimated_alt - 1200) * 0.2)
+    sunshine = max(1200, min(sunshine, 2100))
+
+    # Heating degree days (base 20C): roughly (20 - avg_temp) * 365 * 0.6
+    hdd = int(max(0, (20 - avg_temp) * 365 * 0.6))
+
+    # Tropical days (>30C): rare in Switzerland, mostly Ticino/Rhone
+    tropical = 0
+    if lat < 46.2:  # Ticino
+        tropical = 15
+    elif estimated_alt < 500:
+        tropical = 5
+    elif estimated_alt < 800:
+        tropical = 2
+
+    return {
+        "avg_temp_c": avg_temp,
+        "precipitation_mm": precip,
+        "frost_days": frost_days,
+        "sunshine_hours": sunshine,
+        "heating_degree_days": hdd,
+        "tropical_days": tropical,
+        "estimated_altitude_m": estimated_alt,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 5i-20. Nearest public transport stops (transport.opendata.ch)
+# ---------------------------------------------------------------------------
+
+
+async def fetch_nearest_stops(lat: float, lon: float) -> dict[str, Any]:
+    """Fetch nearest public transport stops via transport.opendata.ch."""
+    await _throttle()
+    url = "https://transport.opendata.ch/v1/locations"
+    params = {
+        "x": str(lat),
+        "y": str(lon),
+        "type": "station",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+
+        stations = data.get("stations", [])
+        if not stations:
+            return {}
+
+        stops: list[dict[str, Any]] = []
+        for s in stations[:5]:
+            stop: dict[str, Any] = {"name": s.get("name", "")}
+            if s.get("distance") is not None:
+                stop["distance_m"] = int(s["distance"])
+            stops.append(stop)
+
+        result: dict[str, Any] = {"stops": stops}
+        if stops:
+            result["nearest_stop_name"] = stops[0]["name"]
+            result["nearest_stop_distance_m"] = stops[0].get("distance_m", 0)
+        return result
+
+    except Exception as exc:
+        logger.warning("Transport stops fetch failed for (%s, %s): %s", lat, lon, exc)
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# Computed scores
+# ---------------------------------------------------------------------------
+
+
+def compute_connectivity_score(enrichment_data: dict[str, Any]) -> float:
+    """Compute connectivity score (0-10) from 5G, broadband, EV, district heating.
+
+    Pure function — no API calls.
+    """
+    score = 0.0
+    count = 0
+
+    # 5G coverage: 2.5 points
+    mobile = enrichment_data.get("mobile_coverage", {})
+    if mobile.get("has_5g_coverage"):
+        score += 2.5
+    count += 1
+
+    # Broadband speed: 0-2.5 points
+    broadband = enrichment_data.get("broadband", {})
+    speed = broadband.get("max_speed_mbps")
+    if speed is not None:
+        if speed >= 1000:
+            score += 2.5
+        elif speed >= 100:
+            score += 1.5
+        elif speed >= 10:
+            score += 0.5
+    count += 1
+
+    # EV charging nearby: 2.5 points
+    ev = enrichment_data.get("ev_charging", {})
+    if ev.get("ev_stations_nearby", 0) > 0:
+        score += 2.5
+    count += 1
+
+    # District heating: 2.5 points
+    thermal = enrichment_data.get("thermal_networks", {})
+    if thermal.get("has_district_heating"):
+        score += 2.5
+    count += 1
+
+    return round(score, 1)
+
+
+def compute_environmental_risk_score(enrichment_data: dict[str, Any]) -> float:
+    """Compute environmental risk score (0-10, 10=safest).
+
+    Combines flood, seismic, contamination, radon, noise (road+rail+air).
+    Pure function — no API calls.
+    """
+    penalties = 0.0
+
+    # Flood risk: 0-2 penalty
+    flood = enrichment_data.get("flood_zones", {})
+    flood_level = str(flood.get("flood_danger_level", "")).lower()
+    if "hoch" in flood_level or "erheblich" in flood_level or "high" in flood_level:
+        penalties += 2.0
+    elif "mittel" in flood_level or "medium" in flood_level:
+        penalties += 1.0
+    elif flood_level and "gering" not in flood_level and "low" not in flood_level:
+        penalties += 0.5
+
+    # Seismic: 0-2 penalty
+    seismic = enrichment_data.get("seismic", {})
+    zone = str(seismic.get("seismic_zone", "")).lower()
+    if zone in ("3b", "3a"):
+        penalties += 2.0
+    elif zone == "2":
+        penalties += 1.0
+    elif zone == "1":
+        penalties += 0.3
+
+    # Contaminated site: 0-2 penalty
+    contam = enrichment_data.get("contaminated_sites", {})
+    if contam.get("is_contaminated"):
+        penalties += 2.0
+
+    # Radon: 0-2 penalty
+    radon = enrichment_data.get("radon", {})
+    radon_level = radon.get("radon_level", "low")
+    if radon_level == "high":
+        penalties += 2.0
+    elif radon_level == "medium":
+        penalties += 1.0
+
+    # Noise (combined): 0-2 penalty
+    noise = enrichment_data.get("noise", {})
+    road_db = noise.get("road_noise_day_db", 0) or 0
+    rail = enrichment_data.get("railway_noise", {})
+    rail_db = rail.get("railway_noise_day_db", 0) or 0
+    aircraft = enrichment_data.get("aircraft_noise", {})
+    air_db = aircraft.get("aircraft_noise_db", 0) or 0
+    max_noise = max(road_db, rail_db, air_db)
+    if max_noise > 65:
+        penalties += 2.0
+    elif max_noise > 55:
+        penalties += 1.0
+    elif max_noise > 45:
+        penalties += 0.5
+
+    return round(max(0.0, 10.0 - penalties), 1)
+
+
+def compute_livability_score(enrichment_data: dict[str, Any]) -> float:
+    """Compute livability score (0-10) from transport, amenities, noise, connectivity.
+
+    Pure function — no API calls.
+    """
+    scores: list[tuple[float, float]] = []  # (score, weight)
+
+    # Transport quality: weight 3
+    transport = enrichment_data.get("transport", {})
+    tclass = transport.get("transport_quality_class", "").upper()
+    _t_scores = {"A": 10.0, "B": 8.0, "C": 5.0, "D": 2.0}
+    if tclass in _t_scores:
+        scores.append((_t_scores[tclass], 3.0))
+
+    # Amenities: weight 2
+    amenities = enrichment_data.get("osm_amenities", {})
+    total_am = amenities.get("total_amenities", 0)
+    if total_am > 0:
+        am_score = min(10.0, total_am / 5.0)  # 50+ amenities = 10
+        scores.append((am_score, 2.0))
+
+    # Noise (inverse): weight 2
+    noise = enrichment_data.get("noise", {})
+    road_db = noise.get("road_noise_day_db")
+    if road_db is not None:
+        if road_db < 45:
+            scores.append((10.0, 2.0))
+        elif road_db < 55:
+            scores.append((7.0, 2.0))
+        elif road_db < 65:
+            scores.append((4.0, 2.0))
+        else:
+            scores.append((1.0, 2.0))
+
+    # Connectivity: weight 1.5
+    conn = enrichment_data.get("connectivity_score")
+    if conn is not None:
+        scores.append((float(conn), 1.5))
+
+    # Nearest transport stop: weight 1.5
+    stops = enrichment_data.get("nearest_stops", {})
+    stop_dist = stops.get("nearest_stop_distance_m")
+    if stop_dist is not None:
+        if stop_dist < 200:
+            scores.append((10.0, 1.5))
+        elif stop_dist < 500:
+            scores.append((7.0, 1.5))
+        elif stop_dist < 1000:
+            scores.append((4.0, 1.5))
+        else:
+            scores.append((2.0, 1.5))
+
+    if not scores:
+        return 5.0
+
+    total_weight = sum(w for _, w in scores)
+    weighted_sum = sum(s * w for s, w in scores)
+    return round(weighted_sum / total_weight, 1)
+
+
+def compute_renovation_potential(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """Compute renovation potential from building characteristics + enrichment data.
+
+    Pure function — no API calls.
+    """
+    score = 0.0
+    actions: list[str] = []
+    savings = 0
+
+    year = building_data.get("construction_year")
+    heating = str(building_data.get("heating_type", "") or building_data.get("heating_type_code", "") or "").lower()
+    solar = enrichment_data.get("solar", {})
+    subsidies = enrichment_data.get("subsidies", {})
+
+    # Fossil heating → high potential
+    oil_gas = ("oil", "gas", "mazout", "gaz", "heizol", "erdgas", "7520", "7530", "7500", "7510")
+    if any(ind in heating for ind in oil_gas):
+        score += 3.0
+        actions.append("Replace fossil heating with heat pump or district heating")
+        savings += 3000
+
+    # Old building envelope
+    if year and year < 1990:
+        score += 2.5
+        actions.append("Insulate building envelope (facade, roof, basement)")
+        savings += 2000
+    elif year and year < 2000:
+        score += 1.5
+        actions.append("Evaluate envelope insulation potential")
+        savings += 1000
+
+    # Solar potential
+    suitability = solar.get("suitability", "")
+    if suitability == "high":
+        score += 2.0
+        actions.append("Install rooftop photovoltaic system")
+        savings += 1500
+    elif suitability == "medium":
+        score += 1.0
+        actions.append("Consider rooftop solar installation")
+        savings += 800
+
+    # Windows (pre-1990)
+    if year and year < 1990:
+        score += 1.5
+        actions.append("Replace windows with triple-glazed Minergie-certified")
+        savings += 800
+
+    # Subsidy availability bonus
+    subsidy_total = subsidies.get("total_estimated_chf", 0) if subsidies else 0
+    if subsidy_total > 10000:
+        score += 1.0
+        actions.append(f"Apply for available subsidies (est. CHF {subsidy_total:,})")
+
+    # District heating available
+    thermal = enrichment_data.get("thermal_networks", {})
+    if thermal.get("has_district_heating") and any(ind in heating for ind in oil_gas):
+        score += 0.5
+        actions.append("Connect to nearby district heating network")
+        savings += 500
+
+    score = min(10.0, score)
+
+    return {
+        "potential_score": round(score, 1),
+        "recommended_actions": actions,
+        "estimated_savings_chf_per_year": savings,
+    }
+
+
+def compute_overall_building_intelligence_score(all_data: dict[str, Any]) -> dict[str, Any]:
+    """Compute overall building intelligence score (0-100, grade A-F).
+
+    Weighted combination of all sub-scores.
+    Pure function — no API calls.
+    """
+    sub_scores: dict[str, float] = {}
+    weights = {
+        "neighborhood": 2.0,
+        "environmental_risk": 2.5,
+        "connectivity": 1.5,
+        "livability": 2.0,
+        "renovation_potential": 1.0,
+        "data_completeness": 1.0,
+    }
+
+    # Neighborhood score (0-10)
+    ns = all_data.get("neighborhood_score")
+    if ns is not None:
+        sub_scores["neighborhood"] = float(ns)
+
+    # Environmental risk (0-10)
+    er = all_data.get("environmental_risk_score")
+    if er is not None:
+        sub_scores["environmental_risk"] = float(er)
+
+    # Connectivity (0-10)
+    cs = all_data.get("connectivity_score")
+    if cs is not None:
+        sub_scores["connectivity"] = float(cs)
+
+    # Livability (0-10)
+    ls = all_data.get("livability_score")
+    if ls is not None:
+        sub_scores["livability"] = float(ls)
+
+    # Renovation potential (0-10)
+    rp = all_data.get("renovation_potential", {})
+    if isinstance(rp, dict) and rp.get("potential_score") is not None:
+        sub_scores["renovation_potential"] = float(rp["potential_score"])
+
+    # Data completeness: how many enrichment sources returned data
+    _data_keys = [
+        "radon",
+        "natural_hazards",
+        "noise",
+        "solar",
+        "heritage",
+        "transport",
+        "seismic",
+        "water_protection",
+        "railway_noise",
+        "aircraft_noise",
+        "building_zones",
+        "contaminated_sites",
+        "groundwater_zones",
+        "flood_zones",
+        "mobile_coverage",
+        "broadband",
+        "ev_charging",
+        "thermal_networks",
+        "osm_amenities",
+        "nearest_stops",
+        "climate",
+    ]
+    filled = sum(1 for k in _data_keys if all_data.get(k))
+    completeness = min(10.0, filled / len(_data_keys) * 10.0)
+    sub_scores["data_completeness"] = completeness
+
+    if not sub_scores:
+        return {"score_0_100": 0, "grade": "F", "strengths": [], "weaknesses": [], "top_actions": []}
+
+    total_weight = sum(weights.get(k, 1.0) for k in sub_scores)
+    weighted_sum = sum(sub_scores[k] * weights.get(k, 1.0) for k in sub_scores)
+    score_10 = weighted_sum / total_weight
+    score_100 = round(score_10 * 10)
+
+    # Grade
+    if score_100 >= 85:
+        grade = "A"
+    elif score_100 >= 70:
+        grade = "B"
+    elif score_100 >= 55:
+        grade = "C"
+    elif score_100 >= 40:
+        grade = "D"
+    elif score_100 >= 25:
+        grade = "E"
+    else:
+        grade = "F"
+
+    # Strengths and weaknesses
+    strengths: list[str] = []
+    weaknesses: list[str] = []
+    for k, v in sub_scores.items():
+        label = k.replace("_", " ").title()
+        if v >= 7.0:
+            strengths.append(f"{label}: {v:.1f}/10")
+        elif v < 4.0:
+            weaknesses.append(f"{label}: {v:.1f}/10")
+
+    # Top actions from renovation potential
+    top_actions: list[str] = []
+    if isinstance(rp, dict):
+        top_actions = rp.get("recommended_actions", [])[:3]
+
+    return {
+        "score_0_100": score_100,
+        "grade": grade,
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "top_actions": top_actions,
+    }
+
+
+# ---------------------------------------------------------------------------
 # 5j. Neighborhood attractiveness score (pure computation)
 # ---------------------------------------------------------------------------
 
@@ -1161,7 +2011,13 @@ async def enrich_building(
     15. Compute pollutant risk prediction
     16. Compute accessibility assessment
     17. Compute subsidy eligibility
-    18. Persist + 19. Timeline event
+    18-32. Fetch extended layers (rail/aircraft noise, zones, contamination, flood, mobile, broadband,
+           EV, thermal, monuments, agriculture, forest, military, Seveso)
+    33-34. Fetch OSM amenities + building details
+    35. Compute climate data
+    36. Fetch nearest transport stops
+    37-41. Compute scores (connectivity, environmental risk, livability, renovation, overall intelligence)
+    42. Persist + 43. Timeline event
     """
     from app.models.building import Building
     from app.models.event import Event
@@ -1381,7 +2237,196 @@ async def enrich_building(
     result.subsidies_computed = True
     fields_updated.append("subsidies")
 
-    # --- Step 18: Persist ---
+    # --- Step 18: Railway noise ---
+    if has_coords:
+        rail_noise = await fetch_railway_noise(building.latitude, building.longitude)
+        if rail_noise:
+            enrichment_meta["railway_noise"] = rail_noise
+            result.railway_noise_fetched = True
+            fields_updated.append("railway_noise")
+
+    # --- Step 19: Aircraft noise ---
+    if has_coords:
+        air_noise = await fetch_aircraft_noise(building.latitude, building.longitude)
+        if air_noise:
+            enrichment_meta["aircraft_noise"] = air_noise
+            result.aircraft_noise_fetched = True
+            fields_updated.append("aircraft_noise")
+
+    # --- Step 20: Building zones ---
+    if has_coords:
+        zones = await fetch_building_zones(building.latitude, building.longitude)
+        if zones:
+            enrichment_meta["building_zones"] = zones
+            result.building_zones_fetched = True
+            fields_updated.append("building_zones")
+
+    # --- Step 21: Contaminated sites ---
+    if has_coords:
+        contam = await fetch_contaminated_sites(building.latitude, building.longitude)
+        if contam:
+            enrichment_meta["contaminated_sites"] = contam
+            result.contaminated_sites_fetched = True
+            fields_updated.append("contaminated_sites")
+
+    # --- Step 22: Groundwater zones ---
+    if has_coords:
+        gw = await fetch_groundwater_zones(building.latitude, building.longitude)
+        if gw:
+            enrichment_meta["groundwater_zones"] = gw
+            result.groundwater_zones_fetched = True
+            fields_updated.append("groundwater_zones")
+
+    # --- Step 23: Flood zones ---
+    if has_coords:
+        flood = await fetch_flood_zones(building.latitude, building.longitude)
+        if flood:
+            enrichment_meta["flood_zones"] = flood
+            result.flood_zones_fetched = True
+            fields_updated.append("flood_zones")
+
+    # --- Step 24: Mobile coverage ---
+    if has_coords:
+        mobile = await fetch_mobile_coverage(building.latitude, building.longitude)
+        if mobile:
+            enrichment_meta["mobile_coverage"] = mobile
+            result.mobile_coverage_fetched = True
+            fields_updated.append("mobile_coverage")
+
+    # --- Step 25: Broadband ---
+    if has_coords:
+        bb = await fetch_broadband(building.latitude, building.longitude)
+        if bb:
+            enrichment_meta["broadband"] = bb
+            result.broadband_fetched = True
+            fields_updated.append("broadband")
+
+    # --- Step 26: EV charging ---
+    if has_coords:
+        ev = await fetch_ev_charging(building.latitude, building.longitude)
+        if ev:
+            enrichment_meta["ev_charging"] = ev
+            result.ev_charging_fetched = True
+            fields_updated.append("ev_charging")
+
+    # --- Step 27: Thermal networks ---
+    if has_coords:
+        thermal = await fetch_thermal_networks(building.latitude, building.longitude)
+        if thermal:
+            enrichment_meta["thermal_networks"] = thermal
+            result.thermal_networks_fetched = True
+            fields_updated.append("thermal_networks")
+
+    # --- Step 28: Protected monuments ---
+    if has_coords:
+        monuments = await fetch_protected_monuments(building.latitude, building.longitude)
+        if monuments:
+            enrichment_meta["protected_monuments"] = monuments
+            result.protected_monuments_fetched = True
+            fields_updated.append("protected_monuments")
+
+    # --- Step 29: Agricultural zones ---
+    if has_coords:
+        agri = await fetch_agricultural_zones(building.latitude, building.longitude)
+        if agri:
+            enrichment_meta["agricultural_zones"] = agri
+            result.agricultural_zones_fetched = True
+            fields_updated.append("agricultural_zones")
+
+    # --- Step 30: Forest reserves ---
+    if has_coords:
+        forest = await fetch_forest_reserves(building.latitude, building.longitude)
+        if forest:
+            enrichment_meta["forest_reserves"] = forest
+            result.forest_reserves_fetched = True
+            fields_updated.append("forest_reserves")
+
+    # --- Step 31: Military zones ---
+    if has_coords:
+        military = await fetch_military_zones(building.latitude, building.longitude)
+        if military:
+            enrichment_meta["military_zones"] = military
+            result.military_zones_fetched = True
+            fields_updated.append("military_zones")
+
+    # --- Step 32: Accident (Seveso) sites ---
+    if has_coords:
+        seveso = await fetch_accident_sites(building.latitude, building.longitude)
+        if seveso:
+            enrichment_meta["accident_sites"] = seveso
+            result.accident_sites_fetched = True
+            fields_updated.append("accident_sites")
+
+    # --- Step 33: OSM amenities ---
+    if has_coords:
+        amenities = await fetch_osm_amenities(building.latitude, building.longitude)
+        if amenities:
+            enrichment_meta["osm_amenities"] = amenities
+            result.osm_amenities_fetched = True
+            fields_updated.append("osm_amenities")
+
+    # --- Step 34: OSM building details ---
+    if has_coords:
+        osm_bld = await fetch_osm_building_details(building.latitude, building.longitude)
+        if osm_bld:
+            enrichment_meta["osm_building"] = osm_bld
+            result.osm_building_fetched = True
+            fields_updated.append("osm_building")
+
+    # --- Step 35: Climate data (pure) ---
+    if has_coords:
+        climate = fetch_climate_data(building.latitude, building.longitude)
+        if climate:
+            enrichment_meta["climate"] = climate
+            result.climate_computed = True
+            fields_updated.append("climate")
+
+    # --- Step 36: Nearest stops ---
+    if has_coords:
+        stops = await fetch_nearest_stops(building.latitude, building.longitude)
+        if stops:
+            enrichment_meta["nearest_stops"] = stops
+            result.nearest_stops_fetched = True
+            fields_updated.append("nearest_stops")
+
+    # --- Step 37: Connectivity score (pure) ---
+    conn_score = compute_connectivity_score(enrichment_meta)
+    enrichment_meta["connectivity_score"] = conn_score
+    result.connectivity_score = conn_score
+    fields_updated.append("connectivity_score")
+
+    # --- Step 38: Environmental risk score (pure) ---
+    env_score = compute_environmental_risk_score(enrichment_meta)
+    enrichment_meta["environmental_risk_score"] = env_score
+    result.environmental_risk_score = env_score
+    fields_updated.append("environmental_risk_score")
+
+    # --- Step 39: Livability score (pure) ---
+    liv_score = compute_livability_score(enrichment_meta)
+    enrichment_meta["livability_score"] = liv_score
+    result.livability_score = liv_score
+    fields_updated.append("livability_score")
+
+    # --- Step 40: Renovation potential (pure) ---
+    reno_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "heating_type_code": enrichment_meta.get("regbl_data", {}).get("heating_type_code"),
+        "canton": building.canton,
+    }
+    reno = compute_renovation_potential(reno_input, enrichment_meta)
+    enrichment_meta["renovation_potential"] = reno
+    result.renovation_potential_computed = True
+    fields_updated.append("renovation_potential")
+
+    # --- Step 41: Overall intelligence score (pure) ---
+    overall = compute_overall_building_intelligence_score(enrichment_meta)
+    enrichment_meta["overall_intelligence"] = overall
+    result.overall_intelligence_computed = True
+    result.overall_intelligence_score = overall.get("score_0_100")
+    result.overall_intelligence_grade = overall.get("grade")
+    fields_updated.append("overall_intelligence")
+
+    # --- Step 42: Persist ---
     if fields_updated or result.image_url:
         enrichment_meta["last_enriched_at"] = datetime.now(UTC).isoformat()
         building.source_metadata_json = enrichment_meta
@@ -1390,7 +2435,7 @@ async def enrich_building(
 
     result.fields_updated = fields_updated
 
-    # --- Step 19: Timeline event ---
+    # --- Step 43: Timeline event ---
     if fields_updated:
         event = Event(
             building_id=building_id,

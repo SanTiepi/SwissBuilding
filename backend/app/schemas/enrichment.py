@@ -40,6 +40,34 @@ class EnrichmentResult(BaseModel):
     pollutant_risk_computed: bool = False
     accessibility_computed: bool = False
     subsidies_computed: bool = False
+    # Extended enrichment sources
+    railway_noise_fetched: bool = False
+    aircraft_noise_fetched: bool = False
+    building_zones_fetched: bool = False
+    contaminated_sites_fetched: bool = False
+    groundwater_zones_fetched: bool = False
+    flood_zones_fetched: bool = False
+    mobile_coverage_fetched: bool = False
+    broadband_fetched: bool = False
+    ev_charging_fetched: bool = False
+    thermal_networks_fetched: bool = False
+    protected_monuments_fetched: bool = False
+    agricultural_zones_fetched: bool = False
+    forest_reserves_fetched: bool = False
+    military_zones_fetched: bool = False
+    accident_sites_fetched: bool = False
+    osm_amenities_fetched: bool = False
+    osm_building_fetched: bool = False
+    climate_computed: bool = False
+    nearest_stops_fetched: bool = False
+    # Computed scores
+    connectivity_score: float | None = None
+    environmental_risk_score: float | None = None
+    livability_score: float | None = None
+    renovation_potential_computed: bool = False
+    overall_intelligence_computed: bool = False
+    overall_intelligence_score: int | None = None
+    overall_intelligence_grade: str | None = None
     fields_updated: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
 

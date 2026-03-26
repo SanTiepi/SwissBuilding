@@ -16,20 +16,45 @@ from app.schemas.enrichment import (
 )
 from app.services.building_enrichment_service import (
     _build_ai_prompt,
+    _geo_identify,
     _lat_lon_to_tile,
     compute_accessibility_assessment,
+    compute_connectivity_score,
+    compute_environmental_risk_score,
+    compute_livability_score,
     compute_neighborhood_score,
+    compute_overall_building_intelligence_score,
     compute_pollutant_risk_prediction,
+    compute_renovation_potential,
     estimate_subsidy_eligibility,
+    fetch_accident_sites,
+    fetch_agricultural_zones,
+    fetch_aircraft_noise,
+    fetch_broadband,
+    fetch_building_zones,
     fetch_cadastre_egrid,
+    fetch_climate_data,
+    fetch_contaminated_sites,
+    fetch_ev_charging,
+    fetch_flood_zones,
+    fetch_forest_reserves,
+    fetch_groundwater_zones,
     fetch_heritage_status,
+    fetch_military_zones,
+    fetch_mobile_coverage,
     fetch_natural_hazards,
+    fetch_nearest_stops,
     fetch_noise_data,
+    fetch_osm_amenities,
+    fetch_osm_building_details,
+    fetch_protected_monuments,
     fetch_radon_risk,
+    fetch_railway_noise,
     fetch_regbl_data,
     fetch_seismic_zone,
     fetch_solar_potential,
     fetch_swisstopo_image_url,
+    fetch_thermal_networks,
     fetch_transport_quality,
     fetch_water_protection,
     geocode_address,
@@ -1116,3 +1141,774 @@ class TestSubsidyEligibility:
             }
         )
         assert result["total_estimated_chf"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Generic _geo_identify helper tests
+# ---------------------------------------------------------------------------
+
+
+class TestGeoIdentify:
+    @pytest.mark.asyncio
+    async def test_geo_identify_returns_attributes(self):
+        """_geo_identify returns attributes from first result."""
+        mock_data = {"results": [{"attributes": {"zone": "Z1", "value": 42}}]}
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await _geo_identify(46.52, 6.63, "ch.test.layer")
+
+        assert result["zone"] == "Z1"
+        assert result["value"] == 42
+
+    @pytest.mark.asyncio
+    async def test_geo_identify_empty_results(self):
+        """_geo_identify returns empty dict when no results."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"results": []}
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await _geo_identify(46.52, 6.63, "ch.test.layer")
+
+        assert result == {}
+
+    @pytest.mark.asyncio
+    async def test_geo_identify_network_error(self):
+        """_geo_identify returns empty dict on error."""
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(side_effect=httpx.ConnectError("timeout"))
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await _geo_identify(46.52, 6.63, "ch.test.layer")
+
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# Railway noise tests
+# ---------------------------------------------------------------------------
+
+
+class TestRailwayNoise:
+    @pytest.mark.asyncio
+    async def test_railway_noise_found(self):
+        """Railway noise returns dB value."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"lr_tag": 58.3},
+        ):
+            result = await fetch_railway_noise(46.52, 6.63)
+
+        assert result["railway_noise_day_db"] == 58.3
+
+    @pytest.mark.asyncio
+    async def test_railway_noise_empty(self):
+        """Railway noise returns empty dict when no data."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={},
+        ):
+            result = await fetch_railway_noise(46.52, 6.63)
+
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# Aircraft noise tests
+# ---------------------------------------------------------------------------
+
+
+class TestAircraftNoise:
+    @pytest.mark.asyncio
+    async def test_aircraft_noise_found(self):
+        """Aircraft noise returns dB value."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"lr_tag": 65.0},
+        ):
+            result = await fetch_aircraft_noise(46.52, 6.63)
+
+        assert result["aircraft_noise_db"] == 65.0
+
+
+# ---------------------------------------------------------------------------
+# Building zones tests
+# ---------------------------------------------------------------------------
+
+
+class TestBuildingZones:
+    @pytest.mark.asyncio
+    async def test_building_zones_found(self):
+        """Building zones returns zone info."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"zonentyp": "Wohnzone", "ch_code": "W2", "bezeichnung": "Wohnzone W2"},
+        ):
+            result = await fetch_building_zones(46.52, 6.63)
+
+        assert result["zone_type"] == "Wohnzone"
+        assert result["zone_code"] == "W2"
+        assert result["zone_description"] == "Wohnzone W2"
+
+
+# ---------------------------------------------------------------------------
+# Contaminated sites tests
+# ---------------------------------------------------------------------------
+
+
+class TestContaminatedSites:
+    @pytest.mark.asyncio
+    async def test_contaminated_site_found(self):
+        """Contaminated sites returns positive when found."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"standorttyp": "Betriebsstandort", "untersuchungsstand": "Voruntersuchung"},
+        ):
+            result = await fetch_contaminated_sites(46.52, 6.63)
+
+        assert result["is_contaminated"] is True
+        assert result["site_type"] == "Betriebsstandort"
+        assert result["investigation_status"] == "Voruntersuchung"
+
+    @pytest.mark.asyncio
+    async def test_contaminated_site_not_found(self):
+        """Contaminated sites returns false when empty."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={},
+        ):
+            result = await fetch_contaminated_sites(46.52, 6.63)
+
+        assert result["is_contaminated"] is False
+
+
+# ---------------------------------------------------------------------------
+# Groundwater zones tests
+# ---------------------------------------------------------------------------
+
+
+class TestGroundwaterZones:
+    @pytest.mark.asyncio
+    async def test_groundwater_zone_s2(self):
+        """Groundwater zones returns S2 protection zone."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"zone": "S2", "typ": "Schutzzone"},
+        ):
+            result = await fetch_groundwater_zones(46.52, 6.63)
+
+        assert result["protection_zone"] == "S2"
+        assert result["zone_type"] == "Schutzzone"
+
+
+# ---------------------------------------------------------------------------
+# Flood zones tests
+# ---------------------------------------------------------------------------
+
+
+class TestFloodZones:
+    @pytest.mark.asyncio
+    async def test_flood_zone_data(self):
+        """Flood zones returns danger level."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"gefahrenstufe": "erheblich", "wiederkehrperiode": 100},
+        ):
+            result = await fetch_flood_zones(46.52, 6.63)
+
+        assert result["flood_danger_level"] == "erheblich"
+        assert result["flood_return_period"] == 100
+
+
+# ---------------------------------------------------------------------------
+# Mobile coverage tests
+# ---------------------------------------------------------------------------
+
+
+class TestMobileCoverage:
+    @pytest.mark.asyncio
+    async def test_5g_coverage_found(self):
+        """Mobile coverage returns True when 5G layer returns data."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"provider": "Swisscom"},
+        ):
+            result = await fetch_mobile_coverage(46.52, 6.63)
+
+        assert result["has_5g_coverage"] is True
+
+    @pytest.mark.asyncio
+    async def test_no_5g_coverage(self):
+        """Mobile coverage returns False when no 5G data."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={},
+        ):
+            result = await fetch_mobile_coverage(46.52, 6.63)
+
+        assert result["has_5g_coverage"] is False
+
+
+# ---------------------------------------------------------------------------
+# Broadband tests
+# ---------------------------------------------------------------------------
+
+
+class TestBroadband:
+    @pytest.mark.asyncio
+    async def test_broadband_data(self):
+        """Broadband returns technology and speed."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"technology": "FTTH", "max_speed": 10000},
+        ):
+            result = await fetch_broadband(46.52, 6.63)
+
+        assert result["broadband_technology"] == "FTTH"
+        assert result["max_speed_mbps"] == 10000.0
+
+
+# ---------------------------------------------------------------------------
+# EV charging tests
+# ---------------------------------------------------------------------------
+
+
+class TestEvCharging:
+    @pytest.mark.asyncio
+    async def test_ev_station_found(self):
+        """EV charging returns station found."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"distance": 150},
+        ):
+            result = await fetch_ev_charging(46.52, 6.63)
+
+        assert result["ev_stations_nearby"] == 1
+        assert result["nearest_distance_m"] == 150.0
+
+    @pytest.mark.asyncio
+    async def test_ev_station_not_found(self):
+        """EV charging returns 0 stations when no data."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={},
+        ):
+            result = await fetch_ev_charging(46.52, 6.63)
+
+        assert result["ev_stations_nearby"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Thermal networks tests
+# ---------------------------------------------------------------------------
+
+
+class TestThermalNetworks:
+    @pytest.mark.asyncio
+    async def test_district_heating_found(self):
+        """Thermal networks returns district heating info."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"name": "Fernwarme Lausanne"},
+        ):
+            result = await fetch_thermal_networks(46.52, 6.63)
+
+        assert result["has_district_heating"] is True
+        assert result["network_name"] == "Fernwarme Lausanne"
+
+    @pytest.mark.asyncio
+    async def test_no_district_heating(self):
+        """Thermal networks returns False when no data."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={},
+        ):
+            result = await fetch_thermal_networks(46.52, 6.63)
+
+        assert result["has_district_heating"] is False
+
+
+# ---------------------------------------------------------------------------
+# Protected monuments tests
+# ---------------------------------------------------------------------------
+
+
+class TestProtectedMonuments:
+    @pytest.mark.asyncio
+    async def test_monument_found(self):
+        """Protected monuments returns listed monument."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"kategorie": "national"},
+        ):
+            result = await fetch_protected_monuments(46.52, 6.63)
+
+        assert result["is_listed_monument"] is True
+        assert result["monument_category"] == "national"
+
+
+# ---------------------------------------------------------------------------
+# Forest reserves tests
+# ---------------------------------------------------------------------------
+
+
+class TestAgriculturalZones:
+    @pytest.mark.asyncio
+    async def test_agricultural_zone_found(self):
+        """Agricultural zones returns soil quality info."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"eignung": "sehr gut", "zone": "Landwirtschaftszone"},
+        ):
+            result = await fetch_agricultural_zones(46.52, 6.63)
+
+        assert result["soil_quality"] == "sehr gut"
+        assert result["agricultural_zone"] == "Landwirtschaftszone"
+
+
+# ---------------------------------------------------------------------------
+# Forest reserves tests
+# ---------------------------------------------------------------------------
+
+
+class TestForestReserves:
+    @pytest.mark.asyncio
+    async def test_forest_reserve_found(self):
+        """Forest reserves returns reserve info."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"name": "Bois de Sauvabelin"},
+        ):
+            result = await fetch_forest_reserves(46.52, 6.63)
+
+        assert result["in_forest_reserve"] is True
+        assert result["reserve_name"] == "Bois de Sauvabelin"
+
+
+# ---------------------------------------------------------------------------
+# Military zones tests
+# ---------------------------------------------------------------------------
+
+
+class TestMilitaryZones:
+    @pytest.mark.asyncio
+    async def test_shooting_range_nearby(self):
+        """Military zones returns shooting range proximity."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"distance": 800},
+        ):
+            result = await fetch_military_zones(46.52, 6.63)
+
+        assert result["near_shooting_range"] is True
+        assert result["distance_m"] == 800.0
+
+
+# ---------------------------------------------------------------------------
+# Accident sites tests
+# ---------------------------------------------------------------------------
+
+
+class TestAccidentSites:
+    @pytest.mark.asyncio
+    async def test_seveso_site_found(self):
+        """Accident sites returns Seveso site info."""
+        with patch(
+            "app.services.building_enrichment_service._geo_identify",
+            return_value={"name": "Chem Corp", "distance": 500},
+        ):
+            result = await fetch_accident_sites(46.52, 6.63)
+
+        assert result["near_seveso_site"] is True
+        assert result["site_name"] == "Chem Corp"
+        assert result["distance_m"] == 500.0
+
+
+# ---------------------------------------------------------------------------
+# OSM amenities tests
+# ---------------------------------------------------------------------------
+
+
+class TestOsmAmenities:
+    @pytest.mark.asyncio
+    async def test_osm_amenities_count(self):
+        """OSM amenities counts by type."""
+        mock_data = {
+            "elements": [
+                {"tags": {"amenity": "school"}},
+                {"tags": {"amenity": "school"}},
+                {"tags": {"amenity": "restaurant"}},
+                {"tags": {"amenity": "cafe"}},
+                {"tags": {"amenity": "unknown_type"}},
+            ]
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.post = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_osm_amenities(46.52, 6.63)
+
+        assert result["schools"] == 2
+        assert result["restaurants"] == 1
+        assert result["cafes"] == 1
+        assert result["hospitals"] == 0
+        assert result["total_amenities"] == 5
+
+    @pytest.mark.asyncio
+    async def test_osm_amenities_error(self):
+        """OSM amenities returns empty on error."""
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.post = AsyncMock(side_effect=httpx.ConnectError("timeout"))
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_osm_amenities(46.52, 6.63)
+
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# OSM building details tests
+# ---------------------------------------------------------------------------
+
+
+class TestOsmBuildingDetails:
+    @pytest.mark.asyncio
+    async def test_osm_building_found(self):
+        """OSM building details returns building info."""
+        mock_data = {
+            "elements": [
+                {
+                    "tags": {
+                        "height": "15.5",
+                        "building:levels": "4",
+                        "building:material": "brick",
+                        "roof:shape": "gabled",
+                        "wheelchair": "yes",
+                    }
+                }
+            ]
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.post = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_osm_building_details(46.52, 6.63)
+
+        assert result["height"] == 15.5
+        assert result["levels"] == 4
+        assert result["material"] == "brick"
+        assert result["roof_type"] == "gabled"
+        assert result["wheelchair_access"] == "yes"
+
+
+# ---------------------------------------------------------------------------
+# Climate data tests
+# ---------------------------------------------------------------------------
+
+
+class TestClimateData:
+    def test_climate_plateau(self):
+        """Climate data for Swiss plateau returns reasonable values."""
+        result = fetch_climate_data(46.95, 7.45)  # Bern area
+        assert 5.0 < result["avg_temp_c"] < 15.0
+        assert result["precipitation_mm"] > 700
+        assert result["frost_days"] > 30
+        assert result["sunshine_hours"] > 1000
+        assert result["heating_degree_days"] > 2000
+        assert "estimated_altitude_m" in result
+
+    def test_climate_ticino_has_tropical_days(self):
+        """Climate data for Ticino includes tropical days."""
+        result = fetch_climate_data(46.0, 8.95)  # Lugano area
+        assert result["tropical_days"] > 0
+
+
+# ---------------------------------------------------------------------------
+# Nearest stops tests
+# ---------------------------------------------------------------------------
+
+
+class TestNearestStops:
+    @pytest.mark.asyncio
+    async def test_nearest_stops_found(self):
+        """Nearest stops returns station list."""
+        mock_data = {
+            "stations": [
+                {"name": "Lausanne", "distance": 150},
+                {"name": "Flon", "distance": 400},
+            ]
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = mock_data
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_nearest_stops(46.52, 6.63)
+
+        assert result["nearest_stop_name"] == "Lausanne"
+        assert result["nearest_stop_distance_m"] == 150
+        assert len(result["stops"]) == 2
+
+    @pytest.mark.asyncio
+    async def test_nearest_stops_empty(self):
+        """Nearest stops returns empty when no stations."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"stations": []}
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+            instance = AsyncMock()
+            instance.get = AsyncMock(return_value=mock_resp)
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_client.return_value = instance
+
+            result = await fetch_nearest_stops(46.52, 6.63)
+
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# Connectivity score tests
+# ---------------------------------------------------------------------------
+
+
+class TestConnectivityScore:
+    def test_full_connectivity(self):
+        """Full connectivity (5G + fast broadband + EV + heating) scores high."""
+        data = {
+            "mobile_coverage": {"has_5g_coverage": True},
+            "broadband": {"max_speed_mbps": 10000},
+            "ev_charging": {"ev_stations_nearby": 1},
+            "thermal_networks": {"has_district_heating": True},
+        }
+        score = compute_connectivity_score(data)
+        assert score == 10.0
+
+    def test_no_connectivity(self):
+        """No connectivity data scores zero."""
+        score = compute_connectivity_score({})
+        assert score == 0.0
+
+    def test_partial_connectivity(self):
+        """Partial connectivity scores proportionally."""
+        data = {
+            "mobile_coverage": {"has_5g_coverage": True},
+            "broadband": {"max_speed_mbps": 50},
+        }
+        score = compute_connectivity_score(data)
+        assert 2.0 < score < 5.0
+
+
+# ---------------------------------------------------------------------------
+# Environmental risk score tests
+# ---------------------------------------------------------------------------
+
+
+class TestEnvironmentalRiskScore:
+    def test_safe_environment(self):
+        """No environmental risks scores 10."""
+        data = {
+            "radon": {"radon_level": "low"},
+            "noise": {"road_noise_day_db": 35},
+        }
+        score = compute_environmental_risk_score(data)
+        assert score >= 9.0
+
+    def test_risky_environment(self):
+        """Multiple environmental risks score low."""
+        data = {
+            "flood_zones": {"flood_danger_level": "high"},
+            "seismic": {"seismic_zone": "3b"},
+            "contaminated_sites": {"is_contaminated": True},
+            "radon": {"radon_level": "high"},
+            "noise": {"road_noise_day_db": 70},
+        }
+        score = compute_environmental_risk_score(data)
+        assert score <= 2.0
+
+
+# ---------------------------------------------------------------------------
+# Livability score tests
+# ---------------------------------------------------------------------------
+
+
+class TestLivabilityScore:
+    def test_high_livability(self):
+        """Good transport + amenities + quiet = high livability."""
+        data = {
+            "transport": {"transport_quality_class": "A"},
+            "osm_amenities": {"total_amenities": 60},
+            "noise": {"road_noise_day_db": 40},
+            "connectivity_score": 8.0,
+            "nearest_stops": {"nearest_stop_distance_m": 100},
+        }
+        score = compute_livability_score(data)
+        assert score >= 8.0
+
+    def test_empty_data_returns_neutral(self):
+        """Empty data returns neutral 5.0."""
+        assert compute_livability_score({}) == 5.0
+
+
+# ---------------------------------------------------------------------------
+# Renovation potential tests
+# ---------------------------------------------------------------------------
+
+
+class TestRenovationPotential:
+    def test_old_oil_building_high_potential(self):
+        """Old oil-heated building has high renovation potential."""
+        result = compute_renovation_potential(
+            {"construction_year": 1970, "heating_type_code": "7520"},
+            {"solar": {"suitability": "high"}, "subsidies": {"total_estimated_chf": 15000}},
+        )
+        assert result["potential_score"] >= 7.0
+        assert len(result["recommended_actions"]) >= 3
+        assert result["estimated_savings_chf_per_year"] > 3000
+
+    def test_modern_building_low_potential(self):
+        """Modern building has low renovation potential."""
+        result = compute_renovation_potential(
+            {"construction_year": 2020, "heating_type_code": "pac"},
+            {"solar": {"suitability": "low"}},
+        )
+        assert result["potential_score"] <= 2.0
+
+
+# ---------------------------------------------------------------------------
+# Overall intelligence score tests
+# ---------------------------------------------------------------------------
+
+
+class TestOverallIntelligenceScore:
+    def test_high_intelligence_score(self):
+        """Good data across all dimensions scores A/B."""
+        data = {
+            "neighborhood_score": 9.0,
+            "environmental_risk_score": 8.5,
+            "connectivity_score": 7.0,
+            "livability_score": 8.0,
+            "renovation_potential": {"potential_score": 3.0},
+            "radon": {"level": "low"},
+            "natural_hazards": {"flood_risk": "none"},
+            "noise": {"road_noise_day_db": 40},
+            "solar": {"suitability": "high"},
+            "heritage": {"isos_protected": True},
+            "transport": {"transport_quality_class": "A"},
+            "seismic": {"seismic_zone": "1"},
+            "water_protection": {"zone": "none"},
+            "railway_noise": {"railway_noise_day_db": 30},
+            "aircraft_noise": {},
+            "building_zones": {"zone_type": "W2"},
+            "contaminated_sites": {"is_contaminated": False},
+            "groundwater_zones": {},
+            "flood_zones": {},
+            "mobile_coverage": {"has_5g_coverage": True},
+            "broadband": {"max_speed_mbps": 1000},
+            "ev_charging": {"ev_stations_nearby": 1},
+            "thermal_networks": {"has_district_heating": True},
+            "osm_amenities": {"total_amenities": 50},
+            "nearest_stops": {"nearest_stop_distance_m": 100},
+            "climate": {"avg_temp_c": 10},
+        }
+        result = compute_overall_building_intelligence_score(data)
+        assert result["score_0_100"] >= 60
+        assert result["grade"] in ("A", "B", "C")
+        assert isinstance(result["strengths"], list)
+        assert isinstance(result["weaknesses"], list)
+
+    def test_empty_data_scores_f(self):
+        """No data scores F."""
+        result = compute_overall_building_intelligence_score({})
+        assert result["grade"] == "F"
+        assert result["score_0_100"] == 0
+
+
+# ---------------------------------------------------------------------------
+# EnrichmentResult extended schema tests
+# ---------------------------------------------------------------------------
+
+
+class TestEnrichmentResultExtended:
+    def test_new_enrichment_flags(self):
+        """EnrichmentResult supports all extended flags."""
+        r = EnrichmentResult(
+            building_id=uuid.uuid4(),
+            railway_noise_fetched=True,
+            aircraft_noise_fetched=True,
+            building_zones_fetched=True,
+            contaminated_sites_fetched=True,
+            groundwater_zones_fetched=True,
+            flood_zones_fetched=True,
+            mobile_coverage_fetched=True,
+            broadband_fetched=True,
+            ev_charging_fetched=True,
+            thermal_networks_fetched=True,
+            protected_monuments_fetched=True,
+            agricultural_zones_fetched=True,
+            forest_reserves_fetched=True,
+            military_zones_fetched=True,
+            accident_sites_fetched=True,
+            osm_amenities_fetched=True,
+            osm_building_fetched=True,
+            climate_computed=True,
+            nearest_stops_fetched=True,
+            connectivity_score=7.5,
+            environmental_risk_score=8.0,
+            livability_score=6.5,
+            renovation_potential_computed=True,
+            overall_intelligence_computed=True,
+            overall_intelligence_score=72,
+            overall_intelligence_grade="B",
+        )
+        assert r.railway_noise_fetched is True
+        assert r.connectivity_score == 7.5
+        assert r.overall_intelligence_grade == "B"
