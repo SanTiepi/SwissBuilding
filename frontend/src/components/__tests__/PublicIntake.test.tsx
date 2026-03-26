@@ -72,7 +72,7 @@ describe('PublicIntake', () => {
   it('updates form fields on change', () => {
     renderPage();
     const nameInput = screen.getByTestId('intake-name') as HTMLInputElement;
-    fireEvent.change(nameInput, { target: { value: 'Jean Dupont', name: 'name' } });
+    fireEvent.change(nameInput, { target: { value: 'Jean Dupont', name: 'requester_name' } });
     expect(nameInput.value).toBe('Jean Dupont');
   });
 
@@ -80,8 +80,8 @@ describe('PublicIntake', () => {
     mockSubmit.mockResolvedValueOnce({ id: '1', status: 'new' });
     renderPage();
 
-    fireEvent.change(screen.getByTestId('intake-name'), { target: { value: 'Jean', name: 'name' } });
-    fireEvent.change(screen.getByTestId('intake-email'), { target: { value: 'j@test.ch', name: 'email' } });
+    fireEvent.change(screen.getByTestId('intake-name'), { target: { value: 'Jean', name: 'requester_name' } });
+    fireEvent.change(screen.getByTestId('intake-email'), { target: { value: 'j@test.ch', name: 'requester_email' } });
     fireEvent.change(screen.getByTestId('intake-address'), {
       target: { value: 'Rue Test 1', name: 'building_address' },
     });
@@ -92,14 +92,23 @@ describe('PublicIntake', () => {
       expect(screen.getByTestId('intake-success')).toBeInTheDocument();
     });
     expect(mockSubmit).toHaveBeenCalledTimes(1);
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requester_name: 'Jean',
+        requester_email: 'j@test.ch',
+        building_address: 'Rue Test 1',
+        request_type: 'asbestos_diagnostic',
+        source: 'website',
+      }),
+    );
   });
 
   it('shows error on submit failure', async () => {
     mockSubmit.mockRejectedValueOnce(new Error('fail'));
     renderPage();
 
-    fireEvent.change(screen.getByTestId('intake-name'), { target: { value: 'Jean', name: 'name' } });
-    fireEvent.change(screen.getByTestId('intake-email'), { target: { value: 'j@test.ch', name: 'email' } });
+    fireEvent.change(screen.getByTestId('intake-name'), { target: { value: 'Jean', name: 'requester_name' } });
+    fireEvent.change(screen.getByTestId('intake-email'), { target: { value: 'j@test.ch', name: 'requester_email' } });
     fireEvent.change(screen.getByTestId('intake-address'), {
       target: { value: 'Rue Test 1', name: 'building_address' },
     });

@@ -33,6 +33,25 @@ const urgencyColors: Record<string, string> = {
   emergency: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 };
 
+function requestTypeLabelKey(requestType: string) {
+  switch (requestType) {
+    case 'asbestos_diagnostic':
+      return 'intake.request_type.asbestos';
+    case 'pcb_diagnostic':
+      return 'intake.request_type.pcb';
+    case 'lead_diagnostic':
+      return 'intake.request_type.lead';
+    case 'multi_pollutant':
+      return 'intake.request_type.multi';
+    case 'consultation':
+      return 'intake.request_type.consultation';
+    case 'other':
+      return 'intake.request_type.other';
+    default:
+      return requestType;
+  }
+}
+
 export default function AdminIntakeReview() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
@@ -45,12 +64,12 @@ export default function AdminIntakeReview() {
   });
 
   const qualifyMutation = useMutation({
-    mutationFn: (id: string) => intakeApi.updateStatus(id, 'qualified'),
+    mutationFn: (id: string) => intakeApi.qualify(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-intake'] }),
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (id: string) => intakeApi.updateStatus(id, 'rejected'),
+    mutationFn: (id: string) => intakeApi.reject(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-intake'] }),
   });
 
@@ -144,7 +163,7 @@ export default function AdminIntakeReview() {
               {/* Left: info */}
               <div className="space-y-2 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">{req.name}</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">{req.requester_name}</h3>
                   <span
                     className={cn('px-2 py-0.5 rounded-full text-xs font-medium', statusColors[req.status])}
                     data-testid={`intake-status-${req.id}`}
@@ -158,22 +177,22 @@ export default function AdminIntakeReview() {
                     {t(`intake.urgency.${req.urgency}`)}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                    {t(`intake.request_type.${req.request_type}`)}
+                    {t(requestTypeLabelKey(req.request_type))}
                   </span>
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400">
                   <span className="flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5" /> {req.email}
+                    <Mail className="w-3.5 h-3.5" /> {req.requester_email}
                   </span>
-                  {req.phone && (
+                  {req.requester_phone && (
                     <span className="flex items-center gap-1">
-                      <Phone className="w-3.5 h-3.5" /> {req.phone}
+                      <Phone className="w-3.5 h-3.5" /> {req.requester_phone}
                     </span>
                   )}
-                  {req.company && (
+                  {req.requester_company && (
                     <span className="flex items-center gap-1">
-                      <Building2 className="w-3.5 h-3.5" /> {req.company}
+                      <Building2 className="w-3.5 h-3.5" /> {req.requester_company}
                     </span>
                   )}
                 </div>
@@ -182,10 +201,10 @@ export default function AdminIntakeReview() {
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
                     {req.building_address}
-                    {req.city && `, ${req.city}`}
-                    {req.postal_code && ` ${req.postal_code}`}
+                    {req.building_city && `, ${req.building_city}`}
+                    {req.building_postal_code && ` ${req.building_postal_code}`}
                   </span>
-                  {req.egid && <span className="text-xs font-mono">EGID: {req.egid}</span>}
+                  {req.building_egid && <span className="text-xs font-mono">EGID: {req.building_egid}</span>}
                 </div>
 
                 {req.description && (

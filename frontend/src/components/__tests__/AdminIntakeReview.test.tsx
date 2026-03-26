@@ -25,13 +25,15 @@ vi.mock('@/store/authStore', () => ({
 }));
 
 const mockList = vi.fn();
-const mockUpdateStatus = vi.fn();
+const mockQualify = vi.fn();
+const mockReject = vi.fn();
 const mockConvert = vi.fn();
 
 vi.mock('@/api/intake', () => ({
   intakeApi: {
     list: (...args: unknown[]) => mockList(...args),
-    updateStatus: (...args: unknown[]) => mockUpdateStatus(...args),
+    qualify: (...args: unknown[]) => mockQualify(...args),
+    reject: (...args: unknown[]) => mockReject(...args),
     convert: (...args: unknown[]) => mockConvert(...args),
   },
 }));
@@ -43,35 +45,37 @@ vi.mock('@/utils/formatters', () => ({
 const mockRequests = [
   {
     id: 'req-1',
-    name: 'Jean Dupont',
-    email: 'jean@test.ch',
-    phone: '+41791234567',
-    company: 'Dupont SA',
+    requester_name: 'Jean Dupont',
+    requester_email: 'jean@test.ch',
+    requester_phone: '+41791234567',
+    requester_company: 'Dupont SA',
     building_address: 'Rue de Lausanne 10',
-    city: 'Lausanne',
-    postal_code: '1000',
-    egid: '12345',
-    request_type: 'asbestos',
+    building_city: 'Lausanne',
+    building_postal_code: '1000',
+    building_egid: '12345',
+    request_type: 'asbestos_diagnostic',
     urgency: 'standard',
     description: 'Need asbestos check',
     status: 'new',
+    source: 'website',
     created_at: '2026-03-20T10:00:00Z',
     updated_at: '2026-03-20T10:00:00Z',
   },
   {
     id: 'req-2',
-    name: 'Marie Martin',
-    email: 'marie@test.ch',
-    phone: null,
-    company: null,
+    requester_name: 'Marie Martin',
+    requester_email: 'marie@test.ch',
+    requester_phone: null,
+    requester_company: null,
     building_address: 'Avenue de la Gare 5',
-    city: 'Geneva',
-    postal_code: '1201',
-    egid: null,
-    request_type: 'pcb',
+    building_city: 'Geneva',
+    building_postal_code: '1201',
+    building_egid: null,
+    request_type: 'pcb_diagnostic',
     urgency: 'urgent',
     description: null,
     status: 'qualified',
+    source: 'website',
     created_at: '2026-03-21T14:00:00Z',
     updated_at: '2026-03-21T14:00:00Z',
   },
@@ -165,14 +169,14 @@ describe('AdminIntakeReview', () => {
   });
 
   it('calls updateStatus on qualify click', async () => {
-    mockUpdateStatus.mockResolvedValue({ ...mockRequests[0], status: 'qualified' });
+    mockQualify.mockResolvedValue({ ...mockRequests[0], status: 'qualified' });
     renderPage();
     await waitFor(() => {
       expect(screen.getByTestId('intake-qualify-req-1')).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId('intake-qualify-req-1'));
     await waitFor(() => {
-      expect(mockUpdateStatus).toHaveBeenCalledWith('req-1', 'qualified');
+      expect(mockQualify).toHaveBeenCalledWith('req-1');
     });
   });
 

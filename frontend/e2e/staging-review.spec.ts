@@ -1,7 +1,28 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 // Staging review suite for https://swissbuilding.batiscan.ch
 // Basic auth is handled by playwright.staging.config.ts httpCredentials
+
+const STAGING_ADMIN_EMAIL = process.env.E2E_REAL_ADMIN_EMAIL || 'admin@swissbuildingos.ch';
+const STAGING_ADMIN_PASSWORD = process.env.E2E_REAL_ADMIN_PASSWORD || 'noob42';
+
+async function loginAsAdmin(page: Page) {
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+
+  const emailInput = page.locator('input[type="email"], input[name="email"]').first();
+  const passwordInput = page.locator('input[type="password"]').first();
+
+  await expect(emailInput).toBeVisible();
+  await expect(passwordInput).toBeVisible();
+
+  await emailInput.fill(STAGING_ADMIN_EMAIL);
+  await passwordInput.fill(STAGING_ADMIN_PASSWORD);
+  await page.locator('button[type="submit"]').first().click();
+
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 10_000 });
+  await expect(page).not.toHaveURL(/login/);
+}
 
 test.describe('Health & Infrastructure', () => {
   test('health endpoint returns OK', async ({ request }) => {
@@ -81,44 +102,14 @@ test.describe('Login Flow', () => {
   });
 
   test('login with admin credentials', async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-
-    // Fill login form
-    const emailInput = page.locator('input[type="email"], input[name="email"]').first();
-    const passwordInput = page.locator('input[type="password"]').first();
-
-    if ((await emailInput.count()) > 0 && (await passwordInput.count()) > 0) {
-      await emailInput.fill('admin@swissbuildingos.ch');
-      await passwordInput.fill('admin123');
-
-      // Submit
-      const submitBtn = page.locator('button[type="submit"]').first();
-      if ((await submitBtn.count()) > 0) {
-        await submitBtn.click();
-        // Should redirect away from login
-        await page.waitForURL(/(?!.*login).*/, { timeout: 10000 }).catch(() => {});
-      }
-    }
+    await loginAsAdmin(page);
+    await expect(page).toHaveURL(/dashboard|control-tower|buildings|portfolio|marketplace/);
   });
 });
 
 test.describe('Authenticated Pages (if login succeeds)', () => {
   test.beforeEach(async ({ page }) => {
-    // Try to login
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    const emailInput = page.locator('input[type="email"], input[name="email"]').first();
-    const passwordInput = page.locator('input[type="password"]').first();
-    if ((await emailInput.count()) > 0 && (await passwordInput.count()) > 0) {
-      await emailInput.fill('admin@swissbuildingos.ch');
-      await passwordInput.fill('admin123');
-      const submitBtn = page.locator('button[type="submit"]').first();
-      if ((await submitBtn.count()) > 0) {
-        await submitBtn.click();
-        await page.waitForTimeout(3000);
-      }
-    }
+    await loginAsAdmin(page);
   });
 
   test('dashboard loads', async ({ page }) => {

@@ -3,18 +3,22 @@ import { test, expect, Page } from '@playwright/test';
 // Intensive staging review for https://swissbuilding.batiscan.ch
 // Tests every major surface, API endpoint, and user flow
 
+const STAGING_ADMIN_EMAIL = process.env.E2E_REAL_ADMIN_EMAIL || 'admin@swissbuildingos.ch';
+const STAGING_ADMIN_PASSWORD = process.env.E2E_REAL_ADMIN_PASSWORD || 'noob42';
+
 // Helper: login as admin
 async function loginAsAdmin(page: Page) {
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
   const email = page.locator('input[type="email"], input[name="email"]').first();
   const password = page.locator('input[type="password"]').first();
-  if ((await email.count()) > 0 && (await password.count()) > 0) {
-    await email.fill('admin@swissbuildingos.ch');
-    await password.fill('admin123');
-    await page.locator('button[type="submit"]').first().click();
-    await page.waitForTimeout(3000);
-  }
+  await expect(email).toBeVisible();
+  await expect(password).toBeVisible();
+  await email.fill(STAGING_ADMIN_EMAIL);
+  await password.fill(STAGING_ADMIN_PASSWORD);
+  await page.locator('button[type="submit"]').first().click();
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 10_000 });
+  await expect(page).not.toHaveURL(/login/);
 }
 
 // ============================================================
@@ -72,10 +76,7 @@ test.describe('2. Auth Flow', () => {
 
   test('login with admin credentials succeeds', async ({ page }) => {
     await loginAsAdmin(page);
-    // Should not be on login page anymore
-    const url = page.url();
-    // Either redirected to dashboard or stayed (depends on seed)
-    expect(url).toBeTruthy();
+    await expect(page).toHaveURL(/dashboard|control-tower|buildings|portfolio|marketplace/);
   });
 
   test('unauthenticated access redirects to login', async ({ page }) => {
@@ -279,20 +280,25 @@ test.describe('7. Admin Pages', () => {
 // 8. API ENDPOINTS (smoke)
 // ============================================================
 test.describe('8. API Smoke Tests', () => {
-  let token: string;
+  let token = '';
 
   test.beforeAll(async ({ request }) => {
     // Login to get JWT
     const r = await request.post('/api/v1/auth/login', {
-      data: { email: 'admin@swissbuildingos.ch', password: 'admin123' },
+      data: { email: STAGING_ADMIN_EMAIL, password: STAGING_ADMIN_PASSWORD },
     });
-    if (r.status() === 200) {
-      const body = await r.json();
-      token = body.access_token || body.token || '';
-    }
+    expect(r.status(), 'staging auth login should succeed before API smoke tests').toBe(200);
+    const body = await r.json();
+    token = body.access_token || body.token || '';
+    expect(token, 'staging auth login should return a JWT token').toBeTruthy();
   });
 
   const authHeaders = () => token ? { Authorization: `Bearer ${token}` } : {};
+
+  test('GET /api/v1/auth/me with JWT', async ({ request }) => {
+    const r = await request.get('/api/v1/auth/me', { headers: authHeaders() });
+    expect(r.status()).toBe(200);
+  });
 
   test('GET /api/v1/buildings', async ({ request }) => {
     const r = await request.get('/api/v1/buildings', { headers: authHeaders() });

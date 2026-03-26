@@ -4,7 +4,14 @@ import { intakeApi, type IntakeRequestCreate } from '@/api/intake';
 import { Building2, CheckCircle2, Loader2, Send } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
-const REQUEST_TYPES = ['asbestos', 'pcb', 'lead', 'multi', 'consultation', 'other'] as const;
+const REQUEST_TYPES = [
+  { value: 'asbestos_diagnostic', labelKey: 'asbestos' },
+  { value: 'pcb_diagnostic', labelKey: 'pcb' },
+  { value: 'lead_diagnostic', labelKey: 'lead' },
+  { value: 'multi_pollutant', labelKey: 'multi' },
+  { value: 'consultation', labelKey: 'consultation' },
+  { value: 'other', labelKey: 'other' },
+] as const;
 const URGENCY_LEVELS = ['standard', 'urgent', 'emergency'] as const;
 
 const urgencyColors: Record<string, string> = {
@@ -20,17 +27,18 @@ export default function PublicIntake() {
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState<IntakeRequestCreate>({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
+    requester_name: '',
+    requester_email: '',
+    requester_phone: '',
+    requester_company: '',
     building_address: '',
-    city: '',
-    postal_code: '',
-    egid: '',
-    request_type: 'asbestos',
+    building_city: '',
+    building_postal_code: '',
+    building_egid: '',
+    request_type: 'asbestos_diagnostic',
     urgency: 'standard',
     description: '',
+    source: 'website',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -106,10 +114,10 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="name"
-                    name="name"
+                    name="requester_name"
                     type="text"
                     required
-                    value={form.name}
+                    value={form.requester_name}
                     onChange={handleChange}
                     data-testid="intake-name"
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -121,10 +129,10 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="email"
-                    name="email"
+                    name="requester_email"
                     type="email"
                     required
-                    value={form.email}
+                    value={form.requester_email}
                     onChange={handleChange}
                     data-testid="intake-email"
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -136,9 +144,9 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="phone"
-                    name="phone"
+                    name="requester_phone"
                     type="tel"
-                    value={form.phone}
+                    value={form.requester_phone}
                     onChange={handleChange}
                     data-testid="intake-phone"
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -153,9 +161,9 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="company"
-                    name="company"
+                    name="requester_company"
                     type="text"
-                    value={form.company}
+                    value={form.requester_company}
                     onChange={handleChange}
                     data-testid="intake-company"
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -194,9 +202,9 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="city"
-                    name="city"
+                    name="building_city"
                     type="text"
-                    value={form.city}
+                    value={form.building_city}
                     onChange={handleChange}
                     data-testid="intake-city"
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -211,9 +219,9 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="postal_code"
-                    name="postal_code"
+                    name="building_postal_code"
                     type="text"
-                    value={form.postal_code}
+                    value={form.building_postal_code}
                     onChange={handleChange}
                     data-testid="intake-postal-code"
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -225,9 +233,9 @@ export default function PublicIntake() {
                   </label>
                   <input
                     id="egid"
-                    name="egid"
+                    name="building_egid"
                     type="text"
-                    value={form.egid}
+                    value={form.building_egid}
                     onChange={handleChange}
                     data-testid="intake-egid"
                     placeholder={t('intake.field_egid_placeholder')}
@@ -259,8 +267,8 @@ export default function PublicIntake() {
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   >
                     {REQUEST_TYPES.map((type) => (
-                      <option key={type} value={type}>
-                        {t(`intake.request_type.${type}`)}
+                      <option key={type.value} value={type.value}>
+                        {t(`intake.request_type.${type.labelKey}`)}
                       </option>
                     ))}
                   </select>

@@ -3,34 +3,36 @@ import axios from 'axios';
 
 export interface IntakeRequest {
   id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  company: string | null;
+  requester_name: string;
+  requester_email: string;
+  requester_phone: string | null;
+  requester_company: string | null;
   building_address: string;
-  city: string | null;
-  postal_code: string | null;
-  egid: string | null;
+  building_city: string | null;
+  building_postal_code: string | null;
+  building_egid: string | null;
   request_type: string;
   urgency: string;
   description: string | null;
   status: 'new' | 'qualified' | 'converted' | 'rejected';
+  source: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface IntakeRequestCreate {
-  name: string;
-  email: string;
-  phone?: string;
-  company?: string;
+  requester_name: string;
+  requester_email: string;
+  requester_phone?: string;
+  requester_company?: string;
   building_address: string;
-  city?: string;
-  postal_code?: string;
-  egid?: string;
+  building_city?: string;
+  building_postal_code?: string;
+  building_egid?: string;
   request_type: string;
   urgency: string;
   description?: string;
+  source?: string;
 }
 
 export interface IntakeListResponse {
@@ -54,19 +56,25 @@ export const intakeApi = {
 
   /** Admin: list intake requests */
   list: async (params?: { status?: string; page?: number; size?: number }): Promise<IntakeListResponse> => {
-    const response = await apiClient.get<IntakeListResponse>('/admin/intake', { params });
+    const response = await apiClient.get<IntakeListResponse>('/intake-requests', { params });
     return response.data;
   },
 
-  /** Admin: update intake status */
-  updateStatus: async (id: string, status: string): Promise<IntakeRequest> => {
-    const response = await apiClient.patch<IntakeRequest>(`/admin/intake/${id}`, { status });
+  /** Admin: qualify intake */
+  qualify: async (id: string, notes?: string): Promise<IntakeRequest> => {
+    const response = await apiClient.post<IntakeRequest>(`/intake-requests/${id}/qualify`, { notes });
+    return response.data;
+  },
+
+  /** Admin: reject intake */
+  reject: async (id: string, reason?: string): Promise<IntakeRequest> => {
+    const response = await apiClient.post<IntakeRequest>(`/intake-requests/${id}/reject`, { reason });
     return response.data;
   },
 
   /** Admin: convert intake to contact + building */
   convert: async (id: string): Promise<IntakeRequest> => {
-    const response = await apiClient.post<IntakeRequest>(`/admin/intake/${id}/convert`);
+    const response = await apiClient.post<IntakeRequest>(`/intake-requests/${id}/convert`, {});
     return response.data;
   },
 };
