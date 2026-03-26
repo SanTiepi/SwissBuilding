@@ -106,7 +106,9 @@ function filterForRole(role: AudienceRole, card: InstantCardResult, decisionView
 
 function filterKnowledge(role: AudienceRole, card: InstantCardResult): string[] {
   const items: string[] = [];
-  const { identity, physical, diagnostics, residual_materials } = card.what_we_know;
+  const wk = card.what_we_know || ({} as any);
+  const { identity, physical, diagnostics } = wk;
+  const residual_materials = wk.residual_materials || [];
 
   switch (role) {
     case 'property_manager':
@@ -157,7 +159,8 @@ function filterKnowledge(role: AudienceRole, card: InstantCardResult): string[] 
 
 function filterRisks(role: AudienceRole, card: InstantCardResult, decisionView: DecisionView | undefined): string[] {
   const items: string[] = [];
-  const pollutants = Object.entries(card.what_is_risky.pollutant_risk || {}).filter(
+  const risky = card.what_is_risky || ({} as any);
+  const pollutants = Object.entries(risky.pollutant_risk || {}).filter(
     ([, v]) => typeof v === 'number',
   ) as [string, number][];
 
@@ -171,7 +174,7 @@ function filterRisks(role: AudienceRole, card: InstantCardResult, decisionView: 
 
   // Compliance gaps — relevant for authority, property_manager, insurer
   if (['authority', 'property_manager', 'insurer'].includes(role)) {
-    card.what_is_risky.compliance_gaps.forEach((g) => {
+    (risky.compliance_gaps || []).forEach((g) => {
       items.push(String(g.description || g.label || JSON.stringify(g)));
     });
   }
@@ -187,32 +190,28 @@ function filterRisks(role: AudienceRole, card: InstantCardResult, decisionView: 
 
 function filterBlockers(role: AudienceRole, card: InstantCardResult, decisionView: DecisionView | undefined): string[] {
   const items: string[] = [];
+  const wb = card.what_blocks || ({} as any);
+  const procedural = wb.procedural_blockers || [];
+  const overdue = wb.overdue_obligations || [];
+  const missing = wb.missing_proof || [];
 
   switch (role) {
     case 'property_manager':
-      card.what_blocks.procedural_blockers.forEach((b) =>
-        items.push(String(b.description || b.label || JSON.stringify(b))),
-      );
-      card.what_blocks.overdue_obligations.forEach((b) =>
-        items.push(String(b.description || b.label || JSON.stringify(b))),
-      );
+      procedural.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
+      overdue.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
       break;
     case 'authority':
-      card.what_blocks.procedural_blockers.forEach((b) =>
-        items.push(String(b.description || b.label || JSON.stringify(b))),
-      );
-      card.what_blocks.missing_proof.forEach((b) => items.push(String(b.description || b.label || JSON.stringify(b))));
+      procedural.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
+      missing.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
       break;
     case 'insurer':
-      card.what_blocks.missing_proof.forEach((b) => items.push(String(b.description || b.label || JSON.stringify(b))));
+      missing.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
       break;
     case 'diagnostician':
-      card.what_blocks.missing_proof.forEach((b) => items.push(String(b.description || b.label || JSON.stringify(b))));
+      missing.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
       break;
     case 'contractor':
-      card.what_blocks.procedural_blockers.forEach((b) =>
-        items.push(String(b.description || b.label || JSON.stringify(b))),
-      );
+      procedural.forEach((b: any) => items.push(String(b.description || b.label || JSON.stringify(b))));
       break;
   }
 
@@ -236,7 +235,7 @@ function filterBlockers(role: AudienceRole, card: InstantCardResult, decisionVie
 
 function filterActions(role: AudienceRole, card: InstantCardResult): string[] {
   const items: string[] = [];
-  const actions = card.what_to_do_next.top_3_actions;
+  const actions = (card.what_to_do_next || ({} as any)).top_3_actions || [];
 
   switch (role) {
     case 'property_manager':
@@ -280,7 +279,10 @@ function filterActions(role: AudienceRole, card: InstantCardResult): string[] {
 
 function filterReusable(role: AudienceRole, card: InstantCardResult): string[] {
   const items: string[] = [];
-  const { diagnostic_publications, packs_generated, proof_deliveries } = card.what_is_reusable;
+  const reusable = card.what_is_reusable || ({} as any);
+  const diagnostic_publications = reusable.diagnostic_publications || [];
+  const packs_generated = reusable.packs_generated || [];
+  const proof_deliveries = reusable.proof_deliveries || [];
 
   if (['authority', 'diagnostician', 'property_manager'].includes(role) && diagnostic_publications.length > 0) {
     items.push(`${diagnostic_publications.length} publication(s) diagnostique(s)`);
