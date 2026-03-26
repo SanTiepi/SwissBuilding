@@ -18,7 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 
 from sqlalchemy import select
 
@@ -991,8 +991,8 @@ _PERMIT_DEFS = [
         "approved",
         "SUVA Lausanne",
         "SUVA-VD-2024-0438",
-        datetime(2024, 8, 1, tzinfo=UTC),
-        datetime(2024, 8, 20, tzinfo=UTC),
+        datetime(2024, 8, 1),
+        datetime(2024, 8, 20),
     ),
     (
         "Avenue Emile-Henri Jaques-Dalcroze 5",
@@ -1001,7 +1001,7 @@ _PERMIT_DEFS = [
         "submitted",
         "DGE-DIREN Canton de Vaud",
         "VD-DEC-2025-T001",
-        datetime(2025, 2, 15, tzinfo=UTC),
+        datetime(2025, 2, 15),
         None,
     ),
     (
@@ -1021,7 +1021,7 @@ _PERMIT_DEFS = [
         "submitted",
         "DGE-DIREN Canton de Vaud",
         "VD-DEC-2025-R002",
-        datetime(2025, 3, 10, tzinfo=UTC),
+        datetime(2025, 3, 10),
         None,
     ),
     (
@@ -1031,8 +1031,8 @@ _PERMIT_DEFS = [
         "approved",
         "Service d'urbanisme, Ville de Lausanne",
         "CAMAC-2024-F127",
-        datetime(2024, 10, 1, tzinfo=UTC),
-        datetime(2024, 11, 15, tzinfo=UTC),
+        datetime(2024, 10, 1),
+        datetime(2024, 11, 15),
     ),
 ]
 
