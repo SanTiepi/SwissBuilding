@@ -142,36 +142,51 @@ class TestGeocode:
 
     @pytest.mark.asyncio
     async def test_geocode_unknown_address(self):
-        """Geocode returns empty dict for unknown address."""
+        """Geocode returns no data (just source entry) for unknown address."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {"results": []}
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                return_value=(mock_resp, 0),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.get = AsyncMock(return_value=mock_resp)
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await geocode_address("Nonexistent Street 999", "0000")
 
-        assert result == {}
+        assert "lat" not in result
+        assert "lon" not in result
+        assert result.get("_source_entry", {}).get("status") == "failed"
 
     @pytest.mark.asyncio
     async def test_geocode_network_error(self):
-        """Geocode returns empty dict on network error."""
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        """Geocode returns source entry with error on network error."""
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                side_effect=Exception("Connection refused"),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.get = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await geocode_address("Rue de Bourg 1", "1003")
 
-        assert result == {}
+        assert "lat" not in result
+        assert result.get("_source_entry", {}).get("status") == "failed"
 
 
 # ---------------------------------------------------------------------------
@@ -224,20 +239,27 @@ class TestRegBL:
 
     @pytest.mark.asyncio
     async def test_regbl_404(self):
-        """RegBL returns empty dict on 404."""
+        """RegBL returns source entry with failed status on 404."""
         mock_resp = MagicMock()
         mock_resp.status_code = 404
 
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                return_value=(mock_resp, 0),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.get = AsyncMock(return_value=mock_resp)
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await fetch_regbl_data(999999)
 
-        assert result == {}
+        assert "construction_year" not in result
+        assert result.get("_source_entry", {}).get("status") == "failed"
 
 
 # ---------------------------------------------------------------------------
@@ -399,6 +421,8 @@ class TestEnrichBuildingOrchestration:
         mock_building.floors_above = None
         mock_building.surface_area_m2 = None
         mock_building.building_type = "residential"
+        mock_building.dwellings = None
+        mock_building.has_elevator = False
         mock_building.source_metadata_json = None
 
         mock_db = AsyncMock()
@@ -411,11 +435,39 @@ class TestEnrichBuildingOrchestration:
         with (
             patch(
                 "app.services.building_enrichment_service.geocode_address",
-                return_value={"lat": 46.52, "lon": 6.63, "egid": 12345, "label": "Test"},
+                return_value={
+                    "lat": 46.52,
+                    "lon": 6.63,
+                    "egid": 12345,
+                    "label": "Test",
+                    "match_quality": "exact",
+                    "_source_entry": {
+                        "source_name": "geocode",
+                        "status": "success",
+                        "confidence": "high",
+                        "fetched_at": "2026-01-01T00:00:00+00:00",
+                        "retry_count": 0,
+                        "error": None,
+                        "match_quality": "exact",
+                    },
+                },
             ),
             patch(
                 "app.services.building_enrichment_service.fetch_regbl_data",
-                return_value={"construction_year": 1965, "floors": 5},
+                return_value={
+                    "construction_year": 1965,
+                    "floors": 5,
+                    "egid_confidence": "verified",
+                    "_source_entry": {
+                        "source_name": "regbl",
+                        "status": "success",
+                        "confidence": "high",
+                        "fetched_at": "2026-01-01T00:00:00+00:00",
+                        "retry_count": 0,
+                        "error": None,
+                        "match_quality": "verified",
+                    },
+                },
             ),
             patch(
                 "app.services.building_enrichment_service.fetch_cadastre_egrid",
@@ -458,6 +510,8 @@ class TestEnrichBuildingOrchestration:
         mock_building.floors_above = 3
         mock_building.surface_area_m2 = 100.0
         mock_building.building_type = "residential"
+        mock_building.dwellings = None
+        mock_building.has_elevator = False
         mock_building.source_metadata_json = None
 
         mock_db = AsyncMock()
@@ -1172,36 +1226,51 @@ class TestGeoIdentify:
 
     @pytest.mark.asyncio
     async def test_geo_identify_empty_results(self):
-        """_geo_identify returns empty dict when no results."""
+        """_geo_identify returns source entry (success) when no results at location."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {"results": []}
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                return_value=(mock_resp, 0),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.get = AsyncMock(return_value=mock_resp)
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await _geo_identify(46.52, 6.63, "ch.test.layer")
 
-        assert result == {}
+        # No data keys, only _source_entry
+        data_keys = {k for k in result if not k.startswith("_")}
+        assert data_keys == set()
+        assert result.get("_source_entry", {}).get("status") == "success"
 
     @pytest.mark.asyncio
     async def test_geo_identify_network_error(self):
-        """_geo_identify returns empty dict on error."""
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        """_geo_identify returns source entry with failed status on error."""
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                side_effect=Exception("timeout"),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.get = AsyncMock(side_effect=httpx.ConnectError("timeout"))
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await _geo_identify(46.52, 6.63, "ch.test.layer")
 
-        assert result == {}
+        assert result.get("_source_entry", {}).get("status") in ("failed", "timeout")
 
 
 # ---------------------------------------------------------------------------
@@ -1584,17 +1653,24 @@ class TestOsmAmenities:
 
     @pytest.mark.asyncio
     async def test_osm_amenities_error(self):
-        """OSM amenities returns empty on error."""
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        """OSM amenities returns source entry with error status on error."""
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                side_effect=Exception("timeout"),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.post = AsyncMock(side_effect=httpx.ConnectError("timeout"))
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await fetch_osm_amenities(46.52, 6.63)
 
-        assert result == {}
+        assert "total_amenities" not in result
+        assert result.get("_source_entry", {}).get("status") in ("failed", "timeout")
 
 
 # ---------------------------------------------------------------------------
@@ -1697,22 +1773,29 @@ class TestNearestStops:
 
     @pytest.mark.asyncio
     async def test_nearest_stops_empty(self):
-        """Nearest stops returns empty when no stations."""
+        """Nearest stops returns source entry when no stations."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {"stations": []}
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client:
+        with (
+            patch(
+                "app.services.building_enrichment_service._retry_request",
+                new_callable=AsyncMock,
+                return_value=(mock_resp, 0),
+            ),
+            patch("app.services.building_enrichment_service.httpx.AsyncClient") as mock_client,
+        ):
             instance = AsyncMock()
-            instance.get = AsyncMock(return_value=mock_resp)
             instance.__aenter__ = AsyncMock(return_value=instance)
             instance.__aexit__ = AsyncMock(return_value=False)
             mock_client.return_value = instance
 
             result = await fetch_nearest_stops(46.52, 6.63)
 
-        assert result == {}
+        assert "stops" not in result
+        assert result.get("_source_entry", {}).get("status") == "success"
 
 
 # ---------------------------------------------------------------------------

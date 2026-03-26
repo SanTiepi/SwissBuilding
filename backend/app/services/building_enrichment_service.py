@@ -3,6 +3,8 @@
 Fills building records with data from geo.admin.ch, RegBL/GWR,
 Swisstopo, cadastre, and optionally AI-generated descriptions.
 All external calls use httpx with graceful error handling.
+Production-grade: per-source confidence, match verification,
+retry with backoff, enrichment quality summary.
 """
 
 from __future__ import annotations
@@ -13,6 +15,8 @@ import json
 import logging
 import math
 import os
+import re
+import unicodedata
 from datetime import UTC, date, datetime
 from typing import Any
 from uuid import UUID
@@ -43,33 +47,421 @@ async def _throttle() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Retry with backoff
+# ---------------------------------------------------------------------------
+_TRANSIENT_STATUS_CODES = {500, 502, 503, 504}
+_RETRY_DELAYS: dict[int, float] = {
+    500: 2.0,
+    502: 2.0,
+    503: 2.0,
+    504: 5.0,
+}
+_CONNECTION_RETRY_DELAY = 3.0
+
+
+async def _retry_request(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    *,
+    params: dict | None = None,
+    data: dict | None = None,
+    json_body: dict | None = None,
+    headers: dict | None = None,
+    timeout: float = 15.0,
+) -> tuple[httpx.Response, int]:
+    """Execute an HTTP request with a single retry on transient failures.
+
+    Returns (response, retry_count).
+    On permanent errors (400, 404) returns immediately with no retry.
+    """
+    retry_count = 0
+    kwargs: dict[str, Any] = {}
+    if params:
+        kwargs["params"] = params
+    if data:
+        kwargs["data"] = data
+    if json_body:
+        kwargs["json"] = json_body
+    if headers:
+        kwargs["headers"] = headers
+
+    try:
+        if method == "GET":
+            resp = await client.get(url, **kwargs)
+        else:
+            resp = await client.post(url, **kwargs)
+    except (httpx.ConnectError, httpx.ReadTimeout, httpx.WriteTimeout, httpx.PoolTimeout) as exc:
+        # Connection error — retry once
+        logger.warning("Connection error for %s, retrying in %.1fs: %s", url, _CONNECTION_RETRY_DELAY, exc)
+        await asyncio.sleep(_CONNECTION_RETRY_DELAY)
+        retry_count = 1
+        if method == "GET":
+            resp = await client.get(url, **kwargs)
+        else:
+            resp = await client.post(url, **kwargs)
+        return resp, retry_count
+
+    if resp.status_code in _TRANSIENT_STATUS_CODES:
+        delay = _RETRY_DELAYS.get(resp.status_code, 2.0)
+        logger.warning(
+            "Transient %d for %s, retrying in %.1fs",
+            resp.status_code,
+            url,
+            delay,
+        )
+        await asyncio.sleep(delay)
+        retry_count = 1
+        if method == "GET":
+            resp = await client.get(url, **kwargs)
+        else:
+            resp = await client.post(url, **kwargs)
+
+    return resp, retry_count
+
+
+# ---------------------------------------------------------------------------
+# Address normalization
+# ---------------------------------------------------------------------------
+_ABBREVIATION_MAP: dict[str, str] = {
+    "av.": "avenue",
+    "av ": "avenue ",
+    "ch.": "chemin",
+    "ch ": "chemin ",
+    "rte": "route",
+    "rte.": "route",
+    "rte ": "route ",
+    "pl.": "place",
+    "pl ": "place ",
+    "bd.": "boulevard",
+    "bd ": "boulevard ",
+    "imp.": "impasse",
+    "chem.": "chemin",
+    "str.": "strasse",
+}
+
+_REVERSE_ABBREVIATION_MAP: dict[str, str] = {
+    "avenue": "av.",
+    "chemin": "ch.",
+    "route": "rte",
+    "place": "pl.",
+    "boulevard": "bd.",
+    "strasse": "str.",
+}
+
+
+def _strip_accents(s: str) -> str:
+    """Remove diacritics/accents from a string."""
+    nfkd = unicodedata.normalize("NFKD", s)
+    return "".join(c for c in nfkd if not unicodedata.combining(c))
+
+
+def _normalize_address(address: str, npa: str = "", city: str = "") -> str:
+    """Normalize an address for geocoding.
+
+    - Remove extra spaces
+    - Expand abbreviations: av. -> avenue, ch. -> chemin, etc.
+    - Add city name to search if provided
+    - Format: "{address}, {npa} {city}"
+    """
+    text = (address or "").strip()
+    text = re.sub(r"\s+", " ", text)
+
+    # Expand abbreviations (case-insensitive)
+    text_lower = text.lower()
+    for abbr, full in _ABBREVIATION_MAP.items():
+        if abbr in text_lower:
+            # Find position in lowered text, replace in original
+            idx = text_lower.find(abbr)
+            while idx >= 0:
+                text = text[:idx] + full + text[idx + len(abbr) :]
+                text_lower = text.lower()
+                idx = text_lower.find(abbr, idx + len(full))
+
+    parts = [text]
+    if npa:
+        parts.append(npa.strip())
+    if city:
+        parts.append(city.strip())
+
+    return ", ".join(p for p in parts if p)
+
+
+def _normalize_for_comparison(text: str) -> str:
+    """Normalize text for fuzzy comparison: lowercase, strip accents, collapse whitespace."""
+    text = _strip_accents(text.lower())
+    text = re.sub(r"[,.\-/]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    # Collapse abbreviations to canonical
+    for abbr, full in _ABBREVIATION_MAP.items():
+        text = text.replace(abbr.strip("."), full.rstrip())
+    for full, abbr in _REVERSE_ABBREVIATION_MAP.items():
+        text = text.replace(abbr.strip("."), full)
+    return text
+
+
+def _extract_street_number(text: str) -> str | None:
+    """Extract the street number from an address string."""
+    match = re.search(r"\b(\d+[a-zA-Z]?)\b", text)
+    return match.group(1) if match else None
+
+
+def _extract_street_name(text: str) -> str:
+    """Extract the street name (remove number, city, NPA)."""
+    # Remove numbers at end (house number)
+    name = re.sub(r"\b\d+[a-zA-Z]?\b", "", text)
+    # Remove NPA-like patterns (4 digits)
+    name = re.sub(r"\b\d{4}\b", "", name)
+    return re.sub(r"\s+", " ", name).strip()
+
+
+def verify_geocode_match(
+    input_address: str,
+    input_npa: str,
+    result_label: str,
+) -> str:
+    """Compare geocode result label with input address.
+
+    Returns match_quality: 'exact' | 'partial' | 'weak' | 'no_match'.
+    """
+    if not result_label:
+        return "no_match"
+
+    norm_input = _normalize_for_comparison(input_address + " " + (input_npa or ""))
+    norm_result = _normalize_for_comparison(result_label)
+
+    input_number = _extract_street_number(norm_input)
+    result_number = _extract_street_number(norm_result)
+    input_street = _extract_street_name(norm_input)
+    result_street = _extract_street_name(norm_result)
+
+    number_match = input_number == result_number if input_number and result_number else False
+    # Street name: check if main words overlap
+    input_words = set(input_street.split()) - {"de", "du", "des", "la", "le", "les", "l", "d"}
+    result_words = set(result_street.split()) - {"de", "du", "des", "la", "le", "les", "l", "d"}
+    common = input_words & result_words
+    street_match = len(common) >= 1 and len(common) / max(len(input_words), 1) >= 0.5
+
+    if number_match and street_match:
+        return "exact"
+    if street_match:
+        return "partial"
+    if common:
+        return "weak"
+    return "no_match"
+
+
+def verify_egid_address(
+    building_address: str,
+    regbl_strname: str | None,
+    regbl_deinr: str | None,
+) -> str:
+    """Compare building address with RegBL strname + deinr.
+
+    Returns egid_confidence: 'verified' | 'probable' | 'unverified'.
+    """
+    if not regbl_strname:
+        return "unverified"
+
+    norm_building = _normalize_for_comparison(building_address or "")
+    regbl_full = regbl_strname or ""
+    if regbl_deinr:
+        regbl_full += " " + regbl_deinr
+    norm_regbl = _normalize_for_comparison(regbl_full)
+
+    building_number = _extract_street_number(norm_building)
+    regbl_number = _extract_street_number(norm_regbl)
+    building_street = _extract_street_name(norm_building)
+    regbl_street = _extract_street_name(norm_regbl)
+
+    b_words = set(building_street.split()) - {"de", "du", "des", "la", "le", "les", "l", "d"}
+    r_words = set(regbl_street.split()) - {"de", "du", "des", "la", "le", "les", "l", "d"}
+    common = b_words & r_words
+    street_match = len(common) >= 1 and len(common) / max(len(b_words), 1) >= 0.5
+    number_match = building_number == regbl_number if building_number and regbl_number else True
+
+    if street_match and number_match:
+        return "verified"
+    if street_match:
+        return "probable"
+    return "unverified"
+
+
+# ---------------------------------------------------------------------------
+# Per-source metadata helper
+# ---------------------------------------------------------------------------
+
+
+def _source_entry(
+    source_name: str,
+    *,
+    status: str = "success",
+    confidence: str = "high",
+    match_quality: str | None = None,
+    retry_count: int = 0,
+    error: str | None = None,
+) -> dict[str, Any]:
+    """Create a standardized per-source metadata entry."""
+    entry: dict[str, Any] = {
+        "source_name": source_name,
+        "status": status,
+        "confidence": confidence,
+        "fetched_at": datetime.now(UTC).isoformat(),
+        "retry_count": retry_count,
+        "error": error,
+    }
+    if match_quality is not None:
+        entry["match_quality"] = match_quality
+    return entry
+
+
+# ---------------------------------------------------------------------------
+# Enrichment quality summary
+# ---------------------------------------------------------------------------
+
+
+def compute_enrichment_quality(
+    source_entries: list[dict[str, Any]],
+    *,
+    geocode_quality: str | None = None,
+    egid_confidence: str | None = None,
+) -> dict[str, Any]:
+    """Compute an enrichment quality summary from per-source entries.
+
+    Returns dict with total_sources, succeeded, failed, unavailable,
+    timeout, skipped, overall_confidence, critical_gaps, warnings.
+    """
+    total = len(source_entries)
+    succeeded = sum(1 for e in source_entries if e.get("status") == "success")
+    partial = sum(1 for e in source_entries if e.get("status") == "partial")
+    failed = sum(1 for e in source_entries if e.get("status") == "failed")
+    unavailable = sum(1 for e in source_entries if e.get("status") == "unavailable")
+    timeout = sum(1 for e in source_entries if e.get("status") == "timeout")
+    skipped = sum(1 for e in source_entries if e.get("status") == "skipped")
+
+    critical_gaps: list[str] = []
+    warnings: list[str] = []
+
+    # Check critical sources
+    source_map = {e["source_name"]: e for e in source_entries}
+
+    geocode_entry = source_map.get("geocode")
+    if geocode_entry and geocode_entry.get("status") != "success":
+        critical_gaps.append("Geocode failed — no coordinates")
+    elif geocode_quality and geocode_quality in ("weak", "no_match"):
+        warnings.append(f"Geocode match is {geocode_quality}")
+
+    regbl_entry = source_map.get("regbl")
+    if regbl_entry and regbl_entry.get("status") != "success":
+        critical_gaps.append("RegBL data missing")
+
+    if egid_confidence == "unverified":
+        warnings.append("EGID not verified against address")
+    elif egid_confidence == "probable":
+        warnings.append("EGID match is probable but not exact")
+
+    # No EGID at all
+    if not source_map.get("regbl") or source_map.get("regbl", {}).get("status") in ("failed", "skipped"):
+        critical_gaps.append("EGID not found")
+
+    # Overall confidence
+    if critical_gaps:
+        overall_confidence = "low"
+    elif warnings or failed > total * 0.3:
+        overall_confidence = "medium"
+    else:
+        overall_confidence = "high"
+
+    return {
+        "total_sources": total,
+        "succeeded": succeeded + partial,
+        "failed": failed,
+        "unavailable": unavailable,
+        "timeout": timeout,
+        "skipped": skipped,
+        "overall_confidence": overall_confidence,
+        "critical_gaps": critical_gaps,
+        "warnings": warnings,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Supported geo.admin.ch identify layers
+# ---------------------------------------------------------------------------
+# Layers known to work with the identify API.
+# Layers that consistently return 400 are excluded.
+SUPPORTED_IDENTIFY_LAYERS: set[str] = {
+    "ch.bfs.gebaeude_wohnungs_register",
+    "ch.bag.radonkarte",
+    "ch.bafu.showme-gemeinden_hochwasser",
+    "ch.bafu.showme-gemeinden_rutschungen",
+    "ch.bafu.showme-gemeinden_sturzprozesse",
+    "ch.bafu.laerm-strassenlaerm_tag",
+    "ch.bfe.solarenergie-eignung-daecher",
+    "ch.bak.bundesinventar-schuetzenswerte-ortsbilder",
+    "ch.are.gueteklassen_oev",
+    "ch.bafu.erdbeben-erdbebenzonen",
+    "ch.bafu.grundwasserschutzareale",
+    "ch.bafu.laerm-bahnlaerm_tag",
+    "ch.bazl.laermbelastungskataster-zivilflugplaetze",
+    "ch.are.bauzonen",
+    "ch.bafu.altlasten-kataster",
+    "ch.bafu.grundwasserschutzzonen",
+    "ch.bafu.gefahrenkarte-hochwasser",
+    "ch.bakom.mobilnetz-5g",
+    "ch.bakom.breitband-technologien",
+    "ch.bfe.ladestellen-elektromobilitaet",
+    "ch.bfe.thermische-netze",
+    "ch.bak.bundesinventar-schuetzenswerte-denkmaler",
+    "ch.blw.bodeneignungskarte",
+    "ch.bafu.waldreservate",
+    "ch.vbs.schiessplaetze",
+    "ch.bafu.stoerfallverordnung",
+}
+
+# Layers discovered to NOT support identify (400 errors).
+# Cached to avoid wasting requests.
+_UNSUPPORTED_LAYERS: set[str] = set()
+
+
+# ---------------------------------------------------------------------------
 # 1. Geocode via geo.admin.ch
 # ---------------------------------------------------------------------------
 
 
-async def geocode_address(address: str, npa: str) -> dict[str, Any]:
+async def geocode_address(address: str, npa: str, city: str = "") -> dict[str, Any]:
     """Geocode a Swiss address using geo.admin.ch search API.
 
-    Returns dict with keys: lat, lon, egid, label, detail.
+    Returns dict with keys: lat, lon, egid, label, detail, match_quality,
+    _source_entry (per-source metadata).
     Returns empty dict on failure.
     """
     await _throttle()
-    search_text = f"{address} {npa}".strip()
+    search_text = _normalize_address(address, npa, city)
     url = "https://api3.geo.admin.ch/rest/services/api/SearchServer"
     params = {
         "searchText": search_text,
         "type": "locations",
         "limit": 1,
     }
+    retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(url, params=params)
+            resp, retry_count = await _retry_request(client, "GET", url, params=params, timeout=15.0)
             resp.raise_for_status()
             data = resp.json()
 
         results = data.get("results", [])
         if not results:
-            return {}
+            return {
+                "_source_entry": _source_entry(
+                    "geocode",
+                    status="failed",
+                    confidence="low",
+                    error="no results",
+                    retry_count=retry_count,
+                ),
+            }
 
         attrs = results[0].get("attrs", {})
         result: dict[str, Any] = {}
@@ -88,11 +480,41 @@ async def geocode_address(address: str, npa: str) -> dict[str, Any]:
         result["label"] = attrs.get("label", "")
         result["detail"] = attrs.get("detail", "")
 
+        # Verify match quality
+        match_quality = verify_geocode_match(address, npa, result.get("label", ""))
+        result["match_quality"] = match_quality
+
+        if match_quality in ("weak", "no_match"):
+            logger.warning(
+                "Geocode match_quality=%s for '%s %s' → '%s'",
+                match_quality,
+                address,
+                npa,
+                result.get("label", ""),
+            )
+
+        confidence = "high" if match_quality == "exact" else "medium" if match_quality == "partial" else "low"
+        result["_source_entry"] = _source_entry(
+            "geocode",
+            status="success",
+            confidence=confidence,
+            match_quality=match_quality,
+            retry_count=retry_count,
+        )
+
         return result
 
     except Exception as exc:
         logger.warning("Geocoding failed for '%s %s': %s", address, npa, exc)
-        return {}
+        return {
+            "_source_entry": _source_entry(
+                "geocode",
+                status="failed",
+                confidence="low",
+                error=str(exc),
+                retry_count=retry_count,
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -100,24 +522,33 @@ async def geocode_address(address: str, npa: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-async def fetch_regbl_data(egid: int) -> dict[str, Any]:
+async def fetch_regbl_data(egid: int, building_address: str = "") -> dict[str, Any]:
     """Fetch building data from the Swiss Register of Buildings via geo.admin.ch.
 
     Uses the GWR layer on geo.admin.ch which returns comprehensive building data
     including EGRID, parcel number, construction year, floors, dwellings, surface,
     heating type, energy source, and individual dwelling details.
 
-    Returns dict with construction_year, floors, dwellings, etc.
+    Returns dict with construction_year, floors, dwellings, egid_confidence, etc.
     Returns empty dict on 404 or error.
     """
     await _throttle()
     url = f"https://api3.geo.admin.ch/rest/services/ech/MapServer/ch.bfs.gebaeude_wohnungs_register/{egid}_0"
+    retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(url)
+            resp, retry_count = await _retry_request(client, "GET", url, timeout=15.0)
             if resp.status_code == 404:
                 logger.info("RegBL: EGID %d not found (404)", egid)
-                return {}
+                return {
+                    "_source_entry": _source_entry(
+                        "regbl",
+                        status="failed",
+                        confidence="low",
+                        error="EGID not found (404)",
+                        retry_count=retry_count,
+                    ),
+                }
             resp.raise_for_status()
             data = resp.json()
 
@@ -126,7 +557,15 @@ async def fetch_regbl_data(egid: int) -> dict[str, Any]:
         if isinstance(data, dict) and "feature" in data:
             attrs = data["feature"].get("attributes", data)
         if not isinstance(attrs, dict):
-            return {}
+            return {
+                "_source_entry": _source_entry(
+                    "regbl",
+                    status="failed",
+                    confidence="low",
+                    error="invalid response structure",
+                    retry_count=retry_count,
+                ),
+            }
 
         result: dict[str, Any] = {}
 
@@ -160,6 +599,24 @@ async def fetch_regbl_data(egid: int) -> dict[str, Any]:
         if attrs.get("gebnr"):
             result["building_number"] = attrs["gebnr"]  # = ECA number
 
+        # Address fields from RegBL for verification
+        strname = attrs.get("strname") or attrs.get("strname_deinr") or attrs.get("strasse")
+        deinr = attrs.get("deinr") or attrs.get("hausnummer")
+        result["_regbl_strname"] = strname
+        result["_regbl_deinr"] = deinr
+
+        # EGID verification against building address
+        egid_confidence = verify_egid_address(building_address, strname, deinr)
+        result["egid_confidence"] = egid_confidence
+        if egid_confidence == "unverified":
+            logger.warning(
+                "EGID %d address mismatch: building='%s', regbl='%s %s'",
+                egid,
+                building_address,
+                strname or "",
+                deinr or "",
+            )
+
         # Dwelling details
         if attrs.get("warea") and isinstance(attrs["warea"], list):
             result["dwelling_areas_m2"] = attrs["warea"]
@@ -170,11 +627,28 @@ async def fetch_regbl_data(egid: int) -> dict[str, Any]:
         if attrs.get("gwaerdath1"):
             result["heating_updated_at"] = attrs["gwaerdath1"]
 
+        confidence = "high" if egid_confidence == "verified" else "medium" if egid_confidence == "probable" else "low"
+        result["_source_entry"] = _source_entry(
+            "regbl",
+            status="success",
+            confidence=confidence,
+            match_quality=egid_confidence,
+            retry_count=retry_count,
+        )
+
         return result
 
     except Exception as exc:
         logger.warning("RegBL fetch failed for EGID %d: %s", egid, exc)
-        return {}
+        return {
+            "_source_entry": _source_entry(
+                "regbl",
+                status="failed",
+                confidence="low",
+                error=str(exc),
+                retry_count=retry_count,
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -805,7 +1279,25 @@ async def fetch_water_protection(lat: float, lon: float) -> dict[str, Any]:
 
 
 async def _geo_identify(lat: float, lon: float, layer: str) -> dict[str, Any]:
-    """Generic geo.admin.ch identify call for any layer."""
+    """Generic geo.admin.ch identify call for any layer.
+
+    Returns attributes dict on success, or dict with only '_source_entry' key on failure.
+    Handles:
+    - 400 → marks layer as unsupported, returns unavailable status
+    - 200 empty → normal (no data at location), returns empty dict
+    - 500/502/503/504 → retries once
+    """
+    # Skip known-unsupported layers
+    if layer in _UNSUPPORTED_LAYERS:
+        return {
+            "_source_entry": _source_entry(
+                layer,
+                status="unavailable",
+                confidence="low",
+                error="layer not supported by identify API",
+            ),
+        }
+
     await _throttle()
     url = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
     params = {
@@ -817,18 +1309,59 @@ async def _geo_identify(lat: float, lon: float, layer: str) -> dict[str, Any]:
         "returnGeometry": "false",
         "limit": 1,
     }
+    retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(url, params=params)
+            resp, retry_count = await _retry_request(client, "GET", url, params=params, timeout=15.0)
+
+            # 400 → layer not supported by identify
+            if resp.status_code == 400:
+                _UNSUPPORTED_LAYERS.add(layer)
+                logger.info("Layer %s returned 400 — marking as unsupported", layer)
+                return {
+                    "_source_entry": _source_entry(
+                        layer,
+                        status="unavailable",
+                        confidence="low",
+                        error="400 — layer not supported",
+                        retry_count=retry_count,
+                    ),
+                }
+
             resp.raise_for_status()
             data = resp.json()
+
         results = data.get("results", [])
         if results:
-            return results[0].get("attributes", results[0].get("properties", {}))
-        return {}
+            attrs = results[0].get("attributes", results[0].get("properties", {}))
+            attrs["_source_entry"] = _source_entry(
+                layer,
+                status="success",
+                confidence="high",
+                retry_count=retry_count,
+            )
+            return attrs
+        # Empty results — valid response, just no data at this location
+        return {
+            "_source_entry": _source_entry(
+                layer,
+                status="success",
+                confidence="high",
+                retry_count=retry_count,
+            ),
+        }
     except Exception as exc:
         logger.warning("geo.admin.ch identify failed for layer %s: %s", layer, exc)
-        return {}
+        status = "timeout" if "timeout" in str(exc).lower() else "failed"
+        return {
+            "_source_entry": _source_entry(
+                layer,
+                status=status,
+                confidence="low",
+                error=str(exc),
+                retry_count=retry_count,
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -1120,11 +1653,15 @@ async def fetch_osm_amenities(lat: float, lon: float, radius: int = 500) -> dict
     """Count amenities by type within radius using Overpass API."""
     await _throttle()
     query = f"[out:json][timeout:15];(node[amenity](around:{radius},{lat},{lon}););out body;"
+    retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
-            resp = await client.post(
+            resp, retry_count = await _retry_request(
+                client,
+                "POST",
                 "https://overpass-api.de/api/interpreter",
                 data={"data": query},
+                timeout=20.0,
             )
             resp.raise_for_status()
             data = resp.json()
@@ -1151,11 +1688,26 @@ async def fetch_osm_amenities(lat: float, lon: float, radius: int = 500) -> dict
 
         result: dict[str, Any] = {k: counts.get(k, 0) for k in _amenity_map.values()}
         result["total_amenities"] = len(elements)
+        result["_source_entry"] = _source_entry(
+            "overpass/amenities",
+            status="success",
+            confidence="medium",
+            retry_count=retry_count,
+        )
         return result
 
     except Exception as exc:
         logger.warning("Overpass amenities fetch failed for (%s, %s): %s", lat, lon, exc)
-        return {}
+        status = "timeout" if "504" in str(exc) or "timeout" in str(exc).lower() else "failed"
+        return {
+            "_source_entry": _source_entry(
+                "overpass/amenities",
+                status=status,
+                confidence="low",
+                error=str(exc),
+                retry_count=retry_count,
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -1167,18 +1719,29 @@ async def fetch_osm_building_details(lat: float, lon: float) -> dict[str, Any]:
     """Fetch building footprint details from OSM via Overpass."""
     await _throttle()
     query = f"[out:json][timeout:15];(way[building](around:30,{lat},{lon}););out body 1;"
+    retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
-            resp = await client.post(
+            resp, retry_count = await _retry_request(
+                client,
+                "POST",
                 "https://overpass-api.de/api/interpreter",
                 data={"data": query},
+                timeout=20.0,
             )
             resp.raise_for_status()
             data = resp.json()
 
         elements = data.get("elements", [])
         if not elements:
-            return {}
+            return {
+                "_source_entry": _source_entry(
+                    "overpass/building",
+                    status="success",
+                    confidence="medium",
+                    retry_count=retry_count,
+                ),
+            }
 
         tags = elements[0].get("tags", {})
         result: dict[str, Any] = {}
@@ -1194,11 +1757,26 @@ async def fetch_osm_building_details(lat: float, lon: float) -> dict[str, Any]:
             result["roof_type"] = str(tags["roof:shape"])
         if tags.get("wheelchair"):
             result["wheelchair_access"] = str(tags["wheelchair"])
+        result["_source_entry"] = _source_entry(
+            "overpass/building",
+            status="success",
+            confidence="medium",
+            retry_count=retry_count,
+        )
         return result
 
     except Exception as exc:
         logger.warning("Overpass building details fetch failed for (%s, %s): %s", lat, lon, exc)
-        return {}
+        status = "timeout" if "504" in str(exc) or "timeout" in str(exc).lower() else "failed"
+        return {
+            "_source_entry": _source_entry(
+                "overpass/building",
+                status=status,
+                confidence="low",
+                error=str(exc),
+                retry_count=retry_count,
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -1271,15 +1849,23 @@ async def fetch_nearest_stops(lat: float, lon: float) -> dict[str, Any]:
         "y": str(lon),
         "type": "station",
     }
+    retry_count = 0
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(url, params=params)
+            resp, retry_count = await _retry_request(client, "GET", url, params=params, timeout=15.0)
             resp.raise_for_status()
             data = resp.json()
 
         stations = data.get("stations", [])
         if not stations:
-            return {}
+            return {
+                "_source_entry": _source_entry(
+                    "transport.opendata.ch",
+                    status="success",
+                    confidence="high",
+                    retry_count=retry_count,
+                ),
+            }
 
         stops: list[dict[str, Any]] = []
         for s in stations[:5]:
@@ -1292,11 +1878,26 @@ async def fetch_nearest_stops(lat: float, lon: float) -> dict[str, Any]:
         if stops:
             result["nearest_stop_name"] = stops[0]["name"]
             result["nearest_stop_distance_m"] = stops[0].get("distance_m", 0)
+        result["_source_entry"] = _source_entry(
+            "transport.opendata.ch",
+            status="success",
+            confidence="high",
+            retry_count=retry_count,
+        )
         return result
 
     except Exception as exc:
         logger.warning("Transport stops fetch failed for (%s, %s): %s", lat, lon, exc)
-        return {}
+        status = "timeout" if "timeout" in str(exc).lower() else "failed"
+        return {
+            "_source_entry": _source_entry(
+                "transport.opendata.ch",
+                status=status,
+                confidence="low",
+                error=str(exc),
+                retry_count=retry_count,
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -3075,29 +3676,58 @@ async def enrich_building(
 
     fields_updated: list[str] = []
     enrichment_meta: dict[str, Any] = dict(building.source_metadata_json or {}) if building.source_metadata_json else {}
+    source_entries: list[dict[str, Any]] = []
+    geocode_quality: str | None = None
+    egid_confidence: str | None = None
 
     # --- Step 1: Geocode (always re-geocode to get precise coords + EGID) ---
     if not skip_geocode:
-        geo = await geocode_address(building.address, building.postal_code)
-        if geo.get("lat") and geo.get("lon"):
+        geo = await geocode_address(building.address, building.postal_code, getattr(building, "city", "") or "")
+        # Collect source entry
+        if geo.get("_source_entry"):
+            source_entries.append(geo["_source_entry"])
+
+        match_quality = geo.get("match_quality", "no_match")
+        geocode_quality = match_quality
+
+        # Only update coordinates if match is exact or partial
+        if geo.get("lat") and geo.get("lon") and match_quality in ("exact", "partial"):
             building.latitude = geo["lat"]
             building.longitude = geo["lon"]
             fields_updated.extend(["latitude", "longitude"])
             result.geocoded = True
             enrichment_meta["geocoded_at"] = datetime.now(UTC).isoformat()
             enrichment_meta["geocode_source"] = "geo.admin.ch"
+            enrichment_meta["geocode_match_quality"] = match_quality
 
             # If geocoding found an EGID and building has none
             if geo.get("egid") and building.egid is None:
                 building.egid = geo["egid"]
                 fields_updated.append("egid")
+        elif geo.get("lat") and match_quality in ("weak", "no_match"):
+            logger.warning(
+                "Skipping coordinate update for building %s: geocode match_quality=%s",
+                building_id,
+                match_quality,
+            )
+            result.errors.append(f"Geocode match_quality={match_quality} — coordinates not updated")
+    else:
+        source_entries.append(_source_entry("geocode", status="skipped", confidence="low"))
 
     # --- Step 2: RegBL ---
     if not skip_regbl and building.egid is not None:
-        regbl = await fetch_regbl_data(building.egid)
-        if regbl:
+        regbl = await fetch_regbl_data(building.egid, building.address or "")
+        if regbl.get("_source_entry"):
+            source_entries.append(regbl["_source_entry"])
+
+        egid_confidence = regbl.get("egid_confidence")
+
+        # Only populate fields if we have actual data (not just _source_entry)
+        has_regbl_data = any(k for k in regbl if not k.startswith("_") and k != "egid_confidence")
+        if has_regbl_data:
             result.regbl_found = True
             enrichment_meta["regbl_at"] = datetime.now(UTC).isoformat()
+            enrichment_meta["egid_confidence"] = egid_confidence
 
             if regbl.get("construction_year") and building.construction_year is None:
                 building.construction_year = int(regbl["construction_year"])
@@ -3115,7 +3745,7 @@ async def enrich_building(
             # EGRID from RegBL (often more reliable than cadastre lookup)
             if regbl.get("egrid") and building.egrid is None:
                 building.egrid = regbl["egrid"]
-                fields_updated.append("egrid")
+                fields_updated.append("egid")
                 result.egrid_found = True
             # Parcel number
             if regbl.get("parcel_number") and building.parcel_number is None:
@@ -3126,8 +3756,19 @@ async def enrich_building(
                 building.surface_area_m2 = float(regbl["ground_area_m2"])
                 fields_updated.append("surface_area_m2")
 
+            # Don't overwrite building.egid if egid_confidence is unverified
+            # (already set above, just log warning)
+            if egid_confidence == "unverified":
+                result.errors.append("EGID address mismatch — confidence=unverified")
+
             # Store full RegBL data in metadata (dwelling details, heating codes, etc.)
-            enrichment_meta["regbl_data"] = regbl
+            # Exclude internal keys
+            regbl_clean = {k: v for k, v in regbl.items() if not k.startswith("_")}
+            enrichment_meta["regbl_data"] = regbl_clean
+    elif not skip_regbl:
+        source_entries.append(_source_entry("regbl", status="skipped", confidence="low", error="no EGID"))
+    else:
+        source_entries.append(_source_entry("regbl", status="skipped", confidence="low"))
 
     # --- Step 3: Cadastre EGRID ---
     if not skip_cadastre and building.egrid is None and building.latitude and building.longitude:
@@ -3530,6 +4171,50 @@ async def enrich_building(
     result.building_narrative_computed = True
     fields_updated.append("building_narrative")
 
+    # --- Collect source entries from layer fetches ---
+    # Extract _source_entry from enrichment_meta values that are dicts
+    _layer_source_keys = [
+        "radon",
+        "natural_hazards",
+        "noise",
+        "solar",
+        "heritage",
+        "transport",
+        "seismic",
+        "water_protection",
+        "railway_noise",
+        "aircraft_noise",
+        "building_zones",
+        "contaminated_sites",
+        "groundwater_zones",
+        "flood_zones",
+        "mobile_coverage",
+        "broadband",
+        "ev_charging",
+        "thermal_networks",
+        "protected_monuments",
+        "agricultural_zones",
+        "forest_reserves",
+        "military_zones",
+        "accident_sites",
+        "osm_amenities",
+        "osm_building",
+        "nearest_stops",
+    ]
+    for key in _layer_source_keys:
+        data = enrichment_meta.get(key)
+        if isinstance(data, dict) and "_source_entry" in data:
+            source_entries.append(data.pop("_source_entry"))
+
+    # --- Enrichment quality summary ---
+    quality = compute_enrichment_quality(
+        source_entries,
+        geocode_quality=geocode_quality,
+        egid_confidence=egid_confidence,
+    )
+    enrichment_meta["enrichment_quality"] = quality
+    enrichment_meta["source_entries"] = source_entries
+
     # --- Step 42: Persist ---
     if fields_updated or result.image_url:
         enrichment_meta["last_enriched_at"] = datetime.now(UTC).isoformat()
@@ -3551,6 +4236,7 @@ async def enrich_building(
                 "source": "building_enrichment_service",
                 "fields_updated": fields_updated,
                 "errors": result.errors,
+                "enrichment_quality": quality,
             },
         )
         db.add(event)
