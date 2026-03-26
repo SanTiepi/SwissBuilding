@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
 import { RiskGauge } from '@/components/RiskGauge';
@@ -17,6 +18,7 @@ import { TimeMachinePanel } from '@/components/TimeMachinePanel';
 import { PassportCard } from '@/components/PassportCard';
 import { SharedLinksPanel } from '@/components/SharedLinksPanel';
 import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTriggerCard';
+import InstantCardView from '@/components/building-detail/InstantCardView';
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
@@ -31,6 +33,7 @@ import { AudiencePackPreview } from '@/components/building-detail/AudiencePackPr
 import { ArchivePosture } from '@/components/building-detail/ArchivePosture';
 import { CustodyChainPanel } from '@/components/building-detail/CustodyChainPanel';
 import { useAuthStore } from '@/store/authStore';
+import { intelligenceApi } from '@/api/intelligence';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
 import type { Building, Diagnostic, PollutantType, BuildingRiskScore, ActionItem } from '@/types';
 import {
@@ -82,8 +85,18 @@ export function OverviewTab({
   const { t } = useTranslation();
   const currentUser = useAuthStore((s) => s.user);
 
+  const { data: instantCard } = useQuery({
+    queryKey: ['instant-card', buildingId],
+    queryFn: () => intelligenceApi.getInstantCard(buildingId),
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
   return (
     <div className="space-y-6">
+      {/* Instant Card — full intelligence overview */}
+      {instantCard && <InstantCardView data={instantCard} />}
+
       {/* Dashboard Summary (aggregate endpoint) */}
       {dashboard && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">

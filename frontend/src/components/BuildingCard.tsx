@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Home, Factory, Landmark, Store, Layers, MapPin, Calendar, Clock } from 'lucide-react';
 import { useTranslation } from '@/i18n';
-// formatters not needed here
+import { cn } from '@/utils/formatters';
 import { RISK_COLORS } from '@/utils/constants';
 import type { Building, RiskLevel } from '@/types';
 
@@ -106,6 +106,44 @@ export const BuildingCard = memo(function BuildingCard({ building, onClick }: Bu
           </div>
         </div>
       </div>
+
+      {/* Safe-to-start status badge (derived from risk level) */}
+      {riskLevel !== 'unknown' && (
+        <div className="mb-3">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold',
+              riskLevel === 'low'
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : riskLevel === 'medium'
+                  ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                  : riskLevel === 'high'
+                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                    : 'bg-red-200 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+            )}
+          >
+            <span
+              className={cn(
+                'w-2 h-2 rounded-full',
+                riskLevel === 'low'
+                  ? 'bg-emerald-500'
+                  : riskLevel === 'medium'
+                    ? 'bg-yellow-500'
+                    : riskLevel === 'high'
+                      ? 'bg-red-500'
+                      : 'bg-red-700',
+              )}
+            />
+            {riskLevel === 'low'
+              ? 'Pret'
+              : riskLevel === 'medium'
+                ? 'Conditions'
+                : riskLevel === 'high'
+                  ? 'Diagnostic requis'
+                  : 'Risque critique'}
+          </span>
+        </div>
+      )}
 
       {/* Bottom row: construction year + freshness */}
       <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700">
