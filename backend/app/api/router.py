@@ -53,6 +53,7 @@ from app.api import (
     data_quality,
     decision_replay,
     decision_view,
+    demo_path,
     demo_pilot,
     diagnostic_integration,
     diagnostic_quality,
@@ -67,8 +68,10 @@ from app.api import (
     dossier_completion,
     due_diligence,
     eco_clauses,
+    ecosystem_engagements,
     energy_performance,
     environmental_impact,
+    erp_integration,
     events,
     evidence,
     evidence_chain,
@@ -85,6 +88,7 @@ from app.api import (
     gdpr,
     handoff_pack,
     incident_response,
+    indispensability,
     instant_card,
     insurance_risk_assessment,
     intake,
@@ -101,6 +105,7 @@ from app.api import (
     material_inventory,
     material_recommendations,
     materials,
+    memory_transfers,
     monitoring_plan,
     multi_org_dashboard,
     notification_digest,
@@ -110,6 +115,7 @@ from app.api import (
     obligations,
     occupancy_risks,
     occupant_safety,
+    operational_gates,
     organizations,
     ownership,
     pack_impact,
@@ -173,6 +179,7 @@ from app.api import (
     trust_scores,
     unknowns,
     users,
+    value_ledger,
     ventilation_assessment,
     warranty_obligations,
     waste_management,
@@ -249,6 +256,7 @@ api_router.include_router(compliance_artefacts.router, prefix="", tags=["Complia
 api_router.include_router(control_tower_v2.router, prefix="", tags=["Control Tower v2"])
 api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Procedures"])
 api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
+api_router.include_router(demo_path.router, prefix="", tags=["Demo Path"])
 api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
 api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
 api_router.include_router(decision_view.router, prefix="", tags=["Decision View"])
@@ -257,6 +265,7 @@ api_router.include_router(expansion.router, prefix="", tags=["Expansion"])
 api_router.include_router(package_presets.router, prefix="", tags=["Package Presets"])
 api_router.include_router(audience_packs.router, prefix="", tags=["Audience Packs"])
 api_router.include_router(marketplace.router, prefix="", tags=["Marketplace"])
+api_router.include_router(memory_transfers.router, prefix="", tags=["Memory Transfers"])
 api_router.include_router(marketplace_rfq.router, prefix="", tags=["Marketplace RFQ"])
 api_router.include_router(marketplace_trust.router, prefix="", tags=["Marketplace Trust"])
 api_router.include_router(remediation_intelligence.router, prefix="", tags=["Remediation Intelligence"])
@@ -329,6 +338,7 @@ api_router.include_router(regulatory_filing.router, prefix="", tags=["Regulatory
 api_router.include_router(regulatory_watch.router, prefix="", tags=["Regulatory Watch"])
 api_router.include_router(occupant_safety.router, prefix="", tags=["Occupant Safety"])
 api_router.include_router(occupancy_risks.router, prefix="/occupancy-risks", tags=["Occupancy Risks"])
+api_router.include_router(operational_gates.router, prefix="", tags=["Operational Gates"])
 api_router.include_router(permit_tracking.router, prefix="", tags=["Permit Tracking"])
 api_router.include_router(spatial_risk_mapping.router, prefix="", tags=["Spatial Risk Mapping"])
 api_router.include_router(stakeholder_dashboard.router, prefix="", tags=["Stakeholder Dashboard"])
@@ -353,14 +363,18 @@ api_router.include_router(digital_vault.router, prefix="", tags=["Digital Vault"
 api_router.include_router(budget_tracking.router, prefix="", tags=["Budget Tracking"])
 api_router.include_router(ventilation_assessment.router, prefix="", tags=["Ventilation Assessment"])
 api_router.include_router(incident_response.router, prefix="", tags=["Incident Response"])
+api_router.include_router(indispensability.router, prefix="", tags=["Indispensability"])
 api_router.include_router(reporting_metrics.router, prefix="", tags=["Reporting Metrics"])
 api_router.include_router(cross_building_pattern.router, prefix="", tags=["Cross Building Patterns"])
 api_router.include_router(eco_clauses.router, prefix="", tags=["Eco Clauses"])
+api_router.include_router(ecosystem_engagements.router, prefix="", tags=["Ecosystem Engagements"])
+api_router.include_router(erp_integration.router, prefix="", tags=["ERP Integration"])
 api_router.include_router(
     building_certifications.router, prefix="/building-certifications", tags=["Building Certifications"]
 )
 api_router.include_router(notification_rules.router, prefix="/notification-rules", tags=["Notification Rules"])
 api_router.include_router(building_valuations.router, prefix="", tags=["Building Valuations"])
+api_router.include_router(value_ledger.router, prefix="", tags=["Value Ledger"])
 api_router.include_router(work_phases.router, prefix="", tags=["Work Phases"])
 api_router.include_router(building_clustering.router, prefix="", tags=["Building Clustering"])
 api_router.include_router(warranty_obligations.router, prefix="", tags=["Warranty Obligations"])

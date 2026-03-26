@@ -11,9 +11,13 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.user import User
 from app.schemas.instant_card import InstantCardResult
-from app.schemas.portfolio_triage import PortfolioTriageResult
+from app.schemas.portfolio_triage import PortfolioBenchmark, PortfolioTrends, PortfolioTriageResult
 from app.services.instant_card_service import build_instant_card
-from app.services.portfolio_triage_service import get_portfolio_triage
+from app.services.portfolio_triage_service import (
+    get_portfolio_benchmark,
+    get_portfolio_trends,
+    get_portfolio_triage,
+)
 
 router = APIRouter()
 
@@ -48,3 +52,35 @@ async def get_instant_card(
     if result is None:
         raise HTTPException(status_code=404, detail="Building not found")
     return result
+
+
+@router.get(
+    "/organizations/{org_id}/portfolio-benchmark",
+    response_model=PortfolioBenchmark,
+)
+async def portfolio_benchmark(
+    org_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cross-building benchmarking: percentile ranks, KPIs, clusters, patterns."""
+    try:
+        return await get_portfolio_benchmark(db, org_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.get(
+    "/organizations/{org_id}/portfolio-trends",
+    response_model=PortfolioTrends,
+)
+async def portfolio_trends_endpoint(
+    org_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Trend indicators: improved/stable/degraded per building and portfolio-wide."""
+    try:
+        return await get_portfolio_trends(db, org_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e

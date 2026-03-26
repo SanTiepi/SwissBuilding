@@ -57,6 +57,7 @@ from app.models.document_inbox import DocumentInboxItem
 from app.models.document_link import DocumentLink
 from app.models.domain_event import DomainEvent
 from app.models.dossier_version import DossierVersion
+from app.models.ecosystem_engagement import EcosystemEngagement
 from app.models.enrichment_run import BuildingEnrichmentRun
 from app.models.event import Event
 from app.models.evidence_link import EvidenceLink
@@ -82,9 +83,11 @@ from app.models.invitation import Invitation
 from app.models.jurisdiction import Jurisdiction
 from app.models.lease import Lease, LeaseEvent
 from app.models.material import Material
+from app.models.memory_transfer import MemoryTransfer
 from app.models.municipality_review_pack import MunicipalityReviewPack
 from app.models.notification import Notification, NotificationPreference
 from app.models.obligation import Obligation
+from app.models.operational_gate import OperationalGate
 from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
 from app.models.package_preset import PackagePreset
@@ -188,6 +191,7 @@ __all__ = [
     "DocumentLink",
     "DomainEvent",
     "DossierVersion",
+    "EcosystemEngagement",
     "Event",
     "EvidenceLink",
     "EvidencePack",
@@ -210,11 +214,13 @@ __all__ = [
     "Lease",
     "LeaseEvent",
     "Material",
+    "MemoryTransfer",
     "MunicipalityReviewPack",
     "Notification",
     "NotificationPreference",
     "Obligation",
     "OccupantNotice",
+    "OperationalGate",
     "Organization",
     "OwnershipRecord",
     "PackagePreset",

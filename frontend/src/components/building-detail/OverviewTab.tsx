@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
@@ -19,6 +20,17 @@ import { PassportCard } from '@/components/PassportCard';
 import { SharedLinksPanel } from '@/components/SharedLinksPanel';
 import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTriggerCard';
 import InstantCardView from '@/components/building-detail/InstantCardView';
+
+// Below-the-fold intelligence views — lazy-loaded to reduce OverviewTab chunk
+const EvidenceByRoleView = lazy(() => import('@/components/building-detail/EvidenceByRoleView'));
+const IndispensabilityView = lazy(() => import('@/components/building-detail/IndispensabilityView'));
+const EcosystemEngagementsView = lazy(
+  () => import('@/components/building-detail/EcosystemEngagementsView'),
+);
+const OperationalGatesView = lazy(
+  () => import('@/components/building-detail/OperationalGatesView'),
+);
+const MemoryTransferView = lazy(() => import('@/components/building-detail/MemoryTransferView'));
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
@@ -96,6 +108,27 @@ export function OverviewTab({
     <div className="space-y-6">
       {/* Instant Card — full intelligence overview */}
       {instantCard && <InstantCardView data={instantCard} />}
+
+      {/* Below-the-fold intelligence views — lazy-loaded */}
+      <Suspense fallback={null}>
+        <EvidenceByRoleView buildingId={buildingId} instantCard={instantCard} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <IndispensabilityView buildingId={buildingId} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <EcosystemEngagementsView buildingId={buildingId} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <OperationalGatesView buildingId={buildingId} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <MemoryTransferView buildingId={buildingId} />
+      </Suspense>
 
       {/* Dashboard Summary (aggregate endpoint) */}
       {dashboard && (
@@ -531,9 +564,7 @@ export function OverviewTab({
       <ProofDeliveryHistory buildingId={buildingId} />
 
       {/* Public Sector Panels */}
-      {currentUser?.organization_id && (
-        <PublicOwnerModePanel orgId={currentUser.organization_id} />
-      )}
+      {currentUser?.organization_id && <PublicOwnerModePanel orgId={currentUser.organization_id} />}
       <ReviewPackCard buildingId={buildingId} />
       <CommitteePackCard buildingId={buildingId} />
 

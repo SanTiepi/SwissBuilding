@@ -65,6 +65,10 @@ const PortfolioTriage = lazy(() => import('@/pages/PortfolioTriage'));
 const AdminImportReview = lazy(() => import('@/pages/AdminImportReview'));
 const AdminContributorGateway = lazy(() => import('@/pages/AdminContributorGateway'));
 const BuildingDecisionView = lazy(() => import('@/pages/BuildingDecisionView'));
+const DemoPath = lazy(() => import('@/pages/DemoPath'));
+const PilotScorecard = lazy(() => import('@/pages/PilotScorecard'));
+const IndispensabilityDashboard = lazy(() => import('@/pages/IndispensabilityDashboard'));
+const IndispensabilityExportView = lazy(() => import('@/pages/IndispensabilityExportView'));
 
 function LoadingSpinner() {
   return (
@@ -591,6 +595,46 @@ export default function App() {
                 <PageErrorBoundary pageName="Contributor Gateway">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminContributorGateway />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/demo-path"
+              element={
+                <PageErrorBoundary pageName="Demo Path">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <DemoPath />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/pilot-scorecard"
+              element={
+                <PageErrorBoundary pageName="Pilot Scorecard">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <PilotScorecard />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/indispensability"
+              element={
+                <PageErrorBoundary pageName="Indispensability Dashboard">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <IndispensabilityDashboard />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/indispensability-export/:buildingId"
+              element={
+                <PageErrorBoundary pageName="Indispensability Export">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <IndispensabilityExportView />
                   </Suspense>
                 </PageErrorBoundary>
               }
