@@ -8,6 +8,8 @@ test.describe('Login Page', () => {
   });
 
   test('displays all login page elements', async ({ page }) => {
+    await expect(page.getByTestId('error-boundary')).toHaveCount(0);
+
     // App branding
     await expect(page.getByRole('heading', { name: 'SwissBuildingOS' })).toBeVisible();
 
@@ -19,10 +21,10 @@ test.describe('Login Page', () => {
     await expect(page.getByRole('button', { name: /connecter|sign in|anmelden|accedi/i })).toBeVisible();
 
     // Language selector
-    await expect(page.getByRole('button', { name: 'FR' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'DE' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'IT' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'EN' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'FR', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'DE', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'IT', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'EN', exact: true })).toBeVisible();
   });
 
   test('shows validation errors for empty form submission', async ({ page }) => {
@@ -66,11 +68,11 @@ test.describe('Login Page', () => {
     await expect(page.getByRole('button', { name: /connecter/i })).toBeVisible();
 
     // Switch to EN
-    await page.getByRole('button', { name: 'EN' }).click();
+    await page.getByRole('button', { name: 'EN', exact: true }).click();
     await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
 
     // Switch to DE
-    await page.getByRole('button', { name: 'DE' }).click();
+    await page.getByRole('button', { name: 'DE', exact: true }).click();
     await expect(page.getByRole('button', { name: /anmelden|einloggen/i })).toBeVisible();
   });
 

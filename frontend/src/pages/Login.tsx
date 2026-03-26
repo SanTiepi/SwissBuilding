@@ -18,7 +18,7 @@ const LANGUAGES = [
 ] as const;
 
 const DEMO_EMAIL = import.meta.env.VITE_DEMO_ADMIN_EMAIL || 'admin@swissbuildingos.ch';
-const DEMO_PASSWORD = import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'noob';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'noob42';
 const PRELIVE_NO_PASSWORD = import.meta.env.VITE_PRELIVE_AUTH_BYPASS === '1';
 
 export default function Login() {

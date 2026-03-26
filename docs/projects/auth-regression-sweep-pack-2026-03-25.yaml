@@ -1,0 +1,57 @@
+date: 2026-03-25
+problem:
+  summary: unauthenticated backend tests still expect 403 while auth returns 401
+  source_of_truth:
+    file: backend/app/dependencies.py
+    details:
+      - HTTPBearer(auto_error=False)
+      - get_current_user raises credentials_exception with 401
+hard_rule:
+  unauthenticated: 401
+  authenticated_but_forbidden: 403
+strategy:
+  - scan
+  - rewrite_obvious_assertions
+  - rerun_affected_files
+  - rerun_auth_security_cluster
+  - full_backend_once
+tooling:
+  script: backend/scripts/run_auth_regression_sweep.py
+  commands:
+    scan: cd backend && python scripts/run_auth_regression_sweep.py scan
+    rewrite: cd backend && python scripts/run_auth_regression_sweep.py rewrite
+    pytest: cd backend && python scripts/run_auth_regression_sweep.py pytest
+validation:
+  minimal:
+    - cd backend && python scripts/run_auth_regression_sweep.py pytest
+    - cd backend && python -m pytest tests/test_security.py tests/test_search.py tests/test_access_control.py -q --tb=line
+    - cd backend && python scripts/run_local_test_loop.py confidence
+  full:
+    - cd backend && python -m pytest tests/ -q
+priority_files:
+  - tests/test_security.py
+  - tests/test_search.py
+  - tests/test_access_control.py
+  - tests/test_portfolio.py
+  - tests/test_reporting_metrics.py
+  - tests/test_ui_simulation.py
+tokens:
+  unauth_markers:
+    - unauth
+    - unauthorized
+    - requires_auth
+    - no_auth
+    - without_auth
+    - missing_auth
+  forbidden_markers:
+    - forbidden
+    - wrong_role
+    - inactive
+    - disabled
+    - permission
+acceptance:
+  - no obvious unauthenticated tests still expect 403
+  - role and permission tests still expect 403
+  - targeted auth/security cluster green
+  - confidence loop green
+  - final full backend run green

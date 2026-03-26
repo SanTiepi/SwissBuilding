@@ -56,7 +56,12 @@ async def create_building_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new building."""
-    building = await create_building(db, data, current_user.id)
+    building = await create_building(
+        db,
+        data,
+        current_user.id,
+        organization_id=current_user.organization_id,
+    )
     await log_action(db, current_user.id, "create", "building", building.id)
     try:
         from app.services.search_service import index_building

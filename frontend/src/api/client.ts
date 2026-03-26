@@ -1,11 +1,16 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 
+export interface ApiRequestConfig extends AxiosRequestConfig {
+  skipRetry?: boolean;
+}
+
 interface RetryableConfig extends InternalAxiosRequestConfig {
   __retryCount?: number;
+  skipRetry?: boolean;
 }
 
 function isRetryable(error: AxiosError): boolean {
@@ -38,6 +43,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(undefined, async (error: AxiosError) => {
   const config = error.config as RetryableConfig | undefined;
   if (!config || !isRetryable(error)) return Promise.reject(error);
+  if (config.skipRetry) return Promise.reject(error);
 
   config.__retryCount = config.__retryCount ?? 0;
   if (config.__retryCount >= MAX_RETRIES) return Promise.reject(error);

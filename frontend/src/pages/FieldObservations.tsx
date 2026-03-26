@@ -130,6 +130,7 @@ export default function FieldObservations() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
+          data-testid="field-observations-create-button"
           className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
           <Plus className="h-4 w-4" />
@@ -436,6 +437,7 @@ function CreateObservationModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div
+        data-testid="field-observations-create-modal"
         className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
       >
@@ -455,6 +457,7 @@ function CreateObservationModal({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              data-testid="field-observations-form-title"
               className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               required
             />
@@ -468,6 +471,7 @@ function CreateObservationModal({
               <select
                 value={observationType}
                 onChange={(e) => setObservationType(e.target.value as ObservationType)}
+                data-testid="field-observations-form-type"
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 {observationTypes.map((ot) => (
@@ -485,6 +489,7 @@ function CreateObservationModal({
               <select
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value as ObservationSeverity)}
+                data-testid="field-observations-form-severity"
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 {severityLevels.map((s) => (
@@ -504,6 +509,7 @@ function CreateObservationModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+              data-testid="field-observations-form-description"
               className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
@@ -516,6 +522,7 @@ function CreateObservationModal({
               type="text"
               value={locationDescription}
               onChange={(e) => setLocationDescription(e.target.value)}
+              data-testid="field-observations-form-location"
               className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
@@ -531,6 +538,7 @@ function CreateObservationModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
+              data-testid="field-observations-form-submit"
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {isSubmitting && <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />}

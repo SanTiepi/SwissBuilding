@@ -3,7 +3,7 @@ import process from 'node:process';
 const DEFAULTS = {
   apiBase: 'http://localhost:8000',
   email: 'admin@swissbuildingos.ch',
-  password: 'noob',
+  password: 'noob42',
   minBuildings: 3,
   minDiagnostics: 1,
   minActions: 1,

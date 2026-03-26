@@ -3,7 +3,7 @@ import { Page, expect } from '@playwright/test';
 import { AUTH_STORAGE_KEY } from './auth';
 
 const DEFAULT_REAL_E2E_EMAIL = process.env.E2E_REAL_ADMIN_EMAIL || 'admin@swissbuildingos.ch';
-const DEFAULT_REAL_E2E_PASSWORD = process.env.E2E_REAL_ADMIN_PASSWORD || 'noob';
+const DEFAULT_REAL_E2E_PASSWORD = process.env.E2E_REAL_ADMIN_PASSWORD || 'noob42';
 
 /**
  * Log in via the real UI login form.
@@ -43,7 +43,7 @@ async function getStoredAuthToken(page: Page): Promise<string | null> {
 /**
  * Get a valid auth token or throw with an actionable message.
  */
-async function requireAuthToken(page: Page): Promise<string> {
+export async function requireAuthToken(page: Page): Promise<string> {
   const token = await getStoredAuthToken(page);
   if (!token) {
     throw new Error(

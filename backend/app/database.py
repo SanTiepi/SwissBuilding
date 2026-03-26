@@ -15,14 +15,15 @@ from app.config import settings
 _engine_kwargs: dict = {"echo": False}
 
 if settings.DATABASE_URL.startswith("sqlite"):
-    from sqlalchemy.pool import StaticPool
+    _engine_kwargs["connect_args"] = {"check_same_thread": False}
 
-    _engine_kwargs.update(
-        {
-            "connect_args": {"check_same_thread": False},
-            "poolclass": StaticPool,
-        }
-    )
+    # Keep a single shared connection only for in-memory SQLite.
+    # File-backed SQLite is used for local preview / real E2E and needs
+    # independent connections to avoid cross-request transaction bleed.
+    if ":memory:" in settings.DATABASE_URL:
+        from sqlalchemy.pool import StaticPool
+
+        _engine_kwargs["poolclass"] = StaticPool
 else:
     _engine_kwargs.update(
         {

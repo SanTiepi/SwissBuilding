@@ -52,7 +52,7 @@ async def _enrich_zone(db: AsyncSession, zone: Zone) -> dict:
 async def list_zones_endpoint(
     building_id: UUID,
     page: int = Query(1, ge=1),
-    size: int = Query(20, ge=1, le=100),
+    size: int = Query(20, ge=1, le=200),
     zone_type: str | None = None,
     parent_zone_id: str | None = None,
     current_user: User = Depends(require_permission("zones", "list")),

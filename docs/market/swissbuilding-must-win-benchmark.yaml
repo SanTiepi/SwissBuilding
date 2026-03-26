@@ -1,0 +1,165 @@
+as_of: 2026-03-25
+thesis: >
+  SwissBuilding is only worth building if it wins at the intersection of
+  canonical building memory, procedural readiness, reusable evidence,
+  multi-actor coordination, and Swiss regulatory depth.
+
+white_space:
+  summary: >
+    Existing tools are strong in project collaboration, ERP back office,
+    portfolio analytics, or homeowner guidance, but weak at unifying one
+    building into a long-lived procedural and evidence workspace.
+  broken_workflows:
+    - fragmented_building_memory
+    - invisible_procedure
+    - repeated_dossier_rebuild
+    - dead_documents_without_context
+    - unclear_accountability
+    - weak_public_data_operationalization
+
+categories:
+  collaboration_execution:
+    players:
+      - smino
+      - PlanRadar
+      - Dalux
+      - Procore
+    already_strong_on:
+      - project_communication
+      - task_management
+      - defect_management
+      - field_capture
+      - plans_and_bim
+      - audit_trails
+    implication: >
+      SwissBuilding should not compete as a generic chantier collaboration
+      tool. It must beat this category on continuity, procedure, and
+      evidence reuse instead.
+  swiss_property_erp:
+    players:
+      - GARAIO_REM
+      - W_and_W
+      - AbaImmo
+    already_strong_on:
+      - accounting
+      - rents_and_contracts
+      - installed_workflows
+      - back_office_legitimacy
+    implication: >
+      SwissBuilding should integrate with this category rather than try to
+      replace it first.
+  portfolio_intelligence:
+    players:
+      - Wuest_Dimensions
+      - Scandens
+      - Optiml
+    already_strong_on:
+      - scenario_analysis
+      - decarbonization_planning
+      - portfolio_steering
+      - institutional_decision_support
+    implication: >
+      SwissBuilding should ground any portfolio layer in building-level
+      proof, procedural state, and reusable evidence.
+  homeowner_passport:
+    players:
+      - Houzy
+      - CLEA
+      - Woningpas
+      - Gebouwenpas
+    already_strong_on:
+      - simple_owner_language
+      - maintenance_guidance
+      - digital_passport_mental_model
+      - document_sharing
+    implication: >
+      SwissBuilding must match homeowner clarity while going much deeper on
+      procedure, traceability, and multi-actor coordination.
+
+must_win_axes:
+  - canonical_building_file_across_time
+  - procedural_readiness_not_just_document_storage
+  - once_only_evidence_reuse
+  - swiss_official_data_depth_by_default
+  - one_operating_inbox_per_building_and_portfolio
+  - better_authority_experience
+  - multi_actor_coordination_with_scope
+  - homeowner_grade_simplicity_with_professional_rigor
+  - packs_and_deliveries_as_first_class_objects
+  - switzerland_deep_europe_shaped_architecture
+
+priority_frictions_to_kill:
+  - invisible_procedure
+  - dead_documents
+  - rebuilt_dossiers
+  - lost_accountability
+  - broken_continuity
+
+anti_goals:
+  - swiss_planradar_clone
+  - swiss_property_erp_replacement_first
+  - dashboard_without_action_or_proof
+  - homeowner_advice_only
+  - regulatory_encyclopedia_without_workflow
+
+ship_tests:
+  collaboration_surface: >
+    If the surface is mainly collaboration, it must beat existing tools on
+    regulatory readiness, continuity, or evidence value; otherwise integrate.
+  back_office_surface: >
+    If the surface is mainly ERP/back office, treat incumbents as systems of
+    record unless there is a clearly superior building-workspace angle.
+  portfolio_surface: >
+    If the surface is mainly analytics, it must be grounded in live building
+    proof and procedure, not only scenario logic.
+  owner_surface: >
+    If the surface is owner-facing, it must be simpler than consumer tools
+    while remaining trustworthy for professional and authority use.
+  regulatory_surface: >
+    If the surface is regulatory, it must drive blockers, obligations,
+    routing, procedures, packs, or next actions.
+
+current_roadmap_implications:
+  preserve:
+    - permit_tracking_as_calculated_need_layer
+    - ControlTower_as_single_action_aggregation_surface
+    - Obligation_as_single_deadline_entity
+    - DocumentInbox_as_single_incoming_document_queue
+  expand:
+    - WorkspaceMembership
+    - PermitProcedure
+    - ProofDelivery
+    - SwissRules
+  avoid:
+    - second_permit_logic
+    - second_action_system
+    - second_obligation_model
+    - generic_dms_without_procedure_and_reuse
+
+sources:
+  official:
+    - https://www.are.admin.ch/fr/horszone
+    - https://commission.europa.eu/news-and-media/news/once-only-technical-system-key-creation-first-european-data-space-2022-07-20_en
+    - https://commission.europa.eu/projects/single-digital-gateway_en
+    - https://www.gov.uk/service-manual/service-standard/point-1-understand-user-needs
+  vendor:
+    - https://www.smino.com/en/
+    - https://www.planradar.com/us/about-us/
+    - https://www.planradar.com/gb/construction-plan/
+    - https://www.planradar.com/ch/produkt/planmanagement/
+    - https://www.dalux.com/dalux-box/
+    - https://www.procore.com/platform/document-management
+    - https://www.garaio-rem.ch/de/home
+    - https://www.wwimmo.ch/
+    - https://www.abacus.ch/branchen/immobilienbranche/immobilienbewirtschaftung/uebersicht
+    - https://downloads.abacus.ch/downloads/abaconnect/webservices/
+    - https://en.houzy.ch/
+    - https://en.houzy.ch/about-us
+    - https://en.houzy.ch/tools/renovation-calculator
+    - https://clea.qualitel.org/
+    - https://clea.qualitel.org/conseil/quest-ce-que-le-carnet-dinformation-du-logement/
+    - https://woningpas.vlaanderen.be/
+    - https://www.vlaanderen.be/veka/woningpas-en-gebouwenpas-zorgen-voor-digitale-sprong-vooruit-in-2025
+    - https://www.wuestpartner.com/services-products/digital-solutions-for-real-estate/wuest-dimensions/
+    - https://www.wuestpartner.com/services-products/digital-solutions-for-real-estate/wuest-dimensions/wuest-dimensions-community/
+    - https://www.scandens.ch/en/

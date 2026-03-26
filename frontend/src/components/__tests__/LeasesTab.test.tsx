@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { leasesApi } from '@/api/leases';
 import LeasesTab from '../building-detail/LeasesTab';
 
 vi.mock('@/api/leases', () => ({
@@ -132,5 +133,37 @@ describe('LeasesTab', () => {
       expect(screen.getByText('BAIL-001')).toBeInTheDocument();
       expect(screen.getByText('BAIL-002')).toBeInTheDocument();
     });
+  });
+
+  it('auto-selects a unique tenant contact in the create modal', async () => {
+    vi.mocked(leasesApi.lookupContacts).mockResolvedValueOnce([
+      {
+        id: 'tenant-qa-1',
+        name: 'Camille Rochat',
+        email: 'camille.rochat@example.ch',
+        contact_type: 'person',
+      },
+    ]);
+
+    render(<LeasesTab buildingId="b-1" />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('leases-create-button')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('leases-create-button'));
+    fireEvent.change(screen.getByTestId('contact-search-input'), {
+      target: { value: 'Camille' },
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('contact-selected-name')).toHaveTextContent('Camille Rochat');
+      },
+      { timeout: 2000 },
+    );
+
+    const hiddenField = document.querySelector<HTMLInputElement>('input[type="hidden"]');
+    expect(hiddenField?.value).toBe('tenant-qa-1');
   });
 });

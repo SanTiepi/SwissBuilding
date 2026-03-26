@@ -403,6 +403,7 @@ export default function BuildingsList() {
         <RoleGate allowedRoles={['admin', 'diagnostician']}>
           <button
             onClick={openCreateModal}
+            data-testid="buildings-create-button"
             className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -621,7 +622,10 @@ export default function BuildingsList() {
       {/* Create/Edit Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6">
+          <div
+            data-testid="buildings-create-modal"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 {editingBuilding ? t('building.edit') || 'Edit building' : t('building.add')}
@@ -786,6 +790,7 @@ export default function BuildingsList() {
               <button
                 type="button"
                 onClick={() => setShowAdvancedFields(!showAdvancedFields)}
+                data-testid="buildings-form-advanced-toggle"
                 className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors"
               >
                 {showAdvancedFields ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -896,6 +901,7 @@ export default function BuildingsList() {
                 <button
                   type="submit"
                   disabled={createBuilding.isPending || formSuccess}
+                  data-testid="buildings-form-submit"
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed"
                 >
                   {createBuilding.isPending && <Loader2 className="w-4 h-4 animate-spin" />}

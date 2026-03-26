@@ -1,4 +1,4 @@
-import { apiClient } from '@/api/client';
+import { apiClient, type ApiRequestConfig } from '@/api/client';
 import type { BuildingEvent, Document } from '@/types';
 
 export const documentsApi = {
@@ -19,9 +19,11 @@ export const documentsApi = {
     if (description) {
       formData.append('description', description);
     }
-    const response = await apiClient.post<Document>(`/buildings/${buildingId}/documents`, formData, {
+    const requestConfig: ApiRequestConfig = {
       headers: { 'Content-Type': 'multipart/form-data' },
-    });
+      skipRetry: true,
+    };
+    const response = await apiClient.post<Document>(`/buildings/${buildingId}/documents`, formData, requestConfig);
     return response.data;
   },
 

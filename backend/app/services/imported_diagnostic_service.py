@@ -74,9 +74,7 @@ def project_summary(publication: DiagnosticReportPublication) -> ImportedDiagnos
     )
 
 
-async def get_building_diagnostic_summaries(
-    db: AsyncSession, building_id: UUID
-) -> list[ImportedDiagnosticSummary]:
+async def get_building_diagnostic_summaries(db: AsyncSession, building_id: UUID) -> list[ImportedDiagnosticSummary]:
     """Get all imported diagnostic summaries for a building."""
     result = await db.execute(
         select(DiagnosticReportPublication).where(DiagnosticReportPublication.building_id == building_id)

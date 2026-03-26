@@ -1,0 +1,11 @@
+Diagnostic preparatoire SwissBuilding
+
+Immeuble mixte a Lausanne.
+Objet: controle documentaire avant travaux techniques et amenagement locatif.
+Points verifies:
+- identifiants EGID / EGRID / official_id
+- lot ownership / lease / contracts
+- intervention planifiee
+- observation terrain initiale
+
+Piece jointe de demonstration pour test UI real-backend.

@@ -15,10 +15,19 @@ def test_has_vd_filter() -> None:
 
 
 async def test_main_skip_vaud_only_runs_seed(monkeypatch, capsys) -> None:
-    called = {"seed": 0, "harvest": 0}
+    called = {"seed": 0, "workspace": 0, "harvest": 0}
 
     async def _seed() -> None:
         called["seed"] += 1
+
+    async def _seed_workspace() -> dict:
+        called["workspace"] += 1
+        return {
+            "building_address": "Avenue des Alpes 18",
+            "contacts_count": 9,
+            "leases_count": 3,
+            "contracts_count": 3,
+        }
 
     async def _harvest(**kwargs):  # pragma: no cover - should not be called
         called["harvest"] += 1
@@ -41,18 +50,27 @@ async def test_main_skip_vaud_only_runs_seed(monkeypatch, capsys) -> None:
         ),
     )
     monkeypatch.setattr(seed_demo, "seed", _seed)
+    monkeypatch.setattr(seed_demo, "_seed_workspace", _seed_workspace)
     monkeypatch.setattr(seed_demo, "harvest_vd_buildings", _harvest)
 
     await seed_demo.main()
 
     out = capsys.readouterr().out
-    assert called == {"seed": 1, "harvest": 0}
+    assert called == {"seed": 1, "workspace": 1, "harvest": 0}
     assert "Vaud import skipped" in out
 
 
 async def test_main_requires_filter_without_skip(monkeypatch) -> None:
     async def _seed() -> None:
         return None
+
+    async def _seed_workspace() -> dict:
+        return {
+            "building_address": "Avenue des Alpes 18",
+            "contacts_count": 9,
+            "leases_count": 3,
+            "contracts_count": 3,
+        }
 
     monkeypatch.setattr(
         seed_demo,
@@ -71,6 +89,7 @@ async def test_main_requires_filter_without_skip(monkeypatch) -> None:
         ),
     )
     monkeypatch.setattr(seed_demo, "seed", _seed)
+    monkeypatch.setattr(seed_demo, "_seed_workspace", _seed_workspace)
 
     with pytest.raises(SystemExit, match="Missing Vaud filter"):
         await seed_demo.main()
@@ -81,6 +100,15 @@ async def test_main_harvests_and_applies_vaud_records(monkeypatch, tmp_path, cap
 
     async def _seed() -> None:
         calls["seed"] = True
+
+    async def _seed_workspace() -> dict:
+        calls["workspace"] = True
+        return {
+            "building_address": "Avenue des Alpes 18",
+            "contacts_count": 9,
+            "leases_count": 3,
+            "contracts_count": 3,
+        }
 
     async def _harvest(**kwargs):
         calls["harvest"] = kwargs
@@ -111,6 +139,7 @@ async def test_main_harvests_and_applies_vaud_records(monkeypatch, tmp_path, cap
         ),
     )
     monkeypatch.setattr(seed_demo, "seed", _seed)
+    monkeypatch.setattr(seed_demo, "_seed_workspace", _seed_workspace)
     monkeypatch.setattr(seed_demo, "harvest_vd_buildings", _harvest)
     monkeypatch.setattr(seed_demo, "write_output_json", _write)
     monkeypatch.setattr(seed_demo, "apply_records", _apply)
@@ -119,6 +148,7 @@ async def test_main_harvests_and_applies_vaud_records(monkeypatch, tmp_path, cap
 
     out = capsys.readouterr().out
     assert calls["seed"] is True
+    assert calls["workspace"] is True
     assert calls["harvest"] == {
         "commune": "Lausanne",
         "municipality_ofs": None,
@@ -139,6 +169,15 @@ async def test_main_dry_run_vaud_skips_apply(monkeypatch, tmp_path, capsys) -> N
 
     async def _seed() -> None:
         calls["seed"] = True
+
+    async def _seed_workspace() -> dict:
+        calls["workspace"] = True
+        return {
+            "building_address": "Avenue des Alpes 18",
+            "contacts_count": 9,
+            "leases_count": 3,
+            "contracts_count": 3,
+        }
 
     async def _harvest(**kwargs):
         calls["harvest"] = kwargs
@@ -169,6 +208,7 @@ async def test_main_dry_run_vaud_skips_apply(monkeypatch, tmp_path, capsys) -> N
         ),
     )
     monkeypatch.setattr(seed_demo, "seed", _seed)
+    monkeypatch.setattr(seed_demo, "_seed_workspace", _seed_workspace)
     monkeypatch.setattr(seed_demo, "harvest_vd_buildings", _harvest)
     monkeypatch.setattr(seed_demo, "write_output_json", _write)
     monkeypatch.setattr(seed_demo, "apply_records", _apply)
@@ -177,5 +217,6 @@ async def test_main_dry_run_vaud_skips_apply(monkeypatch, tmp_path, capsys) -> N
 
     out = capsys.readouterr().out
     assert calls["seed"] is True
+    assert calls["workspace"] is True
     assert "apply" not in calls
     assert "Dry-run Vaud mode enabled" in out

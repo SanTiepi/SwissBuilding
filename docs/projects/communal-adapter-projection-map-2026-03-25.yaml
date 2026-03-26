@@ -1,0 +1,71 @@
+date: 2026-03-25
+purpose: Map communal research into existing SwissBuilding product anchors.
+project_into:
+  - SwissRules
+  - permit_tracking
+  - PermitProcedure
+  - Obligation
+  - ControlTower
+  - authority_pack
+  - ProofDelivery
+do_not_create:
+  - second_permit_engine
+  - second_action_inbox
+  - second_deadline_entity
+  - commune_only_document_model
+projection_chain:
+  - official_communal_source
+  - CommunalAdapterProfile
+  - CommunalRuleOverride_or_CommunalProcedureVariant
+  - ApplicabilityEvaluation
+  - product_effects
+effects:
+  permit_need:
+    targets:
+      - permit_tracking
+      - manual_review_flag
+  procedure_routing:
+    targets:
+      - PermitProcedure
+      - authority_assignment
+      - ControlTower
+  proof_requirement:
+    targets:
+      - authority_pack
+      - ProofDelivery
+      - ControlTower
+  blocker:
+    targets:
+      - ControlTower
+      - Obligation
+      - PermitProcedure
+  manual_review:
+    targets:
+      - manual_review_required
+      - ControlTower
+communes:
+  Nyon:
+    projections:
+      - public_inquiry_timing
+      - official_surveyor_plan_requirement
+      - permit_framing_explanation
+  Meyrin:
+    projections:
+      - commune_canton_route_split
+      - public_domain_dependency
+      - local_review_branch
+  Lausanne:
+    projections:
+      - permit_exempt_branch
+      - work_declaration_proof_requirement
+      - heritage_or_urban_review_step
+  Ville_de_Fribourg:
+    projections:
+      - commune_prefecture_or_canton_routing
+      - urban_or_heritage_review_step
+      - friac_context
+acceptance:
+  - clearer_authority_routing
+  - earlier_blocker_visibility
+  - earlier_proof_completeness_visibility
+  - explicit_manual_review_flag

@@ -1,0 +1,75 @@
+date: 2026-03-25
+tiers:
+  - code: tier_a
+    name: procedural_anchor_jurisdictions
+    authorities:
+      - code: vd_camac
+        role: primary_cantonal_permit_anchor
+        current_source: vd_camac
+        adapter_posture:
+          - source_watch_now
+          - procedure_template_now
+          - submission_adapter_later
+      - code: ge_building_auth
+        role: second_cantonal_permit_anchor
+        current_source: ge_building_auth
+        adapter_posture:
+          - source_watch_now
+          - procedure_template_now
+          - submission_adapter_later
+      - code: fr_seca
+        role: third_permit_anchor
+        current_source: fr_seca
+        adapter_posture:
+          - source_watch_now
+          - procedure_template_now
+          - submission_adapter_later
+  - code: tier_b
+    name: federal_and_execution_bodies
+    authorities:
+      - code: suva_ch
+        role: execution_and_notification_body
+        current_source: suva_asbestos
+        adapter_posture:
+          - filing_requirement_now
+          - workflow_adapter_later
+      - code: federal_rule_anchors
+        role: watch_and_explainability_anchors
+        current_source:
+          - are_hors_zone
+          - are_lat_oat
+          - bafu_oled
+          - bag_radon_legal
+          - bak_isos
+          - ebgb_lhand
+        adapter_posture:
+          - watch_now
+          - explainability_now
+  - code: tier_c
+    name: communal_authorities
+    authorities:
+      - code: communal_building_authority
+        role: commune_specific_permits_and_constraints
+        current_source: communal_placeholder
+        adapter_posture:
+          - manual_review_now
+          - pilot_commune_adapters_later
+  - code: tier_d
+    name: utilities_and_concession_bodies
+    authorities:
+      - code: utility_placeholder
+        role: network_and_concession_constraints
+        current_source: utility_placeholder
+        adapter_posture:
+          - source_map_later
+          - adapter_after_authority_flow
+adapter_types:
+  - watch_adapter
+  - procedure_adapter
+  - submission_adapter
+  - manual_review_adapter
+build_rule:
+  - improve_procedural_clarity
+  - improve_required_proof_clarity
+  - improve_blocker_visibility
+  - improve_authority_routing

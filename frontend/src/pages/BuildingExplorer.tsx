@@ -311,11 +311,12 @@ export default function BuildingExplorer() {
   }, []);
 
   // Fetch elements for selected zone
-  const { data: elements, isLoading: elementsLoading } = useQuery({
+  const { data: elementsPage, isLoading: elementsLoading } = useQuery({
     queryKey: ['elements', buildingId, selectedZoneId],
     queryFn: () => elementsApi.list(buildingId!, selectedZoneId!),
     enabled: !!buildingId && !!selectedZoneId,
   });
+  const elements = useMemo(() => elementsPage?.items ?? [], [elementsPage]);
 
   // Fetch plans for building
   const { data: plans } = useQuery({
@@ -424,13 +425,13 @@ export default function BuildingExplorer() {
     const totalZones = zones.length;
     const totalElements = zones.reduce((sum, z) => sum + (z.elements_count || 0), 0);
     // We can only count materials from loaded elements
-    const totalMaterials = (elements ?? []).reduce((sum, e) => sum + (e.materials_count || 0), 0);
+    const totalMaterials = elements.reduce((sum, e) => sum + (e.materials_count || 0), 0);
     return { totalZones, totalElements, totalMaterials };
   }, [zones, elements]);
 
   // Condition distribution from loaded elements
   const conditionDistribution = useMemo(() => {
-    if (!elements || elements.length === 0) return null;
+    if (elements.length === 0) return null;
     const dist: Record<string, number> = { good: 0, fair: 0, poor: 0, critical: 0, unknown: 0 };
     for (const el of elements) {
       const cond = el.condition || 'unknown';
@@ -485,6 +486,7 @@ export default function BuildingExplorer() {
               <RoleGate allowedRoles={['admin', 'diagnostician']}>
                 <button
                   onClick={() => setShowZoneForm(!showZoneForm)}
+                  data-testid="explorer-zone-create-toggle"
                   className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded"
                 >
                   <Plus className="w-4 h-4" />
@@ -509,17 +511,22 @@ export default function BuildingExplorer() {
 
           {/* Zone create form */}
           {showZoneForm && (
-            <div className="p-3 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950/40 space-y-2">
+            <div
+              data-testid="explorer-zone-form"
+              className="p-3 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950/40 space-y-2"
+            >
               <input
                 type="text"
                 value={zoneName}
                 onChange={(e) => setZoneName(e.target.value)}
                 placeholder={t('zone.name') || 'Zone name'}
+                data-testid="explorer-zone-name"
                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded focus:ring-1 focus:ring-red-500 focus:border-red-500"
               />
               <select
                 value={zoneType}
                 onChange={(e) => setZoneType(e.target.value as ZoneType)}
+                data-testid="explorer-zone-type"
                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded"
               >
                 {ZONE_TYPES.map((zt) => (
@@ -531,6 +538,7 @@ export default function BuildingExplorer() {
               <select
                 value={parentZoneId}
                 onChange={(e) => setParentZoneId(e.target.value)}
+                data-testid="explorer-zone-parent"
                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded"
               >
                 <option value="">{t('explorer.no_parent') || 'No parent (root zone)'}</option>
@@ -549,6 +557,7 @@ export default function BuildingExplorer() {
                   })
                 }
                 disabled={!zoneName.trim() || createZone.isPending}
+                data-testid="explorer-zone-submit"
                 className="w-full px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
               >
                 {createZone.isPending ? (
@@ -716,7 +725,12 @@ export default function BuildingExplorer() {
               {/* Zone header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">{selectedZone?.name}</h2>
+                  <h2
+                    data-testid="explorer-selected-zone-name"
+                    className="text-lg font-bold text-gray-900 dark:text-white"
+                  >
+                    {selectedZone?.name}
+                  </h2>
                   <p className="text-sm text-gray-500 dark:text-slate-400">
                     {t(`zone_type.${selectedZone?.zone_type}`) || selectedZone?.zone_type}
                     {selectedZone?.floor_number != null &&
@@ -726,6 +740,7 @@ export default function BuildingExplorer() {
                 <RoleGate allowedRoles={['admin', 'diagnostician']}>
                   <button
                     onClick={() => setShowElementForm(!showElementForm)}
+                    data-testid="explorer-element-create-toggle"
                     className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700"
                   >
                     <Plus className="w-4 h-4" />
@@ -736,17 +751,22 @@ export default function BuildingExplorer() {
 
               {/* Element create form */}
               {showElementForm && (
-                <div className="mb-4 p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg space-y-3">
+                <div
+                  data-testid="explorer-element-form"
+                  className="mb-4 p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg space-y-3"
+                >
                   <input
                     type="text"
                     value={elementName}
                     onChange={(e) => setElementName(e.target.value)}
                     placeholder={t('element.name') || 'Element name'}
+                    data-testid="explorer-element-name"
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded focus:ring-1 focus:ring-red-500 focus:border-red-500"
                   />
                   <select
                     value={elementType}
                     onChange={(e) => setElementType(e.target.value as ElementType)}
+                    data-testid="explorer-element-type"
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded"
                   >
                     {ELEMENT_TYPES.map((et) => (
@@ -758,6 +778,7 @@ export default function BuildingExplorer() {
                   <button
                     onClick={() => createElement.mutate({ name: elementName, element_type: elementType })}
                     disabled={!elementName.trim() || createElement.isPending}
+                    data-testid="explorer-element-submit"
                     className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                   >
                     {createElement.isPending ? (
@@ -774,7 +795,7 @@ export default function BuildingExplorer() {
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-5 h-5 animate-spin text-gray-400 dark:text-slate-500" />
                 </div>
-              ) : !elements || elements.length === 0 ? (
+              ) : elements.length === 0 ? (
                 <p className="text-sm text-gray-500 dark:text-slate-400 py-8 text-center">
                   {t('explorer.no_elements') || 'No elements in this zone.'}
                 </p>
@@ -1032,6 +1053,7 @@ function ElementCard({
 
   return (
     <div
+      data-testid="explorer-element-card"
       className={`bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden border-l-4 ${condBorderColor[condition] || condBorderColor.unknown}`}
     >
       {/* Element header */}
@@ -1069,6 +1091,7 @@ function ElementCard({
               e.stopPropagation();
               setShowMaterialForm(showMaterialForm === element.id ? null : element.id);
             }}
+            data-testid="explorer-material-create-toggle"
             className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded"
             title={t('explorer.add_material') || 'Add material'}
           >
@@ -1096,17 +1119,22 @@ function ElementCard({
         <div className="border-t border-gray-100 dark:border-slate-800">
           {/* Material create form */}
           {showMaterialForm === element.id && (
-            <div className="p-3 bg-gray-50 dark:bg-slate-950/40 border-b border-gray-100 dark:border-slate-800 flex gap-2 items-end">
+            <div
+              data-testid="explorer-material-form"
+              className="p-3 bg-gray-50 dark:bg-slate-950/40 border-b border-gray-100 dark:border-slate-800 flex gap-2 items-end"
+            >
               <input
                 type="text"
                 value={materialName}
                 onChange={(e) => setMaterialName(e.target.value)}
                 placeholder={t('material.name') || 'Material name'}
+                data-testid="explorer-material-name"
                 className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded focus:ring-1 focus:ring-red-500 focus:border-red-500"
               />
               <select
                 value={materialType}
                 onChange={(e) => setMaterialType(e.target.value as MaterialType)}
+                data-testid="explorer-material-type"
                 className="px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded"
               >
                 {MATERIAL_TYPES.map((mt) => (
@@ -1118,6 +1146,7 @@ function ElementCard({
               <button
                 onClick={() => onCreateMaterial(element.id)}
                 disabled={!materialName.trim() || createMaterialPending}
+                data-testid="explorer-material-submit"
                 className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
               >
                 {createMaterialPending ? (

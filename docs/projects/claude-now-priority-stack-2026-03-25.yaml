@@ -1,0 +1,35 @@
+date: 2026-03-25
+purpose: Minimal high-leverage stack for Claude when the catalog is too large.
+immediate_order:
+  - step: unblock_validation_noise
+    packs:
+      - auth-regression-sweep-pack-2026-03-25.md
+    emphasis:
+      - close_401_vs_403_cluster
+      - avoid_full_suites_until_closed
+  - step: restore_core_product_truth
+    briefs: [1, 2, 3]
+    why:
+      - procedure
+      - operating_inbox
+      - proof_trace
+  - step: make_product_obviously_better
+    briefs: [25, 26, 27]
+    why:
+      - must_win_workflows
+      - proof_reuse
+      - explicit_uncertainty
+  - step: reduce_adoption_and_trust_friction
+    briefs: [31, 32, 33]
+    why:
+      - migration_friction
+      - freshness
+      - identity_resolution
+  - step: make_authority_work_feel_real
+    briefs: [51]
+    why:
+      - bounded_submission_room
+buyer_demo_stack:
+  briefs: [16, 18, 37, 45, 46]
+public_sector_stack:
+  briefs: [15, 20, 47, 51]

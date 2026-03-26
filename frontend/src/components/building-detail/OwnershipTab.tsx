@@ -69,6 +69,14 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
   const [selectedContactName, setSelectedContactName] = useState('');
   const contactDropdownRef = useRef<HTMLDivElement>(null);
 
+  const assignSelectedContact = (contact: ContactOption) => {
+    setFormState((s) => ({ ...s, owner_id: contact.id, owner_type: 'contact' }));
+    setSelectedContactName(contact.name);
+    setContactQuery('');
+    setContactResults([]);
+    setShowContactDropdown(false);
+  };
+
   // Debounced contact search
   useEffect(() => {
     if (isEdit) return;
@@ -81,7 +89,11 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
       try {
         const results = await leasesApi.lookupContacts(buildingId, contactQuery);
         setContactResults(results);
-        setShowContactDropdown(true);
+        if (results.length === 1) {
+          assignSelectedContact(results[0]);
+        } else {
+          setShowContactDropdown(true);
+        }
       } catch {
         setContactResults([]);
       } finally {
@@ -89,7 +101,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [contactQuery, isEdit]);
+  }, [buildingId, contactQuery, isEdit]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -103,10 +115,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
   }, []);
 
   const handleSelectContact = (contact: ContactOption) => {
-    setFormState((s) => ({ ...s, owner_id: contact.id, owner_type: contact.contact_type || 'contact' }));
-    setSelectedContactName(contact.name);
-    setContactQuery('');
-    setShowContactDropdown(false);
+    assignSelectedContact(contact);
   };
 
   const createMutation = useMutation({
@@ -205,12 +214,16 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                 <label className={labelCls}>{t('ownership.owner') || 'Owner'} *</label>
                 {selectedContactName ? (
                   <div className="flex items-center gap-2">
-                    <span className={cn(inputCls, 'flex-1 flex items-center')}>{selectedContactName}</span>
+                    <span data-testid="contact-selected-name" className={cn(inputCls, 'flex-1 flex items-center')}>
+                      {selectedContactName}
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedContactName('');
                         setFormState((s) => ({ ...s, owner_id: '', owner_type: 'contact' }));
+                        setContactResults([]);
+                        setShowContactDropdown(false);
                       }}
                       className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg"
                       aria-label={t('form.clear') || 'Clear'}
@@ -248,6 +261,7 @@ function OwnershipFormModal({ buildingId, initialData, onClose }: OwnershipFormP
                               key={contact.id}
                               type="button"
                               onClick={() => handleSelectContact(contact)}
+                              data-testid="contact-search-result"
                               className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-600 flex items-center justify-between"
                             >
                               <span className="font-medium text-gray-900 dark:text-white">{contact.name}</span>

@@ -62,7 +62,9 @@ async def main() -> None:
     # Import after env setup so app.database picks SQLite settings.
     import app.models  # noqa: F401
     from app.database import Base
+    from app.database import AsyncSessionLocal
     from app.seeds.seed_data import seed
+    from app.seeds.seed_demo_workspace import seed_demo_workspace
 
     sqlite_meta = _build_sqlite_metadata(Base.metadata)
     engine = create_async_engine(sqlite_url, connect_args={"check_same_thread": False})
@@ -71,6 +73,8 @@ async def main() -> None:
     await engine.dispose()
 
     await seed()
+    async with AsyncSessionLocal() as db:
+        await seed_demo_workspace(db)
     print(f"[BOOTSTRAP-SQLITE] Ready: {db_file}")
 
 

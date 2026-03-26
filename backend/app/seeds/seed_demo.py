@@ -15,9 +15,11 @@ import argparse
 import asyncio
 from pathlib import Path
 
+from app.database import AsyncSessionLocal
 from app.importers.vaud_public import apply_records, harvest_vd_buildings, write_output_json
 from app.seeds.seed_data import seed
 from app.seeds.seed_demo_enrich import enrich_demo_buildings
+from app.seeds.seed_demo_workspace import seed_demo_workspace
 
 
 def parse_args() -> argparse.Namespace:
@@ -52,10 +54,23 @@ def _has_vd_filter(args: argparse.Namespace) -> bool:
     return any([args.commune, args.municipality_ofs is not None, args.postal_code])
 
 
+async def _seed_workspace() -> dict:
+    async with AsyncSessionLocal() as db:
+        return await seed_demo_workspace(db)
+
+
 async def main() -> None:
     args = parse_args()
 
     await seed()
+    workspace_stats = await _seed_workspace()
+    print(
+        "[SEED-DEMO] Demo workspace: "
+        f"building={workspace_stats['building_address']}, "
+        f"contacts={workspace_stats['contacts_count']}, "
+        f"leases={workspace_stats['leases_count']}, "
+        f"contracts={workspace_stats['contracts_count']}"
+    )
 
     if args.skip_vaud:
         print("[SEED-DEMO] Synthetic demo seed completed. Vaud import skipped.")

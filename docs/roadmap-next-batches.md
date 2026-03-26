@@ -152,6 +152,23 @@ The roadmap should also be read in rings:
 - Primary commercial narrative:
   - the building understands and pilots itself
 
+## Current Execution Posture (2026-03-25)
+
+- Program stack closure:
+  - `Truth-to-Trust Distribution Stack` is complete
+  - `Decision and Pilot Conversion Stack` is complete
+- Product proof state:
+  - closed loop: `import -> building truth -> remediation -> post-works truth -> pack -> exchange -> acknowledgement -> dossier update`
+  - decision-grade surfaces exist for authority, insurer, lender, and transaction audiences
+  - outbound artifacts carry versioning and chain-of-custody
+  - a canonical seed demonstrates the full loop end-to-end
+  - a demo scenario and pilot scorecard are grounded in seeded product truth
+- Immediate execution rule:
+  - prove the loop
+  - convert through bounded pilots
+  - harden reliability, trust, and operator confidence
+  - no net-new expansion unless it directly unblocks proof, pilot execution, or hardening
+
 ## Rupture Layers
 
 The roadmap is structured around 5 product layers. The 3 mega-programs deliver them progressively.
@@ -305,7 +322,7 @@ These are enablers for the product thesis. They are not independent side project
 
 ## Mega-Program 1 - Living and Actionable Building Dossier
 
-Status: `active`
+Status: `complete`
 
 Layer delivery:
 - Evidence OS v1
@@ -321,13 +338,15 @@ Capabilities:
 - parse / review / apply PDF report workflow
 - stronger document ingestion
 - dashboard centered on what must happen next
+- consumer bridge v1
+- imported diagnostic dossier integration
 
 Outcome:
 - a building becomes understandable, explainable, and operable
 
 ## Mega-Program 2 - Multi-Actor Orchestration and Proof Packs
 
-Status: `planned`
+Status: `complete`
 
 Layer delivery:
 - Agent OS v1 in execution workflows
@@ -343,13 +362,16 @@ Capabilities:
 - cross-entity search
 - real settings flows
 - first invisible agents that prepare, reconcile, notify, and package work
+- unified decision cockpit
+- canonical seeded loop from diagnostic import to acknowledgement
+- demo scenario + pilot scorecard grounded in seeded truth
 
 Outcome:
 - the product becomes governable, collaborative, and commercially credible for enterprise buyers
 
 ## Mega-Program 3 - Portfolio Steering, Data, and Scale
 
-Status: `planned`
+Status: `planned but intentionally not opened until proof/pilot/hardening gates are met`
 
 Layer delivery:
 - Portfolio OS v1
@@ -384,12 +406,13 @@ Outcome:
   - complete loading / empty / error / success states
 - keep mock validation and real validation explicitly separated
 - do not mark a mega-program done unless code, tests, seeded data, and docs all agree
+- after MP1 and MP2 closure, resist reopening expansion by inertia; require proof, pilot, and hardening evidence first
 
 ## Priority Order
 
-1. finish Mega-Program 1
-2. execute Mega-Program 2
-3. execute Mega-Program 3
+1. prove MP1 + MP2 under real validation and seeded evidence
+2. convert the closed loop through bounded pilots with explicit scorecards and exit criteria
+3. open Mega-Program 3 only after proof/pilot/hardening gates are met
 
 ## Execution Runway
 
@@ -407,11 +430,10 @@ Longer-term expansion reminder:
 - broad anticipation is intentional at the model/engine level
 
 Default near-term sequence:
-- finish MP1 cleanly
-- complete MP2 search and operating ergonomics
-- add readiness / trust / change primitives
-- add post-works and unknowns foundations
-- turn portfolio into an execution system, not only a dashboard
+- prove the closed loop cleanly in seeded, demo, and real-environment validation
+- harden operator workflows, observability, and failure recovery
+- run bounded pilots with explicit scorecards, proof reuse, and decision exits
+- preserve portfolio, standards, and ecosystem work as prepared horizon, not active expansion
 - strengthen international-class operating layers:
   - interoperability
   - exportability
@@ -426,16 +448,16 @@ The roadmap should think beyond the current program stack. The goal is not only 
 ### Horizon 0-12 months
 
 Focus:
-- complete the living and actionable building dossier
-- complete multi-actor orchestration and search
-- make trust, readiness, and post-works primitives first-class
-- turn portfolio from observation into execution
+- prove the closed loop under seeded, demo, and real-environment validation
+- operationalize bounded pilots with explicit scorecards and decision exits
+- harden reliability, observability, trust, and recovery on the shipped loop
+- keep portfolio and scale work prepared as horizon, not reopened expansion
 
 Expected shape:
 - a strong Swiss wedge
-- evidence-backed workflows
-- reusable building memory
-- first meaningful portfolio steering
+- evidence-backed workflows proven in live operator narratives
+- reusable building memory and proof across multiple audiences
+- real product confidence before scale-heavy expansion
 
 ### Horizon 12-24 months
 
@@ -481,7 +503,7 @@ Expected shape:
 
 - the 48-month horizon is intentionally oversized
 - it should guide architecture and object design, not force premature UI exposure
-- near-term execution still flows through the active mega-programs and the 60-day runway in `ORCHESTRATOR.md`
+- near-term execution flows through proof, pilot, and hardening gates before any new expansion, then through the 60-day runway in `ORCHESTRATOR.md`
 
 ## Missing Functional Families To Keep Explicit
 

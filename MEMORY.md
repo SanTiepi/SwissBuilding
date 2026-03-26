@@ -27,7 +27,27 @@ It is not a changelog. Keep it concise and high-signal.
   - Building Intelligence Network
   - long-term operating system of the built environment
   - most ambitious framing: Built Environment Meta-OS
-- Mega-Program 1 is the active priority: build the living and actionable building dossier.
+- As of `2026-03-25`, the first two execution stacks are complete:
+  - Program 1 (`Truth-to-Trust Distribution Stack`):
+    - consumer bridge v1
+    - imported diagnostic dossier integration
+    - exchange hardening
+    - artifact versioning + chain-of-custody
+    - intelligence stack
+  - Program 2 (`Decision and Pilot Conversion Stack`):
+    - unified decision cockpit
+    - canonical end-to-end seed closing the full loop
+    - demo scenario + pilot scorecard integrated into seeded product truth
+  - current product proof state:
+    - closed loop: `import -> building truth -> remediation -> post-works truth -> pack -> exchange -> acknowledgement -> dossier update`
+    - decision-grade surfaces exist for authority, insurer, lender, and transaction audiences
+    - outbound artifacts carry versioning and custody
+    - the canonical seed demonstrates the full loop end-to-end
+  - immediate execution posture:
+    - prove
+    - pilot
+    - harden
+    - no net-new expansion unless it directly unblocks proof, pilot execution, or hardening
 - Product signature:
   - Agent OS
   - invisible agents first
@@ -98,6 +118,11 @@ It is not a changelog. Keep it concise and high-signal.
     - internal agent validate loop (`run -> fix -> rerun until clean`) before handoff
     - type-first + golden-path testing bias over render-only unit-test multiplication
     - for coherent polish clusters, allow one wider-scope autonomous task instead of forced micro-splitting
+- user execution preference (2026-03-25):
+  - stop asking for routine confirmations between waves
+  - give Claude larger wave-sized lots by default
+  - prefer one coherent autonomous batch over repeated small asks when file scopes allow
+  - escalate only for blockers, acceptance, or materially irreversible/risky decisions
 - Lead automation toolkit (2026-03-09 decision):
   - canonical usage doc:
     - `docs/lead-automation-toolkit.md`
@@ -171,11 +196,13 @@ It is not a changelog. Keep it concise and high-signal.
       - ring_4/infrastructure tasks without near-term consumers should be deprioritized
     - near-term execution bias should stay:
       - `frontend productization : backend expansion ~= 2:1` unless a hard blocker requires backend-first
+      - default wave sizing should bias toward larger, outcome-complete lots
       - during polish/hardening clusters, wave sizing can shift to `1` wider-scope task when it lowers coordination overhead
     - execution-ground feedback should be captured in `ORCHESTRATOR.md`:
       - `Claude observations channel`
     - operating assumption is agent-only by default:
       - execution should be optimized for Codex + ClaudeCode without human-in-the-loop dependencies
+      - normal execution should continue without routine user confirmation between waves
     - continuity rule:
       - execution should auto-continue from `Next 10` -> `Next ready project briefs` -> `Future Horizon Feed` without waiting for a new prompt when work remains
   - Codex is expected to stay ahead of execution:

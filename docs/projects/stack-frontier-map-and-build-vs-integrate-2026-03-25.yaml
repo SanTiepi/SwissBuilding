@@ -1,0 +1,85 @@
+as_of: 2026-03-25
+
+decision_rule:
+  summary: >
+    Build only if the proposal increases at least two of the following:
+    cumulative dossier value, procedural clarity, evidence reuse,
+    useful multi-actor dependency.
+  dimensions:
+    - cumulative_dossier_value
+    - procedural_clarity
+    - evidence_reuse
+    - useful_multi_actor_dependency
+
+core_now:
+  - canonical_building_workspace
+  - control_tower_operating_inbox
+  - obligations_and_deadlines
+  - procedure_engine
+  - proof_and_delivery_layer
+  - swissrules_spine
+  - passport_and_exchange_contract
+
+next_moat:
+  - portfolio_intelligence_grounded_in_proof
+  - contributor_quality_and_partner_trust
+  - geometry_and_openbim_intelligence
+  - benchmarking_and_learning_loops
+  - material_and_circularity_intelligence
+
+future_infrastructure:
+  - passport_exchange_network
+  - authority_flow
+  - trust_vault_and_chain_of_custody
+  - territory_and_public_system_coordination
+  - agent_operating_layer
+
+integrate_instead_of_build:
+  - full_property_erp
+  - generic_chantier_collaboration_suite
+  - bim_authoring
+  - generic_dms_or_drive_replacement
+  - generic_portfolio_planning_detached_from_proof
+
+not_now:
+  - full_insurer_platform
+  - full_lender_stack
+  - full_resident_super_app
+  - public_marketplace_for_providers
+
+build_vs_integrate_test:
+  - is_this_a_canonical_building_file_object
+  - does_it_increase_cumulative_value_over_time
+  - does_it_strengthen_multi_actor_power
+  - are_there_already_strong_market_leaders_here
+  - is_our_edge_procedure_proof_or_continuity
+
+claude_translation:
+  push_now:
+    - workspace
+    - obligations
+    - procedures
+    - control_tower
+    - proof_delivery
+    - swissrules
+    - exchange_contracts
+  frame_tightly:
+    - portfolio_intelligence
+    - partner_trust
+    - geometry_intelligence
+    - learning_loops
+  prepare_architecturally:
+    - authority_flow
+    - trust_vault
+    - territory_public_systems
+    - agent_operating_layer
+  integration_boundaries:
+    - erp
+    - chantier_suite
+    - bim_authoring
+    - generic_storage
+
+north_star:
+  summary: >
+    Build the canonical, procedural, evidentiary, and exchange layers of the
+    building, then let the rest connect to them.

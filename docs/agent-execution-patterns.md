@@ -6,13 +6,14 @@ Goal: maximize throughput while keeping merge and validation risk low.
 ## Wave Size
 
 - default mode depends on work type:
-  - `build mode`: up to `3` disjoint tasks in parallel
+  - `build mode`: prefer `1-2` larger disjoint tasks; use `3` only when scopes are clearly disjoint and the speedup is real
   - `hardening/polish mode`: prefer `1` wider-scope autonomous task to reduce coordination overhead
 - do not exceed `3` parallel implementation tasks in the same wave
 
 Why:
 - above `3`, merge conflicts on shared files increase and remove speed gains
 - for polish clusters, forced micro-splitting creates unnecessary briefing + merge overhead
+- the default user preference is fewer, bigger lots with fewer check-ins
 
 ## Scope Disjointness
 
@@ -37,7 +38,8 @@ Rule:
 
 Preferred shape:
 - default:
-  - `1` task = `1` bounded deliverable (one primary file plus satellites)
+  - `1` task = `1` substantial deliverable or vertical slice (multiple primary files plus satellites are fine when they form one coherent outcome)
+  - prefer outcome-complete lots over artificially tiny “safe” tasks
 - allowed exception (lean hardening mode):
   - `1` task = one coherent polish cluster (for example 3 closely related pages/components)
   - use this when splitting would mostly add coordination overhead
@@ -45,12 +47,14 @@ Preferred shape:
 Good:
 - create one service + one schema + one route + targeted tests
 - one coherent UI hardening cluster with explicit exit checklist
+- one proof/pilot/hardening slice that closes a real operator gap end-to-end
 
 Too broad:
-- multiple domain facades plus multiple routes plus broad migration/refactor in one task
+- multiple unrelated domains with competing hub-file touchpoints in one task
 
 Too small:
 - one-line-only tasks that can be completed directly without agent spawn
+- repeated micro-batches that force extra briefing, merge, and approval overhead without reducing real risk
 
 ## Prioritization Gate (Consumer First)
 
@@ -133,6 +137,7 @@ When velocity matters more than ceremony:
 
 Operating assumption:
 - no human-in-the-loop dependency for execution continuity
+- no routine user confirmation between waves; escalate only for blockers or materially irreversible/risky choices
 
 Control behavior:
 - Codex keeps strategy, sequencing pressure, and acceptance gates explicit

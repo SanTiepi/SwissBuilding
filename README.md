@@ -16,6 +16,30 @@ L'ambition du projet est de montrer jusqu'ou un developpeur debutant peut aller 
 Le positionnement vise va plus loin qu'une simple application de diagnostic:
 SwissBuildingOS cherche a devenir le **systeme d'intelligence du bati**, puis a terme le **Built Environment Meta-OS**: une couche d'infrastructure qui relie batiments, travaux, exploitation, finances, occupants, procedures, portefeuilles et ecosystemes d'echange.
 
+## Pertinence client aujourd'hui
+
+La pertinence commerciale actuelle est forte surtout pour un segment:
+
+- **gerances immobilieres multi-batiments**
+- actives en `VD` et/ou `GE`
+- avec des **travaux a lancer sur batiments anciens**
+- qui jonglent deja entre **PDF, annexes labo, plans, emails et ERP**
+
+Le produit est donc plus pertinent quand il est presente comme:
+
+**une couche de preuve et de readiness pour les dossiers pre-travaux reglementes**
+
+plutot que comme un logiciel immobilier generaliste.
+
+Ce qu'un client achete aujourd'hui:
+- savoir **ce qui est prouve**
+- voir **ce qui manque**
+- reduire le **rework documentaire**
+- produire un **safe-to-start dossier** plus vite
+- conserver une **memoire batiment** reutilisable entre projets
+
+Une evaluation plus detaillee des segments, freins commerciaux et priorites d'amelioration est disponible dans [docs/market/client-fit-evaluation-fr.md](docs/market/client-fit-evaluation-fr.md).
+
 ---
 
 ## Ce que le produit cherche a devenir

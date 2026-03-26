@@ -1,0 +1,118 @@
+date: 2026-03-25
+purpose: Proof-reuse scenarios that create repeated value from one evidence base.
+rule:
+  - same_evidence_normally_resent_or_reexplained
+  - later_audience_differs_from_first_audience
+  - provenance_and_caveats_can_stay_visible
+scenarios:
+  - id: diagnostic_to_authority
+    source_proof:
+      - diagnostic_publication
+    first_audience:
+      - owner
+      - manager
+    later_audience:
+      - authority
+      - commune
+    surfaces:
+      - diagnostics_tab
+      - authority_pack
+      - ProofDelivery
+      - procedure_view
+  - id: diagnostic_to_transaction
+    source_proof:
+      - diagnostic_publication
+      - remediation_follow_up
+    first_audience:
+      - compliance_team
+      - operations_team
+    later_audience:
+      - buyer
+      - lender
+      - insurer
+    surfaces:
+      - transfer_package
+      - buyer_packaging
+      - transaction_lender_presets
+  - id: authority_pack_to_committee
+    source_proof:
+      - authority_pack
+      - procedure_state
+    first_audience:
+      - authority
+    later_audience:
+      - committee
+      - procurement_circulation
+      - public_owner_review
+    surfaces:
+      - public_owner_review_pack
+      - committee_pack
+      - review_decision_trace
+  - id: plan_reuse
+    source_proof:
+      - plan
+      - official_surveyor_plan
+      - versioned_drawing
+    first_audience:
+      - permit_procedure
+    later_audience:
+      - contractor
+      - authority_complement_response
+      - insurer
+    surfaces:
+      - authority_pack
+      - ProofDelivery
+      - geometry_intelligence
+  - id: compliance_to_portfolio
+    source_proof:
+      - obligation_completion
+      - proof_delivery
+      - acknowledgement
+    first_audience:
+      - building_team
+    later_audience:
+      - portfolio_manager
+      - public_owner_governance
+    surfaces:
+      - ControlTower
+      - portfolio_views
+      - benchmarking_grounded_in_proof
+  - id: communal_to_cantonal_reuse
+    source_proof:
+      - local_form
+      - occupation_authorization
+      - communal_preavis
+    first_audience:
+      - commune
+    later_audience:
+      - canton
+      - contractor
+      - owner_archive
+    surfaces:
+      - pilot_communes
+      - PermitProcedure
+      - timeline
+      - authority_pack
+  - id: handover_reuse
+    source_proof:
+      - transfer_package
+      - timeline
+      - caveats
+      - unresolved_blockers
+    first_audience:
+      - outgoing_owner
+      - outgoing_manager
+    later_audience:
+      - incoming_owner
+      - incoming_manager
+    surfaces:
+      - passport_exchange
+      - transfer_package
+      - building_overview
+required_preservation:
+  - source
+  - current_version
+  - send_history
+  - acknowledgement_state
+  - freshness_or_caveat_signal
+  - audience_specific_inclusion_exclusion

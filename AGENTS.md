@@ -35,7 +35,10 @@ human_involvement: blockers_and_acceptance_only
 - max 3 parallel agents per wave, disjoint file scopes
 - agent runs validate + fix internally before returning
 - brief format: outcome + files + constraints + exit (skip repo context — agent reads docs)
+- default to fewer, larger autonomous lots over repeated micro-batches
+- split work only when disjoint scopes create real speedup or reduce merge/blocker risk
 - for coherent frontend polish/hardening clusters, prefer 1 wider-scope autonomous task over forced micro-splitting
+- do not interrupt the user with mid-wave clarification requests unless there is a real blocker or an irreversible/risky decision
 
 ### Wave Pattern
 ```
@@ -44,6 +47,7 @@ read_briefs → launch_≤3_agents → collect → unified_validate+test → upd
 
 Checkpoint rule:
 - one checkpoint at wave completion (not per micro-task) unless blocker
+- user confirmation is not required between normal waves; continue autonomously while repo-visible work remains
 
 ### Validation Commands
 

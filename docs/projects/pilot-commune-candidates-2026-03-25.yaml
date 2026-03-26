@@ -1,0 +1,84 @@
+date: 2026-03-25
+purpose: Concrete pilot-commune shortlist with official sources and rollout order.
+selection_rule:
+  - official_public_pages
+  - target_wedge_relevance
+  - workflow_changing_local_delta
+  - safe_manual_review_fallback
+phases:
+  phase_1:
+    - commune: Nyon
+      canton: VD
+      role: first_communal_permit_anchor
+      why_now:
+        - direct_fit_with_vd_wedge
+        - explicit_public_inquiry_and_plan_requirements
+      outputs:
+        - public_inquiry_timing
+        - official_plan_requirement
+        - commune_level_permit_intake_flag
+      sources:
+        - https://www.nyon.ch/demarches/permis-de-construire-1729/
+        - https://www.nyon.ch/nyon-officiel/administration/urbanisme-1387/
+    - commune: Meyrin
+      canton: GE
+      role: first_geneva_communal_split_anchor
+      why_now:
+        - direct_fit_with_ge_wedge
+        - visible_commune_canton_split
+        - public_domain_dependency_path
+      outputs:
+        - local_review_branch
+        - commune_canton_routing_split
+        - public_domain_dependency
+      sources:
+        - https://www.meyrin.ch/fr/votre-mairie-administration-urbanisme-travaux-publics-et-energie/demande-dautorisation
+        - https://www.meyrin.ch/fr/fao
+  phase_2:
+    - commune: Lausanne
+      canton: VD
+      role: major_market_heritage_and_urban_review_anchor
+      why_now:
+        - high_market_relevance
+        - permit_exempt_vs_required_signal
+        - stronger_heritage_or_urban_review_signal
+      outputs:
+        - permit_exempt_branch
+        - urban_or_heritage_preavis_flag
+        - local_document_set_variant
+      sources:
+        - https://www.lausanne.ch/de/dam/jcr%3Ac7352426-4422-4327-9b7e-f7860f019b4c/Brochure-permis-de-construire.pdf
+        - https://www.lausanne.ch/dam/jcr%3Ad6cdf7ac-b627-41dc-aa2e-63cdc49b1028/250409_formulaire-demande-de-travaux.pdf
+    - commune: Ville de Fribourg
+      canton: FR
+      role: communal_cantonal_split_and_urban_review_anchor
+      why_now:
+        - widens_depth_beyond_vd_ge
+        - visible_commune_prefecture_or_canton_split
+        - urban_or_heritage_review_signal
+      outputs:
+        - commune_vs_prefecture_routing
+        - local_urban_or_heritage_flag
+        - friac_context
+      sources:
+        - https://www.ville-fribourg.ch/urbanisme-architecture/inspectorat-constructions
+        - https://www.fr.ch/territoire-amenagement-et-constructions/permis-de-construire-et-autorisations/permis-de-construire
+        - https://www.ville-fribourg.ch/commissions/commission-paysage-urbain-patrimoine
+first_build_pair:
+  - Nyon
+  - Meyrin
+second_build_pair:
+  - Lausanne
+  - Ville de Fribourg
+expected_outputs:
+  - CommunalAdapterProfile
+  - CommunalRuleOverride
+  - CommunalProcedureVariant
+  - manual_review_required
+  - communal_blocker_reason
+  - communal_proof_requirement
+ship_rule:
+  - improves_procedural_clarity
+  - improves_required_proof_clarity
+  - improves_blocker_visibility
+  - improves_authority_routing

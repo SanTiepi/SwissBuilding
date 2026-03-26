@@ -146,7 +146,10 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6">
+      <div
+        data-testid="contract-form-modal"
+        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6"
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {isEdit ? t('contract.edit') || 'Edit Contract' : t('contract.create') || 'Create Contract'}
@@ -171,7 +174,12 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
             {/* Contract type */}
             <div>
               <label className={labelCls}>{t('contract.contract_type') || 'Contract Type'} *</label>
-              <select value={formState.contract_type} onChange={set('contract_type')} className={inputCls}>
+              <select
+                value={formState.contract_type}
+                onChange={set('contract_type')}
+                className={inputCls}
+                data-testid="contract-form-type"
+              >
                 {CONTRACT_TYPES.map((ct) => (
                   <option key={ct} value={ct}>
                     {t(`contract.type.${ct}`) || ct}
@@ -188,6 +196,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
                 value={formState.reference_code}
                 onChange={set('reference_code')}
                 required
+                data-testid="contract-form-reference-code"
                 className={inputCls}
               />
             </div>
@@ -195,7 +204,14 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
             {/* Title */}
             <div className="sm:col-span-2">
               <label className={labelCls}>{t('contract.title') || 'Title'} *</label>
-              <input type="text" value={formState.title} onChange={set('title')} required className={inputCls} />
+              <input
+                type="text"
+                value={formState.title}
+                onChange={set('title')}
+                required
+                className={inputCls}
+                data-testid="contract-form-title"
+              />
             </div>
 
             {/* Counterparty ID — only on create */}
@@ -209,6 +225,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
                   required
                   className={inputCls}
                   placeholder={t('contract.counterparty_placeholder') || 'UUID of contact, user, or organization'}
+                  data-testid="contract-form-counterparty-id"
                 />
               </div>
             )}
@@ -222,6 +239,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
                 onChange={set('date_start')}
                 required={!isEdit}
                 disabled={isEdit}
+                data-testid="contract-form-date-start"
                 className={cn(inputCls, isEdit && 'opacity-60 cursor-not-allowed')}
               />
             </div>
@@ -229,7 +247,13 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
             {/* Date end */}
             <div>
               <label className={labelCls}>{t('contract.date_end') || 'End Date'}</label>
-              <input type="date" value={formState.date_end} onChange={set('date_end')} className={inputCls} />
+              <input
+                type="date"
+                value={formState.date_end}
+                onChange={set('date_end')}
+                className={inputCls}
+                data-testid="contract-form-date-end"
+              />
             </div>
 
             {/* Annual cost */}
@@ -241,6 +265,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
                 min="0"
                 value={formState.annual_cost_chf}
                 onChange={set('annual_cost_chf')}
+                data-testid="contract-form-annual-cost"
                 className={inputCls}
               />
             </div>
@@ -248,7 +273,12 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
             {/* Payment frequency */}
             <div>
               <label className={labelCls}>{t('contract.payment_frequency') || 'Payment Frequency'}</label>
-              <select value={formState.payment_frequency} onChange={set('payment_frequency')} className={inputCls}>
+              <select
+                value={formState.payment_frequency}
+                onChange={set('payment_frequency')}
+                className={inputCls}
+                data-testid="contract-form-payment-frequency"
+              >
                 <option value="">{t('contract.no_frequency') || '-- None --'}</option>
                 {PAYMENT_FREQUENCIES.map((pf) => (
                   <option key={pf} value={pf}>
@@ -264,6 +294,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
                 type="checkbox"
                 checked={formState.auto_renewal}
                 onChange={(e) => setFormState((s) => ({ ...s, auto_renewal: e.target.checked }))}
+                data-testid="contract-form-auto-renewal"
                 className="w-4 h-4 text-red-600 border-gray-300 dark:border-slate-600 rounded focus:ring-red-500"
               />
               <label className="text-sm font-medium text-gray-700 dark:text-slate-200">
@@ -280,6 +311,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
                 min="0"
                 value={formState.notice_period_months}
                 onChange={set('notice_period_months')}
+                data-testid="contract-form-notice-period"
                 className={inputCls}
               />
             </div>
@@ -287,7 +319,12 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
             {/* Status */}
             <div>
               <label className={labelCls}>{t('contract.status') || 'Status'}</label>
-              <select value={formState.status} onChange={set('status')} className={inputCls}>
+              <select
+                value={formState.status}
+                onChange={set('status')}
+                className={inputCls}
+                data-testid="contract-form-status"
+              >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {t(`contract.status.${s}`) || s}
@@ -300,7 +337,13 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
           {/* Notes */}
           <div>
             <label className={labelCls}>{t('contract.notes') || 'Notes'}</label>
-            <textarea value={formState.notes} onChange={set('notes')} rows={3} className={inputCls} />
+            <textarea
+              value={formState.notes}
+              onChange={set('notes')}
+              rows={3}
+              className={inputCls}
+              data-testid="contract-form-notes"
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
@@ -314,6 +357,7 @@ function ContractFormModal({ buildingId, initialData, onClose }: ContractFormPro
             <button
               type="submit"
               disabled={isPending}
+              data-testid="contract-form-submit"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400"
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -422,6 +466,7 @@ export default function ContractsTab({ buildingId }: ContractsTabProps) {
         </h3>
         <button
           onClick={() => setShowCreateModal(true)}
+          data-testid="contracts-create-button"
           className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
         >
           <Plus className="w-4 h-4" />

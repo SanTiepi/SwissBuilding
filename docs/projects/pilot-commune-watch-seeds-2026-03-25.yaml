@@ -1,0 +1,96 @@
+date: 2026-03-25
+purpose: Initial watch seeds for the first pilot-commune shortlist.
+watch_seeds:
+  - id: nyon_permit_page
+    commune: Nyon
+    canton: VD
+    url: https://www.nyon.ch/demarches/permis-de-construire-1729/
+    source_kind: html
+    cadence: weekly
+    change_sensitivity: high
+    likely_effects:
+      - permit_framing
+      - public_inquiry_timing
+      - required_documents
+  - id: nyon_urbanism_page
+    commune: Nyon
+    canton: VD
+    url: https://www.nyon.ch/nyon-officiel/administration/urbanisme-1387/
+    source_kind: html
+    cadence: monthly
+    change_sensitivity: medium
+    likely_effects:
+      - routing
+      - local_service_contact
+  - id: meyrin_authorization_page
+    commune: Meyrin
+    canton: GE
+    url: https://www.meyrin.ch/fr/votre-mairie-administration-urbanisme-travaux-publics-et-energie/demande-dautorisation
+    source_kind: html
+    cadence: weekly
+    change_sensitivity: high
+    likely_effects:
+      - commune_canton_split
+      - public_domain_dependency
+      - local_review_branch
+  - id: meyrin_fao
+    commune: Meyrin
+    canton: GE
+    url: https://www.meyrin.ch/fr/fao
+    source_kind: html
+    cadence: weekly
+    change_sensitivity: medium
+    likely_effects:
+      - public_notice_signal
+      - local_publication_path
+  - id: lausanne_permit_brochure
+    commune: Lausanne
+    canton: VD
+    url: https://www.lausanne.ch/de/dam/jcr%3Ac7352426-4422-4327-9b7e-f7860f019b4c/Brochure-permis-de-construire.pdf
+    source_kind: pdf
+    cadence: monthly
+    change_sensitivity: medium
+    likely_effects:
+      - permit_exempt_branch
+      - permit_required_branch
+      - heritage_or_urban_review_signal
+  - id: lausanne_work_declaration_form
+    commune: Lausanne
+    canton: VD
+    url: https://www.lausanne.ch/dam/jcr%3Ad6cdf7ac-b627-41dc-aa2e-63cdc49b1028/250409_formulaire-demande-de-travaux.pdf
+    source_kind: pdf
+    cadence: weekly
+    change_sensitivity: high
+    likely_effects:
+      - work_declaration_document_set
+      - local_proof_requirement
+  - id: fribourg_inspectorat_constructions
+    commune: Ville de Fribourg
+    canton: FR
+    url: https://www.ville-fribourg.ch/urbanisme-architecture/inspectorat-constructions
+    source_kind: html
+    cadence: weekly
+    change_sensitivity: medium
+    likely_effects:
+      - local_service_routing
+      - commune_review_path
+  - id: fr_cantonal_permit_page
+    commune: Ville de Fribourg
+    canton: FR
+    url: https://www.fr.ch/territoire-amenagement-et-constructions/permis-de-construire-et-autorisations/permis-de-construire
+    source_kind: html
+    cadence: monthly
+    change_sensitivity: medium
+    likely_effects:
+      - commune_prefecture_or_canton_split
+      - filing_path
+  - id: fribourg_cpup
+    commune: Ville de Fribourg
+    canton: FR
+    url: https://www.ville-fribourg.ch/commissions/commission-paysage-urbain-patrimoine
+    source_kind: html
+    cadence: monthly
+    change_sensitivity: medium
+    likely_effects:
+      - urban_or_heritage_review_step
+      - manual_review_signal

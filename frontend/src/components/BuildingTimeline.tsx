@@ -16,6 +16,7 @@ import {
   Calendar,
   ChevronDown,
   Clock,
+  ClipboardCheck,
 } from 'lucide-react';
 
 const EVENT_COLORS: Record<string, { bg: string; border: string; text: string; dot: string }> = {
@@ -66,6 +67,12 @@ const EVENT_COLORS: Record<string, { bg: string; border: string; text: string; d
     border: 'border-gray-200',
     text: 'text-gray-700',
     dot: 'bg-gray-400',
+  },
+  diagnostic_publication: {
+    bg: 'bg-indigo-50',
+    border: 'border-indigo-200',
+    text: 'text-indigo-700',
+    dot: 'bg-indigo-500',
   },
 };
 
@@ -138,6 +145,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   shield: Shield,
   map: Map,
   calendar: Calendar,
+  clipboard: ClipboardCheck,
 };
 
 function getEventIcon(iconHint: string, className?: string) {
@@ -237,6 +245,58 @@ function TimelineItem({ entry, enriched }: TimelineItemProps) {
               {entry.description && (
                 <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 line-clamp-2">{entry.description}</p>
               )}
+              {entry.event_type === 'diagnostic_publication' && entry.metadata && (() => {
+                const meta = entry.metadata as Record<string, unknown>;
+                return (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5" data-testid="diagnostic-pub-meta">
+                    <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400">
+                      Imported from Batiscan V4
+                    </span>
+                    {meta.source_mission_id ? (
+                      <span className="text-[10px] text-gray-500 dark:text-slate-400">
+                        Mission {String(meta.source_mission_id)}
+                      </span>
+                    ) : null}
+                    {meta.report_readiness_status ? (
+                      <span
+                        className={cn(
+                          'px-1.5 py-0.5 rounded text-[10px] font-medium',
+                          meta.report_readiness_status === 'ready'
+                            ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                            : meta.report_readiness_status === 'blocked'
+                              ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                              : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400',
+                        )}
+                      >
+                        {String(meta.report_readiness_status)}
+                      </span>
+                    ) : null}
+                    {meta.sample_count != null && (
+                      <span className="text-[10px] text-gray-500 dark:text-slate-400">
+                        {String(meta.sample_count)} samples
+                        {meta.positive_sample_count != null &&
+                          `, ${String(meta.positive_sample_count)} positive`}
+                      </span>
+                    )}
+                    {Array.isArray(meta.flags) &&
+                      (meta.flags as string[]).map((flag: string) => (
+                        <span
+                          key={flag}
+                          className={cn(
+                            'px-1 py-0.5 rounded text-[10px] font-medium',
+                            flag === 'no_ai'
+                              ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+                              : flag === 'partial_package'
+                                ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
+                                : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400',
+                          )}
+                        >
+                          {flag.replace(/_/g, ' ')}
+                        </span>
+                      ))}
+                  </div>
+                );
+              })()}
             </div>
             {entry.metadata && Object.keys(entry.metadata).length > 0 && (
               <button

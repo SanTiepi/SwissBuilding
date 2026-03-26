@@ -1,0 +1,95 @@
+date: 2026-03-25
+name: claude_one_shot_finisher
+purpose: Finish the highest-value SwissBuilding slice in one coherent pass.
+precondition:
+  - Close the homogeneous auth regression cluster first.
+  - Avoid repeated full backend runs until the cluster is closed.
+combines_briefs:
+  - 1
+  - 2
+  - 3
+  - 25
+  - 26
+  - 27
+  - 31
+  - 32
+  - 33
+  - 51
+must_ship:
+  - procedure_state
+  - operating_inbox
+  - proof_trace
+  - confidence_visibility
+  - freshness_visibility
+  - identity_safety
+  - authority_submission_room
+hard_rules:
+  - egid_is_not_egrid
+  - egrid_is_not_official_id
+  - no_parallel_permit_engine
+  - no_second_obligation_entity
+  - no_second_persistent_action_system
+  - no_second_dms_or_proof_storage_layer
+  - preserve_batiscan_boundary
+  - preserve_swissbuilding_boundary
+  - respect_reserved_hub_files
+execution_order:
+  - phase: canonical_backend_spine
+    includes:
+      - permit_procedure
+      - permit_steps
+      - authority_requests
+      - proof_delivery
+      - confidence_semantics
+      - freshness_semantics
+      - identity_resolution_semantics
+  - phase: aggregation_and_projection
+    includes:
+      - control_tower_projection
+      - building_detail_projection
+      - blocker_summary
+      - review_required_projection
+      - freshness_projection
+  - phase: authority_room
+    includes:
+      - submission_state
+      - current_proof_set
+      - complement_loop
+      - acknowledgement_trace
+      - next_move
+  - phase: proof_reuse_and_seeds
+    includes:
+      - reusable_proof_scenarios
+      - must_win_instrumentation
+      - seeded_acceptance_path
+  - phase: trust_polish
+    includes:
+      - stale_does_not_look_current
+      - ambiguity_is_visible
+      - blockers_route_to_actor
+do_not_expand_into:
+  - swissrules_watch_full
+  - marketplace_behavior
+  - generic_portfolio_analytics
+  - openbim_authoring
+  - territory_public_systems_expansion
+  - pricing_or_crm_work
+validation:
+  backend:
+    - cd backend && ruff check app/ tests/
+    - cd backend && ruff format --check app/ tests/
+    - cd backend && python scripts/run_local_test_loop.py changed
+    - cd backend && python scripts/run_local_test_loop.py confidence
+  frontend:
+    - cd frontend && npm run validate
+    - cd frontend && npm run test:changed:strict
+  full_runs:
+    - only_once_at_end
+acceptance_story:
+  - building opens with blockers, deadlines, proof, and freshness visible
+  - procedure state is ordered and legible
+  - authority complement loop is actionable
+  - proof is reused instead of rebuilt
+  - delivery and acknowledgement trace are visible
+  - confidence and review state are explicit
+  - identity drift is prevented

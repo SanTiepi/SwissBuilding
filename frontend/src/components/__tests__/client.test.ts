@@ -161,6 +161,17 @@ describe('isRetryable logic (via response interceptor behavior)', () => {
     (error as { config: undefined }).config = undefined;
     await expect(retryInterceptor(error)).rejects.toBe(error);
   });
+
+  it('rejects immediately when skipRetry is enabled on the request config', async () => {
+    const error = makeAxiosError({
+      status: 500,
+      config: {
+        headers: {} as InternalAxiosRequestConfig['headers'],
+        skipRetry: true,
+      } as unknown as Partial<InternalAxiosRequestConfig>,
+    });
+    await expect(retryInterceptor(error)).rejects.toBe(error);
+  });
 });
 
 describe('401 interceptor - logout on unauthorized', () => {

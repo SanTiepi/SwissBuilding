@@ -1,0 +1,55 @@
+date: 2026-03-25
+purpose: Shared confidence ladder and manual-review semantics across SwissBuilding.
+hard_rule:
+  - visible_uncertainty_beats_hidden_false_certainty
+levels:
+  - code: auto_safe
+    meaning:
+      - strong_source
+      - stable_projection
+      - bounded_or_low_risk_effect
+    allowed_behavior:
+      - auto_project
+  - code: auto_with_notice
+    meaning:
+      - likely_correct
+      - caveat_worth_showing
+    allowed_behavior:
+      - auto_project
+      - show_explanation
+      - show_caveat
+  - code: review_required
+    meaning:
+      - material_ambiguity
+      - human_confirmation_needed
+    allowed_behavior:
+      - create_review_action
+      - avoid_silent_branch_choice
+  - code: blocked
+    meaning:
+      - missing_source
+      - contradictory_source
+      - high_stakes_ambiguity
+    allowed_behavior:
+      - block_downstream_automation
+      - require_human_resolution
+applies_to:
+  - SwissRules
+  - pilot_communes
+  - authority_routing
+  - proof_reuse
+  - partner_trust
+  - agent_recommendations
+  - high_stakes_document_classification
+visible_outputs:
+  - confidence_level
+  - short_explanation
+  - source_link_or_provenance
+  - review_or_block_reason
+  - reviewer_target
+  - resume_condition
+acceptance:
+  - safe_automation_is_distinguishable
+  - caveated_output_is_distinguishable
+  - review_required_is_visible
+  - blocked_state_is_visible

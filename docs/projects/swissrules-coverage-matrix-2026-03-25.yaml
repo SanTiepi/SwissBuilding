@@ -1,0 +1,164 @@
+date: 2026-03-25
+summary:
+  jurisdictions: 12
+  authorities: 15
+  sources: 23
+  rule_templates: 12
+  requirement_templates: 18
+  procedure_templates: 15
+  watch_entries: 23
+domains:
+  - code: permit_planning
+    status: anchored
+    current_outputs:
+      - permit_tracking
+      - permit_procedure
+      - control_tower
+    anchor_level:
+      - federal
+      - cantonal
+      - communal_placeholder
+    next_move: add commune_specific_adapters_and_permit_blockers
+    priority: p0
+  - code: pollutant_declarations
+    status: anchored
+    current_outputs:
+      - regulatory_filing
+      - authority_pack
+      - obligation
+    anchor_level:
+      - federal
+      - cantonal_execution
+    next_move: harden_canton_specific_declaration_variants
+    priority: p0
+  - code: oled_waste_traceability
+    status: anchored
+    current_outputs:
+      - regulatory_filing
+      - proof_delivery
+      - control_tower
+    anchor_level:
+      - federal
+    next_move: connect_manifest_proof_to_delivery_tracking
+    priority: p0
+  - code: radon
+    status: anchored
+    current_outputs:
+      - obligation
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - federal
+    next_move: add_risk_overlays_where_available
+    priority: p1
+  - code: energy_mopec
+    status: anchored_partial
+    current_outputs:
+      - permit_tracking
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - intercantonal
+      - cantonal_placeholder
+    next_move: add_canton_specific_energy_execution_deltas
+    priority: p1
+  - code: fire_safety
+    status: anchored_partial
+    current_outputs:
+      - permit_tracking
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - intercantonal_standard
+    next_move: add_sensitive_use_escalation_rules
+    priority: p2
+  - code: rdppf_identity
+    status: anchored
+    current_outputs:
+      - permit_tracking
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - federal_dataset
+      - cadastre
+    next_move: wire_richer_parcel_and_restriction_explainability
+    priority: p1
+  - code: natural_hazards
+    status: anchored_partial
+    current_outputs:
+      - permit_tracking
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - federal
+      - local_review_placeholder
+    next_move: add_canton_hazard_map_adapters
+    priority: p1
+  - code: groundwater_protection
+    status: anchored_partial
+    current_outputs:
+      - permit_tracking
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - federal
+      - local_review_placeholder
+    next_move: add_water_protection_overlays_and_review_reasons
+    priority: p1
+  - code: accessibility
+    status: anchored_partial
+    current_outputs:
+      - permit_tracking
+      - authority_pack
+      - control_tower
+    anchor_level:
+      - federal
+      - local_review_placeholder
+    next_move: add_use_case_thresholds_and_public_use_detail
+    priority: p2
+  - code: heritage_outside_zone
+    status: anchored_partial
+    current_outputs:
+      - permit_tracking
+      - permit_procedure
+      - control_tower
+    anchor_level:
+      - federal
+      - local_review_placeholder
+    next_move: add_canton_and_commune_heritage_adapters
+    priority: p1
+  - code: communal_zoning_specifics
+    status: gap
+    current_outputs:
+      - manual_review
+    anchor_level:
+      - communal_placeholder_only
+    next_move: add_commune_adapter_pattern_and_fixtures
+    priority: p0
+  - code: utility_network_constraints
+    status: gap
+    current_outputs: []
+    anchor_level:
+      - utility_placeholder_only
+    next_move: add_concession_and_network_approval_model
+    priority: p2
+  - code: subsidies_public_funding
+    status: gap
+    current_outputs: []
+    anchor_level:
+      - not_modeled
+    next_move: add_funding_source_map_and_procedure_templates
+    priority: p2
+  - code: special_building_classes
+    status: gap
+    current_outputs: []
+    anchor_level:
+      - not_modeled
+    next_move: add_school_hospital_industrial_agricultural_telecom_variants
+    priority: p3
+anti_duplication:
+  - permit_tracking_remains_canonical_for_permit_needs
+  - obligation_remains_single_deadline_entity
+  - control_tower_remains_single_action_aggregator
+  - authority_pack_remains_authority_facing_proof_channel
+  - document_inbox_remains_single_incoming_document_queue

@@ -73,6 +73,14 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
   const [selectedContactName, setSelectedContactName] = useState('');
   const contactDropdownRef = useRef<HTMLDivElement>(null);
 
+  const assignSelectedContact = (contact: ContactOption) => {
+    setFormState((s) => ({ ...s, tenant_id: contact.id, tenant_type: 'contact' }));
+    setSelectedContactName(contact.name);
+    setContactQuery('');
+    setContactResults([]);
+    setShowContactDropdown(false);
+  };
+
   // Debounced contact search
   useEffect(() => {
     if (isEdit) return;
@@ -85,7 +93,11 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
       try {
         const results = await leasesApi.lookupContacts(buildingId, contactQuery);
         setContactResults(results);
-        setShowContactDropdown(true);
+        if (results.length === 1) {
+          assignSelectedContact(results[0]);
+        } else {
+          setShowContactDropdown(true);
+        }
       } catch {
         setContactResults([]);
       } finally {
@@ -93,7 +105,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [contactQuery, isEdit]);
+  }, [buildingId, contactQuery, isEdit]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -107,10 +119,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
   }, []);
 
   const handleSelectContact = (contact: ContactOption) => {
-    setFormState((s) => ({ ...s, tenant_id: contact.id, tenant_type: contact.contact_type || 'contact' }));
-    setSelectedContactName(contact.name);
-    setContactQuery('');
-    setShowContactDropdown(false);
+    assignSelectedContact(contact);
   };
 
   const createMutation = useMutation({
@@ -177,7 +186,10 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6">
+      <div
+        data-testid="lease-form-modal"
+        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 p-6"
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {isEdit ? t('lease.edit') || 'Edit Lease' : t('lease.create') || 'Create Lease'}
@@ -202,7 +214,12 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
             {/* Lease type */}
             <div>
               <label className={labelCls}>{t('lease.lease_type') || 'Lease Type'} *</label>
-              <select value={formState.lease_type} onChange={set('lease_type')} className={inputCls}>
+              <select
+                value={formState.lease_type}
+                onChange={set('lease_type')}
+                className={inputCls}
+                data-testid="lease-form-type"
+              >
                 {LEASE_TYPES.map((lt) => (
                   <option key={lt} value={lt}>
                     {t(`lease.type.${lt}`) || lt}
@@ -219,6 +236,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                 value={formState.reference_code}
                 onChange={set('reference_code')}
                 required
+                data-testid="lease-form-reference-code"
                 className={inputCls}
               />
             </div>
@@ -229,12 +247,16 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                 <label className={labelCls}>{t('lease.tenant') || 'Tenant'} *</label>
                 {selectedContactName ? (
                   <div className="flex items-center gap-2">
-                    <span className={cn(inputCls, 'flex-1 flex items-center')}>{selectedContactName}</span>
+                    <span data-testid="contact-selected-name" className={cn(inputCls, 'flex-1 flex items-center')}>
+                      {selectedContactName}
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedContactName('');
                         setFormState((s) => ({ ...s, tenant_id: '', tenant_type: 'contact' }));
+                        setContactResults([]);
+                        setShowContactDropdown(false);
                       }}
                       className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg"
                       aria-label={t('form.clear') || 'Clear'}
@@ -254,6 +276,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                         className={cn(inputCls, 'pl-9')}
                         placeholder={t('lease.search_tenant') || 'Search contacts...'}
                         data-testid="contact-search-input"
+                        aria-label={t('lease.tenant') || 'Tenant'}
                       />
                       {contactLoading && (
                         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-gray-400" />
@@ -271,6 +294,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                               key={contact.id}
                               type="button"
                               onClick={() => handleSelectContact(contact)}
+                              data-testid="contact-search-result"
                               className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-600 flex items-center justify-between"
                             >
                               <span className="font-medium text-gray-900 dark:text-white">{contact.name}</span>
@@ -298,6 +322,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                 onChange={set('date_start')}
                 required={!isEdit}
                 disabled={isEdit}
+                data-testid="lease-form-date-start"
                 className={cn(inputCls, isEdit && 'opacity-60 cursor-not-allowed')}
               />
             </div>
@@ -305,7 +330,13 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
             {/* Date end */}
             <div>
               <label className={labelCls}>{t('lease.date_end') || 'End Date'}</label>
-              <input type="date" value={formState.date_end} onChange={set('date_end')} className={inputCls} />
+              <input
+                type="date"
+                value={formState.date_end}
+                onChange={set('date_end')}
+                className={inputCls}
+                data-testid="lease-form-date-end"
+              />
             </div>
 
             {/* Rent */}
@@ -317,6 +348,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                 min="0"
                 value={formState.rent_monthly_chf}
                 onChange={set('rent_monthly_chf')}
+                data-testid="lease-form-rent"
                 className={inputCls}
               />
             </div>
@@ -330,6 +362,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                 min="0"
                 value={formState.charges_monthly_chf}
                 onChange={set('charges_monthly_chf')}
+                data-testid="lease-form-charges"
                 className={inputCls}
               />
             </div>
@@ -343,6 +376,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
                 min="0"
                 value={formState.deposit_chf}
                 onChange={set('deposit_chf')}
+                data-testid="lease-form-deposit"
                 className={inputCls}
               />
             </div>
@@ -350,7 +384,12 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
             {/* Status */}
             <div>
               <label className={labelCls}>{t('lease.status') || 'Status'}</label>
-              <select value={formState.status} onChange={set('status')} className={inputCls}>
+              <select
+                value={formState.status}
+                onChange={set('status')}
+                className={inputCls}
+                data-testid="lease-form-status"
+              >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {t(`lease.status.${s}`) || s}
@@ -363,7 +402,13 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
           {/* Notes */}
           <div>
             <label className={labelCls}>{t('lease.notes') || 'Notes'}</label>
-            <textarea value={formState.notes} onChange={set('notes')} rows={3} className={inputCls} />
+            <textarea
+              value={formState.notes}
+              onChange={set('notes')}
+              rows={3}
+              className={inputCls}
+              data-testid="lease-form-notes"
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
@@ -377,6 +422,7 @@ function LeaseFormModal({ buildingId, initialData, onClose }: LeaseFormProps) {
             <button
               type="submit"
               disabled={isPending}
+              data-testid="lease-form-submit"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400"
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -495,6 +541,7 @@ export default function LeasesTab({ buildingId }: LeasesTabProps) {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('lease.list_title') || 'Leases'}</h3>
         <button
           onClick={() => setShowCreateModal(true)}
+          data-testid="leases-create-button"
           className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
         >
           <Plus className="w-4 h-4" />

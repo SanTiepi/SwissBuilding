@@ -1,0 +1,186 @@
+date: 2026-03-25
+source: docs/projects/claude-wave-brief-kit-2026-03-25.md
+briefs:
+  - id: 1
+    title: PermitProcedure Core
+    theme: core_now
+  - id: 2
+    title: ControlTower v2
+    theme: core_now
+  - id: 3
+    title: ProofDelivery
+    theme: core_now
+  - id: 4
+    title: Passport Exchange Hardening
+    theme: core_now
+  - id: 5
+    title: SwissRules Watch Foundations
+    theme: core_now
+  - id: 6
+    title: Authority Flow Core
+    theme: moat_or_infrastructure
+  - id: 7
+    title: Proof Trust Hardening
+    theme: moat_or_infrastructure
+  - id: 8
+    title: Passport Exchange Network Foundations
+    theme: moat_or_infrastructure
+  - id: 9
+    title: Partner Trust Signals
+    theme: next_moat
+  - id: 10
+    title: Geometry Intelligence Foundations
+    theme: next_moat
+  - id: 11
+    title: Territory and Public Systems Foundations
+    theme: next_moat
+  - id: 12
+    title: Benchmarking Grounded in Proof Foundations
+    theme: next_moat
+  - id: 13
+    title: Agent Operating Layer Foundations
+    theme: long_game
+  - id: 14
+    title: openBIM Convergence Foundations
+    theme: long_game
+  - id: 15
+    title: Pilot Communes Foundations
+    theme: long_game
+  - id: 16
+    title: Killer Demo Foundations
+    theme: adoption
+  - id: 17
+    title: Enterprise Rollout Foundations
+    theme: adoption
+  - id: 18
+    title: Buyer Packaging Presets
+    theme: adoption
+  - id: 19
+    title: Embedded Channels Foundations
+    theme: adoption
+  - id: 20
+    title: Public Owner and Municipality Foundations
+    theme: long_game
+  - id: 21
+    title: Insurer and Fiduciary Surfaces Foundations
+    theme: adoption
+  - id: 22
+    title: Distribution Sales Loops Foundations
+    theme: adoption
+  - id: 23
+    title: Transaction and Lender Surfaces Foundations
+    theme: long_game
+  - id: 24
+    title: Public Procurement and Committee Foundations
+    theme: long_game
+  - id: 25
+    title: Must-Win Workflow Instrumentation
+    theme: core_now
+  - id: 26
+    title: Proof Reuse Scenario Seeds
+    theme: core_now
+  - id: 27
+    title: Confidence Ladder and Review Queue Foundations
+    theme: core_now
+  - id: 28
+    title: Habit Loop Surface Foundations
+    theme: core_now
+  - id: 29
+    title: Canonical Timeline Event Contract
+    theme: core_now
+  - id: 30
+    title: North-Star Metrics and Instrumentation Foundations
+    theme: core_now
+  - id: 31
+    title: Switching Cost Removal Foundations
+    theme: core_now
+  - id: 32
+    title: Freshness and Staleness Foundations
+    theme: core_now
+  - id: 33
+    title: Canonical Identity Resolution Foundations
+    theme: core_now
+  - id: 34
+    title: UX Surface Grammar Foundations
+    theme: core_now
+  - id: 35
+    title: Explainability and Decision Trace Foundations
+    theme: core_now
+  - id: 36
+    title: Progressive Exposure Foundations
+    theme: core_now
+  - id: 37
+    title: Buyer Counterproof Surfaces
+    theme: adoption
+  - id: 38
+    title: Strategic Debt Hardening Queue
+    theme: core_now
+  - id: 39
+    title: Batiscan Cross-Product Operator Story Surfaces
+    theme: core_now
+  - id: 40
+    title: Failure and Recovery Surface Foundations
+    theme: core_now
+  - id: 41
+    title: Source-of-Truth Boundary Guards
+    theme: core_now
+  - id: 42
+    title: Persona Home Surface Foundations
+    theme: core_now
+  - id: 43
+    title: Trust Claim Evidence Surfaces
+    theme: core_now
+  - id: 44
+    title: Human Handoff and Escalation Foundations
+    theme: core_now
+  - id: 45
+    title: Wow Moment Instrumentation Foundations
+    theme: adoption
+  - id: 46
+    title: Procurement Evidence Ladder Surfaces
+    theme: adoption
+  - id: 47
+    title: Public Authority Trust Signal Surfaces
+    theme: adoption
+  - id: 48
+    title: Deal-Breaker and Go/No-Go Fit Logic
+    theme: adoption
+  - id: 49
+    title: Post-Sale Adoption Loop Surfaces
+    theme: adoption
+  - id: 50
+    title: Ecosystem Partner API Contract Foundations
+    theme: long_game
+  - id: 51
+    title: Authority Submission Room Foundations
+    theme: core_now
+  - id: 52
+    title: ROI Proof Calculator Foundations
+    theme: adoption
+  - id: 53
+    title: Pilot Design Cookbook Surfaces
+    theme: adoption
+  - id: 54
+    title: Pilot Scorecard and Exit Logic
+    theme: adoption
+  - id: 55
+    title: Case Study Proof Story Templates
+    theme: adoption
+  - id: 56
+    title: Partner Certification Quality Signals
+    theme: adoption
+  - id: 57
+    title: Customer Success Operating Loop Surfaces
+    theme: adoption
+  - id: 58
+    title: Environment Parity and Demo Fidelity Foundations
+    theme: core_now
+  - id: 59
+    title: Record Retention and Evidence Lifecycle Foundations
+    theme: core_now
+  - id: 60
+    title: Jurisdiction Language and Terminology Foundations
+    theme: core_now
+  - id: 61
+    title: Support Debug and Incident Handoff Foundations
+    theme: core_now

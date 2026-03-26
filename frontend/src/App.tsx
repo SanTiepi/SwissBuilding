@@ -4,13 +4,20 @@ import { Layout } from '@/components/Layout';
 import { ErrorBoundary, PageErrorBoundary } from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
-const Login = lazy(() => import('@/pages/Login'));
+// Keep public entry routes eager so the app does not boot through a lazy-route
+// suspense fallback on the first unauthenticated paint. In staging this path
+// surfaced a root-level spinner mount/unmount race that could trip the global
+// error boundary before the login page fully settled.
+import Login from '@/pages/Login';
+import SharedView from '@/pages/SharedView';
+import PublicIntake from '@/pages/PublicIntake';
+import NotFound from '@/pages/NotFound';
+
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const BuildingsList = lazy(() => import('@/pages/BuildingsList'));
 const BuildingDetail = lazy(() => import('@/pages/BuildingDetail'));
 const DiagnosticView = lazy(() => import('@/pages/DiagnosticView'));
 const Settings = lazy(() => import('@/pages/Settings'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const AdminUsers = lazy(() => import('@/pages/AdminUsers'));
 const AdminOrganizations = lazy(() => import('@/pages/AdminOrganizations'));
@@ -38,8 +45,6 @@ const InterventionSimulator = lazy(() => import('@/pages/InterventionSimulator')
 const SafeToXCockpit = lazy(() => import('@/pages/SafeToXCockpit'));
 const BuildingComparison = lazy(() => import('@/pages/BuildingComparison'));
 const AuthorityPacks = lazy(() => import('@/pages/AuthorityPacks'));
-const SharedView = lazy(() => import('@/pages/SharedView'));
-const PublicIntake = lazy(() => import('@/pages/PublicIntake'));
 const FieldObservations = lazy(() => import('@/pages/FieldObservations'));
 const ControlTower = lazy(() => import('@/pages/ControlTower'));
 const AuthoritySubmissionRoom = lazy(() => import('@/pages/AuthoritySubmissionRoom'));

@@ -1,0 +1,137 @@
+date: 2026-03-25
+categories:
+  - code: construction_collaboration
+    players:
+      - smino
+      - PlanRadar
+      - Dalux
+      - Procore
+    do_well:
+      - tasks
+      - defects
+      - field_capture
+      - plans
+      - bim_views
+      - revision_history
+      - field_office_collaboration
+    do_not_try_to_beat_at:
+      - generic_chantier_collaboration
+    structural_gap:
+      - building_memory_stops_at_project_boundary
+      - weak_owner_and_authority_continuity
+      - weak_procedural_readiness
+    swissbuilding_must_win:
+      - cross_project_building_memory
+      - procedure_readiness
+      - authority_grade_packs
+      - reusable_proof_by_audience
+  - code: swiss_property_erp
+    players:
+      - GARAIO_REM
+      - W_and_W
+      - AbaImmo
+    do_well:
+      - contracts
+      - accounting
+      - fees
+      - rent_flows
+      - operational_back_office
+    do_not_try_to_beat_at:
+      - ledger_depth
+      - accounting_depth
+    structural_gap:
+      - poor_dossier_clarity_across_third_parties
+      - weak_evidence_chain
+      - weak_procedural_visibility
+    swissbuilding_must_win:
+      - canonical_building_workspace
+      - proof_reuse
+      - deadlines_and_blockers
+      - multi_actor_shared_file
+  - code: portfolio_intelligence
+    players:
+      - Wuest_Dimensions
+      - Scandens
+      - Optiml
+    do_well:
+      - planning
+      - scenario_analysis
+      - decarbonization
+      - portfolio_steering
+    do_not_try_to_beat_at:
+      - abstract_analytics_alone
+    structural_gap:
+      - analysis_detached_from_dossier_proof
+      - analysis_detached_from_live_procedures
+    swissbuilding_must_win:
+      - analytics_grounded_in_proof
+      - analytics_grounded_in_obligations
+      - analytics_grounded_in_procedures
+      - analytics_grounded_in_blockers
+  - code: homeowner_passport
+    players:
+      - Houzy
+      - CLEA
+      - Woningpas
+      - Gebouwenpas
+    do_well:
+      - simplicity
+      - homeowner_language
+      - maintenance_reminders
+      - document_centralization
+    do_not_try_to_beat_at:
+      - consumer_convenience_alone
+    structural_gap:
+      - weak_swiss_procedure_depth
+      - weak_multi_actor_coordination
+      - weak_authority_workflow
+    swissbuilding_must_win:
+      - owner_clarity
+      - institutional_grade_procedure
+      - institutional_grade_proof
+      - actor_coordination
+  - code: generic_dms
+    players:
+      - generic_drive_tools
+      - sharepoint_like_stacks
+    do_well:
+      - storage
+      - permissions
+      - file_sync
+    do_not_try_to_beat_at:
+      - generic_storage
+    structural_gap:
+      - files_without_procedural_meaning
+      - files_without_reuse_discipline
+    swissbuilding_must_win:
+      - explainable_proof
+      - versioned_delivery
+      - audience_specific_packs
+      - action_derived_from_evidence
+  - code: specialist_vertical_tools
+    players:
+      - diagnostic_software
+      - expert_vertical_tools
+    do_well:
+      - expert_production
+      - diagnostics
+      - specialist_outputs
+    do_not_try_to_beat_at:
+      - every_vertical_execution_engine
+    structural_gap:
+      - outputs_trapped_in_expert_silos
+    swissbuilding_must_win:
+      - absorb_specialist_outputs_into_building_file
+      - keep_outputs_reusable_over_time
+build_deeply:
+  - procedure_engine
+  - proof_delivery_and_trust
+  - swissrules
+  - operating_inbox
+  - building_workspace
+integrate_or_overlay:
+  - erp_ledgers
+  - chantier_task_tooling
+  - bim_authoring
+  - generic_document_storage
+  - standalone_planning_analytics

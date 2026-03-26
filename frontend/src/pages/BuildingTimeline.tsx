@@ -17,6 +17,7 @@ const EVENT_TYPES = [
   'risk_change',
   'plan',
   'event',
+  'diagnostic_publication',
 ] as const;
 
 const LIFECYCLE_PHASES: LifecyclePhase[] = ['discovery', 'assessment', 'remediation', 'verification', 'closed'];
@@ -87,20 +88,26 @@ export default function BuildingTimeline() {
         >
           {t('timeline.filter.all')}
         </button>
-        {EVENT_TYPES.map((type) => (
-          <button
-            key={type}
-            onClick={() => setFilter(filter === type ? null : type)}
-            className={cn(
-              'px-3 py-1.5 text-xs font-medium rounded-full transition-colors',
-              filter === type
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700',
-            )}
-          >
-            {t(`timeline.event_type.${type}`)}
-          </button>
-        ))}
+        {EVENT_TYPES.map((type) => {
+          const label =
+            type === 'diagnostic_publication'
+              ? t('timeline.event_type.diagnostic_publication') || 'Imported Reports'
+              : t(`timeline.event_type.${type}`);
+          return (
+            <button
+              key={type}
+              onClick={() => setFilter(filter === type ? null : type)}
+              className={cn(
+                'px-3 py-1.5 text-xs font-medium rounded-full transition-colors',
+                filter === type
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700',
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Lifecycle phase filter chips (enriched mode only) */}

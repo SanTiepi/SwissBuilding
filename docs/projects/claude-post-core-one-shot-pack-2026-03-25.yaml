@@ -1,0 +1,103 @@
+date: 2026-03-25
+name: claude_post_core_one_shot
+purpose: Finish the next macro-slice after core by combining regulatory watch, local honesty, exchange, trust, and pilot proof.
+precondition:
+  - Current core one-shot is closed.
+  - Procedure, ControlTower, proof delivery, confidence, freshness, identity, and authority room are in place.
+combines_briefs:
+  - 5
+  - 8
+  - 9
+  - 15
+  - 16
+  - 46
+  - 47
+  - 50
+  - 52
+  - 53
+  - 54
+  - 55
+must_ship:
+  - swissrules_watch
+  - pilot_commune_honesty
+  - exchange_contract_discipline
+  - partner_trust_signals
+  - public_authority_trust_signals
+  - roi_proof
+  - pilot_scorecards
+  - case_study_templates
+hard_rules:
+  - no_second_rules_universe
+  - no_fake_nationwide_commune_automation
+  - no_second_passport_core
+  - no_second_pack_engine
+  - no_public_partner_star_rating
+  - no_marketplace_behavior
+  - no_demo_only_branches
+  - no_roi_without_workflow_events
+  - no_trust_claim_without_evidence_trace
+execution_order:
+  - phase: regulatory_watch_and_local_honesty
+    includes:
+      - watched_sources
+      - snapshots
+      - change_events
+      - review_gates
+      - communal_adapter_profiles
+      - communal_overrides
+      - communal_variants
+  - phase: exchange_and_contract_backbone
+    includes:
+      - exchange_contract_versions
+      - passport_publications
+      - import_receipts
+      - capability_profiles
+      - partner_api_contracts
+  - phase: trust_signals
+    includes:
+      - partner_trust
+      - procurement_evidence_ladder
+      - authority_trust_signals
+      - route_clarity
+      - proof_completeness
+      - response_traceability
+      - version_discipline
+  - phase: pilot_and_demo_proof
+    includes:
+      - demo_scenarios
+      - roi_proof
+      - pilot_design
+      - pilot_scorecards
+      - case_study_templates
+  - phase: coherence_pass
+    includes:
+      - freshness_affects_confidence
+      - commune_caveats_reach_trust_surfaces
+      - exchange_aligns_with_proof_lifecycle
+      - demo_and_pilot_proof_use_real_seeded_flows
+do_not_expand_into:
+  - geometry_intelligence
+  - openbim_convergence
+  - territory_public_systems_expansion
+  - full_distribution_sales_loops
+  - customer_success_expansion
+  - insurer_or_lender_depth
+validation:
+  backend:
+    - cd backend && ruff check app/ tests/
+    - cd backend && ruff format --check app/ tests/
+    - cd backend && python scripts/run_local_test_loop.py changed
+    - cd backend && python scripts/run_local_test_loop.py confidence
+  frontend:
+    - cd frontend && npm run validate
+    - cd frontend && npm run test:changed:strict
+  full_runs:
+    - only_once_at_end
+acceptance_story:
+  - rules and expectations are tied to source freshness
+  - commune-specific overrides are visible honestly
+  - a pack can be published under a versioned exchange contract
+  - downstream receipt or acknowledgement is traceable
+  - partner and authority trust signals are explainable
+  - one demo runbook and one pilot scorecard prove workflow lift
+  - one proof story can be reused as a case study

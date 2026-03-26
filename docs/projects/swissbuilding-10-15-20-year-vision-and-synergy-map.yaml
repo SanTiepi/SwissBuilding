@@ -1,0 +1,151 @@
+as_of: 2026-03-25
+
+north_star: >
+  SwissBuilding becomes the trusted coordination substrate for the built
+  environment by combining canonical building truth, regulatory procedure,
+  reusable evidence, exchange standards, and network intelligence.
+
+horizons:
+  year_10:
+    title: trusted_operating_file_of_the_building
+    outcome:
+      - canonical_building_workspace_in_switzerland
+      - strong_regulatory_engine
+      - reusable_passport_and_pack_model
+      - common_integrations_with_experts_managers_and_document_flows
+      - trusted_multi_actor_building_coordination
+  year_15:
+    title: exchange_and_trust_layer_of_the_building_ecosystem
+    outcome:
+      - recognized_exchange_format_or_protocol
+      - interoperable_proofs_versions_acknowledgements
+      - connected_public_and_private_procedures
+      - swissbuilding_as_preferred_building_exchange_path
+  year_20:
+    title: trusted_coordination_substrate_for_the_built_environment
+    outcome:
+      - building_as_live_digital_object
+      - rich_graph_of_building_procedure_obligation_proof_actor_territory
+      - explainable_agent_assistance_grounded_in_evidence
+      - market_dependency_on_shared_truth_and_exchange_layer
+
+system_layers:
+  - canonical_building_workspace
+  - regulatory_and_procedural_engine
+  - proof_and_trust_layer
+  - exchange_standard
+  - network_intelligence
+
+complementary_tools:
+  - name: Batiscan
+    role: pollutant_and_asbestos_expert_vertical
+    synergy:
+      - publishes_regulatory_outputs_into_swissbuilding
+      - enriches_passport_obligations_procedures_and_packs
+  - name: SwissRules_Studio
+    role: regulatory_sources_templates_diff_review_and_publication
+    synergy:
+      - powers_procedures_obligations_actions_and_updates
+  - name: Passport_Exchange_Network
+    role: exchange_registry_and_package_contracts
+    synergy:
+      - turns_swissbuilding_into_default_exchange_path
+  - name: Authority_Flow
+    role: submissions_complements_acknowledgements_and_public_status
+    synergy:
+      - upgrades_authority_interaction_from_attachments_to_workflow
+  - name: Contributor_Partner_Network
+    role: bounded_external_contribution_and_quality_signals
+    synergy:
+      - creates_routing_quality_and_ecosystem_density_advantage
+  - name: Proof_Delivery_and_Trust_Vault
+    role: delivery_trace_acknowledgements_signatures_and_evidence_custody
+    synergy:
+      - replaces_unreliable_email_and_drive_distribution
+  - name: Building_Twin_Geometry_Intelligence
+    role: plans_3d_zones_elements_openbim_context
+    synergy:
+      - ties_documents_procedures_and_blockers_to_physical_reality
+  - name: Material_and_Circularity_Layer
+    role: material_passports_provenance_reuse_and_end_of_life
+    synergy:
+      - links_building_works_products_and_circular_value
+  - name: Utility_and_Territory_Coordination
+    role: network_dependencies_district_constraints_public_systems
+    synergy:
+      - makes_external_blockers_operational_inside_the_workspace
+  - name: Finance_Insurance_Fiduciary_Layer
+    role: insured_financed_tax_and_transaction_ready_packs
+    synergy:
+      - converts_file_quality_into_direct_economic_value
+  - name: Resident_Occupant_Layer
+    role: critical_communications_and_occupancy_context
+    synergy:
+      - connects_building_file_to_real_usage_and_operations
+  - name: Agent_Operating_Layer
+    role: qualification_verification_routing_research_and_simulation_agents
+    synergy:
+      - makes_the_platform_faster_and_more_proactive
+
+flywheels:
+  evidence:
+    - more_structured_proof
+    - better_reuse
+    - less_rework
+    - more_trust
+    - more_files_processed_in_swissbuilding
+  procedure:
+    - more_native_procedures
+    - more_visible_blockers
+    - better_deadline_control
+    - higher_perceived_value
+    - more_adoption
+  exchange:
+    - better_import_export
+    - more_connected_actors
+    - more_requests_for_swissbuilding_format
+    - stronger_de_facto_standardization
+  rules:
+    - more_watched_sources
+    - better_regulatory_engine
+    - better_actions_and_obligations
+    - better_file_quality
+    - more_trust
+  network_learning:
+    - more_contributors
+    - more_patterns
+    - better_routing
+    - better_recommendation
+    - stronger_ecosystem_pull
+
+adoption_logic:
+  sequence:
+    - win_the_initial_wedge
+    - become_indispensable
+    - become_the_preferred_exchange_path
+    - become_the_de_facto_standard
+    - become_market_infrastructure
+  prerequisites:
+    - product_excellence
+    - switching_cost_reduction
+    - trust
+    - network_effects
+    - distribution
+
+guardrails:
+  - do_not_build_a_generic_monolith
+  - grow_from_canonical_objects_and_exchange_contracts
+  - every_new_surface_must_increase_cumulative_value
+  - long_term_vision_must_influence_current_object_model_and_interfaces
+
+signals_and_references:
+  - https://energy.ec.europa.eu/topics/energy-efficiency/energy-efficient-buildings/energy-performance-buildings-directive_en
+  - https://build-up.ec.europa.eu/en/resources-and-tools/publications/renovation-passports-commission-issues-guidance-implementation
+  - https://commission.europa.eu/projects/single-digital-gateway_en
+  - https://commission.europa.eu/strategy-and-policy/priorities-2019-2024/europe-fit-digital-age/european-digital-identity_en
+  - https://www.buildingsmart.org/standards/bsi-standards/information-delivery-specification-ids/
+  - https://single-market-economy.ec.europa.eu/news/new-eu-rules-safety-and-sustainability-construction-products-mark-new-step-sectors-competitiveness-2025-01-07_en
+  - https://eur-lex.europa.eu/eli/reg/2024/3110/oj/eng
+  - https://www.swisstopo.admin.ch/en/landscape-model-swissbuildings3d-3-0-beta
+  - https://www.swisstopo.admin.ch/en/official-directory-of-building-addresses
+  - https://www.cadastre.ch/fr/cadastre-rdppf

@@ -1,0 +1,119 @@
+date: 2026-03-25
+read_order:
+  - docs/projects/claude-handoff-prompt-2026-03-25.md
+  - docs/projects/claude-master-execution-pack-2026-03-25.md
+  - docs/projects/claude-wave-opportunity-map-2026-03-25.yaml
+  - docs/projects/claude-operating-pack-registry-2026-03-25.md
+  - docs/projects/claude-wave-brief-kit-2026-03-25.md
+core_now:
+  - area: procedure
+    pack: authority-flow-foundation-pack-2026-03-25.md
+    briefs: [1, 6]
+  - area: operating_inbox
+    pack: claude-master-execution-pack-2026-03-25.md
+    briefs: [2]
+  - area: proof_and_trust
+    pack: proof-trust-layer-roadmap-2026-03-25.md
+    briefs: [3, 7]
+  - area: exchange
+    pack: passport-exchange-network-foundation-pack-2026-03-25.md
+    briefs: [4, 8]
+  - area: swissrules
+    pack: swissrules-enablement-pack.md
+    briefs: [5, 15]
+  - area: pilot_communes
+    pack: pilot-communes-pack-2026-03-25.md
+    briefs: [15]
+  - area: must_win_workflows
+    pack: must-win-workflow-map-2026-03-25.md
+    briefs: [25, 26]
+  - area: confidence_and_review
+    pack: confidence-ladder-and-manual-review-pack-2026-03-25.md
+    briefs: [27]
+  - area: habits_timeline_metrics
+    pack: habit-loop-and-operating-rituals-2026-03-25.md
+    briefs: [28, 29, 30]
+  - area: migration_freshness_identity
+    pack: switching-cost-removal-and-migration-pack-2026-03-25.md
+    briefs: [31, 32, 33]
+  - area: surface_quality_release_safety
+    pack: ux-information-hierarchy-and-surface-grammar-2026-03-25.md
+    briefs: [34, 35, 36]
+  - area: buyer_hardening_cross_product
+    pack: buyer-objection-map-and-counterproof-pack-2026-03-25.md
+    briefs: [37, 38, 39]
+  - area: failure_truth_persona
+    pack: failure-mode-and-recovery-scenario-library-2026-03-25.md
+    briefs: [40, 41, 42]
+  - area: trust_escalation_wow
+    pack: trust-claims-and-evidence-matrix-2026-03-25.md
+    briefs: [43, 44, 45]
+  - area: buyer_trust_post_sale
+    pack: procurement-evidence-ladder-2026-03-25.md
+    briefs: [46, 47, 48, 49]
+  - area: partner_submission_roi_pilots
+    pack: ecosystem-partner-api-contract-pack-2026-03-25.md
+    briefs: [50, 51, 52, 53]
+  - area: pilot_proof_success_scaling
+    pack: pilot-scorecard-and-exit-criteria-pack-2026-03-25.md
+    briefs: [54, 55, 56, 57]
+  - area: operational_resilience_language_quality
+    pack: environment-parity-and-demo-fidelity-pack-2026-03-25.md
+    briefs: [58, 59, 60, 61]
+  - area: auth_regression_cluster
+    pack: auth-regression-sweep-pack-2026-03-25.md
+    briefs: []
+next_moat:
+  - area: partner_trust
+    pack: partner-trust-operating-pack-2026-03-25.md
+    briefs: [9]
+  - area: geometry
+    pack: geometry-intelligence-operating-pack-2026-03-25.md
+    briefs: [10]
+  - area: territory_public_systems
+    pack: territory-public-systems-operating-pack-2026-03-25.md
+    briefs: [11]
+  - area: benchmarking_grounded_in_proof
+    pack: benchmarking-grounded-in-proof-operating-pack-2026-03-25.md
+    briefs: [12]
+future_infrastructure:
+  - area: agent_layer
+    pack: agent-operating-layer-foundation-pack-2026-03-25.md
+    briefs: [13]
+  - area: openbim_convergence
+    pack: openbim-convergence-operating-pack-2026-03-25.md
+    briefs: [14]
+  - area: embedded_channels
+    pack: embedded-channels-operating-pack-2026-03-25.md
+    briefs: [19]
+  - area: distribution_sales_loops
+    pack: distribution-sales-loops-operating-pack-2026-03-25.md
+    briefs: [22]
+market_and_adoption:
+  - area: killer_demo
+    pack: killer-demo-operating-pack-2026-03-25.md
+    briefs: [16]
+  - area: enterprise_rollout
+    pack: enterprise-rollout-operating-pack-2026-03-25.md
+    briefs: [17]
+  - area: buyer_packaging
+    pack: pricing-and-packaging-operating-pack-2026-03-25.md
+    briefs: [18]
+  - area: public_owner_municipality
+    pack: public-owner-and-municipality-operating-pack-2026-03-25.md
+    briefs: [20]
+  - area: insurer_fiduciary
+    pack: insurer-fiduciary-surfaces-operating-pack-2026-03-25.md
+    briefs: [21]
+  - area: transaction_lender
+    pack: transaction-and-lender-surfaces-operating-pack-2026-03-25.md
+    briefs: [23]
+  - area: public_procurement_committee
+    pack: public-procurement-and-committee-operating-pack-2026-03-25.md
+    briefs: [24]
+shortcuts:
+  technical_noise: [auth-regression-sweep-pack-2026-03-25.md, claude-validation-matrix-2026-03-25.md]
+  make_product_more_real: [1, 2, 3, 4, 5, 25, 26]
+  harder_to_copy: [6, 7, 8, 9, 12]
+  easier_to_adopt: [16, 17, 18, 19, 22]
+  prepare_long_game: [13, 14, 15, 20, 23, 24]

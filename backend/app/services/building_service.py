@@ -17,7 +17,13 @@ from app.schemas.building import BuildingCreate, BuildingUpdate
 from app.services.risk_engine import calculate_building_risk
 
 
-async def create_building(db: AsyncSession, data: BuildingCreate, created_by: UUID) -> Building:
+async def create_building(
+    db: AsyncSession,
+    data: BuildingCreate,
+    created_by: UUID,
+    *,
+    organization_id: UUID | None = None,
+) -> Building:
     """
     Create a building, auto-compute and attach a BuildingRiskScore,
     and create a 'construction' Event. Returns the committed Building.
@@ -25,6 +31,7 @@ async def create_building(db: AsyncSession, data: BuildingCreate, created_by: UU
     building = Building(
         **data.model_dump(),
         created_by=created_by,
+        organization_id=organization_id,
         status="active",
     )
     db.add(building)
@@ -32,6 +39,7 @@ async def create_building(db: AsyncSession, data: BuildingCreate, created_by: UU
 
     # Auto-create risk score using the risk engine
     risk_score = await calculate_building_risk(db, building)
+    building.risk_scores = risk_score
     db.add(risk_score)
 
     # Create construction event
@@ -53,11 +61,7 @@ async def create_building(db: AsyncSession, data: BuildingCreate, created_by: UU
     db.add(event)
 
     await db.commit()
-
-    # Re-fetch with eager-loaded risk_scores for response serialization
-    stmt = select(Building).options(selectinload(Building.risk_scores)).where(Building.id == building.id)
-    result = await db.execute(stmt)
-    return result.scalar_one()
+    return building
 
 
 async def get_building(db: AsyncSession, building_id: UUID) -> Building | None:

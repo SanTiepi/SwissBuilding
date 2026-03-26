@@ -126,6 +126,7 @@ export function FileUpload({ onUpload, accept, maxSizeMB = 50, isLoading = false
         role="button"
         tabIndex={0}
         aria-label={t('form.upload')}
+        data-testid="file-upload-dropzone"
         className={cn(
           'relative flex flex-col items-center justify-center px-6 py-10 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200',
           isDragging
@@ -139,6 +140,7 @@ export function FileUpload({ onUpload, accept, maxSizeMB = 50, isLoading = false
           type="file"
           accept={accept}
           onChange={handleInputChange}
+          data-testid="file-upload-input"
           className="hidden"
           disabled={isLoading}
         />
