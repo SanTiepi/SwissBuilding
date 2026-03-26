@@ -66,7 +66,14 @@ describe('ReadinessWallet', () => {
     mockEcoClausesGet.mockReset();
     mockSnapshotsList.mockReset();
     // Default: no eco clauses, no snapshots
-    mockEcoClausesGet.mockResolvedValue({ building_id: 'b1', context: 'renovation', generated_at: '2026-03-24T00:00:00Z', total_clauses: 0, detected_pollutants: [], sections: [] });
+    mockEcoClausesGet.mockResolvedValue({
+      building_id: 'b1',
+      context: 'renovation',
+      generated_at: '2026-03-24T00:00:00Z',
+      total_clauses: 0,
+      detected_pollutants: [],
+      sections: [],
+    });
     mockSnapshotsList.mockResolvedValue({ items: [], total: 0 });
   });
 

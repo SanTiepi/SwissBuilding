@@ -40,7 +40,10 @@ export function PublicOwnerModePanel({ orgId }: PublicOwnerModePanelProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5" data-testid="public-owner-mode-loading">
+      <div
+        className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5"
+        data-testid="public-owner-mode-loading"
+      >
         <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
           <Loader2 className="w-4 h-4 animate-spin" />
           {t('app.loading')}
@@ -52,12 +55,13 @@ export function PublicOwnerModePanel({ orgId }: PublicOwnerModePanelProps) {
   if (!mode) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5" data-testid="public-owner-mode-panel">
+    <div
+      className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5"
+      data-testid="public-owner-mode-panel"
+    >
       <div className="flex items-center gap-2 mb-4">
         <Landmark className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {t('public_sector.owner_mode_title')}
-        </h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('public_sector.owner_mode_title')}</h3>
       </div>
 
       <div className="space-y-3">
@@ -65,7 +69,10 @@ export function PublicOwnerModePanel({ orgId }: PublicOwnerModePanelProps) {
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500 dark:text-slate-400">{t('public_sector.mode_type')}:</span>
           <span
-            className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', MODE_COLORS[mode.mode_type] || MODE_COLORS.municipal)}
+            className={cn(
+              'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+              MODE_COLORS[mode.mode_type] || MODE_COLORS.municipal,
+            )}
             data-testid="public-owner-mode-badge"
           >
             {t(`public_sector.mode.${mode.mode_type}`) || mode.mode_type}
@@ -77,7 +84,10 @@ export function PublicOwnerModePanel({ orgId }: PublicOwnerModePanelProps) {
           <ShieldCheck className="w-4 h-4 text-gray-400 dark:text-slate-500" />
           <span className="text-xs text-gray-500 dark:text-slate-400">{t('public_sector.governance_level')}:</span>
           <span
-            className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', GOVERNANCE_COLORS[mode.governance_level] || GOVERNANCE_COLORS.standard)}
+            className={cn(
+              'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+              GOVERNANCE_COLORS[mode.governance_level] || GOVERNANCE_COLORS.standard,
+            )}
             data-testid="governance-level-badge"
           >
             {t(`public_sector.governance.${mode.governance_level}`) || mode.governance_level}
@@ -108,7 +118,10 @@ export function PublicOwnerModePanel({ orgId }: PublicOwnerModePanelProps) {
             </span>
             <div className="flex flex-wrap gap-1">
               {mode.default_review_audience.map((aud, i) => (
-                <span key={i} className="inline-block px-2 py-0.5 text-xs bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded">
+                <span
+                  key={i}
+                  className="inline-block px-2 py-0.5 text-xs bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded"
+                >
                   {aud}
                 </span>
               ))}

@@ -5,7 +5,17 @@ import type { CompanyWorkspaceSummary } from '@/api/remediation';
 import { FileText, Award, ClipboardCheck, Star, Shield, Mail } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
-function StatCard({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ElementType; color: string }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: number;
+  icon: React.ElementType;
+  color: string;
+}) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 flex items-center gap-3">
       <div className={cn('p-2 rounded-lg', color)}>
@@ -82,12 +92,14 @@ export default function CompanyWorkspace() {
               </span>
             )}
             {data.subscription_status && (
-              <span className={cn(
-                'text-xs font-medium px-2 py-0.5 rounded-full',
-                data.subscription_status === 'active'
-                  ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/30'
-                  : 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700',
-              )}>
+              <span
+                className={cn(
+                  'text-xs font-medium px-2 py-0.5 rounded-full',
+                  data.subscription_status === 'active'
+                    ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/30'
+                    : 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700',
+                )}
+              >
                 {data.subscription_plan} - {data.subscription_status}
               </span>
             )}

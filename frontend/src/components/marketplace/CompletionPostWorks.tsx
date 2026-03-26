@@ -25,7 +25,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', STATUS_COLORS[status] || STATUS_COLORS.pending)}>
+    <span
+      className={cn(
+        'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+        STATUS_COLORS[status] || STATUS_COLORS.pending,
+      )}
+    >
       {status.replace('_', ' ')}
     </span>
   );
@@ -106,7 +111,9 @@ export default function CompletionPostWorks({ completionId, completionStatus }: 
       return (
         <div className="text-center py-6 text-gray-500 dark:text-slate-400" data-testid="pw-not-ready">
           <Clock className="w-6 h-6 mx-auto mb-2 text-gray-300 dark:text-slate-600" />
-          <p className="text-sm">{t('post_works.awaiting_confirmation') || 'Awaiting full confirmation to draft post-works'}</p>
+          <p className="text-sm">
+            {t('post_works.awaiting_confirmation') || 'Awaiting full confirmation to draft post-works'}
+          </p>
         </div>
       );
     }
@@ -141,7 +148,9 @@ export default function CompletionPostWorks({ completionId, completionStatus }: 
 
       {/* Intervention link */}
       <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
-        <p className="text-xs text-gray-500 dark:text-slate-400">{t('post_works.intervention') || 'Linked Intervention'}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400">
+          {t('post_works.intervention') || 'Linked Intervention'}
+        </p>
         <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{postWorks.intervention_id}</p>
       </div>
 
@@ -168,7 +177,8 @@ export default function CompletionPostWorks({ completionId, completionStatus }: 
             <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
               <p className="text-xs text-purple-600 dark:text-purple-400">Completeness</p>
               <p className="text-sm font-bold text-purple-700 dark:text-purple-300">
-                {(postWorks.completeness_delta.before * 100).toFixed(0)}% → {(postWorks.completeness_delta.after * 100).toFixed(0)}%
+                {(postWorks.completeness_delta.before * 100).toFixed(0)}% →{' '}
+                {(postWorks.completeness_delta.after * 100).toFixed(0)}%
               </p>
             </div>
           )}
@@ -210,7 +220,11 @@ export default function CompletionPostWorks({ completionId, completionStatus }: 
             className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
             data-testid="finalize-post-works-btn"
           >
-            {finalizeMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+            {finalizeMutation.isPending ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-3 h-3" />
+            )}
             {t('post_works.finalize_action') || 'Finalize'}
           </button>
         )}

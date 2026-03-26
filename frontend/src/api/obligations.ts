@@ -34,16 +34,12 @@ export const obligationsApi = {
   },
 
   complete: async (buildingId: string, obligationId: string): Promise<Obligation> => {
-    const response = await apiClient.post<Obligation>(
-      `/buildings/${buildingId}/obligations/${obligationId}/complete`,
-    );
+    const response = await apiClient.post<Obligation>(`/buildings/${buildingId}/obligations/${obligationId}/complete`);
     return response.data;
   },
 
   cancel: async (buildingId: string, obligationId: string): Promise<Obligation> => {
-    const response = await apiClient.post<Obligation>(
-      `/buildings/${buildingId}/obligations/${obligationId}/cancel`,
-    );
+    const response = await apiClient.post<Obligation>(`/buildings/${buildingId}/obligations/${obligationId}/cancel`);
     return response.data;
   },
 };

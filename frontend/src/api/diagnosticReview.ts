@@ -8,10 +8,9 @@ export const diagnosticReviewApi = {
   },
 
   matchToBuilding: async (publicationId: string, buildingId: string): Promise<DiagnosticPublication> => {
-    const response = await apiClient.post<DiagnosticPublication>(
-      `/diagnostic-publications/${publicationId}/match`,
-      { building_id: buildingId },
-    );
+    const response = await apiClient.post<DiagnosticPublication>(`/diagnostic-publications/${publicationId}/match`, {
+      building_id: buildingId,
+    });
     return response.data;
   },
 };

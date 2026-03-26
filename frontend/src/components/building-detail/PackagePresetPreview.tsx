@@ -66,9 +66,7 @@ export function PackagePresetPreview({ buildingId }: PackagePresetPreviewProps) 
         </div>
       )}
 
-      {selectedPreset && previewError && (
-        <p className="text-xs text-red-500 text-center py-4">{t('app.error')}</p>
-      )}
+      {selectedPreset && previewError && <p className="text-xs text-red-500 text-center py-4">{t('app.error')}</p>}
 
       {preview && (
         <div className="space-y-3">

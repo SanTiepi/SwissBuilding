@@ -86,9 +86,7 @@ export function CaseStudyViewer({ template }: CaseStudyViewerProps) {
                 <FileText className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                 <span>
                   <span className="font-medium">{req.label}</span>
-                  {req.source && (
-                    <span className="text-gray-400 dark:text-slate-500 ml-1">({req.source})</span>
-                  )}
+                  {req.source && <span className="text-gray-400 dark:text-slate-500 ml-1">({req.source})</span>}
                 </span>
               </li>
             ))}

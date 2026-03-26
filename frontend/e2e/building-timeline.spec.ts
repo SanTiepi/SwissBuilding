@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockAuthState, mockApiRoutes, mockApiError } from './helpers';
+import { mockAuthState, mockApiRoutes } from './helpers';
 
 test.describe('Building Timeline Page', () => {
   test.beforeEach(async ({ page }) => {

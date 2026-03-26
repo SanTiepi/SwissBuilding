@@ -155,14 +155,26 @@ export default function AdminGovernanceSignals() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
-                    <SeverityIcon className={cn('w-5 h-5 mt-0.5', signal.severity === 'critical' ? 'text-red-500' : signal.severity === 'warning' ? 'text-orange-500' : 'text-blue-500')} />
+                    <SeverityIcon
+                      className={cn(
+                        'w-5 h-5 mt-0.5',
+                        signal.severity === 'critical'
+                          ? 'text-red-500'
+                          : signal.severity === 'warning'
+                            ? 'text-orange-500'
+                            : 'text-blue-500',
+                      )}
+                    />
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-gray-900 dark:text-white" data-testid="signal-title">
                           {signal.title}
                         </span>
                         <span
-                          className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', SEVERITY_COLORS[signal.severity] || SEVERITY_COLORS.info)}
+                          className={cn(
+                            'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+                            SEVERITY_COLORS[signal.severity] || SEVERITY_COLORS.info,
+                          )}
                           data-testid="signal-severity-badge"
                         >
                           {t(`public_sector.severity.${signal.severity}`) || signal.severity}

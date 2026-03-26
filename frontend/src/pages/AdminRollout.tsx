@@ -236,7 +236,9 @@ export default function AdminRollout() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={cn('px-2 py-0.5 text-xs font-medium rounded-full', grantTypeBadge(grant.grant_type))}>
+                      <span
+                        className={cn('px-2 py-0.5 text-xs font-medium rounded-full', grantTypeBadge(grant.grant_type))}
+                      >
                         {grant.grant_type}
                       </span>
                     </td>

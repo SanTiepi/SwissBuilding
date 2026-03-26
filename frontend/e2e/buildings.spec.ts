@@ -101,8 +101,8 @@ test.describe('Building Create Form', () => {
     const addBtn = page.locator('button').filter({ hasText: /ajouter|add|nouveau|new|hinzufügen/i });
     await addBtn.first().click();
 
-    // Click advanced options
-    const advancedBtn = page.locator('button').filter({ hasText: /advanced|avancé|erweitert/i });
+    // Click advanced options (FR: "Options avancees", EN: "Advanced Options", DE: "Erweiterte Optionen")
+    const advancedBtn = page.locator('button').filter({ hasText: /advanced|avanc|erweitert/i });
     await advancedBtn.click();
 
     // EGID and EGRID should be separate fields with distinct labels

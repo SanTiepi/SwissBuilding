@@ -332,11 +332,7 @@ export default function PublicIntake() {
               data-testid="intake-submit"
               className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-lg transition-colors"
             >
-              {submitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
+              {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
               {submitting ? t('app.loading') : t('intake.submit')}
             </button>
           </form>

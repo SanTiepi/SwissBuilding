@@ -5,12 +5,36 @@ import type { ReadinessAdvisorSuggestion } from '@/api/remediationIntelligence';
 import { AlertTriangle, CheckCircle, Clock, Shield, FileQuestion, Zap } from 'lucide-react';
 
 const TYPE_CONFIG: Record<string, { color: string; icon: typeof AlertTriangle; label: string }> = {
-  blocker: { color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', icon: AlertTriangle, label: 'Blocker' },
-  gap: { color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', icon: FileQuestion, label: 'Gap' },
-  stale: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', icon: Clock, label: 'Stale' },
-  missing_pollutant: { color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', icon: Shield, label: 'Missing' },
-  pending_procedure: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', icon: Clock, label: 'Pending' },
-  proof_gap: { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', icon: FileQuestion, label: 'Proof Gap' },
+  blocker: {
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    icon: AlertTriangle,
+    label: 'Blocker',
+  },
+  gap: {
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    icon: FileQuestion,
+    label: 'Gap',
+  },
+  stale: {
+    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    icon: Clock,
+    label: 'Stale',
+  },
+  missing_pollutant: {
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    icon: Shield,
+    label: 'Missing',
+  },
+  pending_procedure: {
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    icon: Clock,
+    label: 'Pending',
+  },
+  proof_gap: {
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+    icon: FileQuestion,
+    label: 'Proof Gap',
+  },
 };
 
 function ConfidenceBar({ confidence }: { confidence: number }) {
@@ -48,9 +72,7 @@ function SuggestionCard({ suggestion }: { suggestion: ReadinessAdvisorSuggestion
         </div>
       )}
       {suggestion.evidence_refs.length > 0 && (
-        <div className="text-xs text-gray-400">
-          Evidence: {suggestion.evidence_refs.join(', ')}
-        </div>
+        <div className="text-xs text-gray-400">Evidence: {suggestion.evidence_refs.join(', ')}</div>
       )}
     </div>
   );

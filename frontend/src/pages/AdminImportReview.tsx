@@ -29,8 +29,7 @@ export default function AdminImportReview() {
   });
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, decision }: { id: string; decision: string }) =>
-      exchangeHardeningApi.reviewImport(id, decision),
+    mutationFn: ({ id, decision }: { id: string; decision: string }) => exchangeHardeningApi.reviewImport(id, decision),
   });
 
   const integrateMutation = useMutation({
@@ -41,16 +40,12 @@ export default function AdminImportReview() {
     <div className="space-y-6" data-testid="admin-import-review">
       <div className="flex items-center gap-3">
         <Shield className="w-6 h-6 text-indigo-500" />
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          {'Import Validation & Review'}
-        </h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{'Import Validation & Review'}</h1>
       </div>
 
       {/* Receipt ID input */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          {'Validate Import Receipt'}
-        </h2>
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{'Validate Import Receipt'}</h2>
         <div className="flex gap-3">
           <input
             type="text"
@@ -80,9 +75,7 @@ export default function AdminImportReview() {
           data-testid="validation-report"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              {'Validation Report'}
-            </h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{'Validation Report'}</h2>
             <span
               className={cn(
                 'px-2.5 py-1 rounded-full text-xs font-medium',
@@ -123,10 +116,7 @@ export default function AdminImportReview() {
             <div className="mb-4" data-testid="validation-errors">
               <h3 className="text-xs font-medium text-gray-500 mb-1">{'Errors'}</h3>
               {validationReport.validation_errors.map((err, i) => (
-                <div
-                  key={i}
-                  className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1"
-                >
+                <div key={i} className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                   <span className="font-medium">[{err.check}]</span>
                   <span>{err.message}</span>
                 </div>
@@ -137,18 +127,14 @@ export default function AdminImportReview() {
           {/* Review Actions */}
           <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
             <button
-              onClick={() =>
-                reviewMutation.mutate({ id: validationReport.import_receipt_id, decision: 'validated' })
-              }
+              onClick={() => reviewMutation.mutate({ id: validationReport.import_receipt_id, decision: 'validated' })}
               className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700"
               data-testid="approve-btn"
             >
               {'Approve'}
             </button>
             <button
-              onClick={() =>
-                reviewMutation.mutate({ id: validationReport.import_receipt_id, decision: 'rejected' })
-              }
+              onClick={() => reviewMutation.mutate({ id: validationReport.import_receipt_id, decision: 'rejected' })}
               className="px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700"
               data-testid="reject-btn"
             >

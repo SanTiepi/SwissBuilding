@@ -126,18 +126,14 @@ export default function ObligationsCard({ buildingId }: Props) {
   };
 
   const { overdueItems, dueSoonItems, otherItems } = useMemo(() => {
-    const active = obligations.filter(
-      (o: Obligation) => o.status !== 'completed' && o.status !== 'cancelled',
-    );
+    const active = obligations.filter((o: Obligation) => o.status !== 'completed' && o.status !== 'cancelled');
     const overdue = active.filter((o: Obligation) => isOverdue(o.due_date));
     const dueSoon = active.filter((o: Obligation) => !isOverdue(o.due_date) && isDueSoon(o.due_date));
     const other = active.filter((o: Obligation) => !isOverdue(o.due_date) && !isDueSoon(o.due_date));
     return { overdueItems: overdue, dueSoonItems: dueSoon, otherItems: other };
   }, [obligations]);
 
-  const completedItems = obligations.filter(
-    (o: Obligation) => o.status === 'completed' || o.status === 'cancelled',
-  );
+  const completedItems = obligations.filter((o: Obligation) => o.status === 'completed' || o.status === 'cancelled');
 
   const renderItem = (item: Obligation) => (
     <div

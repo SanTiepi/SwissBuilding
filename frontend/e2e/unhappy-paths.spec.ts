@@ -28,8 +28,9 @@ test.describe('Unhappy paths — error scenarios', () => {
   test('expired token redirects to login', async ({ page }) => {
     // Set up auth state so the app thinks we're logged in
     await mockAuthState(page);
+    await mockApiRoutes(page);
 
-    // Mock /auth/me to return 401 (expired token)
+    // Mock /auth/me to return 401 (expired token) — overrides mockApiRoutes handler
     await page.route('**/api/v1/auth/me', (route) =>
       route.fulfill({
         status: 401,

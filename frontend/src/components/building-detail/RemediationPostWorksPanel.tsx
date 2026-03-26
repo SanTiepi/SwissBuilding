@@ -13,22 +13,41 @@ const STATUS_COLORS: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', STATUS_COLORS[status] || STATUS_COLORS.pending)}>
+    <span
+      className={cn(
+        'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+        STATUS_COLORS[status] || STATUS_COLORS.pending,
+      )}
+    >
       {status.replace('_', ' ')}
     </span>
   );
 }
 
-function DeltaDisplay({ label, delta, unit }: { label: string; delta: { before: unknown; after: unknown; change: unknown } | null; unit?: string }) {
+function DeltaDisplay({
+  label,
+  delta,
+  unit,
+}: {
+  label: string;
+  delta: { before: unknown; after: unknown; change: unknown } | null;
+  unit?: string;
+}) {
   if (!delta) return null;
   const suffix = unit ? ` ${unit}` : '';
   return (
     <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
       <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">{label}</p>
       <div className="flex items-center gap-2 text-sm">
-        <span className="font-medium text-gray-900 dark:text-white">{String(delta.before)}{suffix}</span>
+        <span className="font-medium text-gray-900 dark:text-white">
+          {String(delta.before)}
+          {suffix}
+        </span>
         <ArrowRight className="w-3 h-3 text-gray-400" />
-        <span className="font-bold text-green-600 dark:text-green-400">{String(delta.after)}{suffix}</span>
+        <span className="font-bold text-green-600 dark:text-green-400">
+          {String(delta.after)}
+          {suffix}
+        </span>
         <span className="text-xs text-gray-500 dark:text-slate-400">({String(delta.change) || '0'})</span>
       </div>
     </div>
@@ -38,7 +57,10 @@ function DeltaDisplay({ label, delta, unit }: { label: string; delta: { before: 
 function OutcomeCard({ outcome }: { outcome: PostWorksLinkData }) {
   const { t } = useTranslation();
   return (
-    <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-4" data-testid="remediation-outcome-card">
+    <div
+      className="border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-4"
+      data-testid="remediation-outcome-card"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />

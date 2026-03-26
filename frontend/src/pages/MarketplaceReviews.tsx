@@ -11,10 +11,7 @@ function StarDisplay({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((s) => (
         <Star
           key={s}
-          className={cn(
-            'w-4 h-4',
-            s <= rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-slate-600',
-          )}
+          className={cn('w-4 h-4', s <= rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-slate-600')}
         />
       ))}
     </span>
@@ -40,14 +37,13 @@ function ReviewCard({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <StarDisplay rating={review.rating} />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {review.rating}/5
-            </span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{review.rating}/5</span>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400">
             {t('marketplace.reviewer_type') || 'From'}: {review.reviewer_type}
             {' | '}
-            {t('marketplace.submitted') || 'Submitted'}: {review.submitted_at ? formatDateTime(review.submitted_at) : '--'}
+            {t('marketplace.submitted') || 'Submitted'}:{' '}
+            {review.submitted_at ? formatDateTime(review.submitted_at) : '--'}
           </p>
         </div>
         <span
@@ -62,9 +58,7 @@ function ReviewCard({
         </span>
       </div>
 
-      {review.comment && (
-        <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">{review.comment}</p>
-      )}
+      {review.comment && <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">{review.comment}</p>}
 
       <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-slate-400 mb-3">
         {review.quality_score && (
@@ -110,7 +104,11 @@ export default function MarketplaceReviews() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data: reviews, isLoading, error } = useQuery({
+  const {
+    data: reviews,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['marketplace-pending-reviews'],
     queryFn: () => marketplaceRfqApi.getPendingReviews(),
   });

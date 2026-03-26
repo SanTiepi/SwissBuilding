@@ -138,9 +138,7 @@ describe('CompletionPostWorks', () => {
       grade_delta: { before: 'C', after: 'B', change: '+1' },
       trust_delta: { before: 0.52, after: 0.78, change: 0.26 },
       completeness_delta: { before: 0.65, after: 0.82, change: 0.17 },
-      residual_risks: [
-        { risk_type: 'asbestos', description: 'Remaining material', severity: 'low' },
-      ],
+      residual_risks: [{ risk_type: 'asbestos', description: 'Remaining material', severity: 'low' }],
       drafted_at: '2026-03-20T10:00:00Z',
       finalized_at: '2026-03-22T14:30:00Z',
       reviewed_by_user_id: null,

@@ -36,9 +36,7 @@ export interface CreateMissionOrderRequest {
 }
 
 export const diagnosticIntegrationApi = {
-  getImportedDiagnosticSummaries: async (
-    buildingId: string,
-  ): Promise<ImportedDiagnosticSummaryDto[]> => {
+  getImportedDiagnosticSummaries: async (buildingId: string): Promise<ImportedDiagnosticSummaryDto[]> => {
     const response = await apiClient.get<ImportedDiagnosticSummaryDto[]>(
       `/buildings/${buildingId}/imported-diagnostic-summary`,
     );
@@ -46,16 +44,12 @@ export const diagnosticIntegrationApi = {
   },
 
   getPublicationsForBuilding: async (buildingId: string): Promise<DiagnosticPublication[]> => {
-    const response = await apiClient.get<DiagnosticPublication[]>(
-      `/buildings/${buildingId}/diagnostic-publications`,
-    );
+    const response = await apiClient.get<DiagnosticPublication[]>(`/buildings/${buildingId}/diagnostic-publications`);
     return response.data;
   },
 
   getMissionOrdersForBuilding: async (buildingId: string): Promise<DiagnosticMissionOrder[]> => {
-    const response = await apiClient.get<DiagnosticMissionOrder[]>(
-      `/buildings/${buildingId}/mission-orders`,
-    );
+    const response = await apiClient.get<DiagnosticMissionOrder[]>(`/buildings/${buildingId}/mission-orders`);
     return response.data;
   },
 

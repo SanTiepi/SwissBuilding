@@ -9,7 +9,13 @@ vi.mock('@/api/remediationIntelligence', () => ({
     getRemediationBenchmark: vi.fn().mockResolvedValue({
       org_id: 'org-1',
       benchmarks: [
-        { pollutant: 'asbestos_removal', avg_cost_chf: 45000, avg_cycle_days: 30, completion_rate: 0.85, sample_size: 10 },
+        {
+          pollutant: 'asbestos_removal',
+          avg_cost_chf: 45000,
+          avg_cycle_days: 30,
+          completion_rate: 0.85,
+          sample_size: 10,
+        },
       ],
       overall_avg_cost_chf: 45000,
       overall_avg_cycle_days: 30,
@@ -17,8 +23,20 @@ vi.mock('@/api/remediationIntelligence', () => ({
       generated_at: '2026-03-25T10:00:00Z',
     }),
     getFlywheelTrends: vi.fn().mockResolvedValue([
-      { date: '2026-W10', extraction_quality: 0.82, correction_rate: 0.15, cycle_time_days: null, knowledge_density: 0.6 },
-      { date: '2026-W11', extraction_quality: 0.85, correction_rate: 0.12, cycle_time_days: null, knowledge_density: 0.65 },
+      {
+        date: '2026-W10',
+        extraction_quality: 0.82,
+        correction_rate: 0.15,
+        cycle_time_days: null,
+        knowledge_density: 0.6,
+      },
+      {
+        date: '2026-W11',
+        extraction_quality: 0.85,
+        correction_rate: 0.12,
+        cycle_time_days: null,
+        knowledge_density: 0.65,
+      },
     ]),
     getModuleLearningOverview: vi.fn().mockResolvedValue({
       total_patterns: 15,

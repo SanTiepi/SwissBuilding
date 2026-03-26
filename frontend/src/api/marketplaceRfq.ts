@@ -165,17 +165,11 @@ export const marketplaceRfqApi = {
     return apiClient.get(`/marketplace/completions/${completionId}`);
   },
 
-  confirmClient: async (
-    completionId: string,
-    data?: { notes?: string },
-  ): Promise<CompletionConfirmation> => {
+  confirmClient: async (completionId: string, data?: { notes?: string }): Promise<CompletionConfirmation> => {
     return apiClient.post(`/marketplace/completions/${completionId}/confirm-client`, data ?? {});
   },
 
-  confirmCompany: async (
-    completionId: string,
-    data?: { notes?: string },
-  ): Promise<CompletionConfirmation> => {
+  confirmCompany: async (completionId: string, data?: { notes?: string }): Promise<CompletionConfirmation> => {
     return apiClient.post(`/marketplace/completions/${completionId}/confirm-company`, data ?? {});
   },
 

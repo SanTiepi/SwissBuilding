@@ -9,15 +9,7 @@ import AuthorityRequestCard from '@/components/building-detail/AuthorityRequestC
 import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHistory';
 import AuthorityProofSet from '@/components/building-detail/AuthorityProofSet';
 import type { ProofRequirement } from '@/components/building-detail/AuthorityProofSet';
-import {
-  ArrowLeft,
-  Loader2,
-  AlertTriangle,
-  Send,
-  FileText,
-  ClipboardList,
-  ShieldCheck,
-} from 'lucide-react';
+import { ArrowLeft, Loader2, AlertTriangle, Send, FileText, ClipboardList, ShieldCheck } from 'lucide-react';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -38,9 +30,7 @@ function getNextAction(
   activeStep: ProcedureStep | null,
   t: (key: string) => string,
 ): { label: string; type: 'submit' | 'respond' | 'send_proof' | 'wait' } {
-  const openRequests = procedure.authority_requests.filter(
-    (r) => r.status === 'open' || r.status === 'overdue',
-  );
+  const openRequests = procedure.authority_requests.filter((r) => r.status === 'open' || r.status === 'overdue');
 
   if (openRequests.length > 0) {
     return { label: t('authority_room.action_respond_request'), type: 'respond' };
@@ -116,9 +106,7 @@ export default function AuthoritySubmissionRoom() {
   const proofRequirements = buildProofRequirements(activeStep);
   const nextAction = getNextAction(procedure, activeStep, t);
   const NextActionIcon = ACTION_ICONS[nextAction.type] || ClipboardList;
-  const openRequests = procedure.authority_requests.filter(
-    (r) => r.status === 'open' || r.status === 'overdue',
-  );
+  const openRequests = procedure.authority_requests.filter((r) => r.status === 'open' || r.status === 'overdue');
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6" data-testid="authority-submission-room">
       {/* Back nav */}
@@ -193,9 +181,7 @@ export default function AuthoritySubmissionRoom() {
         className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4"
         data-testid="next-move"
       >
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-          {t('authority_room.next_move')}
-        </h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('authority_room.next_move')}</h3>
         <button
           className={cn(
             'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',

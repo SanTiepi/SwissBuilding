@@ -140,9 +140,7 @@ describe('AdminGovernanceSignals', () => {
   });
 
   it('shows empty state when no active signals', async () => {
-    vi.mocked(publicSectorApi.listGovernanceSignals).mockResolvedValue([
-      { ...mockSignals[2], resolved: true },
-    ]);
+    vi.mocked(publicSectorApi.listGovernanceSignals).mockResolvedValue([{ ...mockSignals[2], resolved: true }]);
     render(<AdminGovernanceSignals />, { wrapper: createWrapper() });
 
     // All resolved — shows all signals (fallback)

@@ -173,6 +173,7 @@ function useAnimatedNumber(target: number, duration = 800): number {
   const [current, setCurrent] = useState(target);
   const prevRef = useRef(target);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- animation driven by rAF */
   useEffect(() => {
     const from = prevRef.current;
     const diff = target - from;
@@ -197,6 +198,7 @@ function useAnimatedNumber(target: number, duration = 800): number {
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
   }, [target, duration]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return current;
 }
@@ -209,7 +211,9 @@ export default function InterventionSimulator() {
   const [interventions, setInterventions] = useState<ExtendedSimulationInput[]>([]);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [scenarioName, setScenarioName] = useState('');
-  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
+  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>(() =>
+    buildingId ? loadScenariosFromStorage(buildingId) : [],
+  );
   const [showScenarioPanel, setShowScenarioPanel] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
@@ -217,12 +221,14 @@ export default function InterventionSimulator() {
   const [expandedInterventions, setExpandedInterventions] = useState<Set<number>>(new Set());
   const [resultsVisible, setResultsVisible] = useState(false);
 
-  // Load saved scenarios from localStorage
+  // Reload saved scenarios when buildingId changes (reads from localStorage)
+  /* eslint-disable react-hooks/set-state-in-effect -- reading external storage on param change */
   useEffect(() => {
     if (buildingId) {
       setSavedScenarios(loadScenariosFromStorage(buildingId));
     }
   }, [buildingId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Grade animation timer ref
   const gradeTimerRef = useRef<ReturnType<typeof setTimeout>>();

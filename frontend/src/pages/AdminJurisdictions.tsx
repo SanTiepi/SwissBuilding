@@ -274,7 +274,10 @@ function MobilePackCard({ pack }: { pack: RegulatoryPack }) {
 
   return (
     <div
-      className={cn('border-l-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden', borderClass)}
+      className={cn(
+        'border-l-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden',
+        borderClass,
+      )}
       data-testid="pack-mobile-card"
     >
       <button
@@ -310,7 +313,9 @@ function MobilePackCard({ pack }: { pack: RegulatoryPack }) {
             {t('regulatory_pack.action') || 'Action'}
           </span>
           <span className="text-sm text-gray-500 dark:text-slate-400">
-            {pack.threshold_action ? t(`regulatory_pack.action.${pack.threshold_action}`) || pack.threshold_action : '-'}
+            {pack.threshold_action
+              ? t(`regulatory_pack.action.${pack.threshold_action}`) || pack.threshold_action
+              : '-'}
           </span>
         </div>
         <div className="flex items-center justify-between px-4 py-2.5">
@@ -373,8 +378,7 @@ function MobilePackCard({ pack }: { pack: RegulatoryPack }) {
           </p>
           {pack.base_probability != null && (
             <p className="text-gray-500 dark:text-slate-400">
-              {t('regulatory_pack.base_probability') || 'Base probability'}:{' '}
-              {(pack.base_probability * 100).toFixed(0)}%
+              {t('regulatory_pack.base_probability') || 'Base probability'}: {(pack.base_probability * 100).toFixed(0)}%
             </p>
           )}
           {pack.description_fr && <p className="text-gray-500 dark:text-slate-400">{pack.description_fr}</p>}

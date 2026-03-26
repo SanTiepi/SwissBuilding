@@ -48,7 +48,16 @@ const editSchema = z.object({
 
 type EditFormData = z.infer<typeof editSchema>;
 
-type TabKey = 'overview' | 'activity' | 'diagnostics' | 'documents' | 'ownership' | 'leases' | 'contracts' | 'procedures' | 'details';
+type TabKey =
+  | 'overview'
+  | 'activity'
+  | 'diagnostics'
+  | 'documents'
+  | 'ownership'
+  | 'leases'
+  | 'contracts'
+  | 'procedures'
+  | 'details';
 
 const TabFallback = (
   <div className="flex items-center justify-center py-12">
@@ -351,7 +360,11 @@ export default function BuildingDetail() {
           {/* Diagnostics Tab */}
           {activeTab === 'diagnostics' && (
             <Suspense fallback={TabFallback}>
-              <LazyDiagnosticsTab buildingId={id!} diagnostics={diagnostics} onCreateClick={() => setShowDiagnosticForm(true)} />
+              <LazyDiagnosticsTab
+                buildingId={id!}
+                diagnostics={diagnostics}
+                onCreateClick={() => setShowDiagnosticForm(true)}
+              />
             </Suspense>
           )}
 

@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import {
-  swissRulesWatchApi,
-  type RuleSource,
-  type RuleChangeEvent,
-  type FreshnessState,
-} from '@/api/swissRulesWatch';
+import { swissRulesWatchApi, type RuleSource, type RuleChangeEvent, type FreshnessState } from '@/api/swissRulesWatch';
 import { BookOpen, MapPin, AlertTriangle, Shield, RefreshCw, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,10 +10,26 @@ interface SwissRulesWatchPanelProps {
 }
 
 const FRESHNESS_CONFIG: Record<FreshnessState, { color: string; bg: string; label: string }> = {
-  current: { color: 'text-green-700 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/40', label: 'swiss_rules.freshness_current' },
-  aging: { color: 'text-yellow-700 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900/40', label: 'swiss_rules.freshness_aging' },
-  stale: { color: 'text-red-700 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/40', label: 'swiss_rules.freshness_stale' },
-  unknown: { color: 'text-gray-500 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700', label: 'swiss_rules.freshness_unknown' },
+  current: {
+    color: 'text-green-700 dark:text-green-400',
+    bg: 'bg-green-100 dark:bg-green-900/40',
+    label: 'swiss_rules.freshness_current',
+  },
+  aging: {
+    color: 'text-yellow-700 dark:text-yellow-400',
+    bg: 'bg-yellow-100 dark:bg-yellow-900/40',
+    label: 'swiss_rules.freshness_aging',
+  },
+  stale: {
+    color: 'text-red-700 dark:text-red-400',
+    bg: 'bg-red-100 dark:bg-red-900/40',
+    label: 'swiss_rules.freshness_stale',
+  },
+  unknown: {
+    color: 'text-gray-500 dark:text-gray-400',
+    bg: 'bg-gray-100 dark:bg-gray-700',
+    label: 'swiss_rules.freshness_unknown',
+  },
 };
 
 const ADAPTER_STATUS_STYLE: Record<string, string> = {
@@ -94,7 +105,12 @@ export default function SwissRulesWatchPanel({ buildingId }: SwissRulesWatchPane
 
           {communeCtx.adapter ? (
             <div className="flex flex-wrap gap-2 text-xs" data-testid="adapter-info">
-              <span className={cn('font-medium', ADAPTER_STATUS_STYLE[communeCtx.adapter.adapter_status] ?? 'text-gray-500')}>
+              <span
+                className={cn(
+                  'font-medium',
+                  ADAPTER_STATUS_STYLE[communeCtx.adapter.adapter_status] ?? 'text-gray-500',
+                )}
+              >
                 {t('swiss_rules.adapter_status')}: {communeCtx.adapter.adapter_status}
               </span>
               <span className="text-gray-500 dark:text-gray-400">
@@ -214,9 +230,7 @@ function ChangeRow({ event }: { event: RuleChangeEvent }) {
       <div>
         <span className="font-medium text-gray-700 dark:text-gray-300">{event.title}</span>
         <span className="text-gray-500 dark:text-gray-400 ml-1">({event.event_type})</span>
-        {event.impact_summary && (
-          <p className="text-gray-500 dark:text-gray-400 mt-0.5">{event.impact_summary}</p>
-        )}
+        {event.impact_summary && <p className="text-gray-500 dark:text-gray-400 mt-0.5">{event.impact_summary}</p>}
       </div>
     </div>
   );

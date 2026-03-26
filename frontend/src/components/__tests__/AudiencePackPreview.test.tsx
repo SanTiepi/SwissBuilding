@@ -50,7 +50,9 @@ vi.mock('@/api/audiencePacks', () => ({
       superseded_by_id: null,
       created_at: '2026-03-01T10:00:00Z',
       updated_at: '2026-03-01T10:00:00Z',
-      caveats: [{ caveat_type: 'freshness_warning', severity: 'medium', message: 'Data older than 6 months', applies_when: {} }],
+      caveats: [
+        { caveat_type: 'freshness_warning', severity: 'medium', message: 'Data older than 6 months', applies_when: {} },
+      ],
     }),
     generate: vi.fn().mockResolvedValue({
       id: 'pack-new',

@@ -13,7 +13,13 @@ vi.mock('@/i18n', () => ({
 }));
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(),
+  useAuth: () => ({
+    user: { id: 'u1', role: 'admin' },
+    token: 'tok',
+    isAuthenticated: true,
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
 }));
 
 const mockUseBuilding = vi.fn();

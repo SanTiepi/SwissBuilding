@@ -20,9 +20,7 @@ export interface ProofDelivery {
 
 export const proofDeliveryApi = {
   async listByBuilding(buildingId: string): Promise<ProofDelivery[]> {
-    const res = await apiClient.get<{ items: ProofDelivery[] }>(
-      `/buildings/${buildingId}/proof-deliveries`,
-    );
+    const res = await apiClient.get<{ items: ProofDelivery[] }>(`/buildings/${buildingId}/proof-deliveries`);
     return res.data.items;
   },
 };

@@ -90,8 +90,6 @@ test.describe('Admin Jurisdictions Page', () => {
     await expect(page.locator('h2').filter({ hasText: 'Canton de Vaud' })).toBeVisible();
 
     // Click the edit button
-    const editBtn = page.locator('[title]').filter({ hasText: '' }).locator('svg').first();
-    const editButton = page.locator('button[title]').filter({ has: page.locator('svg') }).first();
     // Safer: find by title attribute
     await page.locator('button[title="Edit"], button[title="Modifier"]').first().click({ timeout: 3000 }).catch(async () => {
       // Fallback: use the generic pencil button near the detail header

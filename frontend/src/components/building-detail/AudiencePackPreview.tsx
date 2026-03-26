@@ -126,9 +126,7 @@ export function AudiencePackPreview({ buildingId }: AudiencePackPreviewProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Package className="w-5 h-5 text-red-600" />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            {t('audience_pack.title')}
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('audience_pack.title')}</h3>
         </div>
         <button
           onClick={() => generateMutation.mutate()}
@@ -355,9 +353,7 @@ export function AudiencePackPreview({ buildingId }: AudiencePackPreviewProps) {
                     data-testid="trust-ref"
                   >
                     {tr.source}
-                    <span className="text-blue-500 dark:text-blue-300">
-                      {Math.round(tr.confidence * 100)}%
-                    </span>
+                    <span className="text-blue-500 dark:text-blue-300">{Math.round(tr.confidence * 100)}%</span>
                     <span className="text-blue-400 dark:text-blue-500">{tr.freshness}</span>
                   </span>
                 ))}
@@ -398,9 +394,7 @@ export function AudiencePackPreview({ buildingId }: AudiencePackPreviewProps) {
 
           {/* Caveats */}
           <div>
-            <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">
-              {t('audience_pack.caveats')}
-            </p>
+            <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">{t('audience_pack.caveats')}</p>
             <CaveatSummary buildingId={buildingId} audienceType={selectedAudience} />
           </div>
 

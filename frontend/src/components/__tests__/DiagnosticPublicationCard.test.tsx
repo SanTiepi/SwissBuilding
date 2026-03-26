@@ -1,9 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  DiagnosticPublicationCard,
-  type DiagnosticPublication,
-} from '../building-detail/DiagnosticPublicationCard';
+import { DiagnosticPublicationCard, type DiagnosticPublication } from '../building-detail/DiagnosticPublicationCard';
 
 vi.mock('@/i18n', () => ({
   useTranslation: () => ({

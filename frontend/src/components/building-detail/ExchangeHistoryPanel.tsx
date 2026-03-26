@@ -113,7 +113,8 @@ export default function ExchangeHistoryPanel({ buildingId }: ExchangeHistoryPane
 
 function PublicationRow({ pub }: { pub: Publication }) {
   const [showDiff, setShowDiff] = useState(false);
-  const stateStyle = DELIVERY_STATE_STYLE[pub.delivery_state] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
+  const stateStyle =
+    DELIVERY_STATE_STYLE[pub.delivery_state] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
 
   return (
     <div>
@@ -123,7 +124,10 @@ function PublicationRow({ pub }: { pub: Publication }) {
       >
         <ArrowUpRight className="w-4 h-4 text-blue-500 flex-shrink-0" />
         <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{pub.audience_type}</span>
-        <span className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', stateStyle)} data-testid={`pub-state-${pub.id}`}>
+        <span
+          className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', stateStyle)}
+          data-testid={`pub-state-${pub.id}`}
+        >
           {pub.delivery_state}
         </span>
         <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{formatDate(pub.published_at)}</span>
@@ -157,7 +161,8 @@ function PublicationRow({ pub }: { pub: Publication }) {
 }
 
 function ImportRow({ receipt }: { receipt: ImportReceipt }) {
-  const statusStyle = IMPORT_STATUS_STYLE[receipt.status] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
+  const statusStyle =
+    IMPORT_STATUS_STYLE[receipt.status] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
   const isValidated = receipt.status === 'validated' || receipt.status === 'integrated';
 
   return (
@@ -167,13 +172,16 @@ function ImportRow({ receipt }: { receipt: ImportReceipt }) {
     >
       <ArrowDownLeft className="w-4 h-4 text-green-500 flex-shrink-0" />
       <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{receipt.source_system}</span>
-      <span className="text-xs text-gray-500 dark:text-gray-400">{receipt.contract_code} v{receipt.contract_version}</span>
-      <span className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', statusStyle)} data-testid={`import-status-${receipt.id}`}>
+      <span className="text-xs text-gray-500 dark:text-gray-400">
+        {receipt.contract_code} v{receipt.contract_version}
+      </span>
+      <span
+        className={cn('inline-block px-2 py-0.5 rounded text-xs font-medium', statusStyle)}
+        data-testid={`import-status-${receipt.id}`}
+      >
         {receipt.status}
       </span>
-      {isValidated && (
-        <Shield className="w-3 h-3 text-green-500" data-testid={`import-validated-${receipt.id}`} />
-      )}
+      {isValidated && <Shield className="w-3 h-3 text-green-500" data-testid={`import-validated-${receipt.id}`} />}
       <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{formatDate(receipt.imported_at)}</span>
     </div>
   );

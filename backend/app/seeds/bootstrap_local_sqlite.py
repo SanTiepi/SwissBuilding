@@ -61,8 +61,7 @@ async def main() -> None:
 
     # Import after env setup so app.database picks SQLite settings.
     import app.models  # noqa: F401
-    from app.database import Base
-    from app.database import AsyncSessionLocal
+    from app.database import AsyncSessionLocal, Base
     from app.seeds.seed_data import seed
     from app.seeds.seed_demo_workspace import seed_demo_workspace
 

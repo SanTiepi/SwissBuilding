@@ -1,9 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  ContractorEcoClausePreview,
-  type EcoClauseSummary,
-} from '../building-detail/ContractorEcoClausePreview';
+import { ContractorEcoClausePreview, type EcoClauseSummary } from '../building-detail/ContractorEcoClausePreview';
 
 vi.mock('@/i18n', () => ({
   useTranslation: () => ({

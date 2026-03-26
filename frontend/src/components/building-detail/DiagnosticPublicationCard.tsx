@@ -1,15 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from '@/i18n';
-import {
-  ChevronDown,
-  ChevronUp,
-  FileText,
-  Lock,
-  Download,
-  Paperclip,
-  History,
-  ClipboardList,
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, Lock, Download, Paperclip, History, ClipboardList } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -135,13 +126,7 @@ export function DiagnosticPublicationCard({ publications }: DiagnosticPublicatio
 /*  Single publication row                                             */
 /* ------------------------------------------------------------------ */
 
-function PublicationRow({
-  publication: pub,
-  t,
-}: {
-  publication: DiagnosticPublication;
-  t: (key: string) => string;
-}) {
+function PublicationRow({ publication: pub, t }: { publication: DiagnosticPublication; t: (key: string) => string }) {
   const [annexesOpen, setAnnexesOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
 

@@ -46,7 +46,10 @@ const AUDIENCE_LABELS: Record<string, string> = {
 function GradeBadge({ grade }: { grade: string }) {
   return (
     <span
-      className={cn('inline-flex items-center px-3 py-1 rounded-full text-lg font-bold', GRADE_COLORS[grade] || GRADE_COLORS.F)}
+      className={cn(
+        'inline-flex items-center px-3 py-1 rounded-full text-lg font-bold',
+        GRADE_COLORS[grade] || GRADE_COLORS.F,
+      )}
     >
       {grade}
     </span>
@@ -80,7 +83,10 @@ function BlockerCard({ item }: { item: DecisionBlocker }) {
         <p className="text-sm font-medium text-red-900 dark:text-red-100">{item.title}</p>
         <p className="text-xs text-red-700 dark:text-red-300 mt-0.5">{item.description}</p>
         {item.link_hint && (
-          <Link to={item.link_hint} className="text-xs text-red-600 dark:text-red-400 hover:underline mt-1 inline-flex items-center gap-1">
+          <Link
+            to={item.link_hint}
+            className="text-xs text-red-600 dark:text-red-400 hover:underline mt-1 inline-flex items-center gap-1"
+          >
             View details <ChevronRight className="w-3 h-3" />
           </Link>
         )}
@@ -97,7 +103,10 @@ function ConditionCard({ item }: { item: DecisionCondition }) {
         <p className="text-sm font-medium text-orange-900 dark:text-orange-100">{item.title}</p>
         <p className="text-xs text-orange-700 dark:text-orange-300 mt-0.5">{item.description}</p>
         {item.link_hint && (
-          <Link to={item.link_hint} className="text-xs text-orange-600 dark:text-orange-400 hover:underline mt-1 inline-flex items-center gap-1">
+          <Link
+            to={item.link_hint}
+            className="text-xs text-orange-600 dark:text-orange-400 hover:underline mt-1 inline-flex items-center gap-1"
+          >
             View details <ChevronRight className="w-3 h-3" />
           </Link>
         )}
@@ -157,15 +166,21 @@ function AudienceTab({ ar }: { ar: AudienceReadiness }) {
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">Unknowns</span>
-              <span className={ar.unknowns_count > 0 ? 'text-orange-600 font-medium' : 'text-green-600'}>{ar.unknowns_count}</span>
+              <span className={ar.unknowns_count > 0 ? 'text-orange-600 font-medium' : 'text-green-600'}>
+                {ar.unknowns_count}
+              </span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">Contradictions</span>
-              <span className={ar.contradictions_count > 0 ? 'text-red-600 font-medium' : 'text-green-600'}>{ar.contradictions_count}</span>
+              <span className={ar.contradictions_count > 0 ? 'text-red-600 font-medium' : 'text-green-600'}>
+                {ar.contradictions_count}
+              </span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">Residual risks</span>
-              <span className={ar.residual_risks_count > 0 ? 'text-orange-600 font-medium' : 'text-green-600'}>{ar.residual_risks_count}</span>
+              <span className={ar.residual_risks_count > 0 ? 'text-orange-600 font-medium' : 'text-green-600'}>
+                {ar.residual_risks_count}
+              </span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">Trust refs</span>
@@ -285,15 +300,21 @@ export default function BuildingDecisionView() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Trust</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{(data.overall_trust * 100).toFixed(0)}%</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {(data.overall_trust * 100).toFixed(0)}%
+            </p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Completeness</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{(data.overall_completeness * 100).toFixed(0)}%</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {(data.overall_completeness * 100).toFixed(0)}%
+            </p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Readiness</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100 capitalize">{data.readiness_status.replace(/_/g, ' ')}</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100 capitalize">
+              {data.readiness_status.replace(/_/g, ' ')}
+            </p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Custody</p>
@@ -402,7 +423,9 @@ export default function BuildingDecisionView() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Time saved</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{data.roi.time_saved_hours.toFixed(1)}h</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {data.roi.time_saved_hours.toFixed(1)}h
+            </p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Rework avoided</p>
@@ -410,7 +433,9 @@ export default function BuildingDecisionView() {
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Blocker days saved</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{data.roi.blocker_days_saved.toFixed(1)}</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {data.roi.blocker_days_saved.toFixed(1)}
+            </p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-xs text-gray-500 dark:text-gray-400">Pack reuse</p>
@@ -418,9 +443,7 @@ export default function BuildingDecisionView() {
           </div>
         </div>
         {data.roi.evidence_sources.length > 0 && (
-          <p className="text-xs text-gray-400 mt-3">
-            Evidence: {data.roi.evidence_sources.join(', ')}
-          </p>
+          <p className="text-xs text-gray-400 mt-3">Evidence: {data.roi.evidence_sources.join(', ')}</p>
         )}
       </section>
     </div>

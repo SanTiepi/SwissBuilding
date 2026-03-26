@@ -14,14 +14,11 @@ vi.mock('@/i18n', () => ({
 
 const mockAuthStore = vi.fn();
 vi.mock('@/store/authStore', () => ({
-  useAuthStore: Object.assign(
-    (selector: (s: unknown) => unknown) => mockAuthStore(selector),
-    {
-      getState: () => ({
-        user: { role: 'admin' },
-      }),
-    },
-  ),
+  useAuthStore: Object.assign((selector: (s: unknown) => unknown) => mockAuthStore(selector), {
+    getState: () => ({
+      user: { role: 'admin' },
+    }),
+  }),
 }));
 
 const mockGetUnmatched = vi.fn();
@@ -188,9 +185,7 @@ describe('AdminDiagnosticReview', () => {
   it('searches for buildings when typing', async () => {
     mockGetUnmatched.mockResolvedValue([mockPublications[0]]);
     mockBuildingsList.mockResolvedValue({
-      items: [
-        { id: 'b1', address: 'Rue de Lausanne 10', postal_code: '1000', city: 'Lausanne', egid: 12345 },
-      ],
+      items: [{ id: 'b1', address: 'Rue de Lausanne 10', postal_code: '1000', city: 'Lausanne', egid: 12345 }],
       total: 1,
     });
     renderPage();

@@ -56,9 +56,7 @@ export function ArchivePosture({ buildingId }: ArchivePostureProps) {
         <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2">
           <FileCheck className="w-4 h-4 mx-auto mb-1 text-green-500" />
           <p className="text-lg font-bold text-gray-900 dark:text-white">{data.current_count}</p>
-          <p className="text-[10px] text-gray-500 dark:text-slate-400">
-            {t('artifact_custody.current') || 'Current'}
-          </p>
+          <p className="text-[10px] text-gray-500 dark:text-slate-400">{t('artifact_custody.current') || 'Current'}</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2">
           <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-gray-400" />
@@ -80,8 +78,7 @@ export function ArchivePosture({ buildingId }: ArchivePostureProps) {
         <div className="mt-3 flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
           <Clock className="w-3 h-3" />
           <span>
-            {t('artifact_custody.last_event') || 'Last event'}:{' '}
-            {data.last_custody_event.event_type} &mdash;{' '}
+            {t('artifact_custody.last_event') || 'Last event'}: {data.last_custody_event.event_type} &mdash;{' '}
             {formatDate(data.last_custody_event.occurred_at)}
           </span>
         </div>

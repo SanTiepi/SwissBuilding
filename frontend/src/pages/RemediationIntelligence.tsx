@@ -2,7 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
 import { remediationIntelligenceApi } from '@/api/remediationIntelligence';
-import type { FlywheelTrendPoint, ModuleLearningOverview, RemediationBenchmarkSnapshot } from '@/api/remediationIntelligence';
+import type {
+  FlywheelTrendPoint,
+  ModuleLearningOverview,
+  RemediationBenchmarkSnapshot,
+} from '@/api/remediationIntelligence';
 import { BarChart3, TrendingUp, Brain, Activity } from 'lucide-react';
 
 function BenchmarkCard({ benchmark }: { benchmark: RemediationBenchmarkSnapshot | undefined }) {
@@ -24,7 +28,9 @@ function BenchmarkCard({ benchmark }: { benchmark: RemediationBenchmarkSnapshot 
           <div className="text-xs text-gray-500">Avg Cycle (days)</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">{Math.round(benchmark.overall_completion_rate * 100)}%</div>
+          <div className="text-2xl font-bold text-purple-600">
+            {Math.round(benchmark.overall_completion_rate * 100)}%
+          </div>
           <div className="text-xs text-gray-500">Completion Rate</div>
         </div>
       </div>
@@ -123,7 +129,10 @@ function LearningOverviewCard({ overview }: { overview: ModuleLearningOverview |
           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Top Correction Categories</h4>
           <div className="flex flex-wrap gap-2">
             {overview.top_correction_categories.map((c) => (
-              <span key={c.category} className="text-xs bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded">
+              <span
+                key={c.category}
+                className="text-xs bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded"
+              >
                 {c.category}: {c.count}
               </span>
             ))}

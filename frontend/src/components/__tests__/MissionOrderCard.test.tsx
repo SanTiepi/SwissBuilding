@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MissionOrderCard, {
-  type DiagnosticMissionOrder,
-} from '../building-detail/MissionOrderCard';
+import MissionOrderCard, { type DiagnosticMissionOrder } from '../building-detail/MissionOrderCard';
 
 vi.mock('@/i18n', () => ({
   useTranslation: () => ({

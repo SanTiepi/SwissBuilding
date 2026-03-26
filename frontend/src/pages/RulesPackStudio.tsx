@@ -405,7 +405,8 @@ export default function RulesPackStudio() {
       >
         <Monitor className="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
         <p className="text-sm text-blue-700 dark:text-blue-300">
-          {t('rules_studio.desktop_hint') || 'This tool is optimized for desktop use. For the best experience, use a larger screen.'}
+          {t('rules_studio.desktop_hint') ||
+            'This tool is optimized for desktop use. For the best experience, use a larger screen.'}
         </p>
       </div>
 

@@ -181,8 +181,8 @@ export default function ReadinessWallet() {
     },
   });
 
-  const assessments = readinessData?.items || [];
-  const snapshots: BuildingSnapshot[] = snapshotsData?.items || [];
+  const assessments = useMemo(() => readinessData?.items || [], [readinessData?.items]);
+  const snapshots: BuildingSnapshot[] = useMemo(() => snapshotsData?.items || [], [snapshotsData?.items]);
 
   const getAssessment = useCallback(
     (type: ReadinessType): ReadinessAssessment | undefined => {

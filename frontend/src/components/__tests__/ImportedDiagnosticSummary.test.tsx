@@ -69,9 +69,7 @@ describe('ImportedDiagnosticSummary', () => {
   });
 
   it('renders nominal summary with source label and mission ref and samples', async () => {
-    vi.mocked(diagnosticIntegrationApi.getImportedDiagnosticSummaries).mockResolvedValue([
-      nominalSummary,
-    ]);
+    vi.mocked(diagnosticIntegrationApi.getImportedDiagnosticSummaries).mockResolvedValue([nominalSummary]);
     render(<ImportedDiagnosticSummary buildingId="b-1" />, { wrapper: createWrapper() });
     await waitFor(() => {
       expect(screen.getByTestId('imported-diagnostic-summaries')).toBeInTheDocument();

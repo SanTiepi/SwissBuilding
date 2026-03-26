@@ -70,8 +70,12 @@ export default function WorkspaceMembersCard({ buildingId }: Props) {
   });
 
   const addMutation = useMutation({
-    mutationFn: (data: { user_id?: string | null; organization_id?: string | null; role: string; access_scope: string }) =>
-      workspaceApi.addMember(buildingId, data),
+    mutationFn: (data: {
+      user_id?: string | null;
+      organization_id?: string | null;
+      role: string;
+      access_scope: string;
+    }) => workspaceApi.addMember(buildingId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace-members', buildingId] });
       resetForm();
@@ -255,7 +259,11 @@ export default function WorkspaceMembersCard({ buildingId }: Props) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {member.user_name || member.user_email || member.org_name || t('workspace.unknown_member') || 'Unknown'}
+                    {member.user_name ||
+                      member.user_email ||
+                      member.org_name ||
+                      t('workspace.unknown_member') ||
+                      'Unknown'}
                   </span>
                   <RoleBadge role={member.role} />
                   <ScopeBadge scope={member.access_scope} />

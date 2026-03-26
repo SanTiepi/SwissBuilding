@@ -7,10 +7,25 @@ import CaveatSummary from '../building-detail/CaveatSummary';
 vi.mock('@/api/audiencePacks', () => ({
   audiencePacksApi: {
     getCaveats: vi.fn().mockResolvedValue([
-      { caveat_type: 'freshness_warning', severity: 'medium', message: 'Diagnostic data is older than 6 months', applies_when: {} },
+      {
+        caveat_type: 'freshness_warning',
+        severity: 'medium',
+        message: 'Diagnostic data is older than 6 months',
+        applies_when: {},
+      },
       { caveat_type: 'freshness_warning', severity: 'low', message: 'Some documents need refresh', applies_when: {} },
-      { caveat_type: 'confidence_caveat', severity: 'high', message: 'Low confidence on asbestos assessment', applies_when: {} },
-      { caveat_type: 'unknown_disclosure', severity: 'medium', message: 'Basement zones not surveyed', applies_when: {} },
+      {
+        caveat_type: 'confidence_caveat',
+        severity: 'high',
+        message: 'Low confidence on asbestos assessment',
+        applies_when: {},
+      },
+      {
+        caveat_type: 'unknown_disclosure',
+        severity: 'medium',
+        message: 'Basement zones not surveyed',
+        applies_when: {},
+      },
     ]),
   },
 }));

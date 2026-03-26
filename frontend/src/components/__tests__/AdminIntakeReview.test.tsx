@@ -14,14 +14,11 @@ vi.mock('@/i18n', () => ({
 
 const mockAuthStore = vi.fn();
 vi.mock('@/store/authStore', () => ({
-  useAuthStore: Object.assign(
-    (selector: (s: unknown) => unknown) => mockAuthStore(selector),
-    {
-      getState: () => ({
-        user: { role: 'admin' },
-      }),
-    },
-  ),
+  useAuthStore: Object.assign((selector: (s: unknown) => unknown) => mockAuthStore(selector), {
+    getState: () => ({
+      user: { role: 'admin' },
+    }),
+  }),
 }));
 
 const mockList = vi.fn();

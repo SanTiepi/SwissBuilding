@@ -52,9 +52,7 @@ export function VersionCard({ version }: { version: ArtifactVersion }) {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              v{version.version_number}
-            </span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">v{version.version_number}</span>
             <span
               className={cn(
                 'inline-block px-2 py-0.5 text-[10px] font-medium rounded-full',
@@ -69,9 +67,7 @@ export function VersionCard({ version }: { version: ArtifactVersion }) {
           </div>
           <p className="text-xs text-gray-400 dark:text-slate-500 truncate mt-0.5">
             {formatDate(version.created_at)}
-            {version.content_hash && (
-              <span className="ml-2 font-mono">#{version.content_hash.slice(0, 8)}</span>
-            )}
+            {version.content_hash && <span className="ml-2 font-mono">#{version.content_hash.slice(0, 8)}</span>}
           </p>
         </div>
       </button>
@@ -94,12 +90,8 @@ export function VersionCard({ version }: { version: ArtifactVersion }) {
                   <span className="shrink-0 mt-0.5">{EVENT_ICONS[evt.event_type] || '•'}</span>
                   <div className="flex-1 min-w-0">
                     <span className="font-medium text-gray-700 dark:text-slate-300">{evt.event_type}</span>
-                    {evt.actor_name && (
-                      <span className="text-gray-500 dark:text-slate-400"> by {evt.actor_name}</span>
-                    )}
-                    <span className="text-gray-400 dark:text-slate-500 ml-1">
-                      ({evt.actor_type})
-                    </span>
+                    {evt.actor_name && <span className="text-gray-500 dark:text-slate-400"> by {evt.actor_name}</span>}
+                    <span className="text-gray-400 dark:text-slate-500 ml-1">({evt.actor_type})</span>
                     <p className="text-gray-400 dark:text-slate-500">{formatDate(evt.occurred_at)}</p>
                   </div>
                 </div>

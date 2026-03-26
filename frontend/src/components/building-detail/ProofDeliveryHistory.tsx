@@ -135,9 +135,7 @@ function DeliveryRow({ delivery }: { delivery: ProofDelivery }) {
             key={step}
             className={cn(
               'h-1.5 flex-1 rounded-full',
-              idx <= statusIdx
-                ? 'bg-emerald-500 dark:bg-emerald-400'
-                : 'bg-gray-200 dark:bg-gray-700',
+              idx <= statusIdx ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-gray-200 dark:bg-gray-700',
             )}
             title={t(`proof_delivery.status_${step}`)}
           />

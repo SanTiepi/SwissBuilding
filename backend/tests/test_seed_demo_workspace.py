@@ -62,27 +62,31 @@ async def test_seed_demo_workspace_links_operational_records(db_session):
     assert org is not None
 
     contacts = (
-        await db_session.execute(
-            select(Contact).where(Contact.organization_id == building.organization_id),
+        (
+            await db_session.execute(
+                select(Contact).where(Contact.organization_id == building.organization_id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert len(contacts) >= 9
 
-    leases = (
-        await db_session.execute(select(Lease).where(Lease.building_id == building.id))
-    ).scalars().all()
-    contracts = (
-        await db_session.execute(select(Contract).where(Contract.building_id == building.id))
-    ).scalars().all()
+    leases = (await db_session.execute(select(Lease).where(Lease.building_id == building.id))).scalars().all()
+    contracts = (await db_session.execute(select(Contract).where(Contract.building_id == building.id))).scalars().all()
     ownerships = (
-        await db_session.execute(select(OwnershipRecord).where(OwnershipRecord.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(OwnershipRecord).where(OwnershipRecord.building_id == building.id)))
+        .scalars()
+        .all()
+    )
     interventions = (
-        await db_session.execute(select(Intervention).where(Intervention.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(Intervention).where(Intervention.building_id == building.id))).scalars().all()
+    )
     observations = (
-        await db_session.execute(select(FieldObservation).where(FieldObservation.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(FieldObservation).where(FieldObservation.building_id == building.id)))
+        .scalars()
+        .all()
+    )
     assert len(leases) == 3
     assert len(contracts) == 3
     assert len(ownerships) == 2
@@ -92,41 +96,53 @@ async def test_seed_demo_workspace_links_operational_records(db_session):
     units = (await db_session.execute(select(Unit).where(Unit.building_id == building.id))).scalars().all()
     zones = (await db_session.execute(select(Zone).where(Zone.building_id == building.id))).scalars().all()
     elements = (
-        await db_session.execute(
-            select(BuildingElement).where(BuildingElement.zone_id.in_([zone.id for zone in zones])),
+        (
+            await db_session.execute(
+                select(BuildingElement).where(BuildingElement.zone_id.in_([zone.id for zone in zones])),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     materials = (
-        await db_session.execute(
-            select(Material).where(Material.element_id.in_([element.id for element in elements])),
+        (
+            await db_session.execute(
+                select(Material).where(Material.element_id.in_([element.id for element in elements])),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert len(units) == 3
     assert len(zones) == 6
     assert len(elements) == 3
     assert len(materials) == 3
 
-    documents = (
-        await db_session.execute(select(Document).where(Document.building_id == building.id))
-    ).scalars().all()
+    documents = (await db_session.execute(select(Document).where(Document.building_id == building.id))).scalars().all()
     artefacts = (
-        await db_session.execute(select(ComplianceArtefact).where(ComplianceArtefact.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(ComplianceArtefact).where(ComplianceArtefact.building_id == building.id)))
+        .scalars()
+        .all()
+    )
     policies = (
-        await db_session.execute(select(InsurancePolicy).where(InsurancePolicy.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(InsurancePolicy).where(InsurancePolicy.building_id == building.id)))
+        .scalars()
+        .all()
+    )
     finance_entries = (
-        await db_session.execute(select(FinancialEntry).where(FinancialEntry.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(FinancialEntry).where(FinancialEntry.building_id == building.id)))
+        .scalars()
+        .all()
+    )
     actions = (
-        await db_session.execute(select(ActionItem).where(ActionItem.building_id == building.id))
-    ).scalars().all()
+        (await db_session.execute(select(ActionItem).where(ActionItem.building_id == building.id))).scalars().all()
+    )
     assignments = (
-        await db_session.execute(select(Assignment).where(Assignment.target_id.in_([building.id, DIAGNOSTIC_ID])))
-    ).scalars().all()
-    samples = (
-        await db_session.execute(select(Sample).where(Sample.diagnostic_id == DIAGNOSTIC_ID))
-    ).scalars().all()
+        (await db_session.execute(select(Assignment).where(Assignment.target_id.in_([building.id, DIAGNOSTIC_ID]))))
+        .scalars()
+        .all()
+    )
+    samples = (await db_session.execute(select(Sample).where(Sample.diagnostic_id == DIAGNOSTIC_ID))).scalars().all()
 
     assert len(documents) == 6
     assert len(artefacts) == 2

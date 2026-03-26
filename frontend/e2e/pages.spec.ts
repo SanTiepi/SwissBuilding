@@ -231,7 +231,6 @@ test.describe('Page-level keyboard focus', () => {
       await page.waitForTimeout(300);
 
       // Verify command palette did not open instead
-      const palette = page.locator('[role="dialog"]');
       // If palette opened, that's a separate concern — just check modal state
     }
   });

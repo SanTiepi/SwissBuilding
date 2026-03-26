@@ -57,11 +57,7 @@ export function QuoteInsightsPanel({ requestId }: QuoteInsightsPanelProps) {
   }
 
   if (!data || data.quote_count === 0) {
-    return (
-      <div className="text-sm text-gray-500">
-        {t('intelligence.no_quotes') || 'No quotes to compare.'}
-      </div>
-    );
+    return <div className="text-sm text-gray-500">{t('intelligence.no_quotes') || 'No quotes to compare.'}</div>;
   }
 
   const { price_spread, timeline_spread, common_exclusions, ambiguity_flags, scope_coverage_matrix } = data;
@@ -130,7 +126,10 @@ export function QuoteInsightsPanel({ requestId }: QuoteInsightsPanelProps) {
           </h4>
           <div className="flex flex-wrap gap-1">
             {common_exclusions.map((e) => (
-              <span key={e} className="text-xs bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-300 px-2 py-0.5 rounded">
+              <span
+                key={e}
+                className="text-xs bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-300 px-2 py-0.5 rounded"
+              >
                 {e}
               </span>
             ))}

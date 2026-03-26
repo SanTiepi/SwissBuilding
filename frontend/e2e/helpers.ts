@@ -55,6 +55,20 @@ export async function mockAuthState(page: Page, role: string = 'admin') {
  * Mock API responses to avoid needing a running backend.
  */
 export async function mockApiRoutes(page: Page) {
+  // ── Catch-all for any unmocked /api/v1/** endpoint ──
+  // Registered FIRST = lowest priority in Playwright (later routes override).
+  // Prevents ECONNREFUSED by returning a safe empty response for any
+  // endpoint not explicitly mocked below.
+  await page.route('**/api/v1/**', (route) => {
+    const method = route.request().method();
+    if (method !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    });
+  });
+
   // Auth
   await page.route('**/api/v1/auth/me', (route) =>
     route.fulfill({
@@ -1875,6 +1889,16 @@ export async function mockApiRoutes(page: Page) {
           latest_diagnostic_date: '2025-11-15',
           latest_document_date: '2026-02-10',
         },
+        diagnostic_publications: {
+          count: 0,
+          latest_published_at: null,
+        },
+        pollutant_coverage: {
+          covered: {},
+          missing: [],
+          covered_count: 0,
+          total_pollutants: 6,
+        },
         passport_grade: 'C',
         assessed_at: '2026-03-08T10:00:00Z',
       }),
@@ -2568,4 +2592,650 @@ export async function mockApiRoutes(page: Page) {
       }),
     });
   });
+
+  // Notifications unread count (called by NotificationBell on every page)
+  await page.route('**/api/v1/notifications/unread-count', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ count: 0 }),
+    }),
+  );
+
+  // Notifications list
+  await page.route(/\/api\/v1\/notifications(\?.*)?$/, (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        page: 1,
+        size: 20,
+        pages: 0,
+      }),
+    });
+  });
+
+  // Organizations
+  await page.route(/\/api\/v1\/organizations(\?.*)?$/, (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        page: 1,
+        size: 20,
+        pages: 0,
+      }),
+    });
+  });
+
+  // Leases list for building
+  await page.route(/\/api\/v1\/buildings\/[^/]+\/leases(\?.*)?$/, (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        page: 1,
+        size: 20,
+        pages: 0,
+      }),
+    });
+  });
+
+  // Lease summary for building
+  await page.route('**/api/v1/buildings/*/lease-summary', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: 'b1000000-0000-0000-0000-000000000001',
+        total_leases: 0,
+        active_leases: 0,
+        monthly_rent_chf: 0,
+        monthly_charges_chf: 0,
+        expiring_90d: 0,
+        disputed_count: 0,
+      }),
+    }),
+  );
+
+  // Contracts list for building
+  await page.route(/\/api\/v1\/buildings\/[^/]+\/contracts(\?.*)?$/, (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        page: 1,
+        size: 20,
+        pages: 0,
+      }),
+    });
+  });
+
+  // Contract summary for building
+  await page.route('**/api/v1/buildings/*/contract-summary', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: 'b1000000-0000-0000-0000-000000000001',
+        total_contracts: 0,
+        active_contracts: 0,
+        annual_cost_chf: 0,
+        expiring_90d: 0,
+        auto_renewal_count: 0,
+      }),
+    }),
+  );
+
+  // Ownership list for building
+  await page.route(/\/api\/v1\/buildings\/[^/]+\/ownership(\?.*)?$/, (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        page: 1,
+        size: 20,
+        pages: 0,
+      }),
+    });
+  });
+
+  // Ownership summary for building
+  await page.route('**/api/v1/buildings/*/ownership-summary', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: 'b1000000-0000-0000-0000-000000000001',
+        total_records: 0,
+        active_records: 0,
+        total_share_pct: 0,
+        owner_count: 0,
+        co_ownership: false,
+      }),
+    }),
+  );
+
+  // Contacts lookup for building
+  await page.route('**/api/v1/buildings/*/contacts/lookup*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Search
+  await page.route('**/api/v1/search*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ results: [], total: 0 }),
+    }),
+  );
+
+  // Organization-level endpoints (value-ledger, value-events, portfolio-triage, etc.)
+  await page.route('**/api/v1/organizations/*/value-ledger*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        org_id: '00000000-0000-0000-0000-000000000010',
+        sources_unified_total: 0,
+        contradictions_resolved_total: 0,
+        proof_chains_created_total: 0,
+        documents_secured_total: 0,
+        decisions_backed_total: 0,
+        hours_saved_estimate: 0,
+        value_chf_estimate: 0,
+        days_active: 0,
+        value_per_day: 0,
+        trend: 'stable',
+      }),
+    }),
+  );
+
+  await page.route('**/api/v1/organizations/*/value-events*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  await page.route('**/api/v1/organizations/*/portfolio-triage*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        org_id: '00000000-0000-0000-0000-000000000010',
+        critical_count: 0,
+        action_needed_count: 0,
+        monitored_count: 0,
+        under_control_count: 0,
+        buildings: [],
+      }),
+    }),
+  );
+
+  await page.route('**/api/v1/organizations/*/portfolio-benchmark*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        org_id: '00000000-0000-0000-0000-000000000010',
+        avg_grade: 'C',
+        avg_trust_pct: 0,
+        avg_completeness_pct: 0,
+        buildings_with_blockers_pct: 0,
+        proof_coverage_pct: 0,
+        buildings: [],
+        clusters: [],
+      }),
+    }),
+  );
+
+  await page.route('**/api/v1/organizations/*/portfolio-trends*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        org_id: '00000000-0000-0000-0000-000000000010',
+        improved_count: 0,
+        degraded_count: 0,
+        stable_count: 0,
+        buildings: [],
+      }),
+    }),
+  );
+
+  await page.route('**/api/v1/organizations/*/indispensability-summary*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        org_id: '00000000-0000-0000-0000-000000000010',
+        buildings_count: 0,
+        avg_fragmentation_score: 0,
+        avg_defensibility_score: 0,
+        total_contradictions_resolved: 0,
+        total_proof_chains: 0,
+        total_cost_of_fragmentation_hours: 0,
+        worst_buildings: [],
+      }),
+    }),
+  );
+
+  // Notification preferences
+  await page.route('**/api/v1/notifications/preferences*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({}),
+    }),
+  );
+
+  // Building-level intelligence endpoints
+  await page.route('**/api/v1/buildings/*/instant-card*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  await page.route('**/api/v1/buildings/*/indispensability*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  await page.route('**/api/v1/buildings/*/source-snapshots*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Public sector packs
+  await page.route('**/api/v1/buildings/*/review-packs*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  await page.route('**/api/v1/buildings/*/committee-packs*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Public owner mode
+  await page.route('**/api/v1/organizations/*/public-owner-mode*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Audience packs
+  await page.route('**/api/v1/buildings/*/audience-packs*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Archive posture
+  await page.route('**/api/v1/buildings/*/archive-posture*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Building ROI
+  await page.route('**/api/v1/buildings/*/roi*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Workspace members
+  await page.route('**/api/v1/buildings/*/workspace-members*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Document inbox
+  await page.route('**/api/v1/buildings/*/document-inbox*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Obligations
+  await page.route('**/api/v1/buildings/*/obligations*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Proof deliveries
+  await page.route('**/api/v1/buildings/*/proof-deliveries*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Swiss rules watch
+  await page.route('**/api/v1/buildings/*/commune-context*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  await page.route('**/api/v1/swiss-rules/sources*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  await page.route('**/api/v1/swiss-rules/unreviewed*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Exchange history
+  await page.route('**/api/v1/buildings/*/exchange-publications*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  await page.route('**/api/v1/buildings/*/exchange-imports*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Package presets
+  await page.route('**/api/v1/package-presets*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Indispensability export
+  await page.route('**/api/v1/buildings/*/indispensability-export*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  await page.route('**/api/v1/organizations/*/indispensability-export*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Material recommendations
+  await page.route('**/api/v1/buildings/*/material-recommendations*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Shared links
+  await page.route('**/api/v1/shared-links*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Rollout package presets
+  await page.route('**/api/v1/rollout/package-presets*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Building workspace members
+  await page.route('**/api/v1/buildings/*/workspace/members*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Building decision view
+  await page.route('**/api/v1/buildings/*/decision-view*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Dossier completion
+  await page.route('**/api/v1/buildings/*/dossier-completion*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Import receipts
+  await page.route('**/api/v1/buildings/*/import-receipts*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Passport publications
+  await page.route('**/api/v1/buildings/*/passport-publications*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Post-works summary
+  await page.route('**/api/v1/buildings/*/post-works/summary*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    }),
+  );
+
+  // Swiss rules changes unreviewed
+  await page.route('**/api/v1/swiss-rules/changes/unreviewed*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Gates status
+  await page.route('**/api/v1/buildings/*/gates/status*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ building_id: null, total_gates: 0, blocked: 0, clearable: 0, cleared: 0, overridden: 0 }),
+    }),
+  );
+
+  // Gates evaluate
+  await page.route('**/api/v1/buildings/*/gates/evaluate*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Engagement summary
+  await page.route('**/api/v1/buildings/*/engagement-summary*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: null,
+        total_engagements: 0,
+        by_actor_type: {},
+        by_engagement_type: {},
+        unique_actors: 0,
+        unique_orgs: 0,
+        latest_engagements: [],
+      }),
+    }),
+  );
+
+  // Engagement depth
+  await page.route('**/api/v1/buildings/*/engagement-depth*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: null,
+        depth_score: 0,
+        unique_actors: 0,
+        unique_orgs: 0,
+        engagement_types_used: [],
+        actor_types_represented: [],
+      }),
+    }),
+  );
+
+  // Engagement timeline
+  await page.route('**/api/v1/buildings/*/engagement-timeline*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Score explainability
+  await page.route('**/api/v1/buildings/*/score-explainability*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: null,
+        generated_at: new Date().toISOString(),
+        scores: [],
+        total_line_items: 0,
+        methodology_summary: '',
+      }),
+    }),
+  );
+
+  // Continuity score
+  await page.route('**/api/v1/buildings/*/continuity-score*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: null,
+        score: 0,
+        transfers_completed: 0,
+        gaps: 0,
+        coverage_pct: 0,
+        integrity_pct: 0,
+      }),
+    }),
+  );
+
+  // Memory transfers
+  await page.route('**/api/v1/buildings/*/memory-transfers*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+
+  // Transfer readiness
+  await page.route('**/api/v1/buildings/*/transfer-readiness*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        building_id: null,
+        ready: false,
+        missing_sections: [],
+        open_gates: 0,
+        incomplete_engagements: [],
+        documents_without_hash: 0,
+      }),
+    }),
+  );
+
 }

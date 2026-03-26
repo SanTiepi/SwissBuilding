@@ -119,7 +119,9 @@ function PriorityBadge({ priority }: { priority: string }) {
     low: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   };
   return (
-    <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase', colors[priority] || colors.medium)}>
+    <span
+      className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase', colors[priority] || colors.medium)}
+    >
       {priority}
     </span>
   );
@@ -140,13 +142,12 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
   const { what_we_know, what_is_risky, what_blocks, what_to_do_next, what_is_reusable, execution, trust } = data;
 
   const blockerCount =
-    what_blocks.procedural_blockers.length +
-    what_blocks.missing_proof.length +
-    what_blocks.overdue_obligations.length;
+    what_blocks.procedural_blockers.length + what_blocks.missing_proof.length + what_blocks.overdue_obligations.length;
 
-  const riskEntries = Object.entries(what_is_risky.pollutant_risk || {}).filter(
-    ([, v]) => typeof v === 'number',
-  ) as [string, number][];
+  const riskEntries = Object.entries(what_is_risky.pollutant_risk || {}).filter(([, v]) => typeof v === 'number') as [
+    string,
+    number,
+  ][];
 
   return (
     <div className="space-y-4" data-testid="instant-card-view">
@@ -166,7 +167,10 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
           <KVRow label="EGID" value={what_we_know.identity?.egid as number} />
           <KVRow label="EGRID" value={what_we_know.identity?.egrid as string} />
           <KVRow label="Parcelle" value={what_we_know.identity?.parcel as string} />
-          <KVRow label={t('intelligence.construction_year') || 'Annee'} value={what_we_know.identity?.construction_year as number} />
+          <KVRow
+            label={t('intelligence.construction_year') || 'Annee'}
+            value={what_we_know.identity?.construction_year as number}
+          />
         </div>
 
         {/* Physical */}
@@ -175,9 +179,18 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
             {t('intelligence.physical') || 'Physique'}
           </h4>
           <KVRow label={t('intelligence.floors') || 'Etages'} value={what_we_know.physical?.floors as number} />
-          <KVRow label={t('intelligence.dwellings') || 'Logements'} value={what_we_know.physical?.dwellings as number} />
-          <KVRow label={t('intelligence.surface') || 'Surface'} value={what_we_know.physical?.surface_m2 ? `${what_we_know.physical.surface_m2} m2` : null} />
-          <KVRow label={t('intelligence.heating') || 'Chauffage'} value={what_we_know.physical?.heating_type as string} />
+          <KVRow
+            label={t('intelligence.dwellings') || 'Logements'}
+            value={what_we_know.physical?.dwellings as number}
+          />
+          <KVRow
+            label={t('intelligence.surface') || 'Surface'}
+            value={what_we_know.physical?.surface_m2 ? `${what_we_know.physical.surface_m2} m2` : null}
+          />
+          <KVRow
+            label={t('intelligence.heating') || 'Chauffage'}
+            value={what_we_know.physical?.heating_type as string}
+          />
         </div>
 
         {/* Environment */}
@@ -222,7 +235,9 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
                 <span
                   className={cn(
                     'px-1.5 py-0.5 rounded text-[10px] font-medium',
-                    m.status === 'removed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                    m.status === 'removed'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
                   )}
                 >
                   {m.status}
@@ -308,9 +323,7 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
         }
         badge={
           blockerCount > 0 ? (
-            <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-              {blockerCount}
-            </span>
+            <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">{blockerCount}</span>
           ) : (
             <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] px-2 py-0.5 rounded-full font-medium">
               {t('intelligence.clear') || 'OK'}
@@ -423,9 +436,7 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
             {execution.subsidies.length > 0 && (
               <KVRow
                 label={t('intelligence.subsidies') || 'Subventions'}
-                value={formatCHF(
-                  execution.subsidies.reduce((s, sub) => s + (sub.amount || 0), 0),
-                )}
+                value={formatCHF(execution.subsidies.reduce((s, sub) => s + (sub.amount || 0), 0))}
               />
             )}
           </div>
@@ -438,7 +449,11 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
               {t('intelligence.next_step') || 'Prochaine etape concrete'}
             </p>
             <p className="text-xs text-blue-600 dark:text-blue-400">
-              {String(execution.next_concrete_step.description || execution.next_concrete_step.action || JSON.stringify(execution.next_concrete_step))}
+              {String(
+                execution.next_concrete_step.description ||
+                  execution.next_concrete_step.action ||
+                  JSON.stringify(execution.next_concrete_step),
+              )}
             </p>
           </div>
         )}
@@ -506,9 +521,7 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
           <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="text-center">
               <Shield className="w-4 h-4 mx-auto text-slate-400 mb-0.5" />
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {t('intelligence.trust') || 'Confiance'}
-              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('intelligence.trust') || 'Confiance'}</p>
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 {Math.round(trust.overall_trust * 100)}%
               </p>

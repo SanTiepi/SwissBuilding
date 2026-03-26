@@ -8,7 +8,11 @@ interface PublicationDiffViewProps {
 }
 
 export default function PublicationDiffView({ publicationId }: PublicationDiffViewProps) {
-  const { data: diff, isLoading, error } = useQuery({
+  const {
+    data: diff,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['publication-diff', publicationId],
     queryFn: () => exchangeHardeningApi.getPublicationDiff(publicationId),
     staleTime: 120_000,
@@ -26,7 +30,7 @@ export default function PublicationDiffView({ publicationId }: PublicationDiffVi
   if (error || !diff) {
     return (
       <div className="text-sm text-gray-400 p-4" data-testid="diff-error">
-{'Diff not available'}
+        {'Diff not available'}
       </div>
     );
   }
@@ -40,9 +44,7 @@ export default function PublicationDiffView({ publicationId }: PublicationDiffVi
     >
       <div className="flex items-center gap-2 mb-3">
         <GitCompare className="w-4 h-4 text-indigo-500" />
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {'Publication Diff'}
-        </h4>
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{'Publication Diff'}</h4>
         <span className="text-xs text-gray-500 dark:text-gray-400">
           {diff.sections_changed_count} {'section(s) changed'}
         </span>
@@ -83,7 +85,9 @@ export default function PublicationDiffView({ publicationId }: PublicationDiffVi
               {summary.changed_sections.map((c, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
                   <RefreshCw className="w-3 h-3" />
-                  <span className="font-medium">{c.section}.{c.field}</span>
+                  <span className="font-medium">
+                    {c.section}.{c.field}
+                  </span>
                   {c.old && <span className="line-through text-gray-400">{c.old}</span>}
                   {c.new && <span>{c.new}</span>}
                 </div>
@@ -93,9 +97,7 @@ export default function PublicationDiffView({ publicationId }: PublicationDiffVi
 
           {summary.added_sections.length === 0 &&
             summary.removed_sections.length === 0 &&
-            summary.changed_sections.length === 0 && (
-              <p className="text-xs text-gray-400">{'No changes detected'}</p>
-            )}
+            summary.changed_sections.length === 0 && <p className="text-xs text-gray-400">{'No changes detected'}</p>}
         </div>
       )}
 

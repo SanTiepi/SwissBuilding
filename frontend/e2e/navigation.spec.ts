@@ -435,9 +435,9 @@ test.describe('Mobile navigation', () => {
     const sidebar = page.locator('aside');
     await expect(sidebar).toBeVisible();
 
-    // Click backdrop to close
+    // Click backdrop to close — use force:true because sidebar links may overlap
     const backdrop = page.locator('[aria-hidden="true"][class*="fixed inset-0"]');
-    await backdrop.click();
+    await backdrop.click({ force: true });
 
     // Sidebar should close
     await expect(sidebar).not.toBeVisible();
@@ -452,7 +452,6 @@ test.describe('Mobile navigation', () => {
     await expect(desktopSearch).not.toBeVisible();
 
     // Mobile search icon button should be visible
-    const mobileSearchButton = page.locator('header button.sm\\:hidden[aria-label]').filter({ hasText: '' });
     const searchButton = page.locator('header button.sm\\:hidden').first();
     await expect(searchButton).toBeVisible();
 

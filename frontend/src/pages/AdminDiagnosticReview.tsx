@@ -145,10 +145,7 @@ function DiagnosticReviewContent({
 
       {/* Empty state */}
       {!isLoading && !isError && publications && publications.length === 0 && (
-        <div
-          className="flex flex-col items-center justify-center py-16 text-center"
-          data-testid="diag-review-empty"
-        >
+        <div className="flex flex-col items-center justify-center py-16 text-center" data-testid="diag-review-empty">
           <CheckCircle2 className="w-12 h-12 text-green-500 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             {t('diag_review.empty_title') || 'All caught up!'}
@@ -388,9 +385,7 @@ function UnmatchedPublicationCard({
                         {b.postal_code} {b.city}
                       </span>
                       {b.egid && (
-                        <span className="ml-2 text-xs font-mono text-gray-400 dark:text-slate-500">
-                          EGID: {b.egid}
-                        </span>
+                        <span className="ml-2 text-xs font-mono text-gray-400 dark:text-slate-500">EGID: {b.egid}</span>
                       )}
                     </div>
                   </button>
@@ -414,9 +409,7 @@ function UnmatchedPublicationCard({
             >
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-indigo-500" />
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {selectedBuilding.address}
-                </span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">{selectedBuilding.address}</span>
                 <span className="text-xs text-gray-500 dark:text-slate-400">
                   {selectedBuilding.postal_code} {selectedBuilding.city}
                 </span>

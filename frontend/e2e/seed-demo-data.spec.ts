@@ -1,4 +1,4 @@
-import { test, expect, APIRequestContext } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Seed demo data into a running SwissBuilding instance.
@@ -442,7 +442,7 @@ test.describe('Seed demo data', () => {
       const building = await bldRes.json();
       const buildingId: string = building.id;
       createdBuildingIds.push(buildingId);
-      console.log(`  ✓ Building: ${demo.address} → ${buildingId}`);
+      console.warn(`  ✓ Building: ${demo.address} → ${buildingId}`);
 
       // --- Create diagnostics ---
       for (const diag of demo.diagnostics) {
@@ -465,7 +465,7 @@ test.describe('Seed demo data', () => {
         ).toBeTruthy();
         const diagnostic = await diagRes.json();
         const diagnosticId: string = diagnostic.id;
-        console.log(`    ✓ Diagnostic: ${diag.diagnostic_type} → ${diagnosticId}`);
+        console.warn(`    ✓ Diagnostic: ${diag.diagnostic_type} → ${diagnosticId}`);
 
         // --- Create samples ---
         for (const sample of diag.samples) {
@@ -477,7 +477,7 @@ test.describe('Seed demo data', () => {
             sampleRes.ok(),
             `Failed to create sample "${sample.sample_number}": ${sampleRes.status()} ${await sampleRes.text()}`
           ).toBeTruthy();
-          console.log(`      ✓ Sample: ${sample.sample_number}`);
+          console.warn(`      ✓ Sample: ${sample.sample_number}`);
         }
 
         // --- Mark diagnostic as completed ---
@@ -486,13 +486,13 @@ test.describe('Seed demo data', () => {
           data: { status: 'completed' },
         });
         if (updateRes.ok()) {
-          console.log(`    ✓ Diagnostic ${diagnosticId} marked as completed`);
+          console.warn(`    ✓ Diagnostic ${diagnosticId} marked as completed`);
         }
       }
     }
 
     expect(createdBuildingIds.length).toBe(5);
-    console.log(`\n  ✅ Created ${createdBuildingIds.length} buildings with diagnostics and samples.`);
+    console.warn(`\n  ✅ Created ${createdBuildingIds.length} buildings with diagnostics and samples.`);
   });
 
   test('verify buildings appear in the API listing', async ({ request }) => {

@@ -293,9 +293,11 @@ const EMERGING_POLLUTANTS = new Set(['pfas']);
 
 function PollutantCoverageSection({ pollutantCoverage }: { pollutantCoverage: PassportSummary['pollutant_coverage'] }) {
   const { t } = useTranslation();
-  const coveredSet = new Set(Object.keys(pollutantCoverage.covered));
+  const covered = pollutantCoverage?.covered ?? {};
+  const missing = pollutantCoverage?.missing ?? [];
+  const coveredSet = new Set(Object.keys(covered));
   // Build ordered list: all 6 pollutants (covered first, then missing)
-  const allPollutants = [...Object.keys(pollutantCoverage.covered), ...pollutantCoverage.missing];
+  const allPollutants = [...Object.keys(covered), ...missing];
 
   return (
     <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
@@ -304,7 +306,7 @@ function PollutantCoverageSection({ pollutantCoverage }: { pollutantCoverage: Pa
           {t('passport.pollutant_coverage') || 'Pollutant Coverage'}
         </span>
         <span className="text-xs font-medium tabular-nums text-gray-600 dark:text-slate-300">
-          {pollutantCoverage.covered_count}/{pollutantCoverage.total_pollutants}{' '}
+          {pollutantCoverage?.covered_count ?? 0}/{pollutantCoverage?.total_pollutants ?? 0}{' '}
           {t('passport.pollutants_evaluated') || 'evaluated'}
         </span>
       </div>
@@ -334,7 +336,7 @@ function PollutantCoverageSection({ pollutantCoverage }: { pollutantCoverage: Pa
           );
         })}
       </div>
-      {pollutantCoverage.missing_count > 0 && pollutantCoverage.missing.some((p) => EMERGING_POLLUTANTS.has(p)) && (
+      {(pollutantCoverage?.missing_count ?? 0) > 0 && missing.some((p: string) => EMERGING_POLLUTANTS.has(p)) && (
         <p className="mt-2 text-[10px] text-amber-600 dark:text-amber-400">
           {t('passport.pfas_note') || 'PFAS: emerging regulation — evaluation recommended'}
         </p>
@@ -359,17 +361,13 @@ const FLAG_STYLES: Record<string, { bg: string; text: string }> = {
 
 function ImportedDossierBlock({ summary }: { summary: ImportedDossierSummary }) {
   const [expanded, setExpanded] = useState(false);
-  const readinessColors =
-    READINESS_BADGE[summary.report_readiness_status ?? ''] ?? READINESS_BADGE_DEFAULT;
+  const readinessColors = READINESS_BADGE[summary.report_readiness_status ?? ''] ?? READINESS_BADGE_DEFAULT;
 
   const aiText = summary.ai_summary_text;
   const isLongAi = aiText && aiText.length > 120;
 
   return (
-    <div
-      className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700"
-      data-testid="imported-dossier-block"
-    >
+    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700" data-testid="imported-dossier-block">
       <div className="flex items-center gap-2 mb-2">
         <ClipboardList className="w-4 h-4 text-indigo-500" />
         <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-slate-500">
@@ -391,11 +389,7 @@ function ImportedDossierBlock({ summary }: { summary: ImportedDossierSummary }) 
         {/* Readiness badge */}
         <div className="flex items-center gap-2">
           <span
-            className={cn(
-              'px-2 py-0.5 rounded text-[10px] font-medium',
-              readinessColors.bg,
-              readinessColors.text,
-            )}
+            className={cn('px-2 py-0.5 rounded text-[10px] font-medium', readinessColors.bg, readinessColors.text)}
             data-testid="imported-readiness-badge"
           >
             {summary.report_readiness_status ?? 'unknown'}
@@ -413,9 +407,7 @@ function ImportedDossierBlock({ summary }: { summary: ImportedDossierSummary }) 
         {/* AI summary */}
         {aiText && (
           <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-            <p className={!expanded && isLongAi ? 'line-clamp-2' : ''}>
-              {aiText}
-            </p>
+            <p className={!expanded && isLongAi ? 'line-clamp-2' : ''}>{aiText}</p>
             {isLongAi && (
               <button
                 onClick={() => setExpanded((v) => !v)}
@@ -475,7 +467,7 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
       blind_spots,
       contradictions,
       evidence_coverage,
-      diagnostic_publications,
+      diagnostic_publications = { count: 0, pollutants_covered: [], latest_published_at: null },
       pollutant_coverage,
       passport_grade,
     } = passport;
@@ -751,7 +743,7 @@ export function PassportCard({ buildingId }: { buildingId: string }) {
         )}
 
         {/* Pollutant coverage */}
-        {pollutant_coverage && <PollutantCoverageSection pollutantCoverage={pollutant_coverage} />}
+        {pollutant_coverage?.covered && <PollutantCoverageSection pollutantCoverage={pollutant_coverage} />}
 
         {/* Share modal */}
         {showShareModal && <SharePassportModal buildingId={buildingId} onClose={() => setShowShareModal(false)} />}

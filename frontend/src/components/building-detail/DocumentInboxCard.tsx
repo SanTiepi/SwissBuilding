@@ -127,7 +127,10 @@ export default function DocumentInboxCard({ buildingId }: Props) {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <FileText className="w-4 h-4 text-gray-400 dark:text-slate-500 flex-shrink-0" />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate" data-testid="inbox-filename">
+                  <span
+                    className="text-sm font-medium text-gray-900 dark:text-white truncate"
+                    data-testid="inbox-filename"
+                  >
                     {item.filename}
                   </span>
                   <StatusBadge status={item.status} />
@@ -171,7 +174,10 @@ export default function DocumentInboxCard({ buildingId }: Props) {
                         {t('common.confirm') || 'OK'}
                       </button>
                       <button
-                        onClick={() => { setClassifyItemId(null); setClassifyType(''); }}
+                        onClick={() => {
+                          setClassifyItemId(null);
+                          setClassifyType('');
+                        }}
                         className="px-1 py-1 text-xs text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
                         data-testid="inbox-classify-cancel-btn"
                       >

@@ -6,7 +6,34 @@ import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
 import { Building2, MapPin, Star, Search, ChevronRight, Shield, Users, Clock, X } from 'lucide-react';
 
-const CANTONS = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH'];
+const CANTONS = [
+  'AG',
+  'AI',
+  'AR',
+  'BE',
+  'BL',
+  'BS',
+  'FR',
+  'GE',
+  'GL',
+  'GR',
+  'JU',
+  'LU',
+  'NE',
+  'NW',
+  'OW',
+  'SG',
+  'SH',
+  'SO',
+  'SZ',
+  'TG',
+  'TI',
+  'UR',
+  'VD',
+  'VS',
+  'ZG',
+  'ZH',
+];
 
 const WORK_CATEGORIES = [
   'asbestos_removal',
@@ -21,7 +48,11 @@ const WORK_CATEGORIES = [
 function RatingBadge({ rating }: { rating: number | null }) {
   if (rating === null) return <span className="text-xs text-gray-400 dark:text-slate-500">--</span>;
   const color =
-    rating >= 4 ? 'text-green-600 dark:text-green-400' : rating >= 3 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400';
+    rating >= 4
+      ? 'text-green-600 dark:text-green-400'
+      : rating >= 3
+        ? 'text-amber-600 dark:text-amber-400'
+        : 'text-red-600 dark:text-red-400';
   return (
     <span className={cn('flex items-center gap-1 text-sm font-semibold', color)}>
       <Star className="w-4 h-4 fill-current" />
@@ -30,13 +61,7 @@ function RatingBadge({ rating }: { rating: number | null }) {
   );
 }
 
-function CompanyCard({
-  company,
-  onClick,
-}: {
-  company: CompanyProfile;
-  onClick: () => void;
-}) {
+function CompanyCard({ company, onClick }: { company: CompanyProfile; onClick: () => void }) {
   const { t } = useTranslation();
   const { data: ratingSummary } = useQuery({
     queryKey: ['marketplace-rating', company.id],
@@ -91,13 +116,7 @@ function CompanyCard({
   );
 }
 
-function CompanyDetail({
-  company,
-  onClose,
-}: {
-  company: CompanyProfile;
-  onClose: () => void;
-}) {
+function CompanyDetail({ company, onClose }: { company: CompanyProfile; onClose: () => void }) {
   const { t } = useTranslation();
   const { data: ratingSummary } = useQuery({
     queryKey: ['marketplace-rating', company.id],
@@ -109,14 +128,9 @@ function CompanyDetail({
       <div className="flex items-start justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">{company.company_name}</h2>
-          {company.legal_form && (
-            <p className="text-sm text-gray-500 dark:text-slate-400">{company.legal_form}</p>
-          )}
+          {company.legal_form && <p className="text-sm text-gray-500 dark:text-slate-400">{company.legal_form}</p>}
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
-        >
+        <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">
           <X className="w-5 h-5 text-gray-400" />
         </button>
       </div>
@@ -162,7 +176,10 @@ function CompanyDetail({
                         <div
                           className="bg-amber-400 h-1.5 rounded-full"
                           style={{
-                            width: ratingSummary.total_reviews > 0 ? `${(count / ratingSummary.total_reviews) * 100}%` : '0%',
+                            width:
+                              ratingSummary.total_reviews > 0
+                                ? `${(count / ratingSummary.total_reviews) * 100}%`
+                                : '0%',
                           }}
                         />
                       </div>
@@ -175,9 +192,7 @@ function CompanyDetail({
         </div>
       </div>
 
-      {company.description && (
-        <p className="text-sm text-gray-600 dark:text-slate-300 mb-4">{company.description}</p>
-      )}
+      {company.description && <p className="text-sm text-gray-600 dark:text-slate-300 mb-4">{company.description}</p>}
 
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300">

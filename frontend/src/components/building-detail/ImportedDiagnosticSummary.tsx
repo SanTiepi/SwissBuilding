@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
-import {
-  diagnosticIntegrationApi,
-  type ImportedDiagnosticSummaryDto,
-} from '@/api/diagnosticIntegration';
+import { diagnosticIntegrationApi, type ImportedDiagnosticSummaryDto } from '@/api/diagnosticIntegration';
 import { ChevronDown, ChevronUp, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 interface ImportedDiagnosticSummaryProps {
@@ -133,8 +130,7 @@ function SummaryCard({ summary }: { summary: ImportedDiagnosticSummaryDto }) {
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-          {t('imported_diagnostic.published_at')}{' '}
-          {new Date(summary.published_at).toLocaleDateString()}
+          {t('imported_diagnostic.published_at')} {new Date(summary.published_at).toLocaleDateString()}
         </p>
 
         {summary.sample_count != null && (
@@ -197,10 +193,7 @@ function SummaryCard({ summary }: { summary: ImportedDiagnosticSummaryDto }) {
         <div className="flex items-center gap-2 mb-1">
           <ConsumerStateBadge state={summary.consumer_state} />
           {summary.match_key_type && summary.match_state.includes('matched') && (
-            <span
-              data-testid="match-info"
-              className="text-xs text-gray-500 dark:text-gray-400"
-            >
+            <span data-testid="match-info" className="text-xs text-gray-500 dark:text-gray-400">
               {t('imported_diagnostic.matched_by', { key_type: summary.match_key_type })}
             </span>
           )}

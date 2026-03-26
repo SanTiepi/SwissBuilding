@@ -56,9 +56,7 @@ export function PassportNarrativePanel({ buildingId }: PassportNarrativePanelPro
 
   if (error) {
     return (
-      <div className="text-sm text-red-500">
-        {t('intelligence.narrative_error') || 'Failed to load narrative.'}
-      </div>
+      <div className="text-sm text-red-500">{t('intelligence.narrative_error') || 'Failed to load narrative.'}</div>
     );
   }
 

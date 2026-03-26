@@ -29,7 +29,8 @@ function PackColumn({ pack, label }: { pack: AudiencePackData; label: string }) 
         </span>
       </div>
       <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
-        v{pack.pack_version} | {t('audience_pack.type_label')}: {t(`audience_pack.type.${pack.pack_type}`) || pack.pack_type}
+        v{pack.pack_version} | {t('audience_pack.type_label')}:{' '}
+        {t(`audience_pack.type.${pack.pack_type}`) || pack.pack_type}
       </p>
 
       {/* Sections */}
@@ -49,7 +50,9 @@ function PackColumn({ pack, label }: { pack: AudiencePackData; label: string }) 
               )}
               <span
                 className={cn(
-                  section.blocked ? 'text-gray-400 dark:text-slate-500 line-through' : 'text-gray-700 dark:text-slate-300',
+                  section.blocked
+                    ? 'text-gray-400 dark:text-slate-500 line-through'
+                    : 'text-gray-700 dark:text-slate-300',
                 )}
               >
                 {name}
@@ -64,7 +67,11 @@ function PackColumn({ pack, label }: { pack: AudiencePackData; label: string }) 
         <div className="mb-3">
           <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">{t('audience_pack.caveats')}</p>
           {pack.caveats.map((c: CaveatEvaluation, i: number) => (
-            <div key={i} className="flex items-start gap-1 text-xs text-gray-600 dark:text-slate-400" data-testid="comparison-caveat">
+            <div
+              key={i}
+              className="flex items-start gap-1 text-xs text-gray-600 dark:text-slate-400"
+              data-testid="comparison-caveat"
+            >
               <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5 text-amber-500" />
               <span>{c.message}</span>
             </div>
@@ -96,9 +103,7 @@ export function PackComparisonView({ comparison, onClose }: PackComparisonViewPr
       data-testid="pack-comparison-view"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {t('audience_pack.comparison_title')}
-        </h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('audience_pack.comparison_title')}</h3>
         {onClose && (
           <button
             onClick={onClose}
@@ -128,11 +133,15 @@ export function PackComparisonView({ comparison, onClose }: PackComparisonViewPr
       {/* Diff summary */}
       {hasDiffs && (
         <div className="border-t border-gray-200 dark:border-slate-700 pt-3" data-testid="diff-summary">
-          <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mb-2">{t('audience_pack.diff_summary')}</p>
+          <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mb-2">
+            {t('audience_pack.diff_summary')}
+          </p>
           {Object.entries(sectionDiff).map(([section, diff]) => {
             const items: string[] = [];
-            if (diff.only_in_1?.length) items.push(`${t('audience_pack.only_in')} Pack 1: ${diff.only_in_1.join(', ')}`);
-            if (diff.only_in_2?.length) items.push(`${t('audience_pack.only_in')} Pack 2: ${diff.only_in_2.join(', ')}`);
+            if (diff.only_in_1?.length)
+              items.push(`${t('audience_pack.only_in')} Pack 1: ${diff.only_in_1.join(', ')}`);
+            if (diff.only_in_2?.length)
+              items.push(`${t('audience_pack.only_in')} Pack 2: ${diff.only_in_2.join(', ')}`);
             if (diff.changed?.length) items.push(`${t('audience_pack.changed')}: ${diff.changed.join(', ')}`);
             if (items.length === 0) return null;
             return (

@@ -22,9 +22,7 @@ const mockDiff: PassportStateDiff = {
   diff_summary: {
     added_sections: ['new_section'],
     removed_sections: ['old_section'],
-    changed_sections: [
-      { section: 'content', field: 'hash', old: 'abc', new: 'def' },
-    ],
+    changed_sections: [{ section: 'content', field: 'hash', old: 'abc', new: 'def' }],
   },
   sections_changed_count: 3,
   computed_at: '2026-03-25T10:00:00Z',

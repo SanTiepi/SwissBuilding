@@ -5,7 +5,7 @@
  *
  * Usage: npx playwright test e2e/ui-review-complete.spec.ts --config playwright.config.ts
  */
-import { test, expect, type Page } from '@playwright/test';
+import { test, type Page } from '@playwright/test';
 
 const BASE_URL = process.env.REVIEW_URL || 'http://194.93.48.163:8080';
 
@@ -136,31 +136,31 @@ test.describe('UI Review — Error Pages', () => {
 // FINAL SUMMARY
 // ============================================================
 test.afterAll(async () => {
-  console.log('\n' + '='.repeat(80));
-  console.log('SWISSBUILDING UI REVIEW — COMPLETE REPORT');
-  console.log('='.repeat(80));
-  console.log(`Total pages reviewed: ${allReports.length}`);
-  console.log(`Pages with errors: ${allReports.filter(r => r.consoleErrors.length > 0).length}`);
-  console.log(`Pages with network errors: ${allReports.filter(r => r.networkErrors.length > 0).length}`);
-  console.log(`Pages with broken images: ${allReports.filter(r => r.brokenImages > 0).length}`);
-  console.log('');
+  console.warn('\n' + '='.repeat(80));
+  console.warn('SWISSBUILDING UI REVIEW — COMPLETE REPORT');
+  console.warn('='.repeat(80));
+  console.warn(`Total pages reviewed: ${allReports.length}`);
+  console.warn(`Pages with errors: ${allReports.filter(r => r.consoleErrors.length > 0).length}`);
+  console.warn(`Pages with network errors: ${allReports.filter(r => r.networkErrors.length > 0).length}`);
+  console.warn(`Pages with broken images: ${allReports.filter(r => r.brokenImages > 0).length}`);
+  console.warn('');
 
   // Print each page report
   for (const r of allReports) {
     const status = r.consoleErrors.length > 0 || r.networkErrors.length > 0
       ? '❌' : '✅';
-    console.log(`${status} ${r.page} @ ${r.viewport} — ${r.loadTime}ms — HTTP ${r.httpStatus}`);
+    console.warn(`${status} ${r.page} @ ${r.viewport} — ${r.loadTime}ms — HTTP ${r.httpStatus}`);
     if (r.consoleErrors.length > 0) {
-      r.consoleErrors.forEach(e => console.log(`   ⚠️ Console: ${e}`));
+      r.consoleErrors.forEach(e => console.warn(`   ⚠️ Console: ${e}`));
     }
     if (r.networkErrors.length > 0) {
-      r.networkErrors.forEach(e => console.log(`   🔴 Network: ${e}`));
+      r.networkErrors.forEach(e => console.warn(`   🔴 Network: ${e}`));
     }
     if (r.brokenImages > 0) {
-      console.log(`   🖼️ Broken images: ${r.brokenImages}`);
+      console.warn(`   🖼️ Broken images: ${r.brokenImages}`);
     }
   }
-  console.log('='.repeat(80));
+  console.warn('='.repeat(80));
 });
 
 // ============================================================

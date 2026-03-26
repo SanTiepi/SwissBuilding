@@ -30,7 +30,13 @@ function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft;
   const Icon = config.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium', config.bg, config.color)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
+        config.bg,
+        config.color,
+      )}
+    >
       <Icon className="w-3 h-3" />
       {config.label}
     </span>
@@ -79,8 +85,7 @@ function RequestDetail({ request, onBack }: { request: ClientRequest; onBack: ()
   });
 
   const awardMutation = useMutation({
-    mutationFn: (data: { quote_id: string; conditions?: string }) =>
-      marketplaceRfqApi.awardQuote(request.id, data),
+    mutationFn: (data: { quote_id: string; conditions?: string }) => marketplaceRfqApi.awardQuote(request.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['marketplace-requests'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace-quotes', request.id] });
@@ -113,7 +118,9 @@ function RequestDetail({ request, onBack }: { request: ClientRequest; onBack: ()
 
         <div className="grid grid-cols-2 gap-4 text-sm mb-4">
           <div>
-            <span className="text-gray-500 dark:text-slate-400">{t('marketplace.work_category_label') || 'Work Category'}:</span>
+            <span className="text-gray-500 dark:text-slate-400">
+              {t('marketplace.work_category_label') || 'Work Category'}:
+            </span>
             <span className="ml-2 text-gray-900 dark:text-white">
               {t(`marketplace.work_category.${request.work_category}`) || request.work_category}
             </span>
@@ -138,14 +145,15 @@ function RequestDetail({ request, onBack }: { request: ClientRequest; onBack: ()
           )}
         </div>
 
-        {request.description && (
-          <p className="text-sm text-gray-600 dark:text-slate-300 mb-4">{request.description}</p>
-        )}
+        {request.description && <p className="text-sm text-gray-600 dark:text-slate-300 mb-4">{request.description}</p>}
 
         {request.pollutant_types && request.pollutant_types.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {request.pollutant_types.map((p) => (
-              <span key={p} className="px-2 py-0.5 text-xs rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+              <span
+                key={p}
+                className="px-2 py-0.5 text-xs rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+              >
                 {p}
               </span>
             ))}
@@ -174,10 +182,7 @@ function RequestDetail({ request, onBack }: { request: ClientRequest; onBack: ()
 
         <div className="space-y-3">
           {(quotes ?? []).map((quote) => (
-            <div
-              key={quote.id}
-              className="border border-gray-100 dark:border-slate-600 rounded-lg p-4"
-            >
+            <div key={quote.id} className="border border-gray-100 dark:border-slate-600 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">

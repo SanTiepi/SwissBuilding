@@ -492,7 +492,7 @@ export function UnknownIssuesPanel({ buildingId, onClose }: UnknownIssuesPanelPr
     enabled: !!buildingId,
   });
 
-  const allIssues = allData?.items ?? [];
+  const allIssues = useMemo(() => allData?.items ?? [], [allData?.items]);
 
   // Mutation
   const updateMutation = useMutation({

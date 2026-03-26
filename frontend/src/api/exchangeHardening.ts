@@ -88,9 +88,7 @@ export const exchangeHardeningApi = {
   },
 
   async validateImport(receiptId: string): Promise<ExchangeValidationReport> {
-    const res = await apiClient.post<ExchangeValidationReport>(
-      `/import-receipts/${receiptId}/validate`,
-    );
+    const res = await apiClient.post<ExchangeValidationReport>(`/import-receipts/${receiptId}/validate`);
     return res.data;
   },
 
@@ -125,17 +123,14 @@ export const exchangeHardeningApi = {
   },
 
   async acceptSubmission(submissionId: string): Promise<ContributorReceipt> {
-    const res = await apiClient.post<ContributorReceipt>(
-      `/contributor-submissions/${submissionId}/accept`,
-    );
+    const res = await apiClient.post<ContributorReceipt>(`/contributor-submissions/${submissionId}/accept`);
     return res.data;
   },
 
   async rejectSubmission(submissionId: string, notes?: string): Promise<ContributorSubmission> {
-    const res = await apiClient.post<ContributorSubmission>(
-      `/contributor-submissions/${submissionId}/reject`,
-      { notes },
-    );
+    const res = await apiClient.post<ContributorSubmission>(`/contributor-submissions/${submissionId}/reject`, {
+      notes,
+    });
     return res.data;
   },
 };

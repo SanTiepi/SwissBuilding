@@ -2,7 +2,7 @@
  * SwissBuilding — Authenticated UI Review
  * Logs in then captures EVERY page with real content visible.
  */
-import { test, expect, type Page, type BrowserContext } from '@playwright/test';
+import { test, type Page, type BrowserContext } from '@playwright/test';
 
 const BASE_URL = process.env.REVIEW_URL || 'http://194.93.48.163:8080';
 const EMAIL = 'admin@swissbuildingos.ch';
@@ -84,7 +84,7 @@ test.describe('Authenticated UI Review', () => {
     });
     const page = await sharedContext.newPage();
     loggedIn = await login(page);
-    console.log(`Login: ${loggedIn ? 'SUCCESS' : 'FAILED'}`);
+    console.warn(`Login: ${loggedIn ? 'SUCCESS' : 'FAILED'}`);
     await page.close();
   });
 
@@ -92,41 +92,41 @@ test.describe('Authenticated UI Review', () => {
     await sharedContext?.close();
 
     // Print report
-    console.log('\n' + '='.repeat(80));
-    console.log('SWISSBUILDING AUTHENTICATED UI REVIEW');
-    console.log('='.repeat(80));
-    console.log(`Login: ${loggedIn ? 'SUCCESS' : 'FAILED'}`);
-    console.log(`Pages reviewed: ${results.length}`);
+    console.warn('\n' + '='.repeat(80));
+    console.warn('SWISSBUILDING AUTHENTICATED UI REVIEW');
+    console.warn('='.repeat(80));
+    console.warn(`Login: ${loggedIn ? 'SUCCESS' : 'FAILED'}`);
+    console.warn(`Pages reviewed: ${results.length}`);
 
     const withErrors = results.filter(r => r.consoleErrors.length > 0);
     const withNetErrors = results.filter(r => r.networkErrors.length > 0);
     const withContent = results.filter(r => r.hasContent);
     const withBroken = results.filter(r => r.brokenImages > 0);
 
-    console.log(`Pages with real content: ${withContent.length}/${results.length}`);
-    console.log(`Pages with console errors: ${withErrors.length}`);
-    console.log(`Pages with network errors: ${withNetErrors.length}`);
-    console.log(`Pages with broken images: ${withBroken.length}`);
-    console.log('');
+    console.warn(`Pages with real content: ${withContent.length}/${results.length}`);
+    console.warn(`Pages with console errors: ${withErrors.length}`);
+    console.warn(`Pages with network errors: ${withNetErrors.length}`);
+    console.warn(`Pages with broken images: ${withBroken.length}`);
+    console.warn('');
 
     for (const r of results) {
       const icon = r.consoleErrors.length > 0 || r.networkErrors.length > 0 ? '❌' :
                    r.hasContent ? '✅' : '⚠️';
-      console.log(`${icon} ${r.name} @ ${r.viewport} — ${r.loadTime}ms — HTTP ${r.httpStatus} — content: ${r.hasContent}`);
+      console.warn(`${icon} ${r.name} @ ${r.viewport} — ${r.loadTime}ms — HTTP ${r.httpStatus} — content: ${r.hasContent}`);
       if (r.consoleErrors.length > 0) {
-        r.consoleErrors.slice(0, 3).forEach(e => console.log(`   ⚠ Console: ${e}`));
+        r.consoleErrors.slice(0, 3).forEach(e => console.warn(`   ⚠ Console: ${e}`));
       }
       if (r.networkErrors.length > 0) {
-        r.networkErrors.slice(0, 3).forEach(e => console.log(`   🔴 Network: ${e}`));
+        r.networkErrors.slice(0, 3).forEach(e => console.warn(`   🔴 Network: ${e}`));
       }
       if (r.brokenImages > 0) {
-        console.log(`   🖼 Broken images: ${r.brokenImages}`);
+        console.warn(`   🖼 Broken images: ${r.brokenImages}`);
       }
       if (r.visibleText) {
-        console.log(`   📄 "${r.visibleText.substring(0, 100)}"`);
+        console.warn(`   📄 "${r.visibleText.substring(0, 100)}"`);
       }
     }
-    console.log('='.repeat(80));
+    console.warn('='.repeat(80));
   });
 
   for (const pg of PAGES) {

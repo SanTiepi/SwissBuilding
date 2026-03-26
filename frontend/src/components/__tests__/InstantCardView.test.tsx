@@ -36,7 +36,7 @@ function makeCard(overrides: Partial<InstantCardResult> = {}): InstantCardResult
     what_to_do_next: {
       top_3_actions: [
         { action: 'Commander diagnostic amiante', priority: 'high', estimated_cost: 3500, evidence_needed: null },
-        { action: 'Etablir plan d\'assainissement', priority: 'medium', estimated_cost: 8000, evidence_needed: null },
+        { action: "Etablir plan d'assainissement", priority: 'medium', estimated_cost: 8000, evidence_needed: null },
         { action: 'Evaluer potentiel solaire', priority: 'low', estimated_cost: null, evidence_needed: null },
       ],
     },

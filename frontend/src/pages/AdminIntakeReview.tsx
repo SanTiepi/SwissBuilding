@@ -112,7 +112,9 @@ export default function AdminIntakeReview() {
         </div>
         <div className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
           <Inbox className="w-4 h-4" />
-          <span>{data?.total ?? 0} {t('intake.total_requests')}</span>
+          <span>
+            {data?.total ?? 0} {t('intake.total_requests')}
+          </span>
         </div>
       </div>
 

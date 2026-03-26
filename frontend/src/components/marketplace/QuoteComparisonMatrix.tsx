@@ -40,7 +40,9 @@ export function QuoteComparisonMatrix({ requestId }: Props) {
   }
 
   if (error) {
-    return <p className="text-red-600 dark:text-red-400">{t('workspace.load_error') || 'Failed to load comparison.'}</p>;
+    return (
+      <p className="text-red-600 dark:text-red-400">{t('workspace.load_error') || 'Failed to load comparison.'}</p>
+    );
   }
 
   if (!data || data.rows.length === 0) {
@@ -87,9 +89,7 @@ export function QuoteComparisonMatrix({ requestId }: Props) {
             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
               <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
                 {row.company_name}
-                {row.ambiguous_fields.length > 0 && (
-                  <AlertTriangle className="inline w-4 h-4 ml-1 text-amber-500" />
-                )}
+                {row.ambiguous_fields.length > 0 && <AlertTriangle className="inline w-4 h-4 ml-1 text-amber-500" />}
               </td>
               <td className="px-4 py-3 text-sm text-right text-gray-900 dark:text-white">
                 {row.amount_chf !== null ? row.amount_chf.toLocaleString('fr-CH') : '--'}
@@ -100,7 +100,10 @@ export function QuoteComparisonMatrix({ requestId }: Props) {
               <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
                 <div className="flex flex-wrap gap-1">
                   {row.scope_items.map((item, i) => (
-                    <span key={i} className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                    <span
+                      key={i}
+                      className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded"
+                    >
                       {item}
                     </span>
                   ))}
@@ -109,7 +112,10 @@ export function QuoteComparisonMatrix({ requestId }: Props) {
               <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
                 <div className="flex flex-wrap gap-1">
                   {row.exclusions.map((item, i) => (
-                    <span key={i} className="text-xs bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded">
+                    <span
+                      key={i}
+                      className="text-xs bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded"
+                    >
                       {item}
                     </span>
                   ))}

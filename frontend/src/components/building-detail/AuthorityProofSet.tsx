@@ -43,7 +43,8 @@ export default function AuthorityProofSet({ requirements, stepName }: AuthorityP
       </div>
 
       <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">
-        {t('authority_room.proof_set_step_label')}: <span className="font-medium text-gray-700 dark:text-slate-300">{stepName}</span>
+        {t('authority_room.proof_set_step_label')}:{' '}
+        <span className="font-medium text-gray-700 dark:text-slate-300">{stepName}</span>
       </p>
 
       {requirements.length === 0 ? (
@@ -88,7 +89,10 @@ export default function AuthorityProofSet({ requirements, stepName }: AuthorityP
       )}
 
       {missing.length > 0 && (
-        <div className="mt-3 p-2 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg text-xs text-orange-700 dark:text-orange-400" data-testid="proof-set-warning">
+        <div
+          className="mt-3 p-2 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg text-xs text-orange-700 dark:text-orange-400"
+          data-testid="proof-set-warning"
+        >
           {missing.length} {t('authority_room.proofs_missing_hint')}
         </div>
       )}

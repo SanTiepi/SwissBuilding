@@ -78,8 +78,7 @@ export const remediationApi = {
   getCompanyWorkspace: (profileId: string): Promise<CompanyWorkspaceSummary> =>
     apiClient.get(`/marketplace/companies/${profileId}/workspace`),
 
-  getOperatorQueue: (): Promise<OperatorRemediationQueue> =>
-    apiClient.get('/marketplace/operator/queue'),
+  getOperatorQueue: (): Promise<OperatorRemediationQueue> => apiClient.get('/marketplace/operator/queue'),
 
   getComparisonMatrix: (requestId: string): Promise<QuoteComparisonMatrix> =>
     apiClient.get(`/marketplace/requests/${requestId}/comparison-matrix`),
@@ -93,12 +92,13 @@ export const remediationApi = {
   confirmExtraction: (logId: string): Promise<AIExtractionLog> =>
     apiClient.post(`/marketplace/extractions/${logId}/confirm`, {}),
 
-  correctExtraction: (logId: string, data: { corrected_data: Record<string, unknown>; notes?: string }): Promise<AIExtractionLog> =>
-    apiClient.post(`/marketplace/extractions/${logId}/correct`, data),
+  correctExtraction: (
+    logId: string,
+    data: { corrected_data: Record<string, unknown>; notes?: string },
+  ): Promise<AIExtractionLog> => apiClient.post(`/marketplace/extractions/${logId}/correct`, data),
 
   rejectExtraction: (logId: string, data: { reason: string }): Promise<AIExtractionLog> =>
     apiClient.post(`/marketplace/extractions/${logId}/reject`, data),
 
-  getFlywheelMetrics: (): Promise<FlywheelMetrics> =>
-    apiClient.get('/admin/remediation/flywheel-metrics'),
+  getFlywheelMetrics: (): Promise<FlywheelMetrics> => apiClient.get('/admin/remediation/flywheel-metrics'),
 };

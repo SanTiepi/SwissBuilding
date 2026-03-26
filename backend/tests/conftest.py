@@ -29,12 +29,24 @@ from datetime import UTC, datetime, timedelta  # noqa: E402
 from jose import jwt  # noqa: E402
 from passlib.context import CryptContext  # noqa: E402
 
+# Growth Stack models
+from app.models.ai_extraction_log import AIExtractionLog as _AEL  # noqa: E402, F401
+
+# Lot 4: Post-Works Truth models
+from app.models.ai_feedback import AIFeedback as _AFB  # noqa: E402, F401
+
+# Intelligence Stack models
+from app.models.ai_rule_pattern import AIRulePattern as _ARP  # noqa: E402, F401
+
 # Artifact Custody models
 from app.models.artifact_version import ArtifactVersion as _AV  # noqa: E402, F401
 
 # Finance Surfaces models
 from app.models.audience_pack import AudiencePack as _AP  # noqa: E402, F401
 from app.models.authority_request import AuthorityRequest as _AR  # noqa: E402, F401
+
+# Marketplace Trust models
+from app.models.award_confirmation import AwardConfirmation as _AC  # noqa: E402, F401
 from app.models.bounded_embed import BoundedEmbedToken as _BET  # noqa: E402, F401
 from app.models.bounded_embed import ExternalViewerProfile as _EVP  # noqa: E402, F401
 from app.models.building import Building  # noqa: E402
@@ -44,17 +56,31 @@ from app.models.case_study_template import CaseStudyTemplate as _CST  # noqa: E4
 # BC2 property management models
 from app.models.claim import Claim as _Claim  # noqa: E402, F401
 
+# Marketplace RFQ models
+from app.models.client_request import ClientRequest as _CR  # noqa: E402, F401
+
 # Public Sector models
 from app.models.committee_decision import CommitteeDecisionPack as _CDP  # noqa: E402, F401
 from app.models.committee_decision import ReviewDecisionTrace as _RDT  # noqa: E402, F401
 from app.models.communal_adapter import CommunalAdapterProfile as _CAP  # noqa: E402, F401
 from app.models.communal_override import CommunalRuleOverride as _CRO  # noqa: E402, F401
 
+# Marketplace models
+from app.models.company_profile import CompanyProfile as _CP  # noqa: E402, F401
+from app.models.company_subscription import CompanySubscription as _CS  # noqa: E402, F401
+from app.models.company_verification import CompanyVerification as _CV  # noqa: E402, F401
+from app.models.completion_confirmation import CompletionConfirmation as _CC  # noqa: E402, F401
+
 # BC1 backbone models — must be imported before _build_sqlite_metadata()
 # so their tables are registered in Base.metadata.
 # Use from-imports to avoid shadowing the FastAPI `app` instance.
 from app.models.contact import Contact as _Contact  # noqa: E402, F401
 from app.models.contract import Contract as _Contract2  # noqa: E402, F401
+
+# Exchange Hardening + Contributor Gateway models
+from app.models.contributor_gateway import ContributorGatewayRequest as _CGR  # noqa: E402, F401
+from app.models.contributor_gateway import ContributorReceipt as _CRcpt  # noqa: E402, F401
+from app.models.contributor_gateway import ContributorSubmission as _CSub  # noqa: E402, F401
 from app.models.custody_event import CustodyEvent as _CE  # noqa: E402, F401
 from app.models.customer_success import CustomerSuccessMilestone as _CSM  # noqa: E402, F401
 from app.models.delegated_access import DelegatedAccessGrant as _DAG  # noqa: E402, F401
@@ -63,7 +89,13 @@ from app.models.delegated_access import TenantBoundary as _TB  # noqa: E402, F40
 from app.models.demo_scenario import DemoScenario as _DS  # noqa: E402, F401
 from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
 from app.models.document_link import DocumentLink as _DL  # noqa: E402, F401
+from app.models.domain_event import DomainEvent as _DE  # noqa: E402, F401
+
+# Enrichment tracking models
+from app.models.enrichment_run import BuildingEnrichmentRun as _BER  # noqa: E402, F401
 from app.models.exchange_contract import ExchangeContractVersion as _ECV  # noqa: E402, F401
+from app.models.exchange_validation import ExchangeValidationReport as _EVR  # noqa: E402, F401
+from app.models.exchange_validation import ExternalRelianceSignal as _ERS  # noqa: E402, F401
 from app.models.expansion_signal import AccountExpansionTrigger as _AET  # noqa: E402, F401
 from app.models.expansion_signal import DistributionLoopSignal as _DLS  # noqa: E402, F401
 from app.models.expansion_signal import ExpansionOpportunity as _EO  # noqa: E402, F401
@@ -80,65 +112,33 @@ from app.models.ownership_record import OwnershipRecord as _OR  # noqa: E402, F4
 from app.models.package_preset import PackagePreset as _PPr  # noqa: E402, F401
 from app.models.partner_trust import PartnerTrustProfile as _PTP  # noqa: E402, F401
 from app.models.partner_trust import PartnerTrustSignal as _PTS  # noqa: E402, F401
+from app.models.partner_webhook import PartnerDeliveryAttempt as _PDA  # noqa: E402, F401
+from app.models.partner_webhook import PartnerWebhookSubscription as _PWS  # noqa: E402, F401
 from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa: E402, F401
 from app.models.passport_publication import PassportPublication as _PPub  # noqa: E402, F401
+from app.models.passport_state_diff import PassportStateDiff as _PSD  # noqa: E402, F401
 from app.models.permit_procedure import PermitProcedure as _PP  # noqa: E402, F401
 from app.models.permit_step import PermitStep as _PS  # noqa: E402, F401
 from app.models.pilot_scorecard import PilotScorecard as _PSc  # noqa: E402, F401
 from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
+from app.models.post_works_link import PostWorksLink as _PWL  # noqa: E402, F401
 from app.models.proof_delivery import ProofDelivery as _PD  # noqa: E402, F401
 from app.models.public_owner_mode import PublicOwnerOperatingMode as _POOM  # noqa: E402, F401
+from app.models.quote import Quote as _Q  # noqa: E402, F401
 from app.models.redaction_profile import DecisionCaveatProfile as _DCP  # noqa: E402, F401
 from app.models.redaction_profile import ExternalAudienceRedactionProfile as _EARP  # noqa: E402, F401
+from app.models.request_document import RequestDocument as _RD  # noqa: E402, F401
+from app.models.request_invitation import RequestInvitation as _RI  # noqa: E402, F401
+from app.models.review import Review as _Rev  # noqa: E402, F401
 from app.models.rule_change_event import RuleChangeEvent as _RCE  # noqa: E402, F401
+from app.models.source_snapshot import BuildingSourceSnapshot as _BSS  # noqa: E402, F401
+from app.models.subscription_change import SubscriptionChange as _SC  # noqa: E402, F401
 from app.models.swiss_rules_source import RuleSource as _RS  # noqa: E402, F401
 from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
 from app.models.unit import Unit as _Unit  # noqa: E402, F401
 from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
-
-# Marketplace models
-from app.models.company_profile import CompanyProfile as _CP  # noqa: E402, F401
-from app.models.company_subscription import CompanySubscription as _CS  # noqa: E402, F401
-from app.models.company_verification import CompanyVerification as _CV  # noqa: E402, F401
-
-# Marketplace RFQ models
-from app.models.client_request import ClientRequest as _CR  # noqa: E402, F401
-from app.models.quote import Quote as _Q  # noqa: E402, F401
-from app.models.request_document import RequestDocument as _RD  # noqa: E402, F401
-from app.models.request_invitation import RequestInvitation as _RI  # noqa: E402, F401
-
-# Marketplace Trust models
-from app.models.award_confirmation import AwardConfirmation as _AC  # noqa: E402, F401
-from app.models.completion_confirmation import CompletionConfirmation as _CC  # noqa: E402, F401
-from app.models.review import Review as _Rev  # noqa: E402, F401
-
-# Lot 4: Post-Works Truth models
-from app.models.ai_feedback import AIFeedback as _AFB  # noqa: E402, F401
-from app.models.domain_event import DomainEvent as _DE  # noqa: E402, F401
-from app.models.post_works_link import PostWorksLink as _PWL  # noqa: E402, F401
-
-# Growth Stack models
-from app.models.ai_extraction_log import AIExtractionLog as _AEL  # noqa: E402, F401
-from app.models.subscription_change import SubscriptionChange as _SC  # noqa: E402, F401
-
-# Intelligence Stack models
-from app.models.ai_rule_pattern import AIRulePattern as _ARP  # noqa: E402, F401
-
-# Exchange Hardening + Contributor Gateway models
-from app.models.contributor_gateway import ContributorGatewayRequest as _CGR  # noqa: E402, F401
-from app.models.contributor_gateway import ContributorReceipt as _CRcpt  # noqa: E402, F401
-from app.models.contributor_gateway import ContributorSubmission as _CSub  # noqa: E402, F401
-from app.models.exchange_validation import ExchangeValidationReport as _EVR  # noqa: E402, F401
-from app.models.exchange_validation import ExternalRelianceSignal as _ERS  # noqa: E402, F401
-from app.models.partner_webhook import PartnerDeliveryAttempt as _PDA  # noqa: E402, F401
-from app.models.partner_webhook import PartnerWebhookSubscription as _PWS  # noqa: E402, F401
-from app.models.passport_state_diff import PassportStateDiff as _PSD  # noqa: E402, F401
-
-# Enrichment tracking models
-from app.models.enrichment_run import BuildingEnrichmentRun as _BER  # noqa: E402, F401
-from app.models.source_snapshot import BuildingSourceSnapshot as _BSS  # noqa: E402, F401
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

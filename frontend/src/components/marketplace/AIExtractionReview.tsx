@@ -101,9 +101,7 @@ export function AIExtractionReview({ extraction, onUpdate }: Props) {
           <span className="text-sm text-gray-600 dark:text-slate-300">
             {t('extraction.overall_confidence') || 'Overall confidence'}:
           </span>
-          <span className="text-sm font-semibold">
-            {Math.round((extraction.confidence_score ?? 0) * 100)}%
-          </span>
+          <span className="text-sm font-semibold">{Math.round((extraction.confidence_score ?? 0) * 100)}%</span>
         </div>
       )}
 
@@ -131,7 +129,8 @@ export function AIExtractionReview({ extraction, onUpdate }: Props) {
           <ul className="text-xs text-amber-600 dark:text-amber-400 space-y-1">
             {extraction.ambiguous_fields.map((af, i) => (
               <li key={i}>
-                <strong>{String((af as Record<string, unknown>).field || 'unknown')}</strong>: {String((af as Record<string, unknown>).reason || '')}
+                <strong>{String((af as Record<string, unknown>).field || 'unknown')}</strong>:{' '}
+                {String((af as Record<string, unknown>).reason || '')}
               </li>
             ))}
           </ul>

@@ -46,7 +46,6 @@ test.describe('1. Login with all users', () => {
       await loginAs(page, u.email, u.password);
       // Should leave login page
       await page.waitForTimeout(2000);
-      const url = page.url();
       // Either redirected or login failed gracefully
       await noErrorBoundary(page);
       await page.screenshot({ path: `test-results/login-${u.role}.png` });

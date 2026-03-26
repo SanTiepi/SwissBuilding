@@ -90,7 +90,8 @@ function StepTimeline({ steps }: { steps: ProcedureStep[] }) {
             <div
               className={cn(
                 'flex-1 pb-4',
-                isActive && 'bg-blue-50 dark:bg-blue-900/10 -mx-2 px-2 py-2 rounded-lg border border-blue-200 dark:border-blue-800',
+                isActive &&
+                  'bg-blue-50 dark:bg-blue-900/10 -mx-2 px-2 py-2 rounded-lg border border-blue-200 dark:border-blue-800',
               )}
             >
               <div className="flex items-center gap-2 flex-wrap">
@@ -135,11 +136,7 @@ function StepTimeline({ steps }: { steps: ProcedureStep[] }) {
                             : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400',
                         )}
                       >
-                        {isLinked ? (
-                          <CheckCircle2 className="w-3 h-3" />
-                        ) : (
-                          <FileText className="w-3 h-3" />
-                        )}
+                        {isLinked ? <CheckCircle2 className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
                         {doc}
                       </span>
                     );
@@ -177,7 +174,12 @@ interface ProcedureCardProps {
   onRespondToRequest?: (requestId: string, text: string) => void;
 }
 
-export default function ProcedureCard({ procedure, defaultExpanded = false, onSubmit, onRespondToRequest }: ProcedureCardProps) {
+export default function ProcedureCard({
+  procedure,
+  defaultExpanded = false,
+  onSubmit,
+  onRespondToRequest,
+}: ProcedureCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(defaultExpanded);
 
@@ -297,7 +299,9 @@ export default function ProcedureCard({ procedure, defaultExpanded = false, onSu
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 text-sm">
               <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-red-700 dark:text-red-300">{t('procedure.rejected_reason') || 'Rejection reason'}</p>
+                <p className="font-medium text-red-700 dark:text-red-300">
+                  {t('procedure.rejected_reason') || 'Rejection reason'}
+                </p>
                 <p className="text-red-600 dark:text-red-400 mt-0.5">{procedure.rejection_reason}</p>
               </div>
             </div>

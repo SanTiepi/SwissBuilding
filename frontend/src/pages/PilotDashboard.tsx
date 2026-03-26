@@ -141,9 +141,7 @@ export default function PilotDashboard() {
                       <div className="space-y-4">
                         {/* Metrics */}
                         {scorecard.metrics.length === 0 ? (
-                          <p className="text-sm text-gray-500 dark:text-slate-400">
-                            {t('pilot_dashboard.no_metrics')}
-                          </p>
+                          <p className="text-sm text-gray-500 dark:text-slate-400">{t('pilot_dashboard.no_metrics')}</p>
                         ) : (
                           <div className="space-y-3" data-testid="pilot-metrics">
                             {scorecard.metrics.map((metric) => {

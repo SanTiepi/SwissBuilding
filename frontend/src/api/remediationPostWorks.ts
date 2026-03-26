@@ -70,9 +70,7 @@ export const remediationPostWorksApi = {
   },
 
   getPostWorks: async (completionId: string): Promise<PostWorksLinkData> => {
-    const response = await apiClient.get<PostWorksLinkData>(
-      `/marketplace/completions/${completionId}/post-works`,
-    );
+    const response = await apiClient.get<PostWorksLinkData>(`/marketplace/completions/${completionId}/post-works`);
     return response.data;
   },
 

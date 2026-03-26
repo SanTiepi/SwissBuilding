@@ -139,13 +139,10 @@ export default function ControlTower() {
     queryClient.invalidateQueries({ queryKey: ['control-tower-actions'] });
   };
 
-  const handleSnooze = useCallback(
-    (actionId: string, days: number) => {
-      snoozeAction(actionId, days);
-      setSnoozeTick((prev) => prev + 1);
-    },
-    [],
-  );
+  const handleSnooze = useCallback((actionId: string, days: number) => {
+    snoozeAction(actionId, days);
+    setSnoozeTick((prev) => prev + 1);
+  }, []);
 
   const isLoading = summaryLoading || actionsLoading;
   const isError = summaryError || actionsError;
@@ -412,13 +409,7 @@ function SummaryCard({
 
 /* ────────────── Action Row ────────────── */
 
-function ActionRow({
-  action,
-  onSnooze,
-}: {
-  action: ControlTowerAction;
-  onSnooze: (id: string, days: number) => void;
-}) {
+function ActionRow({ action, onSnooze }: { action: ControlTowerAction; onSnooze: (id: string, days: number) => void }) {
   const { t } = useTranslation();
   const [showSnooze, setShowSnooze] = useState(false);
   const pConfig = PRIORITY_CONFIG[action.priority] ?? PRIORITY_CONFIG.P3;

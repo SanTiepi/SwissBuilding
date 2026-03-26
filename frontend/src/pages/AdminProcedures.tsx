@@ -159,7 +159,11 @@ export default function AdminProcedures() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                   {items.map((item: ProcedureListItem) => (
-                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50" data-testid={`procedure-row-${item.id}`}>
+                    <tr
+                      key={item.id}
+                      className="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                      data-testid={`procedure-row-${item.id}`}
+                    >
                       <td className="py-3">
                         <div className="flex items-center gap-1.5">
                           <Building2 className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
@@ -171,9 +175,7 @@ export default function AdminProcedures() {
                       <td className="py-3">
                         <div>
                           <span className="font-medium text-gray-900 dark:text-white">{item.title}</span>
-                          <span className="ml-2 text-xs text-gray-400">
-                            {item.procedure_type.replace(/_/g, ' ')}
-                          </span>
+                          <span className="ml-2 text-xs text-gray-400">{item.procedure_type.replace(/_/g, ' ')}</span>
                         </div>
                       </td>
                       <td className="py-3">
@@ -185,9 +187,7 @@ export default function AdminProcedures() {
                         >
                           {t(`procedure.status.${item.status}`) || item.status.replace(/_/g, ' ')}
                         </span>
-                        {item.blocks_activities && (
-                          <AlertTriangle className="w-3 h-3 text-red-500 inline ml-1" />
-                        )}
+                        {item.blocks_activities && <AlertTriangle className="w-3 h-3 text-red-500 inline ml-1" />}
                       </td>
                       <td className="py-3 text-gray-600 dark:text-slate-300">{item.authority_name}</td>
                       <td className="py-3 text-right">
@@ -233,7 +233,8 @@ export default function AdminProcedures() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-700">
               <p className="text-sm text-gray-500 dark:text-slate-400">
-                {t('lease.page') || 'Page'} {page} / {totalPages} ({data?.total ?? 0} {t('lease.total_items') || 'items'})
+                {t('lease.page') || 'Page'} {page} / {totalPages} ({data?.total ?? 0}{' '}
+                {t('lease.total_items') || 'items'})
               </p>
               <div className="flex items-center gap-2">
                 <button

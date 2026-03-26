@@ -78,7 +78,10 @@ export function CommitteePackCard({ buildingId }: CommitteePackCardProps) {
   if (isError) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5" data-testid="committee-pack-card">
+    <div
+      className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5"
+      data-testid="committee-pack-card"
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-gray-500 dark:text-slate-400" />
@@ -92,7 +95,11 @@ export function CommitteePackCard({ buildingId }: CommitteePackCardProps) {
           data-testid="generate-committee-pack-button"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400"
         >
-          {generateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+          {generateMutation.isPending ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Plus className="w-3.5 h-3.5" />
+          )}
           {t('public_sector.generate_committee_pack')}
         </button>
       </div>
@@ -113,7 +120,11 @@ export function CommitteePackCard({ buildingId }: CommitteePackCardProps) {
       {packs.length > 0 && (
         <div className="space-y-4">
           {packs.map((pack) => (
-            <div key={pack.id} className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3" data-testid="committee-pack-item">
+            <div
+              key={pack.id}
+              className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3"
+              data-testid="committee-pack-item"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-gray-900 dark:text-white" data-testid="committee-name">
@@ -123,7 +134,10 @@ export function CommitteePackCard({ buildingId }: CommitteePackCardProps) {
                     ({t(`public_sector.committee_type.${pack.committee_type}`) || pack.committee_type})
                   </span>
                   <span
-                    className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', STATUS_COLORS[pack.status] || STATUS_COLORS.draft)}
+                    className={cn(
+                      'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+                      STATUS_COLORS[pack.status] || STATUS_COLORS.draft,
+                    )}
                     data-testid="committee-pack-status"
                   >
                     {t(`public_sector.status.${pack.status}`) || pack.status}
@@ -150,7 +164,11 @@ export function CommitteePackCard({ buildingId }: CommitteePackCardProps) {
                   >
                     <FileCheck2 className="w-3 h-3" />
                     {t('public_sector.procurement_clauses')} ({pack.procurement_clauses.length})
-                    {expandedClausePack === pack.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    {expandedClausePack === pack.id ? (
+                      <ChevronUp className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )}
                   </button>
                   {expandedClausePack === pack.id && (
                     <ul className="mt-1 space-y-1 ml-4" data-testid="clauses-list">
@@ -178,7 +196,10 @@ export function CommitteePackCard({ buildingId }: CommitteePackCardProps) {
 
               {/* Inline Decision Form */}
               {showDecisionForm === pack.id && (
-                <div className="mt-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 space-y-2" data-testid="decision-form">
+                <div
+                  className="mt-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 space-y-2"
+                  data-testid="decision-form"
+                >
                   <input
                     type="text"
                     placeholder={t('public_sector.reviewer_name')}

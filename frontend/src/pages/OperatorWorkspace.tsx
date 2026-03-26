@@ -5,7 +5,17 @@ import type { OperatorRemediationQueue } from '@/api/remediation';
 import { FileText, MessageSquare, Award, ClipboardCheck, Wrench } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
-function QueueCard({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ElementType; color: string }) {
+function QueueCard({
+  label,
+  value,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: number;
+  icon: React.ElementType;
+  color: string;
+}) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5 flex items-center gap-4">
       <div className={cn('p-3 rounded-xl', color)}>
@@ -45,9 +55,7 @@ export default function OperatorWorkspace() {
   if (error || !data) {
     return (
       <div className="p-6">
-        <p className="text-red-600 dark:text-red-400">
-          {t('workspace.load_error') || 'Failed to load queue data.'}
-        </p>
+        <p className="text-red-600 dark:text-red-400">{t('workspace.load_error') || 'Failed to load queue data.'}</p>
       </div>
     );
   }

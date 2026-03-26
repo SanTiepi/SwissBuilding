@@ -53,7 +53,10 @@ export function ReviewPackCard({ buildingId }: ReviewPackCardProps) {
   if (isError) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5" data-testid="review-pack-card">
+    <div
+      className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5"
+      data-testid="review-pack-card"
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5 text-gray-500 dark:text-slate-400" />
@@ -67,7 +70,11 @@ export function ReviewPackCard({ buildingId }: ReviewPackCardProps) {
           data-testid="generate-review-pack-button"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-red-400"
         >
-          {generateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+          {generateMutation.isPending ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Plus className="w-3.5 h-3.5" />
+          )}
           {t('public_sector.generate_review_pack')}
         </button>
       </div>
@@ -88,14 +95,19 @@ export function ReviewPackCard({ buildingId }: ReviewPackCardProps) {
       {packs.length > 0 && (
         <div className="space-y-3">
           {packs.map((pack) => (
-            <div key={pack.id} className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3" data-testid="review-pack-item">
+            <div
+              key={pack.id}
+              className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3"
+              data-testid="review-pack-item"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    v{pack.pack_version}
-                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">v{pack.pack_version}</span>
                   <span
-                    className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full', STATUS_COLORS[pack.status] || STATUS_COLORS.draft)}
+                    className={cn(
+                      'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
+                      STATUS_COLORS[pack.status] || STATUS_COLORS.draft,
+                    )}
                     data-testid="review-pack-status"
                   >
                     {t(`public_sector.status.${pack.status}`) || pack.status}
@@ -144,7 +156,10 @@ export function ReviewPackCard({ buildingId }: ReviewPackCardProps) {
                   </span>
                   <div className="flex flex-wrap gap-1">
                     {pack.circulated_to.map((r, i) => (
-                      <span key={i} className="inline-block px-2 py-0.5 text-xs bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-slate-300 rounded">
+                      <span
+                        key={i}
+                        className="inline-block px-2 py-0.5 text-xs bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-slate-300 rounded"
+                      >
                         {r.org_name || r.role || 'Reviewer'}
                       </span>
                     ))}

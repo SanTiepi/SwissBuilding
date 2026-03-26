@@ -59,9 +59,7 @@ export default function ProceduresSection({ buildingId }: ProceduresSectionProps
     withdrawn: 7,
   };
 
-  const sorted = [...procedures].sort(
-    (a, b) => (statusPriority[a.status] ?? 9) - (statusPriority[b.status] ?? 9),
-  );
+  const sorted = [...procedures].sort((a, b) => (statusPriority[a.status] ?? 9) - (statusPriority[b.status] ?? 9));
 
   if (isLoading) {
     return (
@@ -104,9 +102,7 @@ export default function ProceduresSection({ buildingId }: ProceduresSectionProps
 
       {/* Heading */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {t('procedure.title') || 'Procedures'}
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('procedure.title') || 'Procedures'}</h3>
       </div>
 
       {/* List */}
@@ -118,12 +114,7 @@ export default function ProceduresSection({ buildingId }: ProceduresSectionProps
       ) : (
         <div className="space-y-3">
           {sorted.map((proc: Procedure) => (
-            <ProcedureCard
-              key={proc.id}
-              procedure={proc}
-              onSubmit={handleSubmit}
-              onRespondToRequest={handleRespond}
-            />
+            <ProcedureCard key={proc.id} procedure={proc} onSubmit={handleSubmit} onRespondToRequest={handleRespond} />
           ))}
         </div>
       )}

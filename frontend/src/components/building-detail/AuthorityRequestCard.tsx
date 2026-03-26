@@ -81,11 +81,7 @@ export default function AuthorityRequestCard({ request, onRespond }: AuthorityRe
             )}
             data-testid="request-deadline"
           >
-            {overdue ? (
-              <AlertTriangle className="w-3 h-3" />
-            ) : (
-              <Clock className="w-3 h-3" />
-            )}
+            {overdue ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
             {formatDateShort(request.response_deadline)}
             {remaining !== null && !overdue && (
               <span>

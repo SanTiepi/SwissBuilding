@@ -96,7 +96,9 @@ export const remediationIntelligenceApi = {
     apiClient.get<RemediationBenchmarkSnapshot>(`/organizations/${orgId}/remediation-benchmark`).then((r) => r.data),
 
   getFlywheelTrends: (orgId: string, days: number = 90) =>
-    apiClient.get<FlywheelTrendPoint[]>(`/organizations/${orgId}/flywheel-trends`, { params: { days } }).then((r) => r.data),
+    apiClient
+      .get<FlywheelTrendPoint[]>(`/organizations/${orgId}/flywheel-trends`, { params: { days } })
+      .then((r) => r.data),
 
   getModuleLearningOverview: () =>
     apiClient.get<ModuleLearningOverview>('/admin/module-learning-overview').then((r) => r.data),

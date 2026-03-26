@@ -77,19 +77,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    // i18n strings (~500 kB raw across 4 langs) are statically imported in main —
-    // the index chunk legitimately exceeds 500 kB after minification.
-    chunkSizeWarningLimit: 650,
+    // i18n: FR is eager (~160 kB), DE/EN/IT are lazy-loaded on demand.
+    // No chunk exceeds 500 kB except recharts (~411 kB, third-party, lazy-only).
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           query: ['@tanstack/react-query'],
-          // Note: mapbox-gl removed — it is only dynamically imported via lazy pages,
-          // so the manual chunk was always empty (0 kB).
-          // recharts is NOT listed here on purpose: it is only imported from lazy
-          // components (DashboardCharts, PortfolioCharts, RiskSimulator) and Rollup
-          // already isolates it into its own chunk automatically.
+          recharts: ['recharts'],
         },
       },
     },

@@ -29,16 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400',
 };
 
-const MISSION_TYPES = [
-  'asbestos_full',
-  'asbestos_complement',
-  'pcb',
-  'lead',
-  'hap',
-  'radon',
-  'pfas',
-  'multi',
-] as const;
+const MISSION_TYPES = ['asbestos_full', 'asbestos_complement', 'pcb', 'lead', 'hap', 'radon', 'pfas', 'multi'] as const;
 
 function StatusBadge({ status }: { status: string }) {
   const { t } = useTranslation();

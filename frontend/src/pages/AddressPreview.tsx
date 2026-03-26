@@ -76,7 +76,10 @@ function RiskBar({ label, value }: { label: string; value: number }) {
         <span className="font-bold">{pct}%</span>
       </div>
       <div className="h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-        <div className={cn('h-full rounded-full transition-all duration-1000 ease-out', color)} style={{ width: `${pct}%` }} />
+        <div
+          className={cn('h-full rounded-full transition-all duration-1000 ease-out', color)}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );
@@ -105,11 +108,17 @@ interface CollapsibleProps {
 function Collapsible({ title, icon, headerColor, defaultOpen = true, badge, children, testId }: CollapsibleProps) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div data-testid={testId} className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+    <div
+      data-testid={testId}
+      className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm"
+    >
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={cn('w-full flex items-center gap-3 px-5 py-4 text-left font-semibold text-sm transition-colors', headerColor)}
+        className={cn(
+          'w-full flex items-center gap-3 px-5 py-4 text-left font-semibold text-sm transition-colors',
+          headerColor,
+        )}
         data-testid={`${testId}-toggle`}
       >
         {icon}
@@ -231,7 +240,10 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
             <KVRow label={t('intelligence.construction_year') || 'Annee'} value={data.physical.construction_year} />
             <KVRow label={t('intelligence.floors') || 'Etages'} value={data.physical.floors} />
             <KVRow label={t('intelligence.dwellings') || 'Logements'} value={data.physical.dwellings} />
-            <KVRow label={t('intelligence.surface') || 'Surface'} value={data.physical.surface_m2 ? `${data.physical.surface_m2} m2` : null} />
+            <KVRow
+              label={t('intelligence.surface') || 'Surface'}
+              value={data.physical.surface_m2 ? `${data.physical.surface_m2} m2` : null}
+            />
             <KVRow label={t('intelligence.heating') || 'Chauffage'} value={data.physical.heating_type} />
           </div>
         </div>
@@ -240,8 +252,14 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
             {t('intelligence.energy') || 'Energie'}
           </h4>
-          <KVRow label={t('intelligence.solar') || 'Potentiel solaire'} value={data.energy.solar_potential ? 'Disponible' : null} />
-          <KVRow label={t('intelligence.district_heating') || 'CAD'} value={data.energy.district_heating_available ? 'Oui' : null} />
+          <KVRow
+            label={t('intelligence.solar') || 'Potentiel solaire'}
+            value={data.energy.solar_potential ? 'Disponible' : null}
+          />
+          <KVRow
+            label={t('intelligence.district_heating') || 'CAD'}
+            value={data.energy.district_heating_available ? 'Oui' : null}
+          />
         </div>
         {/* Environment */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -249,9 +267,18 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
             {t('intelligence.environment') || 'Environnement'}
           </h4>
           <KVRow label="Radon" value={data.environment.radon ? 'Donnees disponibles' : null} />
-          <KVRow label={t('intelligence.noise') || 'Bruit'} value={data.environment.noise ? 'Donnees disponibles' : null} />
-          <KVRow label={t('intelligence.hazards') || 'Dangers'} value={data.environment.hazards ? 'Donnees disponibles' : null} />
-          <KVRow label={t('intelligence.seismic') || 'Seisme'} value={data.environment.seismic ? 'Donnees disponibles' : null} />
+          <KVRow
+            label={t('intelligence.noise') || 'Bruit'}
+            value={data.environment.noise ? 'Donnees disponibles' : null}
+          />
+          <KVRow
+            label={t('intelligence.hazards') || 'Dangers'}
+            value={data.environment.hazards ? 'Donnees disponibles' : null}
+          />
+          <KVRow
+            label={t('intelligence.seismic') || 'Seisme'}
+            value={data.environment.seismic ? 'Donnees disponibles' : null}
+          />
         </div>
       </Collapsible>
 
@@ -309,7 +336,9 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
           blockerCount > 0 ? (
             <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">{blockerCount}</span>
           ) : (
-            <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] px-2 py-0.5 rounded-full font-medium">OK</span>
+            <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] px-2 py-0.5 rounded-full font-medium">
+              OK
+            </span>
           )
         }
         defaultOpen={blockerCount > 0}
@@ -336,9 +365,18 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
           <div className="space-y-2">
             <p className="text-sm text-slate-700 dark:text-slate-300">{data.renovation.plan_summary}</p>
             <div className="grid grid-cols-2 gap-3 mt-2">
-              <KVRow label={t('intelligence.total_cost') || 'Cout total'} value={formatCHF(data.renovation.total_cost)} />
-              <KVRow label={t('intelligence.subsidies') || 'Subventions'} value={formatCHF(data.renovation.total_subsidy)} />
-              <KVRow label={t('intelligence.roi') || 'ROI'} value={data.renovation.roi_years ? `${data.renovation.roi_years} ans` : null} />
+              <KVRow
+                label={t('intelligence.total_cost') || 'Cout total'}
+                value={formatCHF(data.renovation.total_cost)}
+              />
+              <KVRow
+                label={t('intelligence.subsidies') || 'Subventions'}
+                value={formatCHF(data.renovation.total_subsidy)}
+              />
+              <KVRow
+                label={t('intelligence.roi') || 'ROI'}
+                value={data.renovation.roi_years ? `${data.renovation.roi_years} ans` : null}
+              />
             </div>
           </div>
         ) : (
@@ -366,7 +404,7 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
         <div className="space-y-2">
           <p className="text-xs text-slate-600 dark:text-slate-400">
             {t('intelligence.reusable_explanation') ||
-              "Toutes les donnees collectees lors de cette analyse enrichissent le batiment de maniere permanente. Diagnostic, enrichissement, preuves — tout est capitalise dans la memoire du batiment."}
+              'Toutes les donnees collectees lors de cette analyse enrichissent le batiment de maniere permanente. Diagnostic, enrichissement, preuves — tout est capitalise dans la memoire du batiment.'}
           </p>
           <div className="flex items-center gap-2 mt-2">
             <Shield className="w-4 h-4 text-emerald-500" />
@@ -378,7 +416,10 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
       </Collapsible>
 
       {/* Scores dashboard */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6" data-testid="scores-dashboard">
+      <div
+        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6"
+        data-testid="scores-dashboard"
+      >
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <GradeBadge grade={data.scores.overall_grade} />
           <div className="flex-1 grid grid-cols-3 gap-3">
@@ -391,7 +432,8 @@ function AddressPreviewResultView({ data }: { data: AddressPreviewResult }) {
         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Zap className="w-4 h-4 text-slate-400" />
           <span className="text-[11px] text-slate-500 dark:text-slate-400">
-            {data.metadata.sources_used.length} {t('intelligence.sources') || 'sources'} | {t('intelligence.freshness') || 'Fraicheur'}: {data.metadata.freshness}
+            {data.metadata.sources_used.length} {t('intelligence.sources') || 'sources'} |{' '}
+            {t('intelligence.freshness') || 'Fraicheur'}: {data.metadata.freshness}
           </span>
         </div>
       </div>
@@ -448,7 +490,7 @@ export default function AddressPreview() {
       if (!address.trim()) return;
       mutation.mutate();
     },
-    [address, postalCode, city, mutation],
+    [address, mutation],
   );
 
   return (
@@ -466,7 +508,8 @@ export default function AddressPreview() {
             {t('intelligence.hero_title') || 'Entrez une adresse, decouvrez tout en 10 secondes'}
           </h1>
           <p className="mt-3 text-base text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
-            {t('intelligence.hero_subtitle') || 'Intelligence batiment instantanee: identite, risques, obligations, actions.'}
+            {t('intelligence.hero_subtitle') ||
+              'Intelligence batiment instantanee: identite, risques, obligations, actions.'}
           </p>
         </div>
 
@@ -512,11 +555,7 @@ export default function AddressPreview() {
             )}
             data-testid="discover-button"
           >
-            {mutation.isPending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Search className="w-5 h-5" />
-            )}
+            {mutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
             {mutation.isPending
               ? t('intelligence.analyzing') || 'Analyse en cours...'
               : t('intelligence.discover') || 'Decouvrir'}

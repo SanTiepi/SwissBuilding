@@ -52,9 +52,7 @@ ID_VERSION_2 = _sid("pub-asbestos-version-2")
 async def seed():
     async with AsyncSessionLocal() as db:
         # ── Lookup existing admin + buildings ──────────────────────────
-        result = await db.execute(
-            select(User).where(User.email == "admin@swissbuildingos.ch")
-        )
+        result = await db.execute(select(User).where(User.email == "admin@swissbuildingos.ch"))
         admin = result.scalar_one_or_none()
         if not admin:
             print("Diagnostic Integration seed: admin not found — run seed_data first.")
@@ -64,17 +62,11 @@ async def seed():
 
         # Lausanne building (has address, will set egid for matching)
         bld_lau = (
-            await db.execute(
-                select(Building).where(Building.address == "Chemin des Pâquerettes 12")
-            )
+            await db.execute(select(Building).where(Building.address == "Chemin des Pâquerettes 12"))
         ).scalar_one_or_none()
 
         # Geneva building (for mission orders)
-        bld_ge = (
-            await db.execute(
-                select(Building).where(Building.address == "Quai du Rhône 45")
-            )
-        ).scalar_one_or_none()
+        bld_ge = (await db.execute(select(Building).where(Building.address == "Quai du Rhône 45"))).scalar_one_or_none()
 
         if not all([bld_lau, bld_ge]):
             print("Diagnostic Integration seed: buildings not found — run seed_data first.")
@@ -83,9 +75,7 @@ async def seed():
         # ── 1. Publication: auto_matched (asbestos, Lausanne) ──────────
         existing = (
             await db.execute(
-                select(DiagnosticReportPublication).where(
-                    DiagnosticReportPublication.id == ID_PUB_MATCHED
-                )
+                select(DiagnosticReportPublication).where(DiagnosticReportPublication.id == ID_PUB_MATCHED)
             )
         ).scalar_one_or_none()
         if not existing:
@@ -173,11 +163,7 @@ async def seed():
 
         # ── 2. Publication: needs_review (PCB, ambiguous address) ──────
         existing = (
-            await db.execute(
-                select(DiagnosticReportPublication).where(
-                    DiagnosticReportPublication.id == ID_PUB_REVIEW
-                )
-            )
+            await db.execute(select(DiagnosticReportPublication).where(DiagnosticReportPublication.id == ID_PUB_REVIEW))
         ).scalar_one_or_none()
         if not existing:
             db.add(
@@ -241,11 +227,7 @@ async def seed():
 
         # ── 3. Mission order: acknowledged (asbestos_full) ─────────────
         existing = (
-            await db.execute(
-                select(DiagnosticMissionOrder).where(
-                    DiagnosticMissionOrder.id == ID_ORDER_ACK
-                )
-            )
+            await db.execute(select(DiagnosticMissionOrder).where(DiagnosticMissionOrder.id == ID_ORDER_ACK))
         ).scalar_one_or_none()
         if not existing:
             db.add(
@@ -281,11 +263,7 @@ async def seed():
 
         # ── 4. Mission order: failed (lead) ────────────────────────────
         existing = (
-            await db.execute(
-                select(DiagnosticMissionOrder).where(
-                    DiagnosticMissionOrder.id == ID_ORDER_FAILED
-                )
-            )
+            await db.execute(select(DiagnosticMissionOrder).where(DiagnosticMissionOrder.id == ID_ORDER_FAILED))
         ).scalar_one_or_none()
         if not existing:
             db.add(
@@ -319,9 +297,7 @@ async def seed():
         # ── 5. Publication versions (2 versions for matched pub) ───────
         existing_v1 = (
             await db.execute(
-                select(DiagnosticPublicationVersion).where(
-                    DiagnosticPublicationVersion.id == ID_VERSION_1
-                )
+                select(DiagnosticPublicationVersion).where(DiagnosticPublicationVersion.id == ID_VERSION_1)
             )
         ).scalar_one_or_none()
         if not existing_v1:
@@ -369,9 +345,7 @@ async def seed():
 
         existing_v2 = (
             await db.execute(
-                select(DiagnosticPublicationVersion).where(
-                    DiagnosticPublicationVersion.id == ID_VERSION_2
-                )
+                select(DiagnosticPublicationVersion).where(DiagnosticPublicationVersion.id == ID_VERSION_2)
             )
         ).scalar_one_or_none()
         if not existing_v2:

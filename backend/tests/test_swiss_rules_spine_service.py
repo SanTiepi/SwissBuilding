@@ -33,7 +33,9 @@ def test_enablement_pack_contains_seed_official_sources():
     assert source_map["bafu_oled"] == "https://www.bafu.admin.ch/fr/oled"
     assert source_map["suva_asbestos"] == "https://www.suva.ch/fr-ch/prevention/matieres-substances/amiante"
     assert source_map["cadastre_rdppf"] == "https://www.cadastre.ch/fr/cadastre-rdppf"
-    assert source_map["ebgb_lhand"] == "https://www.ebgb.admin.ch/fr/loi-sur-legalite-pour-les-personnes-handicapees-lhand"
+    assert (
+        source_map["ebgb_lhand"] == "https://www.ebgb.admin.ch/fr/loi-sur-legalite-pour-les-personnes-handicapees-lhand"
+    )
 
 
 def test_snapshot_change_detection_returns_event():

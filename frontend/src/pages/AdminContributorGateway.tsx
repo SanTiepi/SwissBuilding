@@ -53,9 +53,7 @@ export default function AdminContributorGateway() {
     <div className="space-y-6" data-testid="admin-contributor-gateway">
       <div className="flex items-center gap-3">
         <Users className="w-6 h-6 text-indigo-500" />
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          {'Contributor Gateway'}
-        </h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{'Contributor Gateway'}</h1>
       </div>
 
       {/* Tabs */}
@@ -120,9 +118,7 @@ export default function AdminContributorGateway() {
                     {'From:'} {sub.contributor_name}
                   </p>
                 )}
-                {sub.notes && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{sub.notes}</p>
-                )}
+                {sub.notes && <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{sub.notes}</p>}
 
                 <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                   <button
@@ -173,9 +169,7 @@ export default function AdminContributorGateway() {
               >
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {req.contributor_type}
-                    </span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{req.contributor_type}</span>
                     <span
                       className={cn(
                         'px-2 py-0.5 rounded text-xs font-medium',

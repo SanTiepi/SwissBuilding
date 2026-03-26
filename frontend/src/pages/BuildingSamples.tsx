@@ -307,6 +307,7 @@ export default function BuildingSamples() {
     resolver: zodResolver(sampleSchema),
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form watch() is intentionally reactive
   const watchedPollutant = watch('pollutant_type');
   const watchedConcentration = watch('concentration');
 
