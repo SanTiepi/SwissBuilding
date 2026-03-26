@@ -79,10 +79,11 @@ async def geocode_address(address: str, npa: str) -> dict[str, Any]:
             result["lat"] = float(attrs["lat"])
             result["lon"] = float(attrs["lon"])
 
-        # EGID (may be present in feature_id or detail)
+        # EGID (featureId format is "884846_0" — take part before underscore)
         if "featureId" in attrs:
             with contextlib.suppress(ValueError, TypeError):
-                result["egid"] = int(attrs["featureId"])
+                fid = str(attrs["featureId"]).split("_")[0]
+                result["egid"] = int(fid)
 
         result["label"] = attrs.get("label", "")
         result["detail"] = attrs.get("detail", "")
@@ -100,13 +101,17 @@ async def geocode_address(address: str, npa: str) -> dict[str, Any]:
 
 
 async def fetch_regbl_data(egid: int) -> dict[str, Any]:
-    """Fetch building data from the Swiss Register of Buildings (RegBL/GWR).
+    """Fetch building data from the Swiss Register of Buildings via geo.admin.ch.
+
+    Uses the GWR layer on geo.admin.ch which returns comprehensive building data
+    including EGRID, parcel number, construction year, floors, dwellings, surface,
+    heating type, energy source, and individual dwelling details.
 
     Returns dict with construction_year, floors, dwellings, etc.
     Returns empty dict on 404 or error.
     """
     await _throttle()
-    url = f"https://madd.bfs.admin.ch/api/v1/en/objects/building/{egid}"
+    url = f"https://api3.geo.admin.ch/rest/services/ech/MapServer/ch.bfs.gebaeude_wohnungs_register/{egid}_0"
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.get(url)
@@ -116,35 +121,54 @@ async def fetch_regbl_data(egid: int) -> dict[str, Any]:
             resp.raise_for_status()
             data = resp.json()
 
+        # geo.admin.ch wraps data in feature.attributes
+        attrs = data
+        if isinstance(data, dict) and "feature" in data:
+            attrs = data["feature"].get("attributes", data)
+        if not isinstance(attrs, dict):
+            return {}
+
         result: dict[str, Any] = {}
-        building = data if isinstance(data, dict) else {}
 
-        # Map known RegBL fields
-        field_map = {
-            "constructionYear": "construction_year",
-            "buildingConstructionYear": "construction_year",
-            "gbauj": "construction_year",
-            "numberOfFloors": "floors",
-            "gastw": "floors",
-            "numberOfDwellings": "dwellings",
-            "ganzwhg": "dwellings",
-            "livingArea": "living_area_m2",
-            "gebf": "living_area_m2",
-            "heatingType": "heating_type",
-            "ghetefText": "heating_type",
-            "energySource": "energy_source",
-            "genergText": "energy_source",
-            "buildingClass": "building_class",
-            "gklas": "building_class",
-            "buildingCategory": "building_category",
-            "gkatText": "building_category",
-            "renovationYear": "renovation_year",
-            "gbaup": "renovation_year",
-        }
+        # Direct field mapping from GWR geo.admin.ch response
+        if attrs.get("gbauj"):
+            result["construction_year"] = int(attrs["gbauj"])
+        if attrs.get("gastw"):
+            result["floors"] = int(attrs["gastw"])
+        if attrs.get("ganzwhg"):
+            result["dwellings"] = int(attrs["ganzwhg"])
+        if attrs.get("gebf"):
+            result["living_area_m2"] = float(attrs["gebf"])
+        if attrs.get("garea"):
+            result["ground_area_m2"] = float(attrs["garea"])
+        if attrs.get("gwaerzh1"):
+            result["heating_type_code"] = attrs["gwaerzh1"]
+        if attrs.get("genh1"):
+            result["energy_source_code"] = attrs["genh1"]
+        if attrs.get("gkat"):
+            result["building_category_code"] = attrs["gkat"]
+        if attrs.get("gklas"):
+            result["building_class_code"] = attrs["gklas"]
+        if attrs.get("gbaup"):
+            result["renovation_period_code"] = attrs["gbaup"]
 
-        for src_key, dst_key in field_map.items():
-            if src_key in building and building[src_key] is not None:
-                result[dst_key] = building[src_key]
+        # EGRID and parcel (very valuable)
+        if attrs.get("egrid"):
+            result["egrid"] = attrs["egrid"]
+        if attrs.get("lparz"):
+            result["parcel_number"] = attrs["lparz"]
+        if attrs.get("gebnr"):
+            result["building_number"] = attrs["gebnr"]  # = ECA number
+
+        # Dwelling details
+        if attrs.get("warea") and isinstance(attrs["warea"], list):
+            result["dwelling_areas_m2"] = attrs["warea"]
+            result["dwelling_rooms"] = attrs.get("wazim", [])
+            result["dwelling_floors"] = attrs.get("wstwk", [])
+
+        # Heating update date
+        if attrs.get("gwaerdath1"):
+            result["heating_updated_at"] = attrs["gwaerdath1"]
 
         return result
 
@@ -356,8 +380,8 @@ async def enrich_building(
     fields_updated: list[str] = []
     enrichment_meta: dict[str, Any] = dict(building.source_metadata_json or {}) if building.source_metadata_json else {}
 
-    # --- Step 1: Geocode ---
-    if not skip_geocode and (building.latitude is None or building.longitude is None):
+    # --- Step 1: Geocode (always re-geocode to get precise coords + EGID) ---
+    if not skip_geocode:
         geo = await geocode_address(building.address, building.postal_code)
         if geo.get("lat") and geo.get("lon"):
             building.latitude = geo["lat"]
@@ -392,7 +416,21 @@ async def enrich_building(
                 building.surface_area_m2 = float(regbl["living_area_m2"])
                 fields_updated.append("surface_area_m2")
 
-            # Store extra RegBL data in metadata
+            # EGRID from RegBL (often more reliable than cadastre lookup)
+            if regbl.get("egrid") and building.egrid is None:
+                building.egrid = regbl["egrid"]
+                fields_updated.append("egrid")
+                result.egrid_found = True
+            # Parcel number
+            if regbl.get("parcel_number") and building.parcel_number is None:
+                building.parcel_number = regbl["parcel_number"]
+                fields_updated.append("parcel_number")
+            # Ground area
+            if regbl.get("ground_area_m2") and building.surface_area_m2 is None:
+                building.surface_area_m2 = float(regbl["ground_area_m2"])
+                fields_updated.append("surface_area_m2")
+
+            # Store full RegBL data in metadata (dwelling details, heating codes, etc.)
             enrichment_meta["regbl_data"] = regbl
 
     # --- Step 3: Cadastre EGRID ---
