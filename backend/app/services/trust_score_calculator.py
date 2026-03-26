@@ -291,7 +291,7 @@ async def calculate_trust_score(
         trend=trend,
         previous_score=previous_score,
         assessed_by=assessed_by,
-        assessed_at=datetime.now(UTC),
+        assessed_at=datetime.utcnow(),
     )
     db.add(new_score)
     await db.flush()

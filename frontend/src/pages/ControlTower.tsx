@@ -442,7 +442,7 @@ function ActionRow({ action, onSnooze }: { action: ControlTowerAction; onSnooze:
             )}
             data-testid={`priority-badge-${action.id}`}
           >
-            {t(`control_tower.priority_${(action.priority || '').toLowerCase()}`)}
+            {t(`control_tower.priority_${String(action.priority || '').toLowerCase()}`)}
           </span>
           {/* Source type */}
           <span className="text-xs text-gray-400 dark:text-gray-500">
