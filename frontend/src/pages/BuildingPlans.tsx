@@ -555,14 +555,14 @@ export default function BuildingPlans() {
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
             <p className="text-red-700 dark:text-red-300">{t('app.error') || 'An error occurred'}</p>
           </div>
-        ) : !plans || plans.length === 0 ? (
+        ) : !Array.isArray(plans) || plans.length === 0 ? (
           <div className="text-center py-16 text-gray-400 dark:text-slate-500">
             <FileImage className="w-10 h-10 mx-auto mb-3" />
             <p className="text-sm">{t('plan.empty') || 'No plans uploaded yet.'}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {plans.map((plan) => (
+            {(Array.isArray(plans) ? plans : []).map((plan) => (
               <div
                 key={plan.id}
                 className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden hover:shadow-sm transition-shadow"

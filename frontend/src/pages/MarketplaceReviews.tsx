@@ -164,7 +164,7 @@ export default function MarketplaceReviews() {
       )}
 
       <div className="space-y-4">
-        {(reviews ?? []).map((review) => (
+        {(Array.isArray(reviews) ? reviews : []).map((review) => (
           <ReviewCard
             key={review.id}
             review={review}
@@ -173,7 +173,7 @@ export default function MarketplaceReviews() {
             isActing={moderateMutation.isPending}
           />
         ))}
-        {!isLoading && (reviews ?? []).length === 0 && (
+        {!isLoading && (!Array.isArray(reviews) || reviews.length === 0) && (
           <div className="text-center py-12">
             <CheckCircle2 className="w-12 h-12 text-green-300 dark:text-green-800 mx-auto mb-3" />
             <p className="text-gray-400 dark:text-slate-500">

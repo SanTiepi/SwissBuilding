@@ -50,8 +50,9 @@ const customerSuccessApi = {
     return response.data;
   },
   listOrgs: async (): Promise<OrgOption[]> => {
-    const response = await apiClient.get<OrgOption[]>('/organizations', { params: { limit: 100 } });
-    return response.data;
+    const response = await apiClient.get<OrgOption[] | { items: OrgOption[] }>('/organizations', { params: { limit: 100 } });
+    const data = response.data;
+    return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
   },
 };
 

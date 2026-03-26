@@ -1,7 +1,16 @@
 import { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import type { InstantCardResult } from '@/api/intelligence';
+import type {
+  InstantCardResult,
+  WhatWeKnow,
+  WhatIsRisky,
+  WhatBlocks,
+  WhatToDoNext,
+  WhatIsReusable,
+  ExecutionSection,
+  TrustMeta,
+} from '@/api/intelligence';
 import {
   ClipboardList,
   AlertTriangle,
@@ -139,10 +148,28 @@ function formatCHF(v: number | null | undefined): string {
 export default function InstantCardView({ data }: InstantCardViewProps) {
   const { t } = useTranslation();
 
-  const { what_we_know, what_is_risky, what_blocks, what_to_do_next, what_is_reusable, execution, trust } = data;
+  const what_we_know: Partial<WhatWeKnow> = data?.what_we_know || {};
+  const what_is_risky: Partial<WhatIsRisky> = data?.what_is_risky || {};
+  const what_blocks: Partial<WhatBlocks> = data?.what_blocks || {};
+  const what_to_do_next: Partial<WhatToDoNext> = data?.what_to_do_next || {};
+  const what_is_reusable: Partial<WhatIsReusable> = data?.what_is_reusable || {};
+  const execution: Partial<ExecutionSection> = data?.execution || {};
+  const trust: Partial<TrustMeta> = data?.trust || {};
+
+  // Safely default nested arrays that are accessed with .length / .map
+  const proceduralBlockers = what_blocks.procedural_blockers || [];
+  const missingProof = what_blocks.missing_proof || [];
+  const overdueObligations = what_blocks.overdue_obligations || [];
+  const residualMaterials = what_we_know.residual_materials || [];
+  const complianceGaps = what_is_risky.compliance_gaps || [];
+  const top3Actions = what_to_do_next.top_3_actions || [];
+  const diagnosticPublications = what_is_reusable.diagnostic_publications || [];
+  const packsGenerated = what_is_reusable.packs_generated || [];
+  const proofDeliveries = what_is_reusable.proof_deliveries || [];
+  const subsidies = execution.subsidies || [];
 
   const blockerCount =
-    what_blocks.procedural_blockers.length + what_blocks.missing_proof.length + what_blocks.overdue_obligations.length;
+    proceduralBlockers.length + missingProof.length + overdueObligations.length;
 
   const riskEntries = Object.entries(what_is_risky.pollutant_risk || {}).filter(([, v]) => typeof v === 'number') as [
     string,
@@ -223,12 +250,12 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
         )}
 
         {/* Residual materials */}
-        {what_we_know.residual_materials.length > 0 && (
+        {residualMaterials.length > 0 && (
           <div>
             <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
               {t('intelligence.residual_materials') || 'Materiaux residuels'}
             </h4>
-            {what_we_know.residual_materials.map((m, i) => (
+            {residualMaterials.map((m, i) => (
               <div key={i} className="flex items-center gap-2 py-1 text-xs">
                 <span className="font-medium text-slate-700 dark:text-slate-300 capitalize">{m.material_type}</span>
                 {m.location && <span className="text-slate-400">— {m.location}</span>}
@@ -294,13 +321,13 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
         )}
 
         {/* Compliance gaps */}
-        {what_is_risky.compliance_gaps.length > 0 && (
+        {complianceGaps.length > 0 && (
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
             <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
               {t('intelligence.compliance_gaps') || 'Non-conformites'}
             </h4>
             <ul className="space-y-1">
-              {what_is_risky.compliance_gaps.map((g, i) => (
+              {complianceGaps.map((g, i) => (
                 <li key={i} className="text-xs text-red-600 dark:text-red-400 flex items-start gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-red-500 mt-1.5 shrink-0" />
                   {String(g.description || g.label || JSON.stringify(g))}
@@ -338,36 +365,36 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
           </p>
         ) : (
           <div className="space-y-3">
-            {what_blocks.procedural_blockers.length > 0 && (
+            {proceduralBlockers.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">
                   {t('intelligence.procedural_blockers') || 'Blocages proceduraux'}
                 </h4>
-                {what_blocks.procedural_blockers.map((b, i) => (
+                {proceduralBlockers.map((b, i) => (
                   <div key={i} className="text-xs text-slate-700 dark:text-slate-300 py-0.5" data-testid="blocker-item">
                     {String(b.description || b.label || JSON.stringify(b))}
                   </div>
                 ))}
               </div>
             )}
-            {what_blocks.missing_proof.length > 0 && (
+            {missingProof.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-orange-600 dark:text-orange-400 mb-1">
                   {t('intelligence.missing_proof') || 'Preuves manquantes'}
                 </h4>
-                {what_blocks.missing_proof.map((b, i) => (
+                {missingProof.map((b, i) => (
                   <div key={i} className="text-xs text-slate-700 dark:text-slate-300 py-0.5" data-testid="blocker-item">
                     {String(b.description || b.label || JSON.stringify(b))}
                   </div>
                 ))}
               </div>
             )}
-            {what_blocks.overdue_obligations.length > 0 && (
+            {overdueObligations.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">
                   {t('intelligence.overdue_obligations') || 'Obligations en retard'}
                 </h4>
-                {what_blocks.overdue_obligations.map((b, i) => (
+                {overdueObligations.map((b, i) => (
                   <div key={i} className="text-xs text-slate-700 dark:text-slate-300 py-0.5" data-testid="blocker-item">
                     {String(b.description || b.label || JSON.stringify(b))}
                   </div>
@@ -385,9 +412,9 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
         icon={<ArrowRight className="w-5 h-5" />}
         headerColor="bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
       >
-        {what_to_do_next.top_3_actions.length > 0 ? (
+        {top3Actions.length > 0 ? (
           <div className="space-y-3">
-            {what_to_do_next.top_3_actions.map((a, i) => (
+            {top3Actions.map((a, i) => (
               <div
                 key={i}
                 className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700"
@@ -433,10 +460,10 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
                 value={formatCHF(execution.renovation_plan_10y.total_net_chf as number)}
               />
             )}
-            {execution.subsidies.length > 0 && (
+            {subsidies.length > 0 && (
               <KVRow
                 label={t('intelligence.subsidies') || 'Subventions'}
-                value={formatCHF(execution.subsidies.reduce((s, sub) => s + (sub.amount || 0), 0))}
+                value={formatCHF(subsidies.reduce((s, sub) => s + (sub.amount || 0), 0))}
               />
             )}
           </div>
@@ -468,39 +495,39 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
         defaultOpen={false}
       >
         <div className="space-y-2">
-          {what_is_reusable.diagnostic_publications.length > 0 && (
+          {diagnosticPublications.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 {t('intelligence.diagnostic_publications') || 'Publications diagnostiques'}
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                {what_is_reusable.diagnostic_publications.length} {t('intelligence.available') || 'disponible(s)'}
+                {diagnosticPublications.length} {t('intelligence.available') || 'disponible(s)'}
               </p>
             </div>
           )}
-          {what_is_reusable.packs_generated.length > 0 && (
+          {packsGenerated.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 {t('intelligence.packs') || 'Packs generes'}
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                {what_is_reusable.packs_generated.length} pack(s)
+                {packsGenerated.length} pack(s)
               </p>
             </div>
           )}
-          {what_is_reusable.proof_deliveries.length > 0 && (
+          {proofDeliveries.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 {t('intelligence.proof_deliveries') || 'Livraisons de preuves'}
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                {what_is_reusable.proof_deliveries.length} {t('intelligence.deliveries') || 'livraison(s)'}
+                {proofDeliveries.length} {t('intelligence.deliveries') || 'livraison(s)'}
               </p>
             </div>
           )}
-          {what_is_reusable.diagnostic_publications.length === 0 &&
-            what_is_reusable.packs_generated.length === 0 &&
-            what_is_reusable.proof_deliveries.length === 0 && (
+          {diagnosticPublications.length === 0 &&
+            packsGenerated.length === 0 &&
+            proofDeliveries.length === 0 && (
               <p className="text-xs text-slate-500 dark:text-slate-400 italic">
                 {t('intelligence.reusable_empty') || 'Chaque action enrichit le batiment de maniere permanente'}
               </p>
@@ -523,7 +550,7 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
               <Shield className="w-4 h-4 mx-auto text-slate-400 mb-0.5" />
               <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('intelligence.trust') || 'Confiance'}</p>
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                {Math.round(trust.overall_trust * 100)}%
+                {Math.round((trust.overall_trust ?? 0) * 100)}%
               </p>
             </div>
             <div className="text-center">

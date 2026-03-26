@@ -478,7 +478,7 @@ export default function PortfolioTriage() {
           <KpiCard
             label={t('portfolio_benchmark.avg_grade') || 'Note moyenne'}
             value={benchmarkData.avg_grade}
-            colorClass={cn('text-white', GRADE_COLORS[benchmarkData.avg_grade.toUpperCase()] || GRADE_COLORS.F)}
+            colorClass={cn('text-white', GRADE_COLORS[(benchmarkData.avg_grade || 'F').toUpperCase()] || GRADE_COLORS.F)}
           />
           <KpiCard
             label={t('portfolio_benchmark.avg_trust') || 'Confiance moy.'}
@@ -685,9 +685,9 @@ export default function PortfolioTriage() {
       {/* === CLUSTERS TAB === */}
       {activeTab === 'clusters' && (
         <>
-          {benchmarkData && benchmarkData.clusters.length > 0 ? (
+          {benchmarkData && (benchmarkData.clusters || []).length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="cluster-list">
-              {benchmarkData.clusters.map((c) => (
+              {(benchmarkData.clusters || []).map((c) => (
                 <ClusterCard key={c.key} cluster={c} />
               ))}
             </div>

@@ -296,14 +296,14 @@ export default function IndispensabilityDashboard() {
           </div>
 
           {/* Worst buildings */}
-          {data.worst_buildings.length > 0 && (
+          {(data.worst_buildings || []).length > 0 && (
             <div data-testid="worst-buildings">
               <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
                 {t('indispensability.worst_buildings') || 'Batiments les plus fragiles (fragmentation elevee)'}
               </h2>
               <div className="space-y-2">
-                {data.worst_buildings.map((b) => (
+                {(data.worst_buildings || []).map((b) => (
                   <button
                     key={b.building_id}
                     type="button"
@@ -337,7 +337,7 @@ export default function IndispensabilityDashboard() {
           )}
 
           {/* Value timeline */}
-          {valueEvents && valueEvents.length > 0 && (
+          {Array.isArray(valueEvents) && valueEvents.length > 0 && (
             <div className="mt-8" data-testid="value-timeline">
               <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-blue-500" />
