@@ -420,9 +420,9 @@ function ImportedDossierBlock({ summary }: { summary: ImportedDossierSummary }) 
         )}
 
         {/* Flag badges */}
-        {summary.flags.length > 0 && (
+        {(summary.flags || []).length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-1" data-testid="imported-flags">
-            {summary.flags.map((flag) => {
+            {(summary.flags || []).map((flag) => {
               const style = FLAG_STYLES[flag] ?? FLAG_STYLES.no_remediation;
               return (
                 <span
