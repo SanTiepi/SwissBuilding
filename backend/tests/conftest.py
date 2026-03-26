@@ -136,6 +136,10 @@ from app.models.partner_webhook import PartnerDeliveryAttempt as _PDA  # noqa: E
 from app.models.partner_webhook import PartnerWebhookSubscription as _PWS  # noqa: E402, F401
 from app.models.passport_state_diff import PassportStateDiff as _PSD  # noqa: E402, F401
 
+# Enrichment tracking models
+from app.models.enrichment_run import BuildingEnrichmentRun as _BER  # noqa: E402, F401
+from app.models.source_snapshot import BuildingSourceSnapshot as _BSS  # noqa: E402, F401
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
