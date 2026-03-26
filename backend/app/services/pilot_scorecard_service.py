@@ -7,7 +7,7 @@ completeness improvement, enrichment velocity, proof coverage, etc.
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -143,7 +143,7 @@ async def _proof_coverage(db: AsyncSession, org_id: UUID) -> PilotMetricResult:
 
 async def _documents_uploaded(db: AsyncSession, org_id: UUID) -> PilotMetricResult:
     """Count documents uploaded in the last 30 days."""
-    cutoff = datetime.now(UTC) - timedelta(days=30)
+    cutoff = datetime.utcnow() - timedelta(days=30)
     stmt = (
         select(func.count())
         .select_from(Document)
@@ -233,5 +233,5 @@ async def compute_pilot_scorecard(
         pilot_score=pilot_score,
         grade=_score_to_grade(pilot_score),
         metrics=metrics,
-        computed_at=datetime.now(UTC).isoformat(),
+        computed_at=datetime.utcnow().isoformat(),
     )

@@ -14,7 +14,7 @@ Swiss regulatory requirements, jurisdiction-specific rules, and building data.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -762,7 +762,7 @@ async def _evaluate_safe_to_requalify(
     diagnostics: list[Diagnostic] = data["diagnostics"]
     interventions: list[Intervention] = data["interventions"]
 
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
 
     # 1. Diagnostic older than validity period
     completed_diags = [d for d in diagnostics if d.status in ("completed", "validated")]
@@ -942,7 +942,7 @@ async def evaluate_readiness(
 
     score = _compute_score(checks)
     status = _determine_status(checks, blockers, conditions)
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
 
     # Upsert: find existing assessment for this building + type
     result = await db.execute(

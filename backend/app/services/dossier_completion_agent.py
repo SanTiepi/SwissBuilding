@@ -10,7 +10,7 @@ describing what is done, what is missing, and what to do next.
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -235,5 +235,5 @@ async def run_dossier_completion(
         recommended_actions=recommended_actions,
         gap_categories=dict(gap_categories),
         data_quality_warnings=data_quality_warnings,
-        assessed_at=datetime.now(UTC),
+        assessed_at=datetime.utcnow(),
     )
