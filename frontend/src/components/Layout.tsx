@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { CommandPalette } from '@/components/CommandPalette';
+import { ValueBanner } from '@/components/ValueBanner';
+import { ValuePulse } from '@/components/ValuePulse';
 import { cn } from '@/utils/formatters';
 
 export function Layout() {
@@ -79,9 +81,11 @@ export function Layout() {
       {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0">
         <Header onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} onSearchOpen={handleOpenSearch} />
+        <ValueBanner />
         <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-6">
           <Outlet />
         </main>
+        <ValuePulse />
       </div>
     </div>
   );
