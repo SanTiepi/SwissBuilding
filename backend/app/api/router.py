@@ -85,6 +85,7 @@ from app.api import (
     gdpr,
     handoff_pack,
     incident_response,
+    instant_card,
     insurance_risk_assessment,
     intake,
     interventions,
@@ -124,6 +125,7 @@ from app.api import (
     portfolio_optimization,
     portfolio_summary,
     portfolio_trends,
+    portfolio_triage,
     post_works,
     priority_matrix,
     proof_delivery,
@@ -232,6 +234,8 @@ api_router.include_router(building_quality.router, prefix="", tags=["Building Qu
 api_router.include_router(completeness.router, prefix="", tags=["Completeness"])
 api_router.include_router(jurisdictions.router, prefix="", tags=["Jurisdictions"])
 api_router.include_router(timeline.router, prefix="", tags=["Timeline"])
+api_router.include_router(instant_card.router, prefix="", tags=["Instant Card"])
+api_router.include_router(portfolio_triage.router, prefix="", tags=["Portfolio Triage"])
 api_router.include_router(timeline_enrichment.router, prefix="", tags=["Timeline Enrichment"])
 api_router.include_router(portfolio.router, prefix="/portfolio", tags=["Portfolio"])
 api_router.include_router(audit_logs.router, prefix="", tags=["Audit Logs"])

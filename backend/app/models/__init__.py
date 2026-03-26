@@ -1,8 +1,8 @@
 from app.models.action_item import ActionItem
 from app.models.ai_extraction_log import AIExtractionLog
-from app.models.artifact_version import ArtifactVersion
 from app.models.ai_feedback import AIFeedback
 from app.models.ai_rule_pattern import AIRulePattern
+from app.models.artifact_version import ArtifactVersion
 from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
@@ -32,13 +32,13 @@ from app.models.completion_confirmation import CompletionConfirmation
 from app.models.compliance_artefact import ComplianceArtefact
 from app.models.contact import Contact
 from app.models.contract import Contract
-from app.models.custody_event import CustodyEvent
 from app.models.contractor_acknowledgment import ContractorAcknowledgment
 from app.models.contributor_gateway import (
     ContributorGatewayRequest,
     ContributorReceipt,
     ContributorSubmission,
 )
+from app.models.custody_event import CustodyEvent
 from app.models.customer_success import CustomerSuccessMilestone
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.decision_record import DecisionRecord
@@ -57,6 +57,7 @@ from app.models.document_inbox import DocumentInboxItem
 from app.models.document_link import DocumentLink
 from app.models.domain_event import DomainEvent
 from app.models.dossier_version import DossierVersion
+from app.models.enrichment_run import BuildingEnrichmentRun
 from app.models.event import Event
 from app.models.evidence_link import EvidenceLink
 from app.models.evidence_pack import EvidencePack
@@ -114,6 +115,7 @@ from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
 from app.models.saved_simulation import SavedSimulation
 from app.models.shared_link import SharedLink
+from app.models.source_snapshot import BuildingSourceSnapshot
 from app.models.subscription_change import SubscriptionChange
 from app.models.swiss_rules_source import RuleSource
 from app.models.tax_context import TaxContext
@@ -142,10 +144,12 @@ __all__ = [
     "BoundedEmbedToken",
     "Building",
     "BuildingElement",
+    "BuildingEnrichmentRun",
     "BuildingPassportState",
     "BuildingPortfolio",
     "BuildingRiskScore",
     "BuildingSnapshot",
+    "BuildingSourceSnapshot",
     "BuildingTrustScore",
     "Campaign",
     "CaseStudyTemplate",
@@ -163,10 +167,10 @@ __all__ = [
     "Contact",
     "Contract",
     "ContractorAcknowledgment",
-    "CustodyEvent",
     "ContributorGatewayRequest",
     "ContributorReceipt",
     "ContributorSubmission",
+    "CustodyEvent",
     "CustomerSuccessMilestone",
     "DataQualityIssue",
     "DecisionCaveatProfile",

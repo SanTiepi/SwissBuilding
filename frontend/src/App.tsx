@@ -60,6 +60,8 @@ const MarketplaceReviews = lazy(() => import('@/pages/MarketplaceReviews'));
 const CompanyWorkspace = lazy(() => import('@/pages/CompanyWorkspace'));
 const OperatorWorkspace = lazy(() => import('@/pages/OperatorWorkspace'));
 const RemediationIntelligence = lazy(() => import('@/pages/RemediationIntelligence'));
+const AddressPreview = lazy(() => import('@/pages/AddressPreview'));
+const PortfolioTriage = lazy(() => import('@/pages/PortfolioTriage'));
 const AdminImportReview = lazy(() => import('@/pages/AdminImportReview'));
 const AdminContributorGateway = lazy(() => import('@/pages/AdminContributorGateway'));
 const BuildingDecisionView = lazy(() => import('@/pages/BuildingDecisionView'));
@@ -549,6 +551,26 @@ export default function App() {
                 <PageErrorBoundary pageName="Remediation Intelligence">
                   <Suspense fallback={<LoadingSpinner />}>
                     <RemediationIntelligence />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/address-preview"
+              element={
+                <PageErrorBoundary pageName="Address Preview">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AddressPreview />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/portfolio-triage"
+              element={
+                <PageErrorBoundary pageName="Portfolio Triage">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <PortfolioTriage />
                   </Suspense>
                 </PageErrorBoundary>
               }
