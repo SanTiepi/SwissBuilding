@@ -68,6 +68,12 @@ class EnrichmentResult(BaseModel):
     overall_intelligence_computed: bool = False
     overall_intelligence_score: int | None = None
     overall_intelligence_grade: str | None = None
+    # Enrichment layer 2: lifecycle, planning, compliance, financial, narrative
+    component_lifecycle_computed: bool = False
+    renovation_plan_computed: bool = False
+    regulatory_compliance_computed: bool = False
+    financial_impact_computed: bool = False
+    building_narrative_computed: bool = False
     fields_updated: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
 

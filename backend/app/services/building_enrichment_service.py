@@ -1985,6 +1985,1046 @@ def estimate_subsidy_eligibility(building_data: dict[str, Any]) -> dict[str, Any
 
 
 # ---------------------------------------------------------------------------
+# 5n. Component lifecycle prediction (pure computation)
+# ---------------------------------------------------------------------------
+
+COMPONENT_LIFESPANS: dict[str, int] = {
+    "roof_flat": 25,
+    "roof_pitched": 40,
+    "facade_plaster": 35,
+    "facade_curtain": 30,
+    "windows_wood": 28,
+    "windows_pvc": 33,
+    "windows_alu": 35,
+    "heating_oil": 22,
+    "heating_gas": 20,
+    "heating_heatpump": 20,
+    "water_pipes": 45,
+    "drainage": 50,
+    "electrical": 35,
+    "elevator": 28,
+    "thermal_insulation": 40,
+    "waterproofing": 25,
+    "interior_finishes": 20,
+    "ventilation": 20,
+    "fire_protection": 30,
+    "intercom_access": 20,
+}
+
+COMPONENT_NAMES_FR: dict[str, str] = {
+    "roof_flat": "Toiture plate",
+    "roof_pitched": "Toiture en pente",
+    "facade_plaster": "Facade enduit",
+    "facade_curtain": "Facade rideau",
+    "windows_wood": "Fenetres bois",
+    "windows_pvc": "Fenetres PVC",
+    "windows_alu": "Fenetres aluminium",
+    "heating_oil": "Chauffage mazout",
+    "heating_gas": "Chauffage gaz",
+    "heating_heatpump": "Pompe a chaleur",
+    "water_pipes": "Conduites eau",
+    "drainage": "Evacuation",
+    "electrical": "Installation electrique",
+    "elevator": "Ascenseur",
+    "thermal_insulation": "Isolation thermique",
+    "waterproofing": "Etancheite",
+    "interior_finishes": "Finitions interieures",
+    "ventilation": "Ventilation mecanique",
+    "fire_protection": "Protection incendie",
+    "intercom_access": "Interphone / controle d'acces",
+}
+
+
+def _component_status(lifespan_pct: float) -> str:
+    """Return component status based on percentage of lifespan used."""
+    if lifespan_pct < 0.20:
+        return "new"
+    if lifespan_pct < 0.50:
+        return "good"
+    if lifespan_pct < 0.75:
+        return "aging"
+    if lifespan_pct <= 1.0:
+        return "end_of_life"
+    return "overdue"
+
+
+def _component_urgency(status: str, lifespan_pct: float) -> str:
+    """Return urgency level from status."""
+    if status == "overdue":
+        return "critical" if lifespan_pct > 1.25 else "urgent"
+    if status == "end_of_life":
+        return "budget"
+    if status == "aging":
+        return "plan"
+    return "none"
+
+
+def compute_component_lifecycle(building_data: dict[str, Any]) -> dict[str, Any]:
+    """Predict the state of each major building component.
+
+    Based on construction_year + renovation_year + building_type.
+    Pure function — no API calls.
+    All estimates are indicative and should be confirmed by on-site inspection.
+    """
+    year = building_data.get("construction_year")
+    renovation_year = building_data.get("renovation_year")
+    current_year = datetime.now(UTC).year
+
+    if year is None:
+        return {
+            "components": [
+                {
+                    "name": name,
+                    "name_fr": COMPONENT_NAMES_FR[name],
+                    "installed_year": None,
+                    "expected_end_year": None,
+                    "age_years": None,
+                    "lifespan_pct": None,
+                    "status": "unknown",
+                    "urgency": "none",
+                }
+                for name in COMPONENT_LIFESPANS
+            ],
+            "critical_count": 0,
+            "urgent_count": 0,
+            "total_overdue_years": 0,
+        }
+
+    installed_year = renovation_year if renovation_year and renovation_year > year else year
+
+    components: list[dict[str, Any]] = []
+    critical_count = 0
+    urgent_count = 0
+    total_overdue_years = 0
+
+    for name, lifespan in COMPONENT_LIFESPANS.items():
+        expected_end = installed_year + lifespan
+        age = current_year - installed_year
+        pct = age / lifespan if lifespan > 0 else 0.0
+        status = _component_status(pct)
+        urgency = _component_urgency(status, pct)
+
+        if urgency == "critical":
+            critical_count += 1
+        if urgency == "urgent":
+            urgent_count += 1
+        if status == "overdue":
+            total_overdue_years += current_year - expected_end
+
+        components.append(
+            {
+                "name": name,
+                "name_fr": COMPONENT_NAMES_FR[name],
+                "installed_year": installed_year,
+                "expected_end_year": expected_end,
+                "age_years": age,
+                "lifespan_pct": round(pct, 2),
+                "status": status,
+                "urgency": urgency,
+            }
+        )
+
+    return {
+        "components": components,
+        "critical_count": critical_count,
+        "urgent_count": urgent_count,
+        "total_overdue_years": total_overdue_years,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 5o. Renovation plan generator (pure computation)
+# ---------------------------------------------------------------------------
+
+RENOVATION_COSTS_CHF_M2: dict[str, float] = {
+    "facade_insulation": 280,
+    "roof_insulation": 200,
+    "window_replacement": 1200,
+    "heating_replacement": 350,
+    "electrical_renovation": 80,
+    "plumbing_renovation": 100,
+    "elevator_replacement": 120_000,  # forfait
+    "asbestos_removal": 100,
+    "pcb_remediation": 80,
+    "lead_paint_removal": 60,
+    "waterproofing": 150,
+    "fire_protection": 40,
+    "accessibility": 50_000,  # forfait
+}
+
+
+def generate_renovation_plan(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate a 10-year renovation plan from component lifecycle + subsidies + costs.
+
+    Pure function — no API calls.
+    All cost estimates are indicative (estimation) and should be confirmed by professional quotes.
+    """
+    surface = building_data.get("surface_area_m2") or 200  # default 200m2
+    current_year = datetime.now(UTC).year
+
+    lifecycle = enrichment_data.get("component_lifecycle", {})
+    components = lifecycle.get("components", [])
+    pollutant_risk = enrichment_data.get("pollutant_risk", {})
+
+    plan_items: list[dict[str, Any]] = []
+
+    def _add_item(
+        year_rec: int,
+        component: str,
+        desc_fr: str,
+        cost_key: str,
+        priority: str,
+        *,
+        is_forfait: bool = False,
+        regulatory_trigger: str = "",
+        subsidy_pct: float = 0.0,
+    ) -> None:
+        if is_forfait:
+            cost = RENOVATION_COSTS_CHF_M2[cost_key]
+        else:
+            cost = int(RENOVATION_COSTS_CHF_M2[cost_key] * surface)
+        subsidy = int(cost * subsidy_pct)
+        plan_items.append(
+            {
+                "year_recommended": year_rec,
+                "component": component,
+                "work_description_fr": f"{desc_fr} (estimation)",
+                "estimated_cost_chf": cost,
+                "available_subsidy_chf": subsidy,
+                "net_cost_chf": cost - subsidy,
+                "priority": priority,
+                "regulatory_trigger": regulatory_trigger,
+            }
+        )
+
+    # --- Year 1-2: Urgent — critical/overdue + pollutant remediation ---
+    for comp in components:
+        if comp.get("urgency") in ("critical", "urgent"):
+            name = comp["name"]
+            name_fr = comp.get("name_fr", name)
+            if "roof" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Remplacement {name_fr}",
+                    "roof_insulation",
+                    "critical",
+                    subsidy_pct=0.15,
+                )
+            elif "facade" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Renovation {name_fr}",
+                    "facade_insulation",
+                    "critical",
+                    subsidy_pct=0.20,
+                    regulatory_trigger="MoPEC: isolation obligatoire si renovation > 10% de l'enveloppe",
+                )
+            elif "heating" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Remplacement {name_fr}",
+                    "heating_replacement",
+                    "critical",
+                    subsidy_pct=0.25,
+                    regulatory_trigger="OEne: remplacement obligatoire chauffage fossile",
+                )
+            elif "window" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Remplacement {name_fr}",
+                    "window_replacement",
+                    "critical",
+                    subsidy_pct=0.10,
+                )
+            elif "elevator" in name:
+                _add_item(
+                    current_year + 2,
+                    name,
+                    f"Remplacement {name_fr}",
+                    "elevator_replacement",
+                    "critical",
+                    is_forfait=True,
+                )
+            elif "electrical" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Renovation {name_fr}",
+                    "electrical_renovation",
+                    "critical",
+                    regulatory_trigger="OIBT: mise en conformite obligatoire",
+                )
+            elif "water_pipes" in name or "drainage" in name:
+                _add_item(
+                    current_year + 2,
+                    name,
+                    f"Renovation {name_fr}",
+                    "plumbing_renovation",
+                    "high",
+                )
+            elif "waterproofing" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Refection {name_fr}",
+                    "waterproofing",
+                    "critical",
+                )
+            elif "fire_protection" in name:
+                _add_item(
+                    current_year + 1,
+                    name,
+                    f"Mise aux normes {name_fr}",
+                    "fire_protection",
+                    "critical",
+                    regulatory_trigger="AEAI: conformite obligatoire",
+                )
+
+    # Pollutant remediation (Year 1-2)
+    asbestos_prob = pollutant_risk.get("asbestos_probability", 0)
+    pcb_prob = pollutant_risk.get("pcb_probability", 0)
+    lead_prob = pollutant_risk.get("lead_probability", 0)
+
+    if asbestos_prob > 0.5:
+        _add_item(
+            current_year + 1,
+            "asbestos",
+            "Desamiantage",
+            "asbestos_removal",
+            "critical",
+            regulatory_trigger="OTConst Art. 60a: desamiantage obligatoire avant travaux",
+        )
+    if pcb_prob > 0.4:
+        _add_item(
+            current_year + 2,
+            "pcb",
+            "Assainissement PCB",
+            "pcb_remediation",
+            "high",
+            regulatory_trigger="ORRChim Annexe 2.15: assainissement si > 50 mg/kg",
+        )
+    if lead_prob > 0.5:
+        _add_item(
+            current_year + 2,
+            "lead",
+            "Decapage peintures au plomb",
+            "lead_paint_removal",
+            "high",
+            regulatory_trigger="ORRChim Annexe 2.18: assainissement si > 5000 mg/kg",
+        )
+
+    # --- Year 3-5: Important — end_of_life + energy ---
+    for comp in components:
+        if comp.get("urgency") == "budget":
+            name = comp["name"]
+            name_fr = comp.get("name_fr", name)
+            year_rec = current_year + 4
+            if "roof" in name:
+                _add_item(year_rec, name, f"Renovation {name_fr}", "roof_insulation", "medium", subsidy_pct=0.15)
+            elif "facade" in name:
+                _add_item(year_rec, name, f"Renovation {name_fr}", "facade_insulation", "medium", subsidy_pct=0.20)
+            elif "window" in name:
+                _add_item(year_rec, name, f"Remplacement {name_fr}", "window_replacement", "medium", subsidy_pct=0.10)
+            elif "heating" in name:
+                _add_item(
+                    current_year + 3,
+                    name,
+                    f"Remplacement {name_fr}",
+                    "heating_replacement",
+                    "medium",
+                    subsidy_pct=0.25,
+                )
+            elif "electrical" in name:
+                _add_item(year_rec, name, f"Renovation {name_fr}", "electrical_renovation", "medium")
+            elif "waterproofing" in name:
+                _add_item(year_rec, name, f"Refection {name_fr}", "waterproofing", "medium")
+
+    # --- Year 6-10: Planned — aging components ---
+    for comp in components:
+        if comp.get("urgency") == "plan":
+            name = comp["name"]
+            name_fr = comp.get("name_fr", name)
+            year_rec = current_year + 8
+            if "roof" in name:
+                _add_item(year_rec, name, f"Planification renovation {name_fr}", "roof_insulation", "low")
+            elif "facade" in name:
+                _add_item(year_rec, name, f"Planification renovation {name_fr}", "facade_insulation", "low")
+            elif "window" in name:
+                _add_item(year_rec, name, f"Planification remplacement {name_fr}", "window_replacement", "low")
+
+    total_estimated = sum(i["estimated_cost_chf"] for i in plan_items)
+    total_subsidy = sum(i["available_subsidy_chf"] for i in plan_items)
+    total_net = total_estimated - total_subsidy
+    critical_items = sum(1 for i in plan_items if i["priority"] == "critical")
+
+    summary_parts: list[str] = []
+    if critical_items:
+        summary_parts.append(f"{critical_items} intervention(s) critique(s) a realiser sous 2 ans")
+    if total_estimated:
+        summary_parts.append(f"cout total estime: CHF {total_estimated:,.0f}")
+    if total_subsidy:
+        summary_parts.append(f"subventions estimees: CHF {total_subsidy:,.0f}")
+    summary_fr = ". ".join(summary_parts) + "." if summary_parts else "Aucune renovation urgente identifiee."
+
+    return {
+        "plan_items": plan_items,
+        "total_estimated_chf": total_estimated,
+        "total_subsidy_chf": total_subsidy,
+        "total_net_chf": total_net,
+        "critical_items_count": critical_items,
+        "summary_fr": summary_fr,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 5p. Regulatory compliance check (pure computation)
+# ---------------------------------------------------------------------------
+
+
+def _fire_safety_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """AEAI fire protection compliance check."""
+    year = building_data.get("construction_year")
+    floors = building_data.get("floors_above") or building_data.get("floors") or 0
+    lifecycle = enrichment_data.get("component_lifecycle", {})
+    comps = {c["name"]: c for c in lifecycle.get("components", [])}
+    fire_comp = comps.get("fire_protection", {})
+
+    if fire_comp.get("status") in ("overdue", "end_of_life"):
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": "Protection incendie en fin de vie ou depassee — verification obligatoire.",
+            "action_required_fr": "Mandater un controle AEAI et planifier la mise aux normes.",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if year and year < 1985 and floors > 3:
+        return {
+            "status": "review_needed",
+            "reason_fr": f"Batiment de {year}, {floors} etages — normes AEAI potentiellement non respectees.",
+            "action_required_fr": "Verifier la conformite avec les prescriptions AEAI actuelles.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Aucun indicateur de non-conformite incendie detecte.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _electrical_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """OIBT electrical installations check."""
+    lifecycle = enrichment_data.get("component_lifecycle", {})
+    comps = {c["name"]: c for c in lifecycle.get("components", [])}
+    elec = comps.get("electrical", {})
+
+    if elec.get("status") == "overdue":
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": "Installation electrique depassee — controle periodique probablement non conforme.",
+            "action_required_fr": "Mandater un controle OIBT par un organisme agree.",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if elec.get("status") == "end_of_life":
+        return {
+            "status": "review_needed",
+            "reason_fr": "Installation electrique en fin de vie — controle OIBT recommande.",
+            "action_required_fr": "Planifier un controle OIBT.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Installation electrique dans sa duree de vie estimee.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _noise_protection_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """OPB noise protection check."""
+    noise = enrichment_data.get("noise", {})
+    road_db = noise.get("road_noise_day_db", 0) or 0
+    rail = enrichment_data.get("railway_noise", {})
+    rail_db = rail.get("railway_noise_day_db", 0) or 0
+    max_noise = max(road_db, rail_db)
+
+    if max_noise > 65:
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": f"Exposition au bruit elevee ({max_noise} dB) — depassement probable des VLI.",
+            "action_required_fr": "Evaluer les mesures d'isolation phonique (fenetres, facade).",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if max_noise > 55:
+        return {
+            "status": "review_needed",
+            "reason_fr": f"Exposition au bruit moderee ({max_noise} dB) — verification recommandee.",
+            "action_required_fr": "Verifier la conformite avec les valeurs limites OPB.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Niveaux de bruit dans les limites OPB estimees.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _energy_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """OEne energy ordinance check."""
+    year = building_data.get("construction_year")
+    heating = str(building_data.get("heating_type", "") or "").lower()
+    oil_gas = ("oil", "gas", "mazout", "gaz", "heizol", "erdgas")
+
+    if any(ind in heating for ind in oil_gas) and year and year < 2000:
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": f"Chauffage fossile dans un batiment de {year} — non conforme OEne/MoPEC.",
+            "action_required_fr": "Planifier le remplacement du chauffage fossile par une energie renouvelable.",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if year and year < 1990:
+        return {
+            "status": "review_needed",
+            "reason_fr": f"Batiment de {year} — performance energetique probablement insuffisante.",
+            "action_required_fr": "Realiser un CECB pour evaluer la performance energetique.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Aucun indicateur de non-conformite energetique detecte.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _accessibility_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """LHand accessibility check."""
+    acc = enrichment_data.get("accessibility", {})
+    status = acc.get("compliance_status", "unknown")
+
+    _status_map = {
+        "full_compliance_required": (
+            "review_needed",
+            "LHand: conformite complete requise pour ce batiment.",
+            "Verifier la conformite avec les exigences LHand.",
+        ),
+        "partial_compliance_required": (
+            "review_needed",
+            "LHand: conformite partielle requise.",
+            "Verifier les exigences minimales d'accessibilite.",
+        ),
+        "adaptation_required": (
+            "review_needed",
+            "LHand: adaptation requise suite a renovation majeure.",
+            "Evaluer les adaptations d'accessibilite necessaires.",
+        ),
+    }
+    if status in _status_map:
+        s, reason, action = _status_map[status]
+        return {
+            "status": s,
+            "reason_fr": reason,
+            "action_required_fr": action,
+            "deadline": None,
+            "confidence": "medium",
+        }
+    return {
+        "status": "not_assessed",
+        "reason_fr": "Pas d'obligation LHand identifiee pour ce batiment.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _hazardous_substances_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """OTConst hazardous substances check."""
+    pollutant_risk = enrichment_data.get("pollutant_risk", {})
+    asbestos = pollutant_risk.get("asbestos_probability", 0)
+    pcb = pollutant_risk.get("pcb_probability", 0)
+    lead = pollutant_risk.get("lead_probability", 0)
+
+    if asbestos > 0.6 or pcb > 0.5:
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": "Probabilite elevee de presence de substances dangereuses (amiante/PCB).",
+            "action_required_fr": "Realiser un diagnostic substances dangereuses avant tout travaux.",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if asbestos > 0.3 or pcb > 0.2 or lead > 0.3:
+        return {
+            "status": "review_needed",
+            "reason_fr": "Probabilite moderee de presence de polluants — verification recommandee.",
+            "action_required_fr": "Planifier un diagnostic de polluants du batiment.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Probabilite faible de presence de substances dangereuses.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _air_protection_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """OPAM air protection check."""
+    heating = str(building_data.get("heating_type", "") or "").lower()
+    oil_indicators = ("oil", "mazout", "heizol")
+
+    if any(ind in heating for ind in oil_indicators):
+        return {
+            "status": "review_needed",
+            "reason_fr": "Chauffage au mazout — conformite OPAM a verifier (emissions).",
+            "action_required_fr": "Verifier les emissions du systeme de chauffage.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Aucun indicateur de non-conformite OPAM detecte.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _water_protection_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """LEaux water protection check."""
+    water = enrichment_data.get("water_protection", {})
+    groundwater = enrichment_data.get("groundwater_zones", {})
+
+    if water.get("in_protection_zone") or groundwater.get("in_protection_zone"):
+        return {
+            "status": "review_needed",
+            "reason_fr": "Batiment en zone de protection des eaux — contraintes LEaux applicables.",
+            "action_required_fr": "Verifier les restrictions applicables (stockage, evacuation, travaux).",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Pas en zone de protection des eaux identifiee.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _mopec_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """MoPEC cantonal energy prescriptions check."""
+    year = building_data.get("construction_year")
+    heating = str(building_data.get("heating_type", "") or "").lower()
+    oil_gas = ("oil", "gas", "mazout", "gaz", "heizol", "erdgas")
+
+    if year and year < 2000 and any(ind in heating for ind in oil_gas):
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": "Chauffage fossile dans batiment ancien — objectifs MoPEC non atteints.",
+            "action_required_fr": "Planifier la transition vers une source d'energie renouvelable.",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if year and year < 2010:
+        return {
+            "status": "review_needed",
+            "reason_fr": f"Batiment de {year} — verifier la conformite aux prescriptions MoPEC cantonales.",
+            "action_required_fr": "Realiser un audit energetique (CECB).",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Batiment recent — probablement conforme MoPEC.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+def _sia500_check(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """SIA 500 accessibility check."""
+    year = building_data.get("construction_year")
+    dwellings = building_data.get("dwellings") or 0
+    has_elevator = building_data.get("has_elevator", False)
+    floors = building_data.get("floors_above") or building_data.get("floors") or 0
+
+    if year and year >= 2009 and dwellings >= 8 and not has_elevator and floors > 1:
+        return {
+            "status": "likely_non_compliant",
+            "reason_fr": "Batiment post-2009 avec 8+ logements sans ascenseur — SIA 500 non respectee.",
+            "action_required_fr": "Installer un ascenseur conforme SIA 500.",
+            "deadline": None,
+            "confidence": "medium",
+        }
+    if dwellings >= 8 and not has_elevator and floors > 2:
+        return {
+            "status": "review_needed",
+            "reason_fr": "Batiment avec 8+ logements et 3+ etages sans ascenseur.",
+            "action_required_fr": "Evaluer la faisabilite d'installation d'un ascenseur.",
+            "deadline": None,
+            "confidence": "low",
+        }
+    return {
+        "status": "likely_compliant",
+        "reason_fr": "Aucun indicateur de non-conformite SIA 500 detecte.",
+        "action_required_fr": "",
+        "deadline": None,
+        "confidence": "low",
+    }
+
+
+_REGULATION_CHECKS: list[dict[str, Any]] = [
+    {"code": "AEAI", "name": "Protection incendie", "check": _fire_safety_check},
+    {"code": "OIBT", "name": "Installations electriques", "check": _electrical_check},
+    {"code": "OPB", "name": "Protection contre le bruit", "check": _noise_protection_check},
+    {"code": "OEne", "name": "Ordonnance sur l'energie", "check": _energy_check},
+    {"code": "LHand", "name": "Egalite pour les handicapes", "check": _accessibility_check},
+    {"code": "OTConst", "name": "Substances dangereuses", "check": _hazardous_substances_check},
+    {"code": "OPAM", "name": "Protection de l'air", "check": _air_protection_check},
+    {"code": "LEaux", "name": "Protection des eaux", "check": _water_protection_check},
+    {"code": "MoPEC", "name": "Prescriptions energetiques", "check": _mopec_check},
+    {"code": "SIA500", "name": "Accessibilite", "check": _sia500_check},
+]
+
+
+def compute_regulatory_compliance(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """Check applicable Swiss regulations against building data.
+
+    Pure function — no API calls.
+    Results are indicative estimates — formal compliance requires professional assessment.
+    """
+    checks: list[dict[str, Any]] = []
+    compliant_count = 0
+    non_compliant_count = 0
+    review_needed_count = 0
+
+    for reg in _REGULATION_CHECKS:
+        check_fn = reg["check"]
+        result = check_fn(building_data, enrichment_data)
+        entry = {
+            "code": reg["code"],
+            "name": reg["name"],
+            "applicable": True,
+            **result,
+        }
+        checks.append(entry)
+
+        status = result.get("status", "not_assessed")
+        if status in ("compliant", "likely_compliant"):
+            compliant_count += 1
+        elif status in ("non_compliant", "likely_non_compliant"):
+            non_compliant_count += 1
+        elif status == "review_needed":
+            review_needed_count += 1
+
+    if non_compliant_count > 0:
+        overall_status = "action_required"
+    elif review_needed_count > 0:
+        overall_status = "review_recommended"
+    else:
+        overall_status = "satisfactory"
+
+    parts: list[str] = []
+    if non_compliant_count:
+        parts.append(f"{non_compliant_count} non-conformite(s) probable(s)")
+    if review_needed_count:
+        parts.append(f"{review_needed_count} verification(s) recommandee(s)")
+    if compliant_count:
+        parts.append(f"{compliant_count} point(s) conformes")
+    summary_fr = (
+        "Bilan reglementaire (estimation): " + ", ".join(parts) + "." if parts else "Evaluation non disponible."
+    )
+
+    return {
+        "checks": checks,
+        "compliant_count": compliant_count,
+        "non_compliant_count": non_compliant_count,
+        "review_needed_count": review_needed_count,
+        "overall_status": overall_status,
+        "summary_fr": summary_fr,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 5q. Financial impact estimator (pure computation)
+# ---------------------------------------------------------------------------
+
+
+def estimate_financial_impact(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """Estimate the financial impact of the current building state.
+
+    Pure function — no API calls.
+    All figures are rough estimates for planning purposes only.
+    """
+    surface = building_data.get("surface_area_m2") or 200
+    year = building_data.get("construction_year")
+    heating = str(building_data.get("heating_type", "") or "").lower()
+    current_year = datetime.now(UTC).year
+    age = (current_year - year) if year else 30  # default assumption
+
+    renovation_plan = enrichment_data.get("renovation_plan", {})
+    total_reno_cost = renovation_plan.get("total_net_chf", 0)
+
+    oil_gas = ("oil", "gas", "mazout", "gaz", "heizol", "erdgas")
+    has_fossil = any(ind in heating for ind in oil_gas)
+
+    # --- Cost of inaction per year ---
+    # Energy waste: older buildings waste more
+    energy_waste = 0.0
+    if year and year < 1980:
+        energy_waste = surface * 25  # CHF 25/m2/year excess energy cost
+    elif year and year < 2000:
+        energy_waste = surface * 15
+    elif year and year < 2010:
+        energy_waste = surface * 5
+
+    # Maintenance overspend on aging systems
+    maintenance_excess = 0.0
+    lifecycle = enrichment_data.get("component_lifecycle", {})
+    overdue_count = sum(1 for c in lifecycle.get("components", []) if c.get("status") == "overdue")
+    maintenance_excess = overdue_count * 500  # CHF 500/year per overdue component
+
+    # Depreciation acceleration
+    depreciation = 0.0
+    if age > 40:
+        depreciation = surface * 10
+    elif age > 25:
+        depreciation = surface * 5
+
+    cost_of_inaction = round(energy_waste + maintenance_excess + depreciation)
+
+    # --- Renovation ROI ---
+    energy_savings = 0.0
+    if has_fossil and year and year < 2000:
+        energy_savings = surface * 20  # CHF 20/m2/year with full renovation
+    elif year and year < 2000:
+        energy_savings = surface * 10
+    elif year and year < 2010:
+        energy_savings = surface * 5
+
+    roi_years = round(total_reno_cost / energy_savings, 1) if energy_savings > 0 and total_reno_cost > 0 else 0.0
+
+    # --- Property value impact ---
+    value_increase_pct = 0.0
+    if age > 40:
+        value_increase_pct = 15.0
+    elif age > 25:
+        value_increase_pct = 10.0
+    elif age > 15:
+        value_increase_pct = 5.0
+
+    # --- Insurance premium impact ---
+    insurance_impact = 0.0
+    if overdue_count > 5:
+        insurance_impact = -1500  # premium reduction after renovation
+    elif overdue_count > 2:
+        insurance_impact = -800
+
+    # --- CO2 reduction ---
+    co2_reduction = 0.0
+    if has_fossil:
+        co2_reduction = round(surface * 0.025, 1)  # ~25 kg CO2/m2/year for fossil → renewable
+
+    summary_parts: list[str] = []
+    if cost_of_inaction > 0:
+        summary_parts.append(f"Cout de l'inaction estime: CHF {cost_of_inaction:,.0f}/an")
+    if energy_savings > 0:
+        summary_parts.append(f"economies d'energie estimees: CHF {energy_savings:,.0f}/an")
+    if roi_years > 0:
+        summary_parts.append(f"retour sur investissement estime: {roi_years} ans")
+    if co2_reduction > 0:
+        summary_parts.append(f"reduction CO2 estimee: {co2_reduction} t/an")
+    summary_fr = ". ".join(summary_parts) + "." if summary_parts else "Estimation financiere non disponible."
+
+    return {
+        "cost_of_inaction_chf_per_year": cost_of_inaction,
+        "renovation_roi_years": roi_years,
+        "value_increase_pct": value_increase_pct,
+        "energy_savings_chf": round(energy_savings),
+        "insurance_impact_chf": round(insurance_impact),
+        "co2_reduction_tons": co2_reduction,
+        "summary_fr": summary_fr,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 5r. Building narrative generator (pure computation)
+# ---------------------------------------------------------------------------
+
+
+def generate_building_narrative(building_data: dict[str, Any], enrichment_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate a template-based narrative in French from structured data.
+
+    Pure function — no API calls, no LLM.
+    """
+    year = building_data.get("construction_year")
+    address = building_data.get("address", "Adresse inconnue")
+    city = building_data.get("city", "")
+    canton = building_data.get("canton", "")
+    floors = building_data.get("floors_above") or building_data.get("floors")
+    surface = building_data.get("surface_area_m2")
+    dwellings = building_data.get("dwellings")
+    heating = building_data.get("heating_type", "")
+    current_year = datetime.now(UTC).year
+
+    sections: list[dict[str, str]] = []
+
+    # 1. Identification
+    location = f"{address}, {city}" if city else address
+    if canton:
+        location += f" ({canton})"
+    id_body = f"Le batiment situe au {location}"
+    if year:
+        id_body += f" a ete construit en {year}, ce qui lui confere un age de {current_year - year} ans"
+    id_body += "."
+    sections.append({"title": "Identification et contexte", "body": id_body})
+
+    # 2. Physical characteristics
+    phys_parts: list[str] = []
+    if floors:
+        phys_parts.append(f"{floors} etage(s) hors sol")
+    if surface:
+        phys_parts.append(f"une surface estimee de {surface} m2")
+    if dwellings:
+        phys_parts.append(f"{dwellings} logement(s)")
+    if phys_parts:
+        phys_body = "L'immeuble comprend " + ", ".join(phys_parts) + "."
+    else:
+        phys_body = "Les caracteristiques physiques detaillees ne sont pas disponibles."
+    sections.append({"title": "Caracteristiques physiques", "body": phys_body})
+
+    # 3. Environmental context
+    radon = enrichment_data.get("radon", {})
+    noise = enrichment_data.get("noise", {})
+    hazards = enrichment_data.get("natural_hazards", {})
+    heritage = enrichment_data.get("heritage", {})
+    env_parts: list[str] = []
+    radon_level = radon.get("radon_level")
+    if radon_level:
+        _radon_fr = {"high": "eleve", "medium": "moyen", "low": "faible"}
+        env_parts.append(f"risque radon {_radon_fr.get(radon_level, radon_level)}")
+    road_db = noise.get("road_noise_day_db")
+    if road_db:
+        env_parts.append(f"bruit routier de {road_db} dB en journee")
+    if hazards.get("flood_risk"):
+        env_parts.append(f"risque d'inondation: {hazards['flood_risk']}")
+    if heritage.get("isos_protected"):
+        env_parts.append("site ISOS protege")
+    if env_parts:
+        env_body = "Contexte environnemental: " + ", ".join(env_parts) + "."
+    else:
+        env_body = "Les donnees environnementales detaillees ne sont pas disponibles."
+    sections.append({"title": "Contexte environnemental", "body": env_body})
+
+    # 4. Energy performance
+    energy_parts: list[str] = []
+    if heating:
+        energy_parts.append(f"systeme de chauffage: {heating}")
+    solar = enrichment_data.get("solar", {})
+    if solar.get("suitability"):
+        _solar_fr = {"high": "elevee", "medium": "moyenne", "low": "faible"}
+        energy_parts.append(f"potentiel solaire {_solar_fr.get(solar['suitability'], solar['suitability'])}")
+    thermal = enrichment_data.get("thermal_networks", {})
+    if thermal.get("has_district_heating"):
+        energy_parts.append("raccordement au chauffage a distance possible")
+    if energy_parts:
+        energy_body = "Performance energetique: " + ", ".join(energy_parts) + "."
+    else:
+        energy_body = "Les donnees de performance energetique ne sont pas disponibles."
+    sections.append({"title": "Performance energetique", "body": energy_body})
+
+    # 5. Pollutant risk
+    pollutant_risk = enrichment_data.get("pollutant_risk", {})
+    overall_risk = pollutant_risk.get("overall_risk_score", 0)
+    if overall_risk > 0.5:
+        poll_body = (
+            f"Le score de risque polluant est de {overall_risk:.2f}/1.0, indiquant un risque eleve. "
+            "Un diagnostic de substances dangereuses est fortement recommande avant tout travaux."
+        )
+    elif overall_risk > 0.2:
+        poll_body = (
+            f"Le score de risque polluant est de {overall_risk:.2f}/1.0, indiquant un risque modere. "
+            "Un diagnostic preventif est recommande."
+        )
+    else:
+        poll_body = "Le risque de presence de polluants est estime comme faible."
+    sections.append({"title": "Evaluation des polluants", "body": poll_body})
+
+    # 6. Regulatory compliance
+    compliance = enrichment_data.get("regulatory_compliance", {})
+    comp_summary = compliance.get("summary_fr")
+    if comp_summary:
+        reg_body = comp_summary
+    else:
+        reg_body = "L'evaluation reglementaire n'est pas disponible."
+    sections.append({"title": "Conformite reglementaire", "body": reg_body})
+
+    # 7. Renovation priorities
+    reno_plan = enrichment_data.get("renovation_plan", {})
+    reno_summary = reno_plan.get("summary_fr")
+    if reno_summary:
+        reno_body = reno_summary
+    else:
+        reno_body = "Aucune priorite de renovation identifiee."
+    sections.append({"title": "Priorites de renovation", "body": reno_body})
+
+    # 8. Financial outlook
+    financial = enrichment_data.get("financial_impact", {})
+    fin_summary = financial.get("summary_fr")
+    if fin_summary:
+        fin_body = fin_summary
+    else:
+        fin_body = "L'estimation financiere n'est pas disponible."
+    sections.append({"title": "Perspectives financieres", "body": fin_body})
+
+    # 9. Neighborhood quality
+    ns = enrichment_data.get("neighborhood_score")
+    if ns is not None:
+        if ns >= 7:
+            nb_body = f"Score de quartier: {ns}/10 — environnement de qualite superieure."
+        elif ns >= 5:
+            nb_body = f"Score de quartier: {ns}/10 — environnement de qualite moyenne."
+        else:
+            nb_body = f"Score de quartier: {ns}/10 — potentiel d'amelioration identifie."
+    else:
+        nb_body = "Le score de qualite du quartier n'est pas disponible."
+    sections.append({"title": "Qualite du quartier", "body": nb_body})
+
+    # Assemble full narrative
+    narrative_parts: list[str] = []
+    for section in sections:
+        narrative_parts.append(f"{section['title']}\n{section['body']}")
+    narrative_fr = "\n\n".join(narrative_parts)
+
+    word_count = len(narrative_fr.split())
+
+    return {
+        "narrative_fr": narrative_fr,
+        "sections": sections,
+        "word_count": word_count,
+    }
+
+
+# ---------------------------------------------------------------------------
 # 6. Main orchestrator — enrich single building
 # ---------------------------------------------------------------------------
 
@@ -2017,6 +3057,7 @@ async def enrich_building(
     35. Compute climate data
     36. Fetch nearest transport stops
     37-41. Compute scores (connectivity, environmental risk, livability, renovation, overall intelligence)
+    44-48. Component lifecycle, renovation plan, regulatory compliance, financial impact, narrative
     42. Persist + 43. Timeline event
     """
     from app.models.building import Building
@@ -2425,6 +3466,69 @@ async def enrich_building(
     result.overall_intelligence_score = overall.get("score_0_100")
     result.overall_intelligence_grade = overall.get("grade")
     fields_updated.append("overall_intelligence")
+
+    # --- Step 44: Component lifecycle prediction (pure) ---
+    lifecycle_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "renovation_year": getattr(building, "renovation_year", None),
+        "building_type": getattr(building, "building_type", None),
+    }
+    lifecycle = compute_component_lifecycle(lifecycle_input)
+    enrichment_meta["component_lifecycle"] = lifecycle
+    result.component_lifecycle_computed = True
+    fields_updated.append("component_lifecycle")
+
+    # --- Step 45: Renovation plan (pure) ---
+    reno_plan_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "surface_area_m2": getattr(building, "surface_area_m2", None),
+    }
+    reno_plan = generate_renovation_plan(reno_plan_input, enrichment_meta)
+    enrichment_meta["renovation_plan"] = reno_plan
+    result.renovation_plan_computed = True
+    fields_updated.append("renovation_plan")
+
+    # --- Step 46: Regulatory compliance (pure) ---
+    compliance_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "floors_above": getattr(building, "floors_above", None),
+        "floors": getattr(building, "floors_above", None),
+        "dwellings": getattr(building, "dwellings", None),
+        "has_elevator": getattr(building, "has_elevator", False),
+        "heating_type": enrichment_meta.get("regbl_data", {}).get("heating_type_code", ""),
+        "canton": building.canton,
+    }
+    compliance = compute_regulatory_compliance(compliance_input, enrichment_meta)
+    enrichment_meta["regulatory_compliance"] = compliance
+    result.regulatory_compliance_computed = True
+    fields_updated.append("regulatory_compliance")
+
+    # --- Step 47: Financial impact (pure) ---
+    financial_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "surface_area_m2": getattr(building, "surface_area_m2", None),
+        "heating_type": enrichment_meta.get("regbl_data", {}).get("heating_type_code", ""),
+    }
+    financial = estimate_financial_impact(financial_input, enrichment_meta)
+    enrichment_meta["financial_impact"] = financial
+    result.financial_impact_computed = True
+    fields_updated.append("financial_impact")
+
+    # --- Step 48: Building narrative (pure) ---
+    narrative_input: dict[str, Any] = {
+        "construction_year": building.construction_year,
+        "address": building.address,
+        "city": getattr(building, "city", ""),
+        "canton": building.canton,
+        "floors_above": getattr(building, "floors_above", None),
+        "surface_area_m2": getattr(building, "surface_area_m2", None),
+        "dwellings": getattr(building, "dwellings", None),
+        "heating_type": enrichment_meta.get("regbl_data", {}).get("heating_type_code", ""),
+    }
+    narrative = generate_building_narrative(narrative_input, enrichment_meta)
+    enrichment_meta["building_narrative"] = narrative
+    result.building_narrative_computed = True
+    fields_updated.append("building_narrative")
 
     # --- Step 42: Persist ---
     if fields_updated or result.image_url:
