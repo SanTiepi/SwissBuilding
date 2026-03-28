@@ -3,11 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import {
-  predictiveReadinessApi,
-  type PredictiveAlert,
-  type PredictiveProjection,
-} from '@/api/predictiveReadiness';
+import { predictiveReadinessApi, type PredictiveAlert, type PredictiveProjection } from '@/api/predictiveReadiness';
 import {
   AlertTriangle,
   Clock,
@@ -76,12 +72,7 @@ const READINESS_LABELS: Record<string, string> = {
 
 function DaysRemainingBadge({ days }: { days: number | null }) {
   if (days === null) return null;
-  const label =
-    days < 0
-      ? `${Math.abs(days)}j en retard`
-      : days === 0
-        ? "Aujourd'hui"
-        : `${days}j`;
+  const label = days < 0 ? `${Math.abs(days)}j en retard` : days === 0 ? "Aujourd'hui" : `${days}j`;
   const color =
     days <= 0
       ? 'bg-red-600 text-white'
@@ -122,9 +113,7 @@ function AlertCard({
             <p className="text-sm font-semibold text-gray-900 dark:text-white">{alert.title}</p>
             <DaysRemainingBadge days={alert.days_remaining} />
           </div>
-          {!compact && (
-            <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">{alert.description}</p>
-          )}
+          {!compact && <p className="text-xs text-gray-600 dark:text-slate-300 mt-1">{alert.description}</p>}
           {onNavigate && (
             <button
               onClick={() => onNavigate(alert.building_id)}
@@ -134,7 +123,9 @@ function AlertCard({
             </button>
           )}
           <div className="flex items-center gap-2 mt-2">
-            <span className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium', styles.badge)}>
+            <span
+              className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium', styles.badge)}
+            >
               <Zap className="w-3 h-3" />
               {alert.recommended_action}
             </span>
@@ -202,17 +193,32 @@ function ProjectionTable({ projections }: { projections: PredictiveProjection[] 
                   {proj.building_name}
                 </td>
                 <td className="px-4 py-2 text-center">
-                  <span className={cn('inline-block px-2 py-0.5 rounded-full text-xs font-medium', READINESS_COLORS[proj.current_readiness])}>
+                  <span
+                    className={cn(
+                      'inline-block px-2 py-0.5 rounded-full text-xs font-medium',
+                      READINESS_COLORS[proj.current_readiness],
+                    )}
+                  >
                     {READINESS_LABELS[proj.current_readiness] || proj.current_readiness}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-center">
-                  <span className={cn('inline-block px-2 py-0.5 rounded-full text-xs font-medium', READINESS_COLORS[proj.projected_readiness_30d])}>
+                  <span
+                    className={cn(
+                      'inline-block px-2 py-0.5 rounded-full text-xs font-medium',
+                      READINESS_COLORS[proj.projected_readiness_30d],
+                    )}
+                  >
                     {READINESS_LABELS[proj.projected_readiness_30d] || proj.projected_readiness_30d}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-center">
-                  <span className={cn('inline-block px-2 py-0.5 rounded-full text-xs font-medium', READINESS_COLORS[proj.projected_readiness_90d])}>
+                  <span
+                    className={cn(
+                      'inline-block px-2 py-0.5 rounded-full text-xs font-medium',
+                      READINESS_COLORS[proj.projected_readiness_90d],
+                    )}
+                  >
                     {READINESS_LABELS[proj.projected_readiness_90d] || proj.projected_readiness_90d}
                   </span>
                 </td>
@@ -309,9 +315,7 @@ export function PredictiveAlertsPortfolio() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg transition-colors"
             >
               <Zap className="w-3 h-3" />
-              {generateMutation.isPending
-                ? 'Creation...'
-                : t('predictive.generate_actions') || 'Generer les actions'}
+              {generateMutation.isPending ? 'Creation...' : t('predictive.generate_actions') || 'Generer les actions'}
             </button>
           ) : null}
         </div>
@@ -345,7 +349,8 @@ export function PredictiveAlertsPortfolio() {
             <>
               <span className="text-gray-400 dark:text-slate-500">|</span>
               <span className="text-gray-600 dark:text-slate-300">
-                <span className="font-semibold">{summary.diagnostics_expiring_90d}</span> diagnostic(s) expirant sous 90j
+                <span className="font-semibold">{summary.diagnostics_expiring_90d}</span> diagnostic(s) expirant sous
+                90j
               </span>
             </>
           )}

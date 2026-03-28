@@ -59,10 +59,7 @@ export interface BuildingCaseCreate {
 }
 
 export const buildingCasesApi = {
-  listForOrg: async (params?: {
-    state?: string;
-    case_type?: string;
-  }): Promise<BuildingCaseRead[]> => {
+  listForOrg: async (params?: { state?: string; case_type?: string }): Promise<BuildingCaseRead[]> => {
     const response = await apiClient.get<BuildingCaseRead[]>('/cases', { params });
     return response.data;
   },

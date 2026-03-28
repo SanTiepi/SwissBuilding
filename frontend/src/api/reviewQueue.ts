@@ -57,11 +57,7 @@ export const reviewQueueApi = {
     return response.data;
   },
 
-  completeTask: async (
-    taskId: string,
-    resolution: string,
-    resolutionNote?: string,
-  ): Promise<ReviewTask> => {
+  completeTask: async (taskId: string, resolution: string, resolutionNote?: string): Promise<ReviewTask> => {
     const response = await apiClient.post<ReviewTask>(`/review-tasks/${taskId}/complete`, {
       resolution,
       resolution_note: resolutionNote,

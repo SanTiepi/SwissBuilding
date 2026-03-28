@@ -84,11 +84,7 @@ function ReadinessIndicator({ readiness, score }: { readiness: string; score: nu
       <span
         className={cn(
           'w-2 h-2 rounded-full',
-          readiness === 'ready'
-            ? 'bg-green-500'
-            : readiness === 'partial'
-              ? 'bg-yellow-500'
-              : 'bg-red-500',
+          readiness === 'ready' ? 'bg-green-500' : readiness === 'partial' ? 'bg-yellow-500' : 'bg-red-500',
         )}
       />
       <span className="text-[10px] text-gray-500 dark:text-slate-400">{pct}%</span>
@@ -109,9 +105,7 @@ function CompletenessBar({ value }: { value: number }) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs font-medium text-gray-600 dark:text-slate-300 w-10 text-right">
-        {pct}%
-      </span>
+      <span className="text-xs font-medium text-gray-600 dark:text-slate-300 w-10 text-right">{pct}%</span>
     </div>
   );
 }
@@ -133,21 +127,13 @@ function PackCard({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              'w-10 h-10 rounded-lg flex items-center justify-center',
-              colors.bg,
-              colors.darkBg,
-            )}
-          >
+          <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', colors.bg, colors.darkBg)}>
             <Icon className={cn('w-5 h-5', colors.text, colors.darkText)} />
           </div>
           <div>
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{pack.name}</h4>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] text-gray-500 dark:text-slate-400">
-                {pack.section_count} sections
-              </span>
+              <span className="text-[10px] text-gray-500 dark:text-slate-400">{pack.section_count} sections</span>
               {pack.includes_trust && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-400 dark:text-slate-500">
                   <Lock className="w-2.5 h-2.5" />
@@ -178,11 +164,7 @@ function PackCard({
           'disabled:opacity-50 disabled:cursor-not-allowed',
         )}
       >
-        {isGenerating ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Icon className="w-3.5 h-3.5" />
-        )}
+        {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icon className="w-3.5 h-3.5" />}
         {isGenerating ? 'Generation...' : 'Generer'}
       </button>
     </div>
@@ -191,11 +173,7 @@ function PackCard({
 
 function ConformanceBadge({ conformance }: { conformance: PackConformanceResult }) {
   const label =
-    conformance.result === 'pass'
-      ? 'Conforme'
-      : conformance.result === 'partial'
-        ? 'Partiel'
-        : 'Non conforme';
+    conformance.result === 'pass' ? 'Conforme' : conformance.result === 'partial' ? 'Partiel' : 'Non conforme';
   const bgColor =
     conformance.result === 'pass'
       ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
@@ -203,27 +181,16 @@ function ConformanceBadge({ conformance }: { conformance: PackConformanceResult 
         ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
         : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
   const IconEl =
-    conformance.result === 'pass'
-      ? CheckCircle2
-      : conformance.result === 'partial'
-        ? AlertTriangle
-        : AlertTriangle;
+    conformance.result === 'pass' ? CheckCircle2 : conformance.result === 'partial' ? AlertTriangle : AlertTriangle;
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            'inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium',
-            bgColor,
-          )}
-        >
+        <span className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium', bgColor)}>
           <IconEl className="w-3 h-3" />
           {label} ({Math.round(conformance.score * 100)}%)
         </span>
-        <span className="text-[10px] text-gray-400 dark:text-slate-500">
-          Profil: {conformance.profile}
-        </span>
+        <span className="text-[10px] text-gray-400 dark:text-slate-500">Profil: {conformance.profile}</span>
       </div>
       {conformance.failed_checks.length > 0 && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
@@ -264,9 +231,7 @@ function PackResultView({
         <div className="flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-green-500" />
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              {result.pack_name}
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{result.pack_name}</h3>
             <p className="text-xs text-gray-500 dark:text-slate-400">
               Pack genere le {formatDateTime(result.generated_at)}
             </p>
@@ -292,34 +257,20 @@ function PackResultView({
         {/* Key metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
-              Completude
-            </p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Completude</p>
             <CompletenessBar value={result.overall_completeness} />
           </div>
           <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
-              Sections
-            </p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              {result.total_sections}
-            </p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Sections</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{result.total_sections}</p>
           </div>
           <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
-              Reserves
-            </p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              {result.caveats_count}
-            </p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Reserves</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{result.caveats_count}</p>
           </div>
           <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
-              Version
-            </p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              v{result.pack_version}
-            </p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Version</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">v{result.pack_version}</p>
           </div>
         </div>
 
@@ -350,11 +301,7 @@ function PackResultView({
           onClick={() => setShowSections(!showSections)}
           className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
-          {showSections ? (
-            <ChevronDown className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronRight className="w-3.5 h-3.5" />
-          )}
+          {showSections ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           {showSections ? 'Masquer les sections' : 'Voir les sections du pack'}
         </button>
 
@@ -376,14 +323,10 @@ function PackResultView({
                           : 'bg-red-500',
                     )}
                   />
-                  <span className="text-xs text-gray-700 dark:text-slate-200 truncate">
-                    {section.section_name}
-                  </span>
+                  <span className="text-xs text-gray-700 dark:text-slate-200 truncate">{section.section_name}</span>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-[10px] text-gray-500 dark:text-slate-400">
-                    {section.items.length} items
-                  </span>
+                  <span className="text-[10px] text-gray-500 dark:text-slate-400">{section.items.length} items</span>
                   <span className="text-[10px] font-medium text-gray-600 dark:text-slate-300">
                     {Math.round(section.completeness * 100)}%
                   </span>
@@ -480,8 +423,7 @@ export default function PackBuilderPanel({ buildingId }: PackBuilderPanelProps) 
             {t('pack_builder.title') || 'Pack Builder'}
           </h3>
           <p className="text-xs text-gray-500 dark:text-slate-400">
-            {t('pack_builder.subtitle') ||
-              'Generez des packs adaptes a chaque audience depuis la meme base de verite'}
+            {t('pack_builder.subtitle') || 'Generez des packs adaptes a chaque audience depuis la meme base de verite'}
           </p>
         </div>
       </div>
@@ -490,19 +432,13 @@ export default function PackBuilderPanel({ buildingId }: PackBuilderPanelProps) 
       {generateMutation.isError && (
         <div className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-          <span className="text-xs text-red-700 dark:text-red-300">
-            Erreur lors de la generation du pack
-          </span>
+          <span className="text-xs text-red-700 dark:text-red-300">Erreur lors de la generation du pack</span>
         </div>
       )}
 
       {/* Generated pack result */}
       {generatedPack && (
-        <PackResultView
-          result={generatedPack}
-          onClose={() => setGeneratedPack(null)}
-          onDownload={handleDownload}
-        />
+        <PackResultView result={generatedPack} onClose={() => setGeneratedPack(null)} onDownload={handleDownload} />
       )}
 
       {/* Financial redaction option */}
@@ -521,8 +457,8 @@ export default function PackBuilderPanel({ buildingId }: PackBuilderPanelProps) 
             <div className="flex items-start gap-1 mt-0.5">
               <Info className="w-3 h-3 text-gray-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] text-gray-500 dark:text-slate-400 leading-tight">
-                Les documents techniques et attestations restent visibles. Seuls les montants, devis
-                et conditions financieres sont masques.
+                Les documents techniques et attestations restent visibles. Seuls les montants, devis et conditions
+                financieres sont masques.
               </span>
             </div>
           </div>

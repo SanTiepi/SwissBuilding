@@ -28,12 +28,8 @@ import { ActionQueue } from '@/components/building-detail/ActionQueue';
 const LazyFormsWorkspace = lazy(() => import('@/components/building-detail/FormsWorkspace'));
 const EvidenceByRoleView = lazy(() => import('@/components/building-detail/EvidenceByRoleView'));
 const IndispensabilityView = lazy(() => import('@/components/building-detail/IndispensabilityView'));
-const EcosystemEngagementsView = lazy(
-  () => import('@/components/building-detail/EcosystemEngagementsView'),
-);
-const OperationalGatesView = lazy(
-  () => import('@/components/building-detail/OperationalGatesView'),
-);
+const EcosystemEngagementsView = lazy(() => import('@/components/building-detail/EcosystemEngagementsView'));
+const OperationalGatesView = lazy(() => import('@/components/building-detail/OperationalGatesView'));
 const MemoryTransferView = lazy(() => import('@/components/building-detail/MemoryTransferView'));
 const AuthorityPackPanel = lazy(() => import('@/components/building-detail/AuthorityPackPanel'));
 const PackBuilderPanel = lazy(() => import('@/components/building-detail/PackBuilderPanel'));
@@ -45,9 +41,7 @@ import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHist
 import SwissRulesWatchPanel from '@/components/building-detail/SwissRulesWatchPanel';
 
 const LazyGeoContextPanel = lazy(() => import('@/components/building-detail/GeoContextPanel'));
-const LazySpatialEnrichmentCard = lazy(
-  () => import('@/components/building-detail/SpatialEnrichmentCard'),
-);
+const LazySpatialEnrichmentCard = lazy(() => import('@/components/building-detail/SpatialEnrichmentCard'));
 const LazyIdentityChainPanel = lazy(() => import('@/components/building-detail/IdentityChainPanel'));
 import ExchangeHistoryPanel from '@/components/building-detail/ExchangeHistoryPanel';
 import { PackagePresetPreview } from '@/components/building-detail/PackagePresetPreview';
@@ -202,9 +196,7 @@ export function OverviewTab({
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-gray-900 dark:text-white">2. Ajoutez vos documents</p>
-                <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
-                  Plans, rapports, photos, permis
-                </p>
+                <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">Plans, rapports, photos, permis</p>
               </div>
             </button>
             {/* Step 3 */}
@@ -331,9 +323,7 @@ export function OverviewTab({
               <Hammer className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                Lancer un projet de travaux
-              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Lancer un projet de travaux</p>
               <p className="text-xs text-gray-500 dark:text-slate-400">
                 Creez un projet pre-rempli a partir du dossier existant
               </p>
@@ -418,18 +408,14 @@ export function OverviewTab({
             >
               {dashboard.passport_grade || '\u2014'}
             </span>
-            <span className="text-xs text-gray-500 dark:text-slate-400">
-              {t('passport.grade') || 'Passport'}
-            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('passport.grade') || 'Passport'}</span>
           </div>
           {/* Diagnostics */}
           <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
             <span className="text-lg font-bold text-gray-900 dark:text-white">
               {dashboard.activity.completed_diagnostics}/{dashboard.activity.total_diagnostics}
             </span>
-            <span className="text-xs text-gray-500 dark:text-slate-400">
-              {t('diagnostic.title') || 'Diagnostics'}
-            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('diagnostic.title') || 'Diagnostics'}</span>
           </div>
           {/* Alerts */}
           <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
@@ -446,9 +432,7 @@ export function OverviewTab({
                 dashboard.alerts.quality_issues +
                 dashboard.alerts.open_unknowns}
             </span>
-            <span className="text-xs text-gray-500 dark:text-slate-400">
-              {t('alert.title') || 'Alertes'}
-            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('alert.title') || 'Alertes'}</span>
             {dashboard.alerts.constraint_blockers > 0 && (
               <span className="text-[10px] text-red-600 dark:text-red-400">
                 ({dashboard.alerts.constraint_blockers} {t('alert.blockers') || 'blockers'})

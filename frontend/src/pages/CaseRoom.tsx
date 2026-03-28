@@ -125,7 +125,7 @@ const POLLUTANT_LABELS: Record<string, string> = {
 type TabKey = 'overview' | 'scope' | 'truth' | 'actions' | 'forms' | 'finance' | 'questions';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: 'overview', label: 'Vue d\'ensemble', icon: Eye },
+  { key: 'overview', label: "Vue d'ensemble", icon: Eye },
   { key: 'scope', label: 'Perimetre', icon: Target },
   { key: 'truth', label: 'Verite & Manques', icon: Search },
   { key: 'actions', label: 'Actions & Rituels', icon: Zap },
@@ -189,27 +189,15 @@ function StateProgressDots({ currentState }: { currentState: string }) {
               </span>
             </div>
             {idx < mainStates.length - 1 && (
-              <div
-                className={cn(
-                  'w-6 h-0.5 mb-4',
-                  isPast ? 'bg-green-400' : 'bg-gray-200 dark:bg-gray-700',
-                )}
-              />
+              <div className={cn('w-6 h-0.5 mb-4', isPast ? 'bg-green-400' : 'bg-gray-200 dark:bg-gray-700')} />
             )}
           </div>
         );
       })}
       {(isCancelled || isBlocked) && (
         <div className="ml-2 flex flex-col items-center">
-          <div
-            className={cn(
-              'w-3 h-3 rounded-full',
-              isCancelled ? 'bg-gray-400' : 'bg-red-500',
-            )}
-          />
-          <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
-            {STATE_LABELS[currentState]}
-          </span>
+          <div className={cn('w-3 h-3 rounded-full', isCancelled ? 'bg-gray-400' : 'bg-red-500')} />
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{STATE_LABELS[currentState]}</span>
         </div>
       )}
     </div>
@@ -241,11 +229,7 @@ function AdvanceDropdown({
         disabled={isAdvancing}
         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm font-medium"
       >
-        {isAdvancing ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Play className="w-4 h-4" />
-        )}
+        {isAdvancing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         Avancer
         <ChevronDown className="w-4 h-4" />
       </button>
@@ -308,26 +292,10 @@ function OverviewTab({
 
       {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard
-          label="Jours actifs"
-          value={daysActive !== null ? String(daysActive) : '-'}
-          icon={Clock}
-        />
-        <MetricCard
-          label="Etapes terminees"
-          value={`${completedSteps}/${steps.length}`}
-          icon={CheckCircle2}
-        />
-        <MetricCard
-          label="Zones concernees"
-          value={String(caseData.spatial_scope_ids?.length ?? 0)}
-          icon={Target}
-        />
-        <MetricCard
-          label="Polluants"
-          value={String(caseData.pollutant_scope?.length ?? 0)}
-          icon={AlertTriangle}
-        />
+        <MetricCard label="Jours actifs" value={daysActive !== null ? String(daysActive) : '-'} icon={Clock} />
+        <MetricCard label="Etapes terminees" value={`${completedSteps}/${steps.length}`} icon={CheckCircle2} />
+        <MetricCard label="Zones concernees" value={String(caseData.spatial_scope_ids?.length ?? 0)} icon={Target} />
+        <MetricCard label="Polluants" value={String(caseData.pollutant_scope?.length ?? 0)} icon={AlertTriangle} />
       </div>
 
       {/* Steps detail */}
@@ -338,10 +306,7 @@ function OverviewTab({
           </h3>
           <div className="space-y-2">
             {steps.map((step, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50"
-              >
+              <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
                 {step.status === 'completed' ? (
                   <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                 ) : step.status === 'in_progress' ? (
@@ -378,9 +343,7 @@ function OverviewTab({
               <Shield className="w-4 h-4" />
               Intervention liee
             </div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-              {caseData.intervention_id}
-            </p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{caseData.intervention_id}</p>
           </div>
         )}
         {caseData.tender_id && (
@@ -389,9 +352,7 @@ function OverviewTab({
               <Package className="w-4 h-4" />
               Appel d'offres lie
             </div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-              {caseData.tender_id}
-            </p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{caseData.tender_id}</p>
           </div>
         )}
       </div>
@@ -408,9 +369,7 @@ function OverviewTab({
                 <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-700 dark:text-gray-300">{ev.label}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {formatDate(ev.timestamp)}
-                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{formatDate(ev.timestamp)}</p>
                 </div>
               </div>
             ))}
@@ -421,15 +380,7 @@ function OverviewTab({
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  icon: React.ElementType;
-}) {
+function MetricCard({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 mb-2">
@@ -465,14 +416,9 @@ function ScopeTab({ caseData }: { caseData: BuildingCaseRead }) {
         ) : (
           <div className="space-y-2">
             {zones.map((zoneId) => (
-              <div
-                key={zoneId}
-                className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50"
-              >
+              <div key={zoneId} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
                 <div className="w-2 h-2 rounded-full bg-blue-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">
-                  {zoneId}
-                </span>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">{zoneId}</span>
               </div>
             ))}
           </div>
@@ -565,9 +511,7 @@ function TruthTab({ caseData: _caseData }: { caseData: BuildingCaseRead }) {
         <div className="text-center py-8 text-gray-400 dark:text-gray-500">
           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Analyse de verite scopee au dossier</p>
-          <p className="text-xs mt-1">
-            Les claims, evidences, manques et contradictions de ce perimetre
-          </p>
+          <p className="text-xs mt-1">Les claims, evidences, manques et contradictions de ce perimetre</p>
         </div>
       </div>
 
@@ -576,9 +520,7 @@ function TruthTab({ caseData: _caseData }: { caseData: BuildingCaseRead }) {
         <div className="flex items-start gap-3">
           <Zap className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-              Prochaine action
-            </p>
+            <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Prochaine action</p>
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
               Lancez une analyse de completude scopee pour identifier les manques dans ce dossier.
             </p>
@@ -638,9 +580,7 @@ function ActionsTab({ caseData }: { caseData: BuildingCaseRead }) {
               >
                 <div className="flex items-center gap-3">
                   <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600" />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {step.name || `Etape ${idx + 1}`}
-                  </span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{step.name || `Etape ${idx + 1}`}</span>
                 </div>
                 <span className="text-xs text-gray-400">{step.status || 'pending'}</span>
               </div>
@@ -679,9 +619,7 @@ function FormsTab({ caseData: _caseData }: { caseData: BuildingCaseRead }) {
         <div className="text-center py-8 text-gray-400 dark:text-gray-500">
           <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Formulaires de ce dossier</p>
-          <p className="text-xs mt-1">
-            Les formulaires reglementaires applicables au type et perimetre du dossier
-          </p>
+          <p className="text-xs mt-1">Les formulaires reglementaires applicables au type et perimetre du dossier</p>
         </div>
       </div>
 
@@ -692,9 +630,7 @@ function FormsTab({ caseData: _caseData }: { caseData: BuildingCaseRead }) {
         <div className="text-center py-8 text-gray-400 dark:text-gray-500">
           <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Packs autorite et soumissions</p>
-          <p className="text-xs mt-1">
-            Les packs de documents compiles pour ce dossier
-          </p>
+          <p className="text-xs mt-1">Les packs de documents compiles pour ce dossier</p>
         </div>
       </div>
     </div>
@@ -715,9 +651,7 @@ function FinanceTab({ caseData }: { caseData: BuildingCaseRead }) {
         <div className="text-center py-8 text-gray-400 dark:text-gray-500">
           <DollarSign className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Entrees financieres liees a ce dossier</p>
-          <p className="text-xs mt-1">
-            Devis, couts, factures et budgets pour ce dossier
-          </p>
+          <p className="text-xs mt-1">Devis, couts, factures et budgets pour ce dossier</p>
         </div>
       </div>
 
@@ -726,9 +660,7 @@ function FinanceTab({ caseData }: { caseData: BuildingCaseRead }) {
           <div className="flex items-start gap-3">
             <Package className="w-5 h-5 text-cyan-500 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-cyan-700 dark:text-cyan-300">
-                Appel d'offres lie
-              </p>
+              <p className="text-sm font-medium text-cyan-700 dark:text-cyan-300">Appel d'offres lie</p>
               <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
                 Les devis de l'appel d'offres sont disponibles dans l'onglet Tender du batiment.
               </p>
@@ -755,9 +687,7 @@ function QuestionsTab({ caseData: _caseData }: { caseData: BuildingCaseRead }) {
         <div className="text-center py-8 text-gray-400 dark:text-gray-500">
           <HelpCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Verdicts scopes a ce dossier</p>
-          <p className="text-xs mt-1">
-            Peut-on demarrer ? Peut-on lancer l'appel d'offres ? Peut-on publier ?
-          </p>
+          <p className="text-xs mt-1">Peut-on demarrer ? Peut-on lancer l'appel d'offres ? Peut-on publier ?</p>
         </div>
       </div>
 
@@ -863,11 +793,9 @@ export default function CaseRoom() {
         </Link>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
           <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-red-700 dark:text-red-300">
-            Dossier introuvable
-          </h3>
+          <h3 className="text-lg font-semibold text-red-700 dark:text-red-300">Dossier introuvable</h3>
           <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-            {error instanceof Error ? error.message : 'Ce dossier n\'existe pas ou n\'est plus accessible.'}
+            {error instanceof Error ? error.message : "Ce dossier n'existe pas ou n'est plus accessible."}
           </p>
         </div>
       </div>
@@ -890,9 +818,7 @@ export default function CaseRoom() {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="space-y-2">
             {/* Title */}
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              {caseData.title}
-            </h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{caseData.title}</h1>
 
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
@@ -988,9 +914,7 @@ export default function CaseRoom() {
 
       {/* Tab content */}
       <div>
-        {activeTab === 'overview' && (
-          <OverviewTab caseData={caseData} context={context} timeline={timeline} />
-        )}
+        {activeTab === 'overview' && <OverviewTab caseData={caseData} context={context} timeline={timeline} />}
         {activeTab === 'scope' && <ScopeTab caseData={caseData} />}
         {activeTab === 'truth' && <TruthTab caseData={caseData} />}
         {activeTab === 'actions' && <ActionsTab caseData={caseData} />}

@@ -65,7 +65,12 @@ const secondaryItems: NavItem[] = [
   { to: '/comparison', icon: ArrowLeftRight, labelKey: 'nav.comparison' },
   { to: '/map', icon: Map, labelKey: 'nav.map' },
   { to: '/address-preview', icon: Search, labelKey: 'nav.address_preview', fallbackLabel: 'Apercu adresse' },
-  { to: '/risk-simulator', icon: Calculator, labelKey: 'nav.simulation', allowedRoles: ['admin', 'diagnostician', 'architect'] },
+  {
+    to: '/risk-simulator',
+    icon: Calculator,
+    labelKey: 'nav.simulation',
+    allowedRoles: ['admin', 'diagnostician', 'architect'],
+  },
   { to: '/campaigns', icon: Megaphone, labelKey: 'campaign.title' },
   { to: '/exports', icon: Download, labelKey: 'nav.exports' },
   { to: '/authority-packs', icon: ShieldCheck, labelKey: 'nav.authority_packs' },
@@ -85,21 +90,49 @@ const adminItems: NavItem[] = [
   { to: '/rules-studio', icon: BookOpen, labelKey: 'nav.rules_studio', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/procedures', icon: ClipboardCheck, labelKey: 'nav.procedures', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/audit-logs', icon: FileSearch, labelKey: 'nav.audit_logs', allowedRoles: ['admin'] as UserRole[] },
-  { to: '/admin/diagnostic-review', icon: ClipboardCheck, labelKey: 'nav.diagnostic_review', allowedRoles: ['admin'] as UserRole[] },
-  { to: '/admin/demo-runbook', icon: Presentation, labelKey: 'nav.demo_runbook', allowedRoles: ['admin'] as UserRole[] },
+  {
+    to: '/admin/diagnostic-review',
+    icon: ClipboardCheck,
+    labelKey: 'nav.diagnostic_review',
+    allowedRoles: ['admin'] as UserRole[],
+  },
+  {
+    to: '/admin/demo-runbook',
+    icon: Presentation,
+    labelKey: 'nav.demo_runbook',
+    allowedRoles: ['admin'] as UserRole[],
+  },
   { to: '/admin/pilot-dashboard', icon: Gauge, labelKey: 'nav.pilot_dashboard', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/rollout', icon: Rocket, labelKey: 'nav.rollout', allowedRoles: ['admin'] as UserRole[] },
   { to: '/admin/expansion', icon: TrendingUp, labelKey: 'nav.expansion', allowedRoles: ['admin'] as UserRole[] },
-  { to: '/admin/customer-success', icon: Trophy, labelKey: 'nav.customer_success', allowedRoles: ['admin'] as UserRole[] },
-  { to: '/admin/governance-signals', icon: Landmark, labelKey: 'nav.governance_signals', allowedRoles: ['admin'] as UserRole[] },
-  { to: '/admin/marketplace-reviews', icon: ClipboardCheck, labelKey: 'nav.marketplace_reviews', allowedRoles: ['admin'] as UserRole[] },
-  { to: '/admin/remediation-intelligence', icon: Radar, labelKey: 'intelligence.nav_label', allowedRoles: ['admin'] as UserRole[] },
+  {
+    to: '/admin/customer-success',
+    icon: Trophy,
+    labelKey: 'nav.customer_success',
+    allowedRoles: ['admin'] as UserRole[],
+  },
+  {
+    to: '/admin/governance-signals',
+    icon: Landmark,
+    labelKey: 'nav.governance_signals',
+    allowedRoles: ['admin'] as UserRole[],
+  },
+  {
+    to: '/admin/marketplace-reviews',
+    icon: ClipboardCheck,
+    labelKey: 'nav.marketplace_reviews',
+    allowedRoles: ['admin'] as UserRole[],
+  },
+  {
+    to: '/admin/remediation-intelligence',
+    icon: Radar,
+    labelKey: 'intelligence.nav_label',
+    allowedRoles: ['admin'] as UserRole[],
+  },
 ];
 
 // ─── Footer items ───────────────────────────────────────────────────────────
-const footerItems: NavItem[] = [
-  { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
-];
+const footerItems: NavItem[] = [{ to: '/settings', icon: Settings, labelKey: 'nav.settings' }];
 
 interface SidebarProps {
   collapsed: boolean;
@@ -202,7 +235,7 @@ export function Sidebar({ collapsed, onToggle, onMobileClose, isMobile }: Sideba
         {/* Admin section */}
         {visibleAdmin.length > 0 && (
           <>
-            {(!collapsed || isMobile) ? (
+            {!collapsed || isMobile ? (
               <div className="pt-3">
                 <button
                   onClick={() => setAdminOpen(!adminOpen)}

@@ -743,7 +743,8 @@ export const it: TranslationMap = {
   'building.tab.cases': 'Fascicoli',
   'building.tab.passport': 'Passaporto & Trasferimento',
   'building.tab.questions': 'Domande',
-  'building.tab.questions_description': 'Verdetti di prontezza, richieste di intento e valutazioni SafeToX per questo edificio.',
+  'building.tab.questions_description':
+    'Verdetti di prontezza, richieste di intento e valutazioni SafeToX per questo edificio.',
   'building.tab.questions_coming_soon': 'Spazio di lavoro di prontezza completo in arrivo.',
   'building.completeness': 'Completezza',
   'building.completeness_desc': "Progresso del dossier dell'edificio",
@@ -1628,7 +1629,8 @@ export const it: TranslationMap = {
   'portfolio_cmd.all_cantons': 'Tutti i cantoni',
   'portfolio_cmd.budget_horizon': 'Orizzonte di budget',
   'portfolio_cmd.heatmap': 'Matrice completezza / fiducia',
-  'portfolio_cmd.heatmap_desc': 'Ogni punto = un edificio. Zona rossa (in basso a sinistra) = completezza e fiducia basse.',
+  'portfolio_cmd.heatmap_desc':
+    'Ogni punto = un edificio. Zona rossa (in basso a sinistra) = completezza e fiducia basse.',
   'portfolio.title': 'Portfolio',
   'portfolio.total_buildings': 'Totale edifici',
   'portfolio.avg_completeness': 'Completezza media',
@@ -3851,7 +3853,8 @@ export const it: TranslationMap = {
   'rfq.generate_comparison_hint': 'Genera il confronto per vedere i preventivi affiancati.',
   'rfq.generate_comparison': 'Generare il confronto',
   'rfq.generating': 'Generazione...',
-  'rfq.comparison_disclaimer': "Confronto fattuale. Nessuna classifica ne raccomandazione. La scelta spetta al committente.",
+  'rfq.comparison_disclaimer':
+    'Confronto fattuale. Nessuna classifica ne raccomandazione. La scelta spetta al committente.',
   'rfq.compare_amount': 'Importo totale (CHF)',
   'rfq.compare_duration': 'Durata stimata (giorni)',
   'rfq.compare_scope': 'Perimetro coperto',
@@ -3922,7 +3925,8 @@ export const it: TranslationMap = {
 
   // Forms Workspace
   'forms.title': 'Moduli normativi',
-  'forms.description': 'Identificare i moduli applicabili, precompilarli dai dati dell\'edificio e monitorare la loro presentazione.',
+  'forms.description':
+    "Identificare i moduli applicabili, precompilarli dai dati dell'edificio e monitorare la loro presentazione.",
   'forms.applicable_title': 'Moduli applicabili',
   'forms.my_forms': 'I miei moduli',
   'forms.no_applicable': 'Nessun modulo applicabile per questo edificio.',
@@ -3930,7 +3934,7 @@ export const it: TranslationMap = {
   'forms.prefill_error': 'Errore durante la precompilazione',
   'forms.save_success': 'Modifiche salvate',
   'forms.submit_success': 'Modulo inviato con successo',
-  'forms.submit_error': 'Errore durante l\'invio',
+  'forms.submit_error': "Errore durante l'invio",
 
   // Navigation — 5 hubs
   'nav.cases': 'Dossier',
@@ -3984,7 +3988,7 @@ export const it: TranslationMap = {
   'spatial_enrichment.error': 'Dati spaziali non disponibili',
   'spatial_enrichment.refresh': 'Aggiorna',
   'spatial_enrichment.no_data': 'Nessun dato 3D disponibile per questo edificio',
-  'spatial_enrichment.height': 'Altezza dell\'edificio',
+  'spatial_enrichment.height': "Altezza dell'edificio",
   'spatial_enrichment.surface': 'Superficie al suolo',
   'spatial_enrichment.volume': 'Volume',
   'spatial_enrichment.roof_type': 'Tipo di tetto',

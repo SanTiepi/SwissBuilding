@@ -238,9 +238,7 @@ export default function InvalidationAlerts({ buildingId }: { buildingId?: string
   });
 
   if (isLoading) {
-    return (
-      <div className="animate-pulse h-20 rounded-xl bg-slate-200 dark:bg-slate-700" />
-    );
+    return <div className="animate-pulse h-20 rounded-xl bg-slate-200 dark:bg-slate-700" />;
   }
 
   if (events.length === 0) return null;

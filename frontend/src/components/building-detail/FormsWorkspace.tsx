@@ -197,9 +197,7 @@ function ApplicableFormsList({
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {inst.template_name || 'Formulaire'}
-                    </p>
+                    <p className="font-medium text-gray-900 dark:text-white">{inst.template_name || 'Formulaire'}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <StatusBadge status={inst.status} />
                       {inst.prefill_confidence != null && (
@@ -233,9 +231,7 @@ function ApplicableFormsList({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <FileText className="w-4 h-4 text-red-500 flex-shrink-0" />
-                      <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                        {item.template.name}
-                      </h4>
+                      <h4 className="font-medium text-gray-900 dark:text-white truncate">{item.template.name}</h4>
                     </div>
                     <JurisdictionBadge canton={item.template.canton} formType={item.template.form_type} />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{item.reason}</p>
@@ -289,15 +285,7 @@ function ApplicableFormsList({
 // Form Instance Detail View
 // ---------------------------------------------------------------------------
 
-function FormInstanceView({
-  formId,
-  onBack,
-  buildingId,
-}: {
-  formId: string;
-  onBack: () => void;
-  buildingId: string;
-}) {
+function FormInstanceView({ formId, onBack, buildingId }: { formId: string; onBack: () => void; buildingId: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -310,8 +298,7 @@ function FormInstanceView({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: { field_values?: Record<string, { value: string | null }> }) =>
-      formsApi.update(formId, data),
+    mutationFn: (data: { field_values?: Record<string, { value: string | null }> }) => formsApi.update(formId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['form-instance', formId] });
       queryClient.invalidateQueries({ queryKey: ['forms-instances', buildingId] });
@@ -364,9 +351,7 @@ function FormInstanceView({
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {form.template_name || 'Formulaire'}
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{form.template_name || 'Formulaire'}</h3>
           <div className="flex items-center gap-2 mt-1">
             <StatusBadge status={form.status} />
             {form.template_form_type && (
@@ -382,9 +367,7 @@ function FormInstanceView({
       {form.prefill_confidence != null && (
         <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-              Confiance du pre-remplissage
-            </span>
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Confiance du pre-remplissage</span>
             <span className="text-xs text-gray-500 dark:text-gray-400">
               {form.missing_fields?.length || 0} champ(s) manquant(s)
             </span>
@@ -459,9 +442,7 @@ function FormInstanceView({
                     <p
                       className={cn(
                         'text-sm',
-                        field.value
-                          ? 'text-gray-900 dark:text-white'
-                          : 'text-red-500 dark:text-red-400 italic',
+                        field.value ? 'text-gray-900 dark:text-white' : 'text-red-500 dark:text-red-400 italic',
                       )}
                     >
                       {field.value || 'A remplir manuellement'}
@@ -494,9 +475,7 @@ function FormInstanceView({
       {/* Missing attachments */}
       {form.missing_attachments && form.missing_attachments.length > 0 && (
         <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-          <h4 className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-2">
-            Documents manquants
-          </h4>
+          <h4 className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-2">Documents manquants</h4>
           <ul className="space-y-1">
             {form.missing_attachments.map((att) => (
               <li key={att} className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
@@ -543,11 +522,7 @@ function FormInstanceView({
               disabled={submitMutation.isPending}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
             >
-              {submitMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
+              {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Soumettre
             </button>
           )}
@@ -575,11 +550,7 @@ export default function FormsWorkspace({ buildingId }: FormsWorkspaceProps) {
   if (selectedFormId) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <FormInstanceView
-          formId={selectedFormId}
-          buildingId={buildingId}
-          onBack={() => setSelectedFormId(null)}
-        />
+        <FormInstanceView formId={selectedFormId} buildingId={buildingId} onBack={() => setSelectedFormId(null)} />
       </div>
     );
   }
@@ -596,10 +567,7 @@ export default function FormsWorkspace({ buildingId }: FormsWorkspaceProps) {
         {t('forms.description') ||
           'Identifiez les formulaires applicables, pre-remplissez-les depuis les donnees du batiment, et suivez leur soumission.'}
       </p>
-      <ApplicableFormsList
-        buildingId={buildingId}
-        onPrefill={(form) => setSelectedFormId(form.id)}
-      />
+      <ApplicableFormsList buildingId={buildingId} onPrefill={(form) => setSelectedFormId(form.id)} />
     </div>
   );
 }

@@ -130,9 +130,7 @@ export function PassportDiffView({ envelopeIdA, envelopeIdB, versionA, versionB,
   if (error || !data) {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-red-200 dark:border-red-800 p-6">
-        <p className="text-red-600 dark:text-red-400 text-sm">
-          {t('passport_diff.error') || 'Failed to load diff.'}
-        </p>
+        <p className="text-red-600 dark:text-red-400 text-sm">{t('passport_diff.error') || 'Failed to load diff.'}</p>
       </div>
     );
   }
@@ -175,9 +173,7 @@ export function PassportDiffView({ envelopeIdA, envelopeIdB, versionA, versionB,
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-5 py-4 border-b border-gray-100 dark:border-slate-700">
         {/* Grade */}
         <div className="text-center">
-          <div className="text-xs text-gray-500 dark:text-slate-400 mb-1">
-            {t('passport_diff.grade') || 'Grade'}
-          </div>
+          <div className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('passport_diff.grade') || 'Grade'}</div>
           <div className="flex items-center justify-center gap-2">
             <span className={cn('text-xl font-bold', GRADE_COLORS[grade_delta.old_grade || ''] || 'text-gray-400')}>
               {grade_delta.old_grade || '--'}
@@ -191,9 +187,7 @@ export function PassportDiffView({ envelopeIdA, envelopeIdB, versionA, versionB,
 
         {/* Trust */}
         <div className="text-center">
-          <div className="text-xs text-gray-500 dark:text-slate-400 mb-1">
-            {t('passport_diff.trust') || 'Trust'}
-          </div>
+          <div className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('passport_diff.trust') || 'Trust'}</div>
           <div className="flex items-center justify-center gap-1">
             <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
               {formatPct(trust_delta.old_trust)}
@@ -264,10 +258,7 @@ export function PassportDiffView({ envelopeIdA, envelopeIdB, versionA, versionB,
         {Object.entries(changesBySection).map(([section, sectionChanges]) => {
           const isExpanded = expandedSections.has(section);
           return (
-            <div
-              key={section}
-              className="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden"
-            >
+            <div key={section} className="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
               <button
                 onClick={() => toggleSection(section)}
                 className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700"

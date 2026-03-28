@@ -41,16 +41,12 @@ export interface IdentityChainResponse {
 
 export const identityChainApi = {
   get: async (buildingId: string): Promise<IdentityChainResponse> => {
-    const response = await apiClient.get<IdentityChainResponse>(
-      `/buildings/${buildingId}/identity-chain`
-    );
+    const response = await apiClient.get<IdentityChainResponse>(`/buildings/${buildingId}/identity-chain`);
     return response.data;
   },
 
   resolve: async (buildingId: string): Promise<IdentityChainResponse> => {
-    const response = await apiClient.post<IdentityChainResponse>(
-      `/buildings/${buildingId}/identity-chain/resolve`
-    );
+    const response = await apiClient.post<IdentityChainResponse>(`/buildings/${buildingId}/identity-chain/resolve`);
     return response.data;
   },
 

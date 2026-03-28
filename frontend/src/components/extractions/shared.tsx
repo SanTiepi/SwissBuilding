@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- intentional shared utilities file */
 import { cn } from '@/utils/formatters';
 
 // ---------------------------------------------------------------------------

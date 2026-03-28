@@ -249,7 +249,8 @@ export default function ChangeSignals() {
           Cette page est obsolete. Les signaux sont disponibles dans Changements du batiment.
         </p>
         <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-          This page reads from the legacy ChangeSignal API and will be retired. Use the Building Changes timeline instead.
+          This page reads from the legacy ChangeSignal API and will be retired. Use the Building Changes timeline
+          instead.
         </p>
       </div>
 

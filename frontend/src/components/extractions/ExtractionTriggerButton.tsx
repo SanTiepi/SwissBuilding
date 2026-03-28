@@ -20,8 +20,7 @@ export function ExtractionTriggerButton({ documentId, buildingId, mimeType, clas
   const [isLoading, setIsLoading] = useState(false);
 
   // Only show for PDF documents
-  const isPdf =
-    mimeType === 'application/pdf' || mimeType?.includes('pdf') || false;
+  const isPdf = mimeType === 'application/pdf' || mimeType?.includes('pdf') || false;
   if (!isPdf) return null;
 
   const handleTrigger = async () => {

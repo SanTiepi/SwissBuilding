@@ -41,7 +41,7 @@ function StepConnector({ status }: { status: StepStatus }) {
     <div
       className={cn(
         'h-0.5 w-8 mx-1',
-        status === 'resolved' ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'
+        status === 'resolved' ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600',
       )}
     />
   );
@@ -97,7 +97,7 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
         <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {t('identity_chain.loading') || 'Chargement de la chaine d\'identite...'}
+          {t('identity_chain.loading') || "Chargement de la chaine d'identite..."}
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-red-500 dark:text-red-400">
             <AlertTriangle className="h-4 w-4" />
-            {t('identity_chain.error') || 'Chaine d\'identite non disponible'}
+            {t('identity_chain.error') || "Chaine d'identite non disponible"}
           </div>
           <button
             onClick={handleResolve}
@@ -126,11 +126,12 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
 
   const egidStatus = getStepStatus(data.egid?.value);
   const egridStatus = getStepStatus(data.egrid?.value);
-  const rdppfStatus = (data.rdppf?.restrictions?.length ?? 0) > 0 || (data.rdppf?.themes?.length ?? 0) > 0
-    ? 'resolved' as StepStatus
-    : data.egrid?.value
-      ? 'missing' as StepStatus
-      : 'skipped' as StepStatus;
+  const rdppfStatus =
+    (data.rdppf?.restrictions?.length ?? 0) > 0 || (data.rdppf?.themes?.length ?? 0) > 0
+      ? ('resolved' as StepStatus)
+      : data.egrid?.value
+        ? ('missing' as StepStatus)
+        : ('skipped' as StepStatus);
 
   const restrictions: RdppfRestriction[] = data.rdppf?.restrictions ?? [];
 
@@ -141,7 +142,7 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
           <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-            {t('identity_chain.title') || 'Chaine d\'identite cadastrale'}
+            {t('identity_chain.title') || "Chaine d'identite cadastrale"}
           </h3>
           {data.chain_complete && (
             <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -229,9 +230,7 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
           <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5">
             <p>
               <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.value') || 'Valeur'}:</span>{' '}
-              <span className="font-mono font-medium text-gray-900 dark:text-white">
-                {data.egid?.value ?? '-'}
-              </span>
+              <span className="font-mono font-medium text-gray-900 dark:text-white">{data.egid?.value ?? '-'}</span>
             </p>
             <p>
               <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.source') || 'Source'}:</span>{' '}
@@ -242,7 +241,9 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
               {formatConfidence(data.egid?.confidence ?? null)}
             </p>
             <p>
-              <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.resolved_at') || 'Resolu le'}:</span>{' '}
+              <span className="text-gray-500 dark:text-gray-500">
+                {t('identity_chain.resolved_at') || 'Resolu le'}:
+              </span>{' '}
               {formatDate(data.egid?.resolved_at ?? null)}
             </p>
           </div>
@@ -257,9 +258,7 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
           <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5">
             <p>
               <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.value') || 'Valeur'}:</span>{' '}
-              <span className="font-mono font-medium text-gray-900 dark:text-white">
-                {data.egrid?.value ?? '-'}
-              </span>
+              <span className="font-mono font-medium text-gray-900 dark:text-white">{data.egrid?.value ?? '-'}</span>
             </p>
             <p>
               <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.parcel') || 'Parcelle'}:</span>{' '}
@@ -270,7 +269,9 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
               {data.egrid?.area_m2 != null ? `${data.egrid.area_m2} m\u00B2` : '-'}
             </p>
             <p>
-              <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.resolved_at') || 'Resolu le'}:</span>{' '}
+              <span className="text-gray-500 dark:text-gray-500">
+                {t('identity_chain.resolved_at') || 'Resolu le'}:
+              </span>{' '}
               {formatDate(data.egrid?.resolved_at ?? null)}
             </p>
           </div>
@@ -284,7 +285,9 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5">
             <p>
-              <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.restrictions') || 'Restrictions'}:</span>{' '}
+              <span className="text-gray-500 dark:text-gray-500">
+                {t('identity_chain.restrictions') || 'Restrictions'}:
+              </span>{' '}
               <span className="font-medium text-gray-900 dark:text-white">{restrictions.length}</span>
             </p>
             <p>
@@ -292,7 +295,9 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
               {(data.rdppf?.themes?.length ?? 0) > 0 ? data.rdppf.themes.join(', ') : '-'}
             </p>
             <p>
-              <span className="text-gray-500 dark:text-gray-500">{t('identity_chain.resolved_at') || 'Resolu le'}:</span>{' '}
+              <span className="text-gray-500 dark:text-gray-500">
+                {t('identity_chain.resolved_at') || 'Resolu le'}:
+              </span>{' '}
               {formatDate(data.rdppf?.resolved_at ?? null)}
             </p>
           </div>
@@ -313,10 +318,7 @@ export default function IdentityChainPanel({ buildingId }: IdentityChainPanelPro
           {showRdppf && (
             <div className="mt-3 space-y-2">
               {restrictions.map((r, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-lg border border-gray-200 dark:border-gray-600 p-3 text-sm"
-                >
+                <div key={idx} className="rounded-lg border border-gray-200 dark:border-gray-600 p-3 text-sm">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{r.description || r.type}</p>

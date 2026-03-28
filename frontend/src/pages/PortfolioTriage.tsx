@@ -484,7 +484,10 @@ export default function PortfolioTriage() {
           <KpiCard
             label={t('portfolio_benchmark.avg_grade') || 'Note moyenne'}
             value={benchmarkData.avg_grade}
-            colorClass={cn('text-white', GRADE_COLORS[(benchmarkData.avg_grade || 'F').toUpperCase()] || GRADE_COLORS.F)}
+            colorClass={cn(
+              'text-white',
+              GRADE_COLORS[(benchmarkData.avg_grade || 'F').toUpperCase()] || GRADE_COLORS.F,
+            )}
           />
           <KpiCard
             label={t('portfolio_benchmark.avg_trust') || 'Confiance moy.'}

@@ -29,10 +29,7 @@ export const invalidationsApi = {
     buildingId: string,
     params?: { status?: string; severity?: string; limit?: number },
   ): Promise<InvalidationEvent[]> => {
-    const response = await apiClient.get<InvalidationEvent[]>(
-      `/buildings/${buildingId}/invalidations`,
-      { params },
-    );
+    const response = await apiClient.get<InvalidationEvent[]>(`/buildings/${buildingId}/invalidations`, { params });
     return response.data;
   },
 
@@ -48,24 +45,19 @@ export const invalidationsApi = {
   },
 
   acknowledge: async (eventId: string): Promise<InvalidationEvent> => {
-    const response = await apiClient.post<InvalidationEvent>(
-      `/invalidations/${eventId}/acknowledge`,
-    );
+    const response = await apiClient.post<InvalidationEvent>(`/invalidations/${eventId}/acknowledge`);
     return response.data;
   },
 
   resolve: async (eventId: string, resolutionNote: string): Promise<InvalidationEvent> => {
-    const response = await apiClient.post<InvalidationEvent>(
-      `/invalidations/${eventId}/resolve`,
-      { resolution_note: resolutionNote },
-    );
+    const response = await apiClient.post<InvalidationEvent>(`/invalidations/${eventId}/resolve`, {
+      resolution_note: resolutionNote,
+    });
     return response.data;
   },
 
   executeReaction: async (eventId: string): Promise<Record<string, unknown>> => {
-    const response = await apiClient.post<Record<string, unknown>>(
-      `/invalidations/${eventId}/execute-reaction`,
-    );
+    const response = await apiClient.post<Record<string, unknown>>(`/invalidations/${eventId}/execute-reaction`);
     return response.data;
   },
 };

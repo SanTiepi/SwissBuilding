@@ -53,10 +53,9 @@ export interface WeeklySummaryResponse {
 
 export const actionQueueApi = {
   getQueue: async (buildingId: string, status = 'open'): Promise<ActionQueueResponse> => {
-    const response = await apiClient.get<ActionQueueResponse>(
-      `/buildings/${buildingId}/action-queue`,
-      { params: { status } },
-    );
+    const response = await apiClient.get<ActionQueueResponse>(`/buildings/${buildingId}/action-queue`, {
+      params: { status },
+    });
     return response.data;
   },
 
@@ -75,9 +74,7 @@ export const actionQueueApi = {
   },
 
   getWeeklySummary: async (buildingId: string): Promise<WeeklySummaryResponse> => {
-    const response = await apiClient.get<WeeklySummaryResponse>(
-      `/buildings/${buildingId}/weekly-summary`,
-    );
+    const response = await apiClient.get<WeeklySummaryResponse>(`/buildings/${buildingId}/weekly-summary`);
     return response.data;
   },
 };

@@ -60,7 +60,10 @@ function truncate(text: string | null, max: number): string {
 
 interface RowDef {
   label: string;
-  render: (entry: TenderComparisonEntry, stats: { minAmount: number | null; maxDuration: number | null }) => {
+  render: (
+    entry: TenderComparisonEntry,
+    stats: { minAmount: number | null; maxDuration: number | null },
+  ) => {
     text: string;
     className?: string;
   };
@@ -188,9 +191,12 @@ function ComparisonTable({
                   return (
                     <td
                       key={entry.quote_id}
-                      className={cn('py-2.5 px-4 text-gray-600 dark:text-slate-400', isSelected && 'bg-green-50 dark:bg-green-900/10')}
+                      className={cn(
+                        'py-2.5 px-4 text-gray-600 dark:text-slate-400',
+                        isSelected && 'bg-green-50 dark:bg-green-900/10',
+                      )}
                     >
-                      {quoteObj ? (t('rfq.quote_document_link') || 'Voir document') : '-'}
+                      {quoteObj ? t('rfq.quote_document_link') || 'Voir document' : '-'}
                     </td>
                   );
                 }

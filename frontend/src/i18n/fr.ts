@@ -743,7 +743,8 @@ export const fr: TranslationMap = {
   'building.tab.cases': 'Dossiers',
   'building.tab.passport': 'Passeport & Transfert',
   'building.tab.questions': 'Questions',
-  'building.tab.questions_description': 'Verdicts de pret, requetes d\'intention et evaluations SafeToX pour ce batiment.',
+  'building.tab.questions_description':
+    "Verdicts de pret, requetes d'intention et evaluations SafeToX pour ce batiment.",
   'building.tab.questions_coming_soon': 'Espace de pret complet bientot disponible.',
   'building.completeness': 'Completude',
   'building.completeness_desc': 'Progression du dossier batiment',
@@ -1630,7 +1631,8 @@ export const fr: TranslationMap = {
   'portfolio_cmd.all_cantons': 'Tous cantons',
   'portfolio_cmd.budget_horizon': 'Horizon budgetaire',
   'portfolio_cmd.heatmap': 'Matrice completude / confiance',
-  'portfolio_cmd.heatmap_desc': 'Chaque point = un batiment. Zone rouge (bas-gauche) = completude et confiance faibles.',
+  'portfolio_cmd.heatmap_desc':
+    'Chaque point = un batiment. Zone rouge (bas-gauche) = completude et confiance faibles.',
   'portfolio.title': 'Portfolio',
   'portfolio.total_buildings': 'Total batiments',
   'portfolio.avg_completeness': 'Completude moyenne',
@@ -3854,7 +3856,8 @@ export const fr: TranslationMap = {
   'rfq.generate_comparison_hint': 'Generez la comparaison pour voir les devis cote a cote.',
   'rfq.generate_comparison': 'Generer la comparaison',
   'rfq.generating': 'Generation...',
-  'rfq.comparison_disclaimer': "Comparaison factuelle. Aucun classement ni recommandation. Le choix revient au maitre d'ouvrage.",
+  'rfq.comparison_disclaimer':
+    "Comparaison factuelle. Aucun classement ni recommandation. Le choix revient au maitre d'ouvrage.",
   'rfq.compare_amount': 'Montant total (CHF)',
   'rfq.compare_duration': 'Duree estimee (jours)',
   'rfq.compare_scope': 'Perimetre couvert',
@@ -3925,7 +3928,8 @@ export const fr: TranslationMap = {
 
   // Forms Workspace
   'forms.title': 'Formulaires reglementaires',
-  'forms.description': 'Identifiez les formulaires applicables, pre-remplissez-les depuis les donnees du batiment, et suivez leur soumission.',
+  'forms.description':
+    'Identifiez les formulaires applicables, pre-remplissez-les depuis les donnees du batiment, et suivez leur soumission.',
   'forms.applicable_title': 'Formulaires applicables',
   'forms.my_forms': 'Mes formulaires',
   'forms.no_applicable': 'Aucun formulaire applicable pour ce batiment.',
@@ -3991,9 +3995,9 @@ export const fr: TranslationMap = {
   'spatial_enrichment.surface': 'Surface au sol',
   'spatial_enrichment.volume': 'Volume',
   'spatial_enrichment.roof_type': 'Type de toiture',
-  'identity_chain.title': 'Chaine d\'identite cadastrale',
-  'identity_chain.loading': 'Chargement de la chaine d\'identite...',
-  'identity_chain.error': 'Chaine d\'identite non disponible',
+  'identity_chain.title': "Chaine d'identite cadastrale",
+  'identity_chain.loading': "Chargement de la chaine d'identite...",
+  'identity_chain.error': "Chaine d'identite non disponible",
   'identity_chain.resolve': 'Resoudre la chaine',
   'identity_chain.complete': 'Complete',
   'identity_chain.address': 'Adresse',

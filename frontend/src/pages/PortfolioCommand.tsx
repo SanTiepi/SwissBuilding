@@ -165,7 +165,13 @@ function StatCard({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') onClick();
+            }
+          : undefined
+      }
     >
       <div className="flex items-center justify-between">
         <div>
@@ -182,7 +188,12 @@ function StatCard({
 
 function GradeBadge({ grade }: { grade: string }) {
   return (
-    <span className={cn('inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold', GRADE_COLORS[grade] || GRADE_COLORS.unknown)}>
+    <span
+      className={cn(
+        'inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold',
+        GRADE_COLORS[grade] || GRADE_COLORS.unknown,
+      )}
+    >
       {grade}
     </span>
   );
@@ -193,7 +204,10 @@ function ProgressBar({ pct, color }: { pct: number; color?: string }) {
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-slate-700">
-        <div className={cn('h-full rounded-full transition-all', barColor)} style={{ width: `${Math.min(pct, 100)}%` }} />
+        <div
+          className={cn('h-full rounded-full transition-all', barColor)}
+          style={{ width: `${Math.min(pct, 100)}%` }}
+        />
       </div>
       <span className="text-xs font-mono text-gray-500 dark:text-slate-400 w-10 text-right">{Math.round(pct)}%</span>
     </div>
@@ -221,13 +235,18 @@ function GradeDistributionBar({
           return (
             <div
               key={g}
-              className={cn(GRADE_BAR_COLORS[g], 'h-full cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-bold text-white')}
+              className={cn(
+                GRADE_BAR_COLORS[g],
+                'h-full cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-bold text-white',
+              )}
               style={{ width: `${pct}%`, minWidth: pct > 3 ? undefined : '24px' }}
               onClick={() => onGradeClick(g)}
               title={`${g}: ${count}`}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onGradeClick(g); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') onGradeClick(g);
+              }}
             >
               {pct > 8 ? `${g}: ${count}` : g}
             </div>
@@ -242,10 +261,14 @@ function GradeDistributionBar({
             onClick={() => onGradeClick(g)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onGradeClick(g); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') onGradeClick(g);
+            }}
           >
             <span className={cn('w-3 h-3 rounded-full', GRADE_BAR_COLORS[g])} />
-            <span className="text-gray-600 dark:text-slate-300">{g}: {distribution[g] || 0}</span>
+            <span className="text-gray-600 dark:text-slate-300">
+              {g}: {distribution[g] || 0}
+            </span>
           </div>
         ))}
       </div>
@@ -295,7 +318,13 @@ function HeatmapChart({ points }: { points: HeatmapPoint[] }) {
             <g key={v}>
               <line x1={x} y1={PAD} x2={x} y2={PAD + plotH} stroke="currentColor" strokeOpacity={0.1} />
               <line x1={PAD} y1={y} x2={PAD + plotW} y2={y} stroke="currentColor" strokeOpacity={0.1} />
-              <text x={x} y={PAD + plotH + 16} textAnchor="middle" className="fill-gray-400 dark:fill-slate-500" fontSize={10}>
+              <text
+                x={x}
+                y={PAD + plotH + 16}
+                textAnchor="middle"
+                className="fill-gray-400 dark:fill-slate-500"
+                fontSize={10}
+              >
                 {v}%
               </text>
               <text x={PAD - 8} y={y + 3} textAnchor="end" className="fill-gray-400 dark:fill-slate-500" fontSize={10}>
@@ -309,20 +338,19 @@ function HeatmapChart({ points }: { points: HeatmapPoint[] }) {
         <text x={W / 2} y={H - 4} textAnchor="middle" className="fill-gray-500 dark:fill-slate-400" fontSize={12}>
           Completude
         </text>
-        <text x={12} y={H / 2} textAnchor="middle" className="fill-gray-500 dark:fill-slate-400" fontSize={12} transform={`rotate(-90, 12, ${H / 2})`}>
+        <text
+          x={12}
+          y={H / 2}
+          textAnchor="middle"
+          className="fill-gray-500 dark:fill-slate-400"
+          fontSize={12}
+          transform={`rotate(-90, 12, ${H / 2})`}
+        >
           Confiance
         </text>
 
         {/* Danger zone background */}
-        <rect
-          x={PAD}
-          y={PAD + plotH / 2}
-          width={plotW / 2}
-          height={plotH / 2}
-          fill="red"
-          fillOpacity={0.04}
-          rx={4}
-        />
+        <rect x={PAD} y={PAD + plotH / 2} width={plotW / 2} height={plotH / 2} fill="red" fillOpacity={0.04} rx={4} />
 
         {/* Points */}
         {points.map((p, i) => {
@@ -354,7 +382,9 @@ function HeatmapChart({ points }: { points: HeatmapPoint[] }) {
         <div className="absolute top-2 right-2 bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-gray-200 dark:border-slate-600 p-3 text-sm z-10 max-w-[200px]">
           <p className="font-medium text-gray-900 dark:text-white truncate">{points[hoveredIdx].building_name}</p>
           <div className="mt-1 space-y-0.5 text-gray-500 dark:text-slate-400">
-            <p>Grade: <span className="font-bold">{points[hoveredIdx].passport_grade}</span></p>
+            <p>
+              Grade: <span className="font-bold">{points[hoveredIdx].passport_grade}</span>
+            </p>
             <p>Completude: {Math.round(points[hoveredIdx].completeness_pct)}%</p>
             <p>Confiance: {Math.round(points[hoveredIdx].trust_pct)}%</p>
             <p>Status: {READINESS_LABEL[points[hoveredIdx].readiness_status] || points[hoveredIdx].readiness_status}</p>
@@ -570,7 +600,9 @@ export default function PortfolioCommand() {
                   onClick={() => navigate(`/buildings/${p.building_id}`)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/buildings/${p.building_id}`); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') navigate(`/buildings/${p.building_id}`);
+                  }}
                 >
                   <span className="text-sm font-bold text-gray-400 dark:text-slate-500 w-6">#{idx + 1}</span>
                   {bld && <GradeBadge grade={bld.passport_grade} />}
@@ -579,7 +611,12 @@ export default function PortfolioCommand() {
                     <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{p.reason}</p>
                   </div>
                   {bld && (
-                    <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', READINESS_BADGE[bld.readiness_status])}>
+                    <span
+                      className={cn(
+                        'text-xs px-2 py-0.5 rounded-full font-medium',
+                        READINESS_BADGE[bld.readiness_status],
+                      )}
+                    >
                       {READINESS_LABEL[bld.readiness_status] || bld.readiness_status}
                     </span>
                   )}
@@ -588,7 +625,9 @@ export default function PortfolioCommand() {
                       {bld.overdue_actions_count} retard
                     </span>
                   )}
-                  <span className="text-xs font-mono text-gray-400 dark:text-slate-500">{Math.round(p.priority_score)}</span>
+                  <span className="text-xs font-mono text-gray-400 dark:text-slate-500">
+                    {Math.round(p.priority_score)}
+                  </span>
                 </div>
               );
             })}
@@ -630,7 +669,9 @@ export default function PortfolioCommand() {
             >
               <option value="">{t('portfolio_cmd.all_cantons') || 'Tous cantons'}</option>
               {cantons.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
             <span className="text-xs text-gray-500 dark:text-slate-400">
@@ -643,18 +684,20 @@ export default function PortfolioCommand() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
-                {([
-                  ['name', 'Batiment'],
-                  ['passport_grade', 'Grade'],
-                  ['completeness_pct', 'Completude'],
-                  ['trust_pct', 'Confiance'],
-                  ['readiness_status', 'Readiness'],
-                  ['open_actions_count', 'Actions'],
-                  ['overdue_actions_count', 'En retard'],
-                  ['expiring_diagnostics_count', 'Expirations'],
-                  ['planned_interventions_count', 'Interventions'],
-                  ['last_activity', 'Derniere activite'],
-                ] as [SortKey, string][]).map(([key, label]) => (
+                {(
+                  [
+                    ['name', 'Batiment'],
+                    ['passport_grade', 'Grade'],
+                    ['completeness_pct', 'Completude'],
+                    ['trust_pct', 'Confiance'],
+                    ['readiness_status', 'Readiness'],
+                    ['open_actions_count', 'Actions'],
+                    ['overdue_actions_count', 'En retard'],
+                    ['expiring_diagnostics_count', 'Expirations'],
+                    ['planned_interventions_count', 'Interventions'],
+                    ['last_activity', 'Derniere activite'],
+                  ] as [SortKey, string][]
+                ).map(([key, label]) => (
                   <th
                     key={key}
                     className="px-3 py-2 text-left font-medium text-gray-500 dark:text-slate-400 cursor-pointer hover:text-gray-700 dark:hover:text-slate-200 whitespace-nowrap"
@@ -678,7 +721,9 @@ export default function PortfolioCommand() {
                   <td className="px-3 py-2.5">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white truncate max-w-[200px]">{b.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-slate-400 truncate max-w-[200px]">{b.municipality}, {b.canton}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 truncate max-w-[200px]">
+                        {b.municipality}, {b.canton}
+                      </p>
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
@@ -691,27 +736,60 @@ export default function PortfolioCommand() {
                     <ProgressBar pct={b.trust_pct} />
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap', READINESS_BADGE[b.readiness_status])}>
+                    <span
+                      className={cn(
+                        'text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap',
+                        READINESS_BADGE[b.readiness_status],
+                      )}
+                    >
                       {READINESS_LABEL[b.readiness_status] || b.readiness_status}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <span className={cn('font-medium', b.open_actions_count > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-slate-500')}>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        b.open_actions_count > 0
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-gray-400 dark:text-slate-500',
+                      )}
+                    >
                       {b.open_actions_count}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <span className={cn('font-medium', b.overdue_actions_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-slate-500')}>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        b.overdue_actions_count > 0
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-gray-400 dark:text-slate-500',
+                      )}
+                    >
                       {b.overdue_actions_count}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <span className={cn('font-medium', b.expiring_diagnostics_count > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-slate-500')}>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        b.expiring_diagnostics_count > 0
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-gray-400 dark:text-slate-500',
+                      )}
+                    >
                       {b.expiring_diagnostics_count}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <span className={cn('font-medium', b.planned_interventions_count > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-slate-500')}>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        b.planned_interventions_count > 0
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-400 dark:text-slate-500',
+                      )}
+                    >
                       {b.planned_interventions_count}
                     </span>
                   </td>
@@ -752,7 +830,8 @@ export default function PortfolioCommand() {
           {t('portfolio_cmd.heatmap') || 'Matrice completude / confiance'}
         </h2>
         <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">
-          {t('portfolio_cmd.heatmap_desc') || 'Chaque point = un batiment. Zone rouge (bas-gauche) = completude et confiance faibles.'}
+          {t('portfolio_cmd.heatmap_desc') ||
+            'Chaque point = un batiment. Zone rouge (bas-gauche) = completude et confiance faibles.'}
         </p>
         <HeatmapChart points={heatmapData?.buildings || []} />
       </div>

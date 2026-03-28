@@ -164,9 +164,7 @@ const SAFE_TO_X_LABELS: Record<string, string> = {
 function SeverityDot({ severity }: { severity: string }) {
   const cfg = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.medium;
   return (
-    <span
-      className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full border', cfg.color, cfg.darkColor)}
-    >
+    <span className={cn('inline-block px-2 py-0.5 text-xs font-medium rounded-full border', cfg.color, cfg.darkColor)}>
       {cfg.label}
     </span>
   );
@@ -227,9 +225,7 @@ function EntryCard({
 
       {expanded && (
         <div className="mt-3 space-y-2 text-sm">
-          {entry.description && (
-            <p className="text-gray-600 dark:text-slate-300">{entry.description}</p>
-          )}
+          {entry.description && <p className="text-gray-600 dark:text-slate-300">{entry.description}</p>}
           {entry.risk_of_acting && (
             <div className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-900/10 rounded text-red-700 dark:text-red-300 text-xs">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
@@ -293,9 +289,7 @@ function CoverageMapSection({ buildingId }: { buildingId: string }) {
 
   const totalZones = data.covered.length + data.gaps.length + data.partial.length;
   if (totalZones === 0) {
-    return (
-      <p className="text-sm text-gray-500 dark:text-slate-400 py-2">Aucune zone definie pour ce batiment.</p>
-    );
+    return <p className="text-sm text-gray-500 dark:text-slate-400 py-2">Aucune zone definie pour ce batiment.</p>;
   }
 
   return (
@@ -449,9 +443,7 @@ function AcceptRiskModal({
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Accepter le risque</h3>
         <div className="flex items-start gap-2 p-3 mb-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg text-amber-800 dark:text-amber-300 text-sm">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-          <span>
-            L'acceptation du risque est irrevocable. Vous devez fournir une justification.
-          </span>
+          <span>L'acceptation du risque est irrevocable. Vous devez fournir une justification.</span>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
@@ -526,22 +518,19 @@ export default function UnknownsLedger({ buildingId }: { buildingId: string }) {
     queryClient.invalidateQueries({ queryKey: ['unknowns-ledger-impact', buildingId] });
   }, [queryClient, buildingId]);
 
-  const handleInvestigate = useCallback(
-    async (id: string) => {
-      try {
-        await apiClient.post(`/unknowns-ledger/${id}/resolve`, {
-          method: 'new_evidence',
-          note: 'Marque pour investigation',
-        });
-        // For now, just mark as investigating via the resolve endpoint is not ideal.
-        // We just expand the card so the user can see the details.
-        toast("Details de l'inconnue affiches ci-dessous", 'info');
-      } catch {
-        // ignore
-      }
-    },
-    [],
-  );
+  const handleInvestigate = useCallback(async (id: string) => {
+    try {
+      await apiClient.post(`/unknowns-ledger/${id}/resolve`, {
+        method: 'new_evidence',
+        note: 'Marque pour investigation',
+      });
+      // For now, just mark as investigating via the resolve endpoint is not ideal.
+      // We just expand the card so the user can see the details.
+      toast("Details de l'inconnue affiches ci-dessous", 'info');
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Group by type
   const grouped = useMemo(() => {
@@ -610,11 +599,7 @@ export default function UnknownsLedger({ buildingId }: { buildingId: string }) {
           disabled={scanMutation.isPending}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {scanMutation.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <RefreshCw className="w-4 h-4" />
-          )}
+          {scanMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           Scanner
         </button>
       </div>
@@ -680,9 +665,7 @@ export default function UnknownsLedger({ buildingId }: { buildingId: string }) {
       </div>
 
       {/* Modals */}
-      {resolveId && (
-        <ResolveModal unknownId={resolveId} onClose={() => setResolveId(null)} onSuccess={invalidateAll} />
-      )}
+      {resolveId && <ResolveModal unknownId={resolveId} onClose={() => setResolveId(null)} onSuccess={invalidateAll} />}
       {acceptRiskId && (
         <AcceptRiskModal unknownId={acceptRiskId} onClose={() => setAcceptRiskId(null)} onSuccess={invalidateAll} />
       )}

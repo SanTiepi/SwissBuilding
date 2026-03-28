@@ -24,7 +24,8 @@ const READINESS_LABELS: Record<string, string> = {
 function blockerToTab(label: string): string | null {
   const lower = label.toLowerCase();
   if (lower.includes('diagnostic') || lower.includes('sample') || lower.includes('pollutant')) return 'diagnostics';
-  if (lower.includes('document') || lower.includes('evidence') || lower.includes('report') || lower.includes('proof')) return 'documents';
+  if (lower.includes('document') || lower.includes('evidence') || lower.includes('report') || lower.includes('proof'))
+    return 'documents';
   if (lower.includes('ownership') || lower.includes('owner')) return 'ownership';
   if (lower.includes('lease') || lower.includes('tenant')) return 'leases';
   if (lower.includes('contract')) return 'contracts';
@@ -32,7 +33,13 @@ function blockerToTab(label: string): string | null {
   return null;
 }
 
-export function ReadinessSummary({ buildingId, onNavigateTab }: { buildingId: string; onNavigateTab?: (tab: string) => void }) {
+export function ReadinessSummary({
+  buildingId,
+  onNavigateTab,
+}: {
+  buildingId: string;
+  onNavigateTab?: (tab: string) => void;
+}) {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['building-readiness', buildingId],

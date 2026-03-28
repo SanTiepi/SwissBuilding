@@ -3,15 +3,7 @@ import { cn } from '@/utils/formatters';
 import { readinessApi } from '@/api/readiness';
 import type { Building, ActionItem, ReadinessAssessment, ReadinessStatus } from '@/types';
 import type { BuildingDashboard } from '@/api/buildingDashboard';
-import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  ChevronRight,
-  Shield,
-  ArrowDown,
-  Circle,
-} from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, ChevronRight, Shield, ArrowDown, Circle } from 'lucide-react';
 import { ConfidenceBadge } from '@/components/ConfidenceBadge';
 
 /* ------------------------------------------------------------------ */
@@ -34,10 +26,22 @@ interface DossierJourneyProps {
 /* ------------------------------------------------------------------ */
 
 const GRADE_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
-  A: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300', ring: 'ring-emerald-500' },
+  A: {
+    bg: 'bg-emerald-100 dark:bg-emerald-900/40',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    ring: 'ring-emerald-500',
+  },
   B: { bg: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-700 dark:text-green-300', ring: 'ring-green-500' },
-  C: { bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-700 dark:text-yellow-300', ring: 'ring-yellow-500' },
-  D: { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-700 dark:text-orange-300', ring: 'ring-orange-500' },
+  C: {
+    bg: 'bg-yellow-100 dark:bg-yellow-900/40',
+    text: 'text-yellow-700 dark:text-yellow-300',
+    ring: 'ring-yellow-500',
+  },
+  D: {
+    bg: 'bg-orange-100 dark:bg-orange-900/40',
+    text: 'text-orange-700 dark:text-orange-300',
+    ring: 'ring-orange-500',
+  },
   E: { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-700 dark:text-red-300', ring: 'ring-red-500' },
   F: { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-700 dark:text-red-300', ring: 'ring-red-500' },
 };
@@ -90,7 +94,8 @@ function actionToTab(sourceType: string): string | null {
 function blockerToTab(label: string): string | null {
   const lower = label.toLowerCase();
   if (lower.includes('diagnostic') || lower.includes('sample') || lower.includes('pollutant')) return 'diagnostics';
-  if (lower.includes('document') || lower.includes('evidence') || lower.includes('report') || lower.includes('proof')) return 'documents';
+  if (lower.includes('document') || lower.includes('evidence') || lower.includes('report') || lower.includes('proof'))
+    return 'documents';
   if (lower.includes('ownership') || lower.includes('owner')) return 'ownership';
   if (lower.includes('lease') || lower.includes('tenant')) return 'leases';
   if (lower.includes('contract')) return 'contracts';
@@ -205,7 +210,11 @@ export function DossierJourney({
     readinessStatus === 'ready'
       ? { label: 'Pret', color: 'text-green-700 dark:text-green-300', bg: 'bg-green-100 dark:bg-green-900/30' }
       : readinessStatus === 'partially_ready'
-        ? { label: 'Partiellement pret', color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-900/30' }
+        ? {
+            label: 'Partiellement pret',
+            color: 'text-amber-700 dark:text-amber-300',
+            bg: 'bg-amber-100 dark:bg-amber-900/30',
+          }
         : readinessStatus === 'not_ready'
           ? { label: 'Non pret', color: 'text-red-700 dark:text-red-300', bg: 'bg-red-100 dark:bg-red-900/30' }
           : { label: '\u2014', color: 'text-gray-500 dark:text-slate-400', bg: 'bg-gray-100 dark:bg-slate-700' };
@@ -244,9 +253,7 @@ export function DossierJourney({
       {/* Title */}
       <div className="flex items-center gap-2 mb-5">
         <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />
-        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-          Parcours du dossier
-        </h3>
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white">Parcours du dossier</h3>
       </div>
 
       {/* ============ SECTION 1: Etat du batiment ============ */}
@@ -376,9 +383,7 @@ export function DossierJourney({
                           {ITEM_LABELS[item.key] || item.key}
                         </button>
                       ) : (
-                        <span className="text-gray-500 dark:text-slate-400">
-                          {ITEM_LABELS[item.key] || item.key}
-                        </span>
+                        <span className="text-gray-500 dark:text-slate-400">{ITEM_LABELS[item.key] || item.key}</span>
                       )}
                     </li>
                   );
@@ -401,7 +406,13 @@ export function DossierJourney({
         <StepHeader step={3} title="Verdict de readiness" variant={readinessVariant} />
 
         {/* Large verdict */}
-        <div className={cn('inline-flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-bold mb-4', readinessVerdict.bg, readinessVerdict.color)}>
+        <div
+          className={cn(
+            'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-bold mb-4',
+            readinessVerdict.bg,
+            readinessVerdict.color,
+          )}
+        >
           {readinessStatus === 'ready' && <CheckCircle2 className="w-5 h-5" />}
           {readinessStatus === 'partially_ready' && <AlertTriangle className="w-5 h-5" />}
           {readinessStatus === 'not_ready' && <XCircle className="w-5 h-5" />}
@@ -419,14 +430,17 @@ export function DossierJourney({
             const blockers = assessment?.blockers_json ?? [];
 
             return (
-              <div key={type} className="rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 px-3 py-2">
+              <div
+                key={type}
+                className="rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 px-3 py-2"
+              >
                 <div className="flex items-center gap-2">
                   <Icon className={cn('w-4 h-4 flex-shrink-0', styles?.text ?? 'text-gray-300 dark:text-slate-500')} />
                   <span className="text-xs font-medium text-gray-700 dark:text-slate-200 flex-1">
                     {READINESS_LABELS[type] || type.replace(/_/g, ' ')}
                   </span>
                   <span className={cn('text-[10px] font-medium', styles?.text ?? 'text-gray-400 dark:text-slate-500')}>
-                    {status ? (STATUS_LABEL[status] || status) : 'Non evalue'}
+                    {status ? STATUS_LABEL[status] || status : 'Non evalue'}
                   </span>
                 </div>
 
@@ -485,9 +499,7 @@ export function DossierJourney({
                             : 'bg-green-500',
                     )}
                   />
-                  <span className="text-xs text-gray-700 dark:text-slate-200 flex-1 truncate">
-                    {action.title}
-                  </span>
+                  <span className="text-xs text-gray-700 dark:text-slate-200 flex-1 truncate">{action.title}</span>
                   <span
                     className={cn(
                       'text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0',
@@ -509,9 +521,7 @@ export function DossierJourney({
               );
             })}
             {openActions.length > 5 && (
-              <p className="text-xs text-gray-400 dark:text-slate-500 pl-1">
-                +{openActions.length - 5} autres actions
-              </p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 pl-1">+{openActions.length - 5} autres actions</p>
             )}
           </ul>
         ) : (

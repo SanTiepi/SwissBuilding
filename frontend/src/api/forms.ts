@@ -64,21 +64,16 @@ export const formsApi = {
   getApplicable: async (buildingId: string, interventionType?: string): Promise<ApplicableForm[]> => {
     const params: Record<string, string> = {};
     if (interventionType) params.intervention_type = interventionType;
-    const response = await apiClient.get<ApplicableForm[]>(
-      `/buildings/${buildingId}/forms/applicable`,
-      { params },
-    );
+    const response = await apiClient.get<ApplicableForm[]>(`/buildings/${buildingId}/forms/applicable`, { params });
     return response.data;
   },
 
   prefill: async (buildingId: string, templateId: string, interventionId?: string): Promise<FormInstance> => {
     const params: Record<string, string> = {};
     if (interventionId) params.intervention_id = interventionId;
-    const response = await apiClient.post<FormInstance>(
-      `/buildings/${buildingId}/forms/${templateId}/prefill`,
-      null,
-      { params },
-    );
+    const response = await apiClient.post<FormInstance>(`/buildings/${buildingId}/forms/${templateId}/prefill`, null, {
+      params,
+    });
     return response.data;
   },
 

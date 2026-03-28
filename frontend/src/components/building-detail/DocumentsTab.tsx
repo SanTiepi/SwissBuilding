@@ -49,11 +49,7 @@ export function DocumentsTab({ documents, isLoadingDocs, documentsError, buildin
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <ExtractionTriggerButton
-                  documentId={doc.id}
-                  buildingId={buildingId}
-                  mimeType={doc.mime_type}
-                />
+                <ExtractionTriggerButton documentId={doc.id} buildingId={buildingId} mimeType={doc.mime_type} />
                 <button
                   onClick={async () => {
                     try {

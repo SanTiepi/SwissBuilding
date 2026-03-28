@@ -124,9 +124,7 @@ export interface ReimportValidation {
 
 export const passportEnvelopeDiffApi = {
   async diffEnvelopes(envelopeIdA: string, envelopeIdB: string): Promise<EnvelopeDiffResult> {
-    const res = await apiClient.get<EnvelopeDiffResult>(
-      `/passport-envelope/${envelopeIdA}/diff/${envelopeIdB}`,
-    );
+    const res = await apiClient.get<EnvelopeDiffResult>(`/passport-envelope/${envelopeIdA}/diff/${envelopeIdB}`);
     return res.data;
   },
 

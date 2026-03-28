@@ -6,16 +6,7 @@ import { financialEntriesApi } from '@/api/financialEntries';
 import type { FinancialEntryRead } from '@/api/financialEntries';
 import { buildingsApi } from '@/api/buildings';
 import type { Building } from '@/types';
-import {
-  Wallet,
-  Loader2,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  FileText,
-  Inbox,
-  ChevronDown,
-} from 'lucide-react';
+import { Wallet, Loader2, TrendingUp, TrendingDown, DollarSign, FileText, Inbox, ChevronDown } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
 const ENTRY_TYPE_COLORS: Record<string, string> = {
@@ -97,9 +88,7 @@ export default function Finance() {
           <Wallet className="w-6 h-6 text-red-600 dark:text-red-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('finance.title') || 'Finance'}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('finance.title') || 'Finance'}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {t('finance.subtitle') || 'Vue consolidee des ecritures financieres'}
           </p>
@@ -193,9 +182,7 @@ export default function Finance() {
         <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
           <Inbox className="w-12 h-12 mb-3 opacity-50" />
           <p className="text-lg font-medium">{t('finance.empty') || 'Aucune ecriture financiere'}</p>
-          <p className="text-sm mt-1">
-            {t('finance.empty_hint') || 'Les ecritures apparaitront ici une fois creees'}
-          </p>
+          <p className="text-sm mt-1">{t('finance.empty_hint') || 'Les ecritures apparaitront ici une fois creees'}</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
@@ -309,9 +296,7 @@ function SummaryCard({
     <div className={cn('rounded-xl p-4 border border-gray-200 dark:border-gray-700', bgColor)}>
       <div className="flex items-center gap-2 mb-2">
         <span className={color}>{icon}</span>
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          {label}
-        </span>
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</span>
       </div>
       {loading ? (
         <div className="h-8 flex items-center">

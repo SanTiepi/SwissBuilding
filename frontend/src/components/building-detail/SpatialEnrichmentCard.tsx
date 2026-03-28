@@ -3,16 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { spatialEnrichmentApi } from '@/api/spatialEnrichment';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import {
-  RefreshCw,
-  AlertTriangle,
-  Building2,
-  Ruler,
-  Box,
-  Layers,
-  Home,
-  Loader2,
-} from 'lucide-react';
+import { RefreshCw, AlertTriangle, Building2, Ruler, Box, Layers, Home, Loader2 } from 'lucide-react';
 
 interface SpatialEnrichmentCardProps {
   buildingId: string;
@@ -134,9 +125,7 @@ export default function SpatialEnrichmentCard({ buildingId }: SpatialEnrichmentC
           )}
         </div>
         <div className="flex items-center gap-2">
-          {formattedDate && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">{formattedDate}</span>
-          )}
+          {formattedDate && <span className="text-[10px] text-gray-400 dark:text-gray-500">{formattedDate}</span>}
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}

@@ -5,7 +5,12 @@ export interface PredictiveAlert {
   severity: 'critical' | 'warning' | 'info';
   building_id: string;
   building_name: string;
-  alert_type: 'diagnostic_expiring' | 'readiness_degradation' | 'obligation_due' | 'coverage_gap' | 'intervention_unready';
+  alert_type:
+    | 'diagnostic_expiring'
+    | 'readiness_degradation'
+    | 'obligation_due'
+    | 'coverage_gap'
+    | 'intervention_unready';
   title: string;
   description: string;
   deadline: string | null;
@@ -55,9 +60,7 @@ export const predictiveReadinessApi = {
   },
 
   scanBuilding: async (buildingId: string): Promise<PredictiveReadinessResult> => {
-    const response = await apiClient.get<PredictiveReadinessResult>(
-      `/buildings/${buildingId}/predictive-readiness`,
-    );
+    const response = await apiClient.get<PredictiveReadinessResult>(`/buildings/${buildingId}/predictive-readiness`);
     return response.data;
   },
 

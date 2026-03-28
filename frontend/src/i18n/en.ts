@@ -3844,7 +3844,8 @@ export const en: TranslationMap = {
   'rfq.generate_comparison_hint': 'Generate the comparison to see quotes side by side.',
   'rfq.generate_comparison': 'Generate comparison',
   'rfq.generating': 'Generating...',
-  'rfq.comparison_disclaimer': 'Factual comparison. No ranking or recommendation. The choice belongs to the project owner.',
+  'rfq.comparison_disclaimer':
+    'Factual comparison. No ranking or recommendation. The choice belongs to the project owner.',
   'rfq.compare_amount': 'Total amount (CHF)',
   'rfq.compare_duration': 'Estimated duration (days)',
   'rfq.compare_scope': 'Scope covered',

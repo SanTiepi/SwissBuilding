@@ -743,7 +743,8 @@ export const de: TranslationMap = {
   'building.tab.cases': 'Dossiers',
   'building.tab.passport': 'Pass & Transfer',
   'building.tab.questions': 'Fragen',
-  'building.tab.questions_description': 'Bereitschaftsurteile, Absichtsanfragen und SafeToX-Bewertungen fuer dieses Gebaeude.',
+  'building.tab.questions_description':
+    'Bereitschaftsurteile, Absichtsanfragen und SafeToX-Bewertungen fuer dieses Gebaeude.',
   'building.tab.questions_coming_soon': 'Vollstaendiger Bereitschaftsarbeitsbereich kommt bald.',
   'building.completeness': 'Vollstaendigkeit',
   'building.completeness_desc': 'Fortschritt des Gebaeudedossiers',
@@ -1627,7 +1628,8 @@ export const de: TranslationMap = {
   'portfolio_cmd.all_cantons': 'Alle Kantone',
   'portfolio_cmd.budget_horizon': 'Budgethorizont',
   'portfolio_cmd.heatmap': 'Vollstaendigkeit / Vertrauen Matrix',
-  'portfolio_cmd.heatmap_desc': 'Jeder Punkt = ein Gebaeude. Roter Bereich (unten links) = geringe Vollstaendigkeit und Vertrauen.',
+  'portfolio_cmd.heatmap_desc':
+    'Jeder Punkt = ein Gebaeude. Roter Bereich (unten links) = geringe Vollstaendigkeit und Vertrauen.',
   'portfolio.title': 'Portfolio',
   'portfolio.total_buildings': 'Gesamtgebaeude',
   'portfolio.avg_completeness': 'Durchschnittliche Vollstaendigkeit',
@@ -3922,7 +3924,8 @@ export const de: TranslationMap = {
 
   // Forms Workspace
   'forms.title': 'Regulatorische Formulare',
-  'forms.description': 'Identifizieren Sie anwendbare Formulare, fuellen Sie diese automatisch aus Gebaeudedaten aus, und verfolgen Sie deren Einreichung.',
+  'forms.description':
+    'Identifizieren Sie anwendbare Formulare, fuellen Sie diese automatisch aus Gebaeudedaten aus, und verfolgen Sie deren Einreichung.',
   'forms.applicable_title': 'Anwendbare Formulare',
   'forms.my_forms': 'Meine Formulare',
   'forms.no_applicable': 'Keine anwendbaren Formulare fuer dieses Gebaeude.',

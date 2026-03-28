@@ -111,11 +111,7 @@ export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['geo-context', buildingId],
     queryFn: () => geoContextApi.get(buildingId),
     enabled: !!buildingId,
@@ -199,9 +195,7 @@ export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {formattedDate && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">{formattedDate}</span>
-          )}
+          {formattedDate && <span className="text-[10px] text-gray-400 dark:text-gray-500">{formattedDate}</span>}
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -241,9 +235,7 @@ export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
                   <Icon className="w-4 h-4 text-gray-400 dark:text-gray-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-400 dark:text-gray-500 truncate capitalize">
-                    {label}
-                  </p>
+                  <p className="text-xs font-medium text-gray-400 dark:text-gray-500 truncate capitalize">{label}</p>
                   <p className="text-sm text-gray-400 dark:text-gray-600 mt-0.5">
                     {t('geo_context.not_available') || 'Non disponible'}
                   </p>

@@ -99,9 +99,11 @@ const TYPE_CONFIG: Record<string, { icon: typeof Calendar; color: string; label:
 
 const STATUS_STYLES: Record<string, string> = {
   overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
-  due_soon: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+  due_soon:
+    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800',
   upcoming: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-  completed: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800',
+  completed:
+    'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800',
 };
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -112,8 +114,19 @@ const PRIORITY_DOT: Record<string, string> = {
 };
 
 const MONTH_NAMES_FR = [
-  '', 'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
+  '',
+  'Janvier',
+  'Fevrier',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Aout',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Decembre',
 ];
 
 // ---------------------------------------------------------------------------
@@ -122,10 +135,30 @@ const MONTH_NAMES_FR = [
 
 function SummaryCards({ summary }: { summary: CalendarSummary }) {
   const cards = [
-    { label: 'En retard', value: summary.overdue, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20' },
-    { label: 'Sous 30 jours', value: summary.due_30d, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-    { label: 'Sous 90 jours', value: summary.due_90d, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Total actifs', value: summary.due_365d, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-slate-700' },
+    {
+      label: 'En retard',
+      value: summary.overdue,
+      color: 'text-red-600 dark:text-red-400',
+      bg: 'bg-red-50 dark:bg-red-900/20',
+    },
+    {
+      label: 'Sous 30 jours',
+      value: summary.due_30d,
+      color: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-50 dark:bg-amber-900/20',
+    },
+    {
+      label: 'Sous 90 jours',
+      value: summary.due_90d,
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+    },
+    {
+      label: 'Total actifs',
+      value: summary.due_365d,
+      color: 'text-gray-600 dark:text-gray-400',
+      bg: 'bg-gray-50 dark:bg-slate-700',
+    },
   ];
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -180,9 +213,7 @@ function EventRow({ event }: { event: CalendarEvent }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium text-gray-900 dark:text-white truncate">{event.title}</span>
-          <span className={cn('px-1.5 py-0.5 text-[10px] font-medium rounded-full', statusStyle)}>
-            {daysLabel()}
-          </span>
+          <span className={cn('px-1.5 py-0.5 text-[10px] font-medium rounded-full', statusStyle)}>{daysLabel()}</span>
           <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400">
             {config.label}
           </span>
@@ -196,9 +227,7 @@ function EventRow({ event }: { event: CalendarEvent }) {
             {formatDate(event.date)}
           </span>
           {event.action_required && (
-            <span className="text-xs font-medium text-red-600 dark:text-red-400">
-              {event.action_required}
-            </span>
+            <span className="text-xs font-medium text-red-600 dark:text-red-400">{event.action_required}</span>
           )}
         </div>
       </div>
@@ -279,7 +308,9 @@ function AnnualReviewPanel({ buildingId }: { buildingId: string }) {
       >
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-          <span className="text-sm font-semibold text-gray-900 dark:text-white">Revue annuelle {new Date().getFullYear()}</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            Revue annuelle {new Date().getFullYear()}
+          </span>
         </div>
         {show ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
       </button>
@@ -291,9 +322,7 @@ function AnnualReviewPanel({ buildingId }: { buildingId: string }) {
               <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
             </div>
           )}
-          {isError && (
-            <p className="text-sm text-red-600 dark:text-red-400 text-center py-4">Erreur de chargement</p>
-          )}
+          {isError && <p className="text-sm text-red-600 dark:text-red-400 text-center py-4">Erreur de chargement</p>}
           {data && (
             <div className="space-y-4">
               {/* Stats grid */}
@@ -310,7 +339,12 @@ function AnnualReviewPanel({ buildingId }: { buildingId: string }) {
                   <p className="text-xs text-gray-500 dark:text-slate-400">Interventions terminees</p>
                 </div>
                 <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-3">
-                  <p className={cn('text-lg font-bold', data.overdue_obligations > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white')}>
+                  <p
+                    className={cn(
+                      'text-lg font-bold',
+                      data.overdue_obligations > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white',
+                    )}
+                  >
                     {data.open_obligations}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-slate-400">Obligations ouvertes</p>
@@ -319,10 +353,14 @@ function AnnualReviewPanel({ buildingId }: { buildingId: string }) {
                   )}
                 </div>
                 <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-3">
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">{data.insurance_coverage.active_policies}</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    {data.insurance_coverage.active_policies}
+                  </p>
                   <p className="text-xs text-gray-500 dark:text-slate-400">Polices actives</p>
                   {data.insurance_coverage.expiring_this_year > 0 && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{data.insurance_coverage.expiring_this_year} a renouveler</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      {data.insurance_coverage.expiring_this_year} a renouveler
+                    </p>
                   )}
                 </div>
               </div>
@@ -421,9 +459,7 @@ export default function BuildingLifeTab({ buildingId }: Props) {
     return (
       <div className="text-center py-12" data-testid="building-life-empty">
         <Calendar className="w-8 h-8 text-gray-300 dark:text-slate-600 mx-auto mb-2" />
-        <p className="text-sm text-gray-500 dark:text-slate-400">
-          Aucun evenement de cycle de vie pour ce batiment
-        </p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Aucun evenement de cycle de vie pour ce batiment</p>
       </div>
     );
   }
@@ -476,9 +512,7 @@ export default function BuildingLifeTab({ buildingId }: Props) {
           // Filter out overdue events already shown above
           const nonOverdue = events.filter((e) => e.status !== 'overdue');
           if (nonOverdue.length === 0) return null;
-          return (
-            <MonthSection key={monthKey} monthKey={monthKey} events={nonOverdue} defaultOpen={idx < 3} />
-          );
+          return <MonthSection key={monthKey} monthKey={monthKey} events={nonOverdue} defaultOpen={idx < 3} />;
         })}
       </div>
 

@@ -15,14 +15,20 @@ const QUOTE_STATUS: Record<string, { label: string; color: string; bg: string }>
     color: 'text-amber-700 dark:text-amber-300',
     bg: 'bg-amber-100 dark:bg-amber-900/30',
   },
-  selected: { label: 'Selectionne', color: 'text-green-700 dark:text-green-300', bg: 'bg-green-100 dark:bg-green-900/30' },
+  selected: {
+    label: 'Selectionne',
+    color: 'text-green-700 dark:text-green-300',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+  },
   rejected: { label: 'Rejete', color: 'text-red-700 dark:text-red-300', bg: 'bg-red-100 dark:bg-red-900/30' },
 };
 
 function QuoteStatusBadge({ status }: { status: string }) {
   const config = QUOTE_STATUS[status] ?? QUOTE_STATUS.received;
   return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', config.bg, config.color)}>
+    <span
+      className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', config.bg, config.color)}
+    >
       {config.label}
     </span>
   );
@@ -116,22 +122,17 @@ export default function QuoteCard({ quote, contractorName, onExtract, isExtracti
             disabled={isExtracting}
             className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50"
           >
-            {isExtracting ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <FileText className="w-3.5 h-3.5" />
-            )}
+            {isExtracting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             {t('rfq.extract_data') || 'Extraire les donnees'}
           </button>
         )}
 
-        {quote.extracted_data &&
-          (quote.extracted_data as Record<string, unknown>).status === 'pending_extraction' && (
-            <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-              <AlertCircle className="w-3.5 h-3.5" />
-              {t('rfq.extraction_pending') || 'Extraction en cours'}
-            </span>
-          )}
+        {quote.extracted_data && (quote.extracted_data as Record<string, unknown>).status === 'pending_extraction' && (
+          <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+            <AlertCircle className="w-3.5 h-3.5" />
+            {t('rfq.extraction_pending') || 'Extraction en cours'}
+          </span>
+        )}
       </div>
 
       {/* Expanded detail */}

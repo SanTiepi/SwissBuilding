@@ -217,9 +217,7 @@ function ExpiringCard({ item, onClick }: { item: TodayExpiring; onClick: () => v
           <p className="text-sm text-slate-900 dark:text-white truncate">
             {item.document_type} — {item.building_name}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Expire le {formatDate(item.expiry_date)}
-          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Expire le {formatDate(item.expiry_date)}</p>
         </div>
         <span
           className={cn(
@@ -283,9 +281,7 @@ export default function Today() {
   if (isError || !data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-slate-500 dark:text-slate-400">
-          {t('common.error') || 'Erreur lors du chargement'}
-        </p>
+        <p className="text-slate-500 dark:text-slate-400">{t('common.error') || 'Erreur lors du chargement'}</p>
       </div>
     );
   }
@@ -297,9 +293,7 @@ export default function Today() {
     <div className="space-y-6 p-4 md:p-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {t('today.title') || "Aujourd'hui"}
-        </h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('today.title') || "Aujourd'hui"}</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           {t('today.subtitle') || 'Vue operationnelle de votre portfolio'}
         </p>
@@ -425,9 +419,7 @@ export default function Today() {
           {blocked.length === 0 ? (
             <EmptyState icon={CheckCircle2} message={t('today.no_blocked') || 'Rien de bloque'} />
           ) : (
-            blocked.map((item, i) => (
-              <BlockedCard key={i} item={item} onClick={() => goBuilding(item.building_id)} />
-            ))
+            blocked.map((item, i) => <BlockedCard key={i} item={item} onClick={() => goBuilding(item.building_id)} />)
           )}
         </Section>
 

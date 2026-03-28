@@ -160,9 +160,10 @@ function filterKnowledge(role: AudienceRole, card: InstantCardResult): string[] 
 function filterRisks(role: AudienceRole, card: InstantCardResult, decisionView: DecisionView | undefined): string[] {
   const items: string[] = [];
   const risky = card.what_is_risky || ({} as any);
-  const pollutants = Object.entries(risky.pollutant_risk || {}).filter(
-    ([, v]) => typeof v === 'number',
-  ) as [string, number][];
+  const pollutants = Object.entries(risky.pollutant_risk || {}).filter(([, v]) => typeof v === 'number') as [
+    string,
+    number,
+  ][];
 
   // All roles care about high pollutant risks, but threshold differs
   const threshold = role === 'diagnostician' ? 0.2 : role === 'authority' ? 0.4 : 0.5;

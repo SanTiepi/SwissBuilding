@@ -53,9 +53,7 @@ describe('ConfidenceBadge', () => {
   });
 
   it('inherited level includes source in tooltip', () => {
-    render(
-      <ConfidenceBadge level="inherited" size="md" source="Diagnostic 2022" date="2022-06-15" />,
-    );
+    render(<ConfidenceBadge level="inherited" size="md" source="Diagnostic 2022" date="2022-06-15" />);
     const badge = screen.getByTestId('confidence-badge-inherited');
     const title = badge.getAttribute('title');
     expect(title).toContain('Source: Diagnostic 2022');

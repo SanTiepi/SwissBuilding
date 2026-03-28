@@ -126,11 +126,11 @@ export default function IndispensabilityView({ buildingId }: IndispensabilityVie
 
   if (isError || !data) return null;
 
-  const fragmentation = data.fragmentation || {} as any;
-  const defensibility = data.defensibility || {} as any;
-  const counterfactual = data.counterfactual || {} as any;
-  const withP = counterfactual.with_platform || {} as any;
-  const withoutP = counterfactual.without_platform || {} as any;
+  const fragmentation = data.fragmentation || ({} as any);
+  const defensibility = data.defensibility || ({} as any);
+  const counterfactual = data.counterfactual || ({} as any);
+  const withP = counterfactual.with_platform || ({} as any);
+  const withoutP = counterfactual.without_platform || ({} as any);
 
   return (
     <div className="space-y-5" data-testid="indispensability-view">

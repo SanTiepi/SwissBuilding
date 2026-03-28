@@ -10,18 +10,7 @@ import {
 } from '@/api/rfq';
 import QuoteComparison from '@/components/rfq/QuoteComparison';
 import QuoteCard from '@/components/rfq/QuoteCard';
-import {
-  Plus,
-  Loader2,
-  X,
-  FileText,
-  ChevronRight,
-  ChevronDown,
-  Send,
-  Clock,
-  ArrowLeft,
-  Sparkles,
-} from 'lucide-react';
+import { Plus, Loader2, X, FileText, ChevronRight, ChevronDown, Send, Clock, ArrowLeft, Sparkles } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -200,9 +189,7 @@ function TenderCreateForm({ buildingId, onClose, onCreated }: TenderFormProps) {
 
       {/* Work type */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-          Type de travaux
-        </label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Type de travaux</label>
         <select
           value={formState.work_type}
           onChange={(e) => setFormState((s) => ({ ...s, work_type: e.target.value }))}
@@ -254,9 +241,7 @@ function TenderCreateForm({ buildingId, onClose, onCreated }: TenderFormProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-            Debut prevu
-          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Debut prevu</label>
           <input
             type="date"
             value={formState.planned_start_date}
@@ -265,9 +250,7 @@ function TenderCreateForm({ buildingId, onClose, onCreated }: TenderFormProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-            Fin prevue
-          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Fin prevue</label>
           <input
             type="date"
             value={formState.planned_end_date}
@@ -297,10 +280,7 @@ function TenderCreateForm({ buildingId, onClose, onCreated }: TenderFormProps) {
           </label>
           <ul className="space-y-1">
             {autoAttachments.map((doc, idx) => (
-              <li
-                key={idx}
-                className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400"
-              >
+              <li key={idx} className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
                 <FileText className="w-4 h-4 shrink-0" />
                 <span className="truncate">{doc}</span>
               </li>
@@ -337,9 +317,7 @@ function TenderCreateForm({ buildingId, onClose, onCreated }: TenderFormProps) {
       </div>
 
       {createMutation.isError && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          Erreur lors de la creation. Veuillez reessayer.
-        </p>
+        <p className="text-sm text-red-600 dark:text-red-400">Erreur lors de la creation. Veuillez reessayer.</p>
       )}
     </div>
   );
@@ -446,12 +424,8 @@ function TenderDetailView({ tender, buildingId, onBack }: TenderDetailProps) {
                 Deadline: {formatDate(currentTender.deadline_submission)}
               </div>
             )}
-            {currentTender.planned_start_date && (
-              <div>Debut: {formatDate(currentTender.planned_start_date)}</div>
-            )}
-            {currentTender.planned_end_date && (
-              <div>Fin: {formatDate(currentTender.planned_end_date)}</div>
-            )}
+            {currentTender.planned_start_date && <div>Debut: {formatDate(currentTender.planned_start_date)}</div>}
+            {currentTender.planned_end_date && <div>Fin: {formatDate(currentTender.planned_end_date)}</div>}
           </div>
         </div>
       </div>
@@ -460,9 +434,7 @@ function TenderDetailView({ tender, buildingId, onBack }: TenderDetailProps) {
       {currentTender.scope_summary && (
         <div className="bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Resume du perimetre</h4>
-          <p className="text-sm text-gray-600 dark:text-slate-400 whitespace-pre-wrap">
-            {currentTender.scope_summary}
-          </p>
+          <p className="text-sm text-gray-600 dark:text-slate-400 whitespace-pre-wrap">{currentTender.scope_summary}</p>
         </div>
       )}
 
@@ -658,11 +630,7 @@ export default function TenderTab({ buildingId }: TenderTabProps) {
   const selectedTender = tenders.find((t) => t.id === selectedTenderId);
   if (selectedTender) {
     return (
-      <TenderDetailView
-        tender={selectedTender}
-        buildingId={buildingId}
-        onBack={() => setSelectedTenderId(null)}
-      />
+      <TenderDetailView tender={selectedTender} buildingId={buildingId} onBack={() => setSelectedTenderId(null)} />
     );
   }
 
@@ -693,9 +661,7 @@ export default function TenderTab({ buildingId }: TenderTabProps) {
   if (isError) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-red-600 dark:text-red-400">
-          Erreur lors du chargement des appels d'offres.
-        </p>
+        <p className="text-sm text-red-600 dark:text-red-400">Erreur lors du chargement des appels d'offres.</p>
       </div>
     );
   }
@@ -706,9 +672,7 @@ export default function TenderTab({ buildingId }: TenderTabProps) {
       <div className="text-center py-12 space-y-4">
         <FileText className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto" />
         <div>
-          <p className="text-gray-500 dark:text-slate-400 text-sm">
-            Aucun appel d'offres pour ce batiment
-          </p>
+          <p className="text-gray-500 dark:text-slate-400 text-sm">Aucun appel d'offres pour ce batiment</p>
           <p className="text-gray-400 dark:text-slate-500 text-xs mt-1">
             Creez un appel d'offres pour lancer une mise en concurrence encadree
           </p>

@@ -6,14 +6,7 @@ import { buildingCasesApi } from '@/api/buildingCases';
 import type { BuildingCaseRead } from '@/api/buildingCases';
 import { buildingsApi } from '@/api/buildings';
 import type { Building } from '@/types';
-import {
-  Briefcase,
-  Loader2,
-  Plus,
-  ArrowUpDown,
-  Inbox,
-  ChevronDown,
-} from 'lucide-react';
+import { Briefcase, Loader2, Plus, ArrowUpDown, Inbox, ChevronDown } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
 const CASE_TYPES = [
@@ -33,15 +26,7 @@ const CASE_TYPES = [
   'other',
 ] as const;
 
-const CASE_STATES = [
-  'draft',
-  'in_preparation',
-  'ready',
-  'in_progress',
-  'blocked',
-  'completed',
-  'cancelled',
-] as const;
+const CASE_STATES = ['draft', 'in_preparation', 'ready', 'in_progress', 'blocked', 'completed', 'cancelled'] as const;
 
 type SortField = 'title' | 'case_type' | 'state' | 'priority' | 'planned_start' | 'updated_at';
 type SortDir = 'asc' | 'desc';
@@ -191,9 +176,7 @@ export default function Cases() {
             <Briefcase className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t('cases.title') || 'Dossiers'}
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('cases.title') || 'Dossiers'}</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {t('cases.subtitle') || 'Episodes operationnels de vos batiments'}
             </p>
@@ -271,15 +254,51 @@ export default function Cases() {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
-                <SortHeader field="title" label={t('cases.col_title') || 'Titre'} sortField={sortField} sortDir={sortDir} onToggle={toggleSort} />
-                <SortHeader field="case_type" label={t('cases.col_type') || 'Type'} sortField={sortField} sortDir={sortDir} onToggle={toggleSort} />
+                <SortHeader
+                  field="title"
+                  label={t('cases.col_title') || 'Titre'}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onToggle={toggleSort}
+                />
+                <SortHeader
+                  field="case_type"
+                  label={t('cases.col_type') || 'Type'}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onToggle={toggleSort}
+                />
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('cases.col_building') || 'Batiment'}
                 </th>
-                <SortHeader field="state" label={t('cases.col_state') || 'Etat'} sortField={sortField} sortDir={sortDir} onToggle={toggleSort} />
-                <SortHeader field="priority" label={t('cases.col_priority') || 'Priorite'} sortField={sortField} sortDir={sortDir} onToggle={toggleSort} />
-                <SortHeader field="planned_start" label={t('cases.col_planned_start') || 'Debut prevu'} sortField={sortField} sortDir={sortDir} onToggle={toggleSort} />
-                <SortHeader field="updated_at" label={t('cases.col_updated') || 'Mis a jour'} sortField={sortField} sortDir={sortDir} onToggle={toggleSort} />
+                <SortHeader
+                  field="state"
+                  label={t('cases.col_state') || 'Etat'}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onToggle={toggleSort}
+                />
+                <SortHeader
+                  field="priority"
+                  label={t('cases.col_priority') || 'Priorite'}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onToggle={toggleSort}
+                />
+                <SortHeader
+                  field="planned_start"
+                  label={t('cases.col_planned_start') || 'Debut prevu'}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onToggle={toggleSort}
+                />
+                <SortHeader
+                  field="updated_at"
+                  label={t('cases.col_updated') || 'Mis a jour'}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onToggle={toggleSort}
+                />
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -318,9 +337,7 @@ export default function Cases() {
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span
-                        className={cn('text-sm font-medium', PRIORITY_COLORS[c.priority ?? 'medium'] || '')}
-                      >
+                      <span className={cn('text-sm font-medium', PRIORITY_COLORS[c.priority ?? 'medium'] || '')}>
                         {c.priority ?? 'medium'}
                       </span>
                     </td>

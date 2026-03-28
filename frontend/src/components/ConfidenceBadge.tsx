@@ -4,13 +4,7 @@ import { cn } from '@/utils/formatters';
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-export type ConfidenceLevel =
-  | 'raw'
-  | 'enriched'
-  | 'validated'
-  | 'published'
-  | 'inherited'
-  | 'contradictory';
+export type ConfidenceLevel = 'raw' | 'enriched' | 'validated' | 'published' | 'inherited' | 'contradictory';
 
 export interface ConfidenceBadgeProps {
   level: ConfidenceLevel;
@@ -82,14 +76,7 @@ const LEVEL_CONFIG: Record<ConfidenceLevel, LevelConfig> = {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function ConfidenceBadge({
-  level,
-  size = 'md',
-  showLabel,
-  tooltip,
-  source,
-  date,
-}: ConfidenceBadgeProps) {
+export function ConfidenceBadge({ level, size = 'md', showLabel, tooltip, source, date }: ConfidenceBadgeProps) {
   const config = LEVEL_CONFIG[level];
   const resolvedShowLabel = showLabel ?? size === 'md';
 

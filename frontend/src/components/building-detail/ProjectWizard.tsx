@@ -18,11 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 import { toast } from '@/store/toastStore';
-import {
-  projectSetupApi,
-  type ProjectDraft,
-  type ProjectCreateRequest,
-} from '@/api/projectSetup';
+import { projectSetupApi, type ProjectDraft, type ProjectCreateRequest } from '@/api/projectSetup';
 
 interface ProjectWizardProps {
   open: boolean;
@@ -39,13 +35,43 @@ const STEPS = [
 ] as const;
 
 const INTERVENTION_TYPES = [
-  { value: 'asbestos_removal', label: 'Desamiantage', description: 'Retrait de materiaux contenant de l\'amiante', icon: '🔬' },
-  { value: 'pcb_removal', label: 'Decontamination PCB', description: 'Retrait des joints et materiaux contenant des PCB', icon: '🧪' },
-  { value: 'lead_removal', label: 'Deplombage', description: 'Retrait des peintures et materiaux contenant du plomb', icon: '🎨' },
+  {
+    value: 'asbestos_removal',
+    label: 'Desamiantage',
+    description: "Retrait de materiaux contenant de l'amiante",
+    icon: '🔬',
+  },
+  {
+    value: 'pcb_removal',
+    label: 'Decontamination PCB',
+    description: 'Retrait des joints et materiaux contenant des PCB',
+    icon: '🧪',
+  },
+  {
+    value: 'lead_removal',
+    label: 'Deplombage',
+    description: 'Retrait des peintures et materiaux contenant du plomb',
+    icon: '🎨',
+  },
   { value: 'hap_removal', label: 'Traitement HAP', description: 'Retrait des materiaux contenant des HAP', icon: '⚗' },
-  { value: 'radon_mitigation', label: 'Assainissement radon', description: 'Mesures de reduction du radon dans le batiment', icon: '☢' },
-  { value: 'pfas_remediation', label: 'Remediation PFAS', description: 'Traitement des contaminations PFAS', icon: '💧' },
-  { value: 'renovation', label: 'Renovation', description: 'Travaux de renovation (controle polluants requis)', icon: '🏗' },
+  {
+    value: 'radon_mitigation',
+    label: 'Assainissement radon',
+    description: 'Mesures de reduction du radon dans le batiment',
+    icon: '☢',
+  },
+  {
+    value: 'pfas_remediation',
+    label: 'Remediation PFAS',
+    description: 'Traitement des contaminations PFAS',
+    icon: '💧',
+  },
+  {
+    value: 'renovation',
+    label: 'Renovation',
+    description: 'Travaux de renovation (controle polluants requis)',
+    icon: '🏗',
+  },
   { value: 'maintenance', label: 'Maintenance', description: 'Entretien courant du batiment', icon: '🔧' },
   { value: 'other', label: 'Autre', description: 'Autre type de travaux', icon: '📋' },
 ] as const;
@@ -174,9 +200,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Lancer un projet de travaux</h2>
-            {buildingName && (
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{buildingName}</p>
-            )}
+            {buildingName && <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{buildingName}</p>}
           </div>
           <button
             onClick={handleClose}
@@ -205,11 +229,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
                           : 'bg-gray-50 dark:bg-slate-700/50 text-gray-400 dark:text-slate-500',
                     )}
                   >
-                    {isDone ? (
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    ) : (
-                      <Icon className="w-3.5 h-3.5" />
-                    )}
+                    {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                     <span className="hidden sm:inline">{s.label}</span>
                   </div>
                   {i < STEPS.length - 1 && (
@@ -295,9 +315,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
                 <Beaker className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <div className="text-sm text-blue-800 dark:text-blue-200">
                   <strong>{draft.scope.total_positive_samples}</strong> echantillon(s) positif(s) detecte(s)
-                  {draft.scope.pollutants_found.length > 0 && (
-                    <span> — {draft.scope.pollutants_found.join(', ')}</span>
-                  )}
+                  {draft.scope.pollutants_found.length > 0 && <span> — {draft.scope.pollutants_found.join(', ')}</span>}
                 </div>
               </div>
 
@@ -384,9 +402,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
                       <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                         {draft.scope.elements_to_treat.map((el, i) => (
                           <tr key={i} className="hover:bg-gray-50 dark:hover:bg-slate-700/30">
-                            <td className="px-3 py-1.5 text-gray-900 dark:text-white font-mono">
-                              {el.sample_number}
-                            </td>
+                            <td className="px-3 py-1.5 text-gray-900 dark:text-white font-mono">{el.sample_number}</td>
                             <td className="px-3 py-1.5 text-gray-700 dark:text-slate-200">{el.material}</td>
                             <td className="px-3 py-1.5 text-gray-500 dark:text-slate-400">{el.location || '—'}</td>
                             <td className="px-3 py-1.5">
@@ -537,8 +553,8 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
                       {draft.gap_analysis.message}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-slate-400 mt-1">
-                      {draft.gap_analysis.available_documents_count}/{draft.gap_analysis.total_required_documents} pieces
-                      disponibles — Readiness {Math.round(draft.gap_analysis.readiness_score * 100)}%
+                      {draft.gap_analysis.available_documents_count}/{draft.gap_analysis.total_required_documents}{' '}
+                      pieces disponibles — Readiness {Math.round(draft.gap_analysis.readiness_score * 100)}%
                     </p>
                   </div>
                 </div>
@@ -561,7 +577,9 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
             <div className="space-y-4">
               <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 space-y-3">
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider font-medium">Projet</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider font-medium">
+                    Projet
+                  </p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white mt-0.5">
                     {customTitle || draft.suggested_title}
                   </p>
@@ -570,9 +588,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-gray-500 dark:text-slate-400">Type</p>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {draft.intervention_type_label}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{draft.intervention_type_label}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 dark:text-slate-400">Zones</p>
@@ -605,9 +621,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
                   {draft.gap_analysis.can_start ? (
                     <>
                       <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                      <span className="text-sm font-semibold text-green-700 dark:text-green-300">
-                        Pret a demarrer
-                      </span>
+                      <span className="text-sm font-semibold text-green-700 dark:text-green-300">Pret a demarrer</span>
                     </>
                   ) : (
                     <>
@@ -652,8 +666,8 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
               )}
 
               <p className="text-xs text-gray-500 dark:text-slate-400 italic">
-                Le projet sera cree avec le statut &laquo; Planifie &raquo;. Les pieces manquantes genereront des actions
-                de suivi.
+                Le projet sera cree avec le statut &laquo; Planifie &raquo;. Les pieces manquantes genereront des
+                actions de suivi.
               </p>
             </div>
           )}
@@ -662,9 +676,7 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
           {loading && (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-3" />
-              <p className="text-sm text-gray-500 dark:text-slate-400">
-                Analyse du dossier en cours...
-              </p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Analyse du dossier en cours...</p>
             </div>
           )}
         </div>
@@ -687,10 +699,10 @@ export default function ProjectWizard({ open, onClose, buildingId, buildingName 
           {step < STEPS.length - 1 ? (
             <button
               onClick={handleNext}
-              disabled={step === 0 && !selectedType || loading}
+              disabled={(step === 0 && !selectedType) || loading}
               className={cn(
                 'flex items-center gap-1 px-5 py-2 text-sm font-semibold rounded-lg transition-colors',
-                step === 0 && !selectedType || loading
+                (step === 0 && !selectedType) || loading
                   ? 'bg-gray-200 dark:bg-slate-600 text-gray-400 dark:text-slate-500 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 text-white',
               )}

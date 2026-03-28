@@ -18,9 +18,7 @@ export interface SpatialEnrichmentResponse {
 
 export const spatialEnrichmentApi = {
   get: async (buildingId: string): Promise<SpatialEnrichmentResponse> => {
-    const response = await apiClient.get<SpatialEnrichmentResponse>(
-      `/buildings/${buildingId}/spatial-enrichment`,
-    );
+    const response = await apiClient.get<SpatialEnrichmentResponse>(`/buildings/${buildingId}/spatial-enrichment`);
     return response.data;
   },
 

@@ -70,8 +70,7 @@ export default function AuthorityPackPanel({ buildingId }: AuthorityPackPanelPro
 
   // Generate mutation
   const generateMutation = useMutation({
-    mutationFn: () =>
-      authorityPacksApi.generate(buildingId, { redact_financials: redactFinancials }),
+    mutationFn: () => authorityPacksApi.generate(buildingId, { redact_financials: redactFinancials }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['authority-packs-panel', buildingId] });
     },
@@ -133,10 +132,10 @@ export default function AuthorityPackPanel({ buildingId }: AuthorityPackPanelPro
             </h3>
             <p className="text-xs text-gray-500 dark:text-slate-400">
               {packState === 'ready'
-                ? (t('authority_packs.pack_ready') || 'Pack genere')
+                ? t('authority_packs.pack_ready') || 'Pack genere'
                 : packState === 'generating'
-                  ? (t('authority_packs.generating') || 'Generation en cours...')
-                  : (t('authority_packs.not_generated') || 'Aucun pack genere')}
+                  ? t('authority_packs.generating') || 'Generation en cours...'
+                  : t('authority_packs.not_generated') || 'Aucun pack genere'}
             </p>
           </div>
         </div>
@@ -162,8 +161,8 @@ export default function AuthorityPackPanel({ buildingId }: AuthorityPackPanelPro
               <Shield className="w-3.5 h-3.5" />
             )}
             {latestPack
-              ? (t('authority_packs.regenerate') || 'Regenerer')
-              : (t('authority_packs.generate') || 'Generer le pack autorite')}
+              ? t('authority_packs.regenerate') || 'Regenerer'
+              : t('authority_packs.generate') || 'Generer le pack autorite'}
           </button>
 
           {/* Expand toggle */}
@@ -188,14 +187,12 @@ export default function AuthorityPackPanel({ buildingId }: AuthorityPackPanelPro
             className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 dark:border-slate-500 text-red-600 focus:ring-red-500 dark:bg-slate-600"
           />
           <div>
-            <span className="text-xs text-gray-700 dark:text-slate-200">
-              Masquer les montants financiers
-            </span>
+            <span className="text-xs text-gray-700 dark:text-slate-200">Masquer les montants financiers</span>
             <div className="flex items-start gap-1 mt-0.5">
               <Info className="w-2.5 h-2.5 text-gray-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] text-gray-500 dark:text-slate-400 leading-tight">
-                Les documents techniques et attestations restent visibles. Seuls les montants, devis
-                et conditions financieres sont masques.
+                Les documents techniques et attestations restent visibles. Seuls les montants, devis et conditions
+                financieres sont masques.
               </span>
             </div>
           </div>
@@ -252,18 +249,20 @@ export default function AuthorityPackPanel({ buildingId }: AuthorityPackPanelPro
                   <CompletenessBar value={packDetail.overall_completeness} />
                 </div>
                 <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Sections</p>
+                  <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
+                    Sections
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{packDetail.total_sections}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Reserves</p>
+                  <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">
+                    Reserves
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{packDetail.caveats_count}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
                   <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Version</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    v{packDetail.pack_version}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">v{packDetail.pack_version}</p>
                 </div>
               </div>
 

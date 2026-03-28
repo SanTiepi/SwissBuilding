@@ -85,7 +85,8 @@ function formatAge(createdAt: string | null): string {
 // ---------------------------------------------------------------------------
 
 function TaskRow({ task, onNavigate }: { task: ReviewTask; onNavigate: (path: string) => void }) {
-  const typeBadge = TASK_TYPE_BADGE[task.task_type] || 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+  const typeBadge =
+    TASK_TYPE_BADGE[task.task_type] || 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
   const typeLabel = TASK_TYPE_LABEL[task.task_type] || task.task_type;
 
   return (
@@ -96,7 +97,9 @@ function TaskRow({ task, onNavigate }: { task: ReviewTask; onNavigate: (path: st
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className={cn('w-2 h-2 rounded-full flex-shrink-0', PRIORITY_DOT[task.priority] || PRIORITY_DOT.medium)} />
+            <span
+              className={cn('w-2 h-2 rounded-full flex-shrink-0', PRIORITY_DOT[task.priority] || PRIORITY_DOT.medium)}
+            />
             <span className={cn('text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded', typeBadge)}>
               {typeLabel}
             </span>

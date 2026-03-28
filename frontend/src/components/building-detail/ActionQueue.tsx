@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import {
-  actionQueueApi,
-  type ActionQueueItem,
-  type ActionQueueResponse,
-} from '@/api/actionQueue';
+import { actionQueueApi, type ActionQueueItem, type ActionQueueResponse } from '@/api/actionQueue';
 import {
   AlertTriangle,
   Calendar,
@@ -152,7 +148,12 @@ function ActionCard({
   return (
     <div className="flex items-start gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
       {/* Priority dot */}
-      <div className={cn('w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0', PRIORITY_COLORS[item.priority] || 'bg-slate-400')} />
+      <div
+        className={cn(
+          'w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0',
+          PRIORITY_COLORS[item.priority] || 'bg-slate-400',
+        )}
+      />
 
       {/* Content */}
       <div className="flex-1 min-w-0">
@@ -177,9 +178,7 @@ function ActionCard({
             </span>
           )}
           {item.linked_entity && (
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">
-              {item.linked_entity.type}
-            </span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">{item.linked_entity.type}</span>
           )}
         </div>
 
@@ -329,7 +328,12 @@ function WeeklySummaryPanel({ buildingId }: { buildingId: string }) {
               <ul className="space-y-1">
                 {data.next_priorities.map((p) => (
                   <li key={p.id} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                    <span className={cn('w-2 h-2 rounded-full flex-shrink-0', PRIORITY_COLORS[p.priority] || 'bg-slate-400')} />
+                    <span
+                      className={cn(
+                        'w-2 h-2 rounded-full flex-shrink-0',
+                        PRIORITY_COLORS[p.priority] || 'bg-slate-400',
+                      )}
+                    />
                     <span className="truncate">{p.title}</span>
                   </li>
                 ))}
@@ -346,13 +350,7 @@ function WeeklySummaryPanel({ buildingId }: { buildingId: string }) {
 // Snooze modal (simple inline)
 // ---------------------------------------------------------------------------
 
-function SnoozeModal({
-  onConfirm,
-  onCancel,
-}: {
-  onConfirm: (dateStr: string) => void;
-  onCancel: () => void;
-}) {
+function SnoozeModal({ onConfirm, onCancel }: { onConfirm: (dateStr: string) => void; onCancel: () => void }) {
   const [selectedDate, setSelectedDate] = useState('');
 
   const presets = [
@@ -442,8 +440,7 @@ export function ActionQueue({ buildingId, onNavigateTab }: ActionQueueProps) {
   });
 
   const snoozeMutation = useMutation({
-    mutationFn: ({ actionId, date }: { actionId: string; date: string }) =>
-      actionQueueApi.snooze(actionId, date),
+    mutationFn: ({ actionId, date }: { actionId: string; date: string }) => actionQueueApi.snooze(actionId, date),
     onSettled: () => {
       setSnoozingId(null);
       queryClient.invalidateQueries({ queryKey: ['action-queue', buildingId] });
@@ -482,9 +479,7 @@ export function ActionQueue({ buildingId, onNavigateTab }: ActionQueueProps) {
         <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-500" />
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-              File d'actions
-            </h2>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">File d'actions</h2>
           </div>
         </div>
         <div className="p-4">
@@ -497,9 +492,7 @@ export function ActionQueue({ buildingId, onNavigateTab }: ActionQueueProps) {
   if (isError || !data) {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {t('common.error') || 'Erreur lors du chargement'}
-        </p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{t('common.error') || 'Erreur lors du chargement'}</p>
       </div>
     );
   }
@@ -583,9 +576,7 @@ export function ActionQueue({ buildingId, onNavigateTab }: ActionQueueProps) {
       <WeeklySummaryPanel buildingId={buildingId} />
 
       {/* Snooze modal */}
-      {snoozingId && (
-        <SnoozeModal onConfirm={handleSnoozeConfirm} onCancel={() => setSnoozingId(null)} />
-      )}
+      {snoozingId && <SnoozeModal onConfirm={handleSnoozeConfirm} onCancel={() => setSnoozingId(null)} />}
     </div>
   );
 }

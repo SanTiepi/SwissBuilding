@@ -113,14 +113,7 @@ const editSchema = z.object({
 
 type EditFormData = z.infer<typeof editSchema>;
 
-type TabKey =
-  | 'overview'
-  | 'spatial'
-  | 'truth'
-  | 'change'
-  | 'cases'
-  | 'passport'
-  | 'questions';
+type TabKey = 'overview' | 'spatial' | 'truth' | 'change' | 'cases' | 'passport' | 'questions';
 
 /** Map legacy tab keys (used by onNavigateTab callbacks) to new doctrinal keys */
 const LEGACY_TAB_MAP: Record<string, TabKey> = {
@@ -231,11 +224,7 @@ function PassportDiffSection({ buildingId }: { buildingId: string }) {
       {showDiff && selectedA && selectedB && selectedA !== selectedB && (
         <div className="mt-4">
           <Suspense fallback={TabFallback}>
-            <LazyPassportDiffView
-              envelopeIdA={selectedA}
-              envelopeIdB={selectedB}
-              onClose={() => setShowDiff(false)}
-            />
+            <LazyPassportDiffView envelopeIdA={selectedA} envelopeIdB={selectedB} onClose={() => setShowDiff(false)} />
           </Suspense>
         </div>
       )}
@@ -502,211 +491,212 @@ export default function BuildingDetail() {
 
         <div className="p-6">
           <TabErrorBoundary tabKey={activeTab}>
-          {/* Vue d'ensemble — daily operating surface */}
-          {activeTab === 'overview' && (
-            <Suspense fallback={TabFallback}>
-              <LazyOverviewTab
-                buildingId={id!}
-                building={building}
-                diagnostics={diagnostics}
-                risk={risk}
-                pollutantProbabilities={pollutantProbabilities}
-                dashboard={dashboard}
-                actions={actions}
-                openActions={openActions}
-                actionsError={actionsError}
-                completenessItems={completenessItems}
-                completenessCount={completenessCount}
-                completenessTotal={completenessTotal}
-                completenessPct={completenessPct}
-                onNavigateTab={(tab: string) => setActiveTab(LEGACY_TAB_MAP[tab] ?? 'overview')}
-              />
-              {/* Building Life summary */}
-              <div className="mt-6">
+            {/* Vue d'ensemble — daily operating surface */}
+            {activeTab === 'overview' && (
+              <Suspense fallback={TabFallback}>
+                <LazyOverviewTab
+                  buildingId={id!}
+                  building={building}
+                  diagnostics={diagnostics}
+                  risk={risk}
+                  pollutantProbabilities={pollutantProbabilities}
+                  dashboard={dashboard}
+                  actions={actions}
+                  openActions={openActions}
+                  actionsError={actionsError}
+                  completenessItems={completenessItems}
+                  completenessCount={completenessCount}
+                  completenessTotal={completenessTotal}
+                  completenessPct={completenessPct}
+                  onNavigateTab={(tab: string) => setActiveTab(LEGACY_TAB_MAP[tab] ?? 'overview')}
+                />
+                {/* Building Life summary */}
+                <div className="mt-6">
+                  <Suspense fallback={TabFallback}>
+                    <LazyBuildingLifeTab buildingId={id!} />
+                  </Suspense>
+                </div>
+                {/* Building details grid (absorbed from old Details tab) */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.details')}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { label: t('building.address'), value: building.address },
+                      { label: t('building.city'), value: `${building.postal_code} ${building.city}` },
+                      { label: t('building.canton'), value: building.canton },
+                      { label: t('building.construction_year'), value: building.construction_year },
+                      { label: t('building.renovation_year'), value: building.renovation_year || '-' },
+                      {
+                        label: t('building.building_type'),
+                        value: t(`building_type.${building.building_type}`) || building.building_type,
+                      },
+                      { label: t('building.floors_above'), value: building.floors_above ?? '-' },
+                      { label: t('building.floors_below'), value: building.floors_below ?? '-' },
+                      {
+                        label: t('building.surface_area'),
+                        value: building.surface_area_m2 ? `${building.surface_area_m2} m\u00B2` : '-',
+                      },
+                      {
+                        label: t('building.volume'),
+                        value: building.volume_m3 ? `${building.volume_m3} m\u00B3` : '-',
+                      },
+                      { label: t('building.egrid'), value: building.egrid || '-' },
+                      { label: t('building.official_id'), value: building.official_id || '-' },
+                      { label: t('building.parcel_number'), value: building.parcel_number || '-' },
+                      {
+                        label: t('building.latitude'),
+                        value: building.latitude != null ? String(building.latitude) : '-',
+                      },
+                      {
+                        label: t('building.longitude'),
+                        value: building.longitude != null ? String(building.longitude) : '-',
+                      },
+                      {
+                        label: t('building.last_diagnostic'),
+                        value: diagnostics.length > 0 ? formatDate(diagnostics[0].date_inspection) : '-',
+                      },
+                      { label: t('form.created_at') || 'Created', value: formatDate(building.created_at) },
+                      { label: t('form.updated_at') || 'Updated', value: formatDate(building.updated_at) },
+                    ].map((item) => (
+                      <div key={item.label} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{item.label}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{item.value || '-'}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Suspense>
+            )}
+
+            {/* Spatial — zone/element explorer + plans */}
+            {activeTab === 'spatial' && (
+              <Suspense fallback={TabFallback}>
+                <div className="space-y-8">
+                  <LazyBuildingExplorerEmbed />
+                  <div className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <LazyBuildingPlansEmbed />
+                  </div>
+                </div>
+              </Suspense>
+            )}
+
+            {/* Verite — what is true: diagnostics, documents, ownership */}
+            {activeTab === 'truth' && (
+              <Suspense fallback={TabFallback}>
+                <div className="space-y-8">
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.diagnostics')}
+                    </h3>
+                    <LazyDiagnosticsTab
+                      buildingId={id!}
+                      diagnostics={diagnostics}
+                      onCreateClick={() => setShowDiagnosticForm(true)}
+                    />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.documents')}
+                    </h3>
+                    <LazyDocumentsTab
+                      documents={documents}
+                      isLoadingDocs={isLoadingDocs}
+                      documentsError={documentsError}
+                      buildingId={id!}
+                      onUpload={handleDocumentUpload}
+                    />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.ownership') || 'Ownership'}
+                    </h3>
+                    <LazyOwnershipTab buildingId={id!} />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <LazyUnknownsLedger buildingId={id!} />
+                  </section>
+                </div>
+              </Suspense>
+            )}
+
+            {/* Changements — what changed: timeline, activity */}
+            {activeTab === 'change' && (
+              <Suspense fallback={TabFallback}>
+                <LazyActivityTab
+                  buildingId={id!}
+                  activity={activity}
+                  activityLoading={activityLoading}
+                  activityError={activityError}
+                />
+              </Suspense>
+            )}
+
+            {/* Dossiers — active episodes: cases, interventions, tenders, leases, contracts, procedures */}
+            {activeTab === 'cases' && (
+              <Suspense fallback={TabFallback}>
+                <div className="space-y-8">
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.leases') || 'Leases'}
+                    </h3>
+                    <LazyLeasesTab buildingId={id!} />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.contracts') || 'Contracts'}
+                    </h3>
+                    <LazyContractsTab buildingId={id!} />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.procedures') || 'Procedures'}
+                    </h3>
+                    <LazyProceduresSection buildingId={id!} />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.tenders') || "Appels d'offres"}
+                    </h3>
+                    <LazyTenderTab buildingId={id!} />
+                  </section>
+                  <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      {t('building.tab.interventions') || 'Interventions'}
+                    </h3>
+                    <LazyBuildingInterventionsEmbed />
+                  </section>
+                </div>
+              </Suspense>
+            )}
+
+            {/* Passeport & Transfert — passport envelope, transfer receipts, version diff */}
+            {activeTab === 'passport' && (
+              <div className="space-y-6">
                 <Suspense fallback={TabFallback}>
-                  <LazyBuildingLifeTab buildingId={id!} />
+                  <LazyTransferPackagePanel buildingId={id!} />
+                </Suspense>
+                <Suspense fallback={TabFallback}>
+                  <PassportDiffSection buildingId={id!} />
                 </Suspense>
               </div>
-              {/* Building details grid (absorbed from old Details tab) */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  {t('building.tab.details')}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    { label: t('building.address'), value: building.address },
-                    { label: t('building.city'), value: `${building.postal_code} ${building.city}` },
-                    { label: t('building.canton'), value: building.canton },
-                    { label: t('building.construction_year'), value: building.construction_year },
-                    { label: t('building.renovation_year'), value: building.renovation_year || '-' },
-                    {
-                      label: t('building.building_type'),
-                      value: t(`building_type.${building.building_type}`) || building.building_type,
-                    },
-                    { label: t('building.floors_above'), value: building.floors_above ?? '-' },
-                    { label: t('building.floors_below'), value: building.floors_below ?? '-' },
-                    {
-                      label: t('building.surface_area'),
-                      value: building.surface_area_m2 ? `${building.surface_area_m2} m\u00B2` : '-',
-                    },
-                    {
-                      label: t('building.volume'),
-                      value: building.volume_m3 ? `${building.volume_m3} m\u00B3` : '-',
-                    },
-                    { label: t('building.egrid'), value: building.egrid || '-' },
-                    { label: t('building.official_id'), value: building.official_id || '-' },
-                    { label: t('building.parcel_number'), value: building.parcel_number || '-' },
-                    {
-                      label: t('building.latitude'),
-                      value: building.latitude != null ? String(building.latitude) : '-',
-                    },
-                    {
-                      label: t('building.longitude'),
-                      value: building.longitude != null ? String(building.longitude) : '-',
-                    },
-                    {
-                      label: t('building.last_diagnostic'),
-                      value: diagnostics.length > 0 ? formatDate(diagnostics[0].date_inspection) : '-',
-                    },
-                    { label: t('form.created_at') || 'Created', value: formatDate(building.created_at) },
-                    { label: t('form.updated_at') || 'Updated', value: formatDate(building.updated_at) },
-                  ].map((item) => (
-                    <div key={item.label} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-slate-400">{item.label}</p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{item.value || '-'}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Suspense>
-          )}
+            )}
 
-          {/* Spatial — zone/element explorer + plans */}
-          {activeTab === 'spatial' && (
-            <Suspense fallback={TabFallback}>
-              <div className="space-y-8">
-                <LazyBuildingExplorerEmbed />
-                <div className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <LazyBuildingPlansEmbed />
-                </div>
-              </div>
-            </Suspense>
-          )}
-
-          {/* Verite — what is true: diagnostics, documents, ownership */}
-          {activeTab === 'truth' && (
-            <Suspense fallback={TabFallback}>
-              <div className="space-y-8">
-                <section>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.diagnostics')}
-                  </h3>
-                  <LazyDiagnosticsTab
-                    buildingId={id!}
-                    diagnostics={diagnostics}
-                    onCreateClick={() => setShowDiagnosticForm(true)}
-                  />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.documents')}
-                  </h3>
-                  <LazyDocumentsTab
-                    documents={documents}
-                    isLoadingDocs={isLoadingDocs}
-                    documentsError={documentsError}
-                    buildingId={id!}
-                    onUpload={handleDocumentUpload}
-                  />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.ownership') || 'Ownership'}
-                  </h3>
-                  <LazyOwnershipTab buildingId={id!} />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <LazyUnknownsLedger buildingId={id!} />
-                </section>
-              </div>
-            </Suspense>
-          )}
-
-          {/* Changements — what changed: timeline, activity */}
-          {activeTab === 'change' && (
-            <Suspense fallback={TabFallback}>
-              <LazyActivityTab
-                buildingId={id!}
-                activity={activity}
-                activityLoading={activityLoading}
-                activityError={activityError}
-              />
-            </Suspense>
-          )}
-
-          {/* Dossiers — active episodes: cases, interventions, tenders, leases, contracts, procedures */}
-          {activeTab === 'cases' && (
-            <Suspense fallback={TabFallback}>
-              <div className="space-y-8">
-                <section>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.leases') || 'Leases'}
-                  </h3>
-                  <LazyLeasesTab buildingId={id!} />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.contracts') || 'Contracts'}
-                  </h3>
-                  <LazyContractsTab buildingId={id!} />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.procedures') || 'Procedures'}
-                  </h3>
-                  <LazyProceduresSection buildingId={id!} />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.tenders') || "Appels d'offres"}
-                  </h3>
-                  <LazyTenderTab buildingId={id!} />
-                </section>
-                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {t('building.tab.interventions') || 'Interventions'}
-                  </h3>
-                  <LazyBuildingInterventionsEmbed />
-                </section>
-              </div>
-            </Suspense>
-          )}
-
-          {/* Passeport & Transfert — passport envelope, transfer receipts, version diff */}
-          {activeTab === 'passport' && (
-            <div className="space-y-6">
-              <Suspense fallback={TabFallback}>
-                <LazyTransferPackagePanel buildingId={id!} />
-              </Suspense>
-              <Suspense fallback={TabFallback}>
-                <PassportDiffSection buildingId={id!} />
-              </Suspense>
-            </div>
-          )}
-
-          {/* Questions — readiness, intent queries, SafeToX verdicts */}
-          {activeTab === 'questions' && (
-            <div className="space-y-4">
-              <p className="text-sm text-gray-500 dark:text-slate-400">
-                {t('building.tab.questions_description') || 'Readiness verdicts, intent queries and SafeToX evaluations for this building.'}
-              </p>
-              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-6 text-center">
-                <p className="text-gray-500 dark:text-slate-400 text-sm">
-                  {t('building.tab.questions_coming_soon') || 'Full readiness workspace coming soon.'}
+            {/* Questions — readiness, intent queries, SafeToX verdicts */}
+            {activeTab === 'questions' && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500 dark:text-slate-400">
+                  {t('building.tab.questions_description') ||
+                    'Readiness verdicts, intent queries and SafeToX evaluations for this building.'}
                 </p>
+                <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-6 text-center">
+                  <p className="text-gray-500 dark:text-slate-400 text-sm">
+                    {t('building.tab.questions_coming_soon') || 'Full readiness workspace coming soon.'}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
           </TabErrorBoundary>
         </div>
       </div>
