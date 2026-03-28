@@ -49,6 +49,9 @@ CANONICAL = {
     "identity_chain",
     "digital_vault",
     "artifact_custody",
+    "dossier_workflow",
+    "renovation_readiness",
+    "pilot_scorecard",
 }
 
 # Compatibility: frozen surfaces kept for backward compat

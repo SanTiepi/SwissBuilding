@@ -138,15 +138,9 @@ export default function RenovationReadinessPanel({ buildingId }: RenovationReadi
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {quickStatus === 'ready' && (
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
-          )}
-          {quickStatus === 'partial' && (
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-          )}
-          {quickStatus === 'not_ready' && (
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-          )}
+          {quickStatus === 'ready' && <span className="w-2.5 h-2.5 rounded-full bg-green-500" />}
+          {quickStatus === 'partial' && <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />}
+          {quickStatus === 'not_ready' && <span className="w-2.5 h-2.5 rounded-full bg-red-500" />}
           {expanded ? (
             <ChevronDown className="w-5 h-5 text-gray-400" />
           ) : (
@@ -168,9 +162,7 @@ export default function RenovationReadinessPanel({ buildingId }: RenovationReadi
               onChange={(e) => setSelectedWorkType(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
             >
-              <option value="">
-                {t('renovation_readiness.assess') || 'Selectionner un type...'}
-              </option>
+              <option value="">{t('renovation_readiness.assess') || 'Selectionner un type...'}</option>
               {(options || []).map((opt: RenovationOption) => (
                 <option key={opt.work_type} value={opt.work_type}>
                   {opt.label_fr}
@@ -190,9 +182,7 @@ export default function RenovationReadinessPanel({ buildingId }: RenovationReadi
 
           {/* Error */}
           {assessmentError && (
-            <div className="text-sm text-red-600 dark:text-red-400 py-2">
-              Erreur lors de l&apos;evaluation.
-            </div>
+            <div className="text-sm text-red-600 dark:text-red-400 py-2">Erreur lors de l&apos;evaluation.</div>
           )}
 
           {/* Assessment results */}
@@ -227,9 +217,7 @@ function AssessmentResults({
       {/* Readiness verdict */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-            Verdict
-          </p>
+          <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Verdict</p>
           <VerdictBadge verdict={assessment.readiness.verdict} />
         </div>
         <div className="text-right">
@@ -253,18 +241,13 @@ function AssessmentResults({
       <div>
         <div className="flex items-center gap-1.5 mb-1.5">
           <ClipboardList className="w-3.5 h-3.5 text-gray-400" />
-          <p className="text-xs font-medium text-gray-600 dark:text-slate-400">
-            Completude du dossier
-          </p>
+          <p className="text-xs font-medium text-gray-600 dark:text-slate-400">Completude du dossier</p>
         </div>
         <CompletenessBar pct={assessment.completeness.score_pct} />
         {assessment.completeness.missing.length > 0 && (
           <ul className="mt-2 space-y-1">
             {assessment.completeness.missing.slice(0, 4).map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-1.5 text-xs text-red-600 dark:text-red-400"
-              >
+              <li key={i} className="flex items-start gap-1.5 text-xs text-red-600 dark:text-red-400">
                 <XCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
                 <span>{item.details || item.label}</span>
               </li>
@@ -278,9 +261,7 @@ function AssessmentResults({
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <Banknote className="w-3.5 h-3.5 text-green-500" />
-            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">
-              Subventions disponibles
-            </p>
+            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">Subventions disponibles</p>
           </div>
           <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 space-y-1.5">
             {assessment.subsidies.eligible.map((sub, i) => (
@@ -309,9 +290,7 @@ function AssessmentResults({
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <Info className="w-3.5 h-3.5 text-blue-500" />
-            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">
-              Procedures requises
-            </p>
+            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">Procedures requises</p>
           </div>
           <ul className="space-y-1">
             {assessment.procedures.forms_needed.map((form, i) => (
@@ -351,9 +330,7 @@ function AssessmentResults({
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <ShieldAlert className="w-3.5 h-3.5 text-gray-500" />
-            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">
-              Reserves
-            </p>
+            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">Reserves</p>
           </div>
           <ul className="space-y-1">
             {assessment.caveats.slice(0, 3).map((cav, i) => (
@@ -368,9 +345,7 @@ function AssessmentResults({
       {/* Next actions */}
       {assessment.next_actions.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
-            Prochaines actions
-          </p>
+          <p className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">Prochaines actions</p>
           <ul className="space-y-1.5">
             {assessment.next_actions.slice(0, 5).map((action, i) => (
               <li key={i} className="flex items-start gap-2 text-xs">
@@ -407,9 +382,7 @@ function AssessmentResults({
             ) : (
               <>
                 <FileDown className="w-4 h-4" />
-                {packResult?.pack
-                  ? 'Pack genere'
-                  : 'Generer le pack'}
+                {packResult?.pack ? 'Pack genere' : 'Generer le pack'}
               </>
             )}
           </button>
@@ -443,9 +416,7 @@ function AssessmentResults({
               <CheckCircle2 className="w-4 h-4" />
               <span className="font-medium">Pack genere avec succes</span>
             </div>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-              {packResult.pack.sections_count} sections
-            </p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">{packResult.pack.sections_count} sections</p>
           </div>
         )}
       </div>

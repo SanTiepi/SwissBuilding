@@ -132,9 +132,7 @@ export function PilotScorecardPanel({ buildingId }: PilotScorecardPanelProps) {
             ) : (
               <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
             )}
-            <span className="text-xs text-gray-500 dark:text-slate-400">
-              {t('pilot.blockers') || 'Blocages'}
-            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('pilot.blockers') || 'Blocages'}</span>
           </div>
           <p className="text-lg font-bold text-gray-900 dark:text-white">
             {blockersResolved}/{blockersTotal}
@@ -146,9 +144,7 @@ export function PilotScorecardPanel({ buildingId }: PilotScorecardPanelProps) {
         <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <BarChart3 className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="text-xs text-gray-500 dark:text-slate-400">
-              {t('pilot.actions') || 'Actions'}
-            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('pilot.actions') || 'Actions'}</span>
           </div>
           <p className="text-lg font-bold text-gray-900 dark:text-white">
             {actionsCompleted}/{actionsTotal}
@@ -169,9 +165,7 @@ export function PilotScorecardPanel({ buildingId }: PilotScorecardPanelProps) {
           {scorecard.diagnostics_expired > 0 && (
             <div className="flex justify-between text-xs">
               <span className="text-amber-600 dark:text-amber-400">Diagnostics expires</span>
-              <span className="font-medium text-amber-600 dark:text-amber-400">
-                {scorecard.diagnostics_expired}
-              </span>
+              <span className="font-medium text-amber-600 dark:text-amber-400">{scorecard.diagnostics_expired}</span>
             </div>
           )}
           <div className="flex justify-between text-xs">
@@ -190,12 +184,8 @@ export function PilotScorecardPanel({ buildingId }: PilotScorecardPanelProps) {
         onClick={() => setExpanded(!expanded)}
         className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
       >
-        {expanded
-          ? (t('common.collapse') || 'Reduire')
-          : (t('pilot.view_full') || 'Voir la fiche pilote complete')}
-        <ChevronRight
-          className={cn('w-3.5 h-3.5 transition-transform', expanded ? 'rotate-90' : '')}
-        />
+        {expanded ? t('common.collapse') || 'Reduire' : t('pilot.view_full') || 'Voir la fiche pilote complete'}
+        <ChevronRight className={cn('w-3.5 h-3.5 transition-transform', expanded ? 'rotate-90' : '')} />
       </button>
     </div>
   );

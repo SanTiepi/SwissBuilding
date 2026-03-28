@@ -110,9 +110,7 @@ export interface RenovationPackResult {
 
 export const renovationReadinessApi = {
   listOptions: async (buildingId: string): Promise<RenovationOption[]> => {
-    const response = await apiClient.get<RenovationOption[]>(
-      `/buildings/${buildingId}/renovation-readiness`,
-    );
+    const response = await apiClient.get<RenovationOption[]>(`/buildings/${buildingId}/renovation-readiness`);
     return response.data;
   },
 
