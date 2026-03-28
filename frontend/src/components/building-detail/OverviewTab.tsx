@@ -23,6 +23,7 @@ import { PredictiveAlertsBuilding } from '@/components/PredictiveAlerts';
 import InstantCardView from '@/components/building-detail/InstantCardView';
 import { DossierJourney } from '@/components/building-detail/DossierJourney';
 import { ActionQueue } from '@/components/building-detail/ActionQueue';
+import { PilotScorecardPanel } from '@/components/building-detail/PilotScorecardPanel';
 
 // Below-the-fold intelligence views — lazy-loaded to reduce OverviewTab chunk
 const LazyFormsWorkspace = lazy(() => import('@/components/building-detail/FormsWorkspace'));
@@ -468,6 +469,9 @@ export function OverviewTab({
 
       {/* Action Queue — operator daily driver */}
       <ActionQueue buildingId={buildingId} onNavigateTab={onNavigateTab} />
+
+      {/* Pilot Scorecard — per-building conversion metrics */}
+      <PilotScorecardPanel buildingId={buildingId} />
 
       {/* Risk Overview */}
       <div>

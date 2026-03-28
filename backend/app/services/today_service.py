@@ -382,6 +382,16 @@ async def get_today_feed(
         "expiring_warranties_90d": len(expiring_warranties),
     }
 
+    # ------------------------------------------------------------------
+    # 10. Weekly focus — operator clarity for the rituel hebdo
+    # ------------------------------------------------------------------
+    weekly_focus = _build_weekly_focus(
+        actions=actions,
+        building_map=building_map,
+        today=today,
+        end_of_week=end_of_week,
+    )
+
     return {
         "urgent": urgent,
         "this_week": this_week,
@@ -392,7 +402,93 @@ async def get_today_feed(
         "expiring_warranties": expiring_warranties,
         "freshness_alerts": freshness_alerts,
         "recent_activity": recent_activity,
+        "weekly_focus": weekly_focus,
         "stats": stats,
+    }
+
+
+def _build_weekly_focus(
+    actions: list,
+    building_map: dict,
+    today: date,
+    end_of_week: date,
+) -> dict:
+    """Build the weekly_focus section for operator clarity (rituel hebdo).
+
+    Returns top-3 buildings needing attention, active dossier workflows,
+    upcoming deadlines (7 days), and a pilot progress summary.
+    """
+    from collections import Counter
+
+    # Count overdue actions per building
+    overdue_per_building: Counter = Counter()
+    for a in actions:
+        if a.status in ("open", "in_progress") and a.due_date and a.due_date < today:
+            overdue_per_building[a.building_id] += 1
+
+    # Top 3 buildings with most overdue actions
+    top3 = overdue_per_building.most_common(3)
+    buildings_needing_attention = []
+    for bid, count in top3:
+        bld = building_map.get(bid)
+        buildings_needing_attention.append(
+            {
+                "building_id": str(bid),
+                "building_name": bld.address if bld else "---",
+                "overdue_actions": count,
+            }
+        )
+
+    # Active dossier workflows: buildings with high/critical open actions
+    # from dossier_workflow source
+    dossier_buildings: set = set()
+    for a in actions:
+        if a.status in ("open", "in_progress") and a.source_type == "dossier_workflow":
+            dossier_buildings.add(a.building_id)
+
+    dossiers_in_progress = []
+    for bid in list(dossier_buildings)[:5]:
+        bld = building_map.get(bid)
+        dossiers_in_progress.append(
+            {
+                "building_id": str(bid),
+                "building_name": bld.address if bld else "---",
+            }
+        )
+
+    # Upcoming deadlines (next 7 days)
+    seven_days = today + timedelta(days=7)
+    upcoming = []
+    for a in actions:
+        if a.status in ("open", "in_progress") and a.due_date and today <= a.due_date <= seven_days:
+            bld = building_map.get(a.building_id)
+            upcoming.append(
+                {
+                    "building_id": str(a.building_id),
+                    "building_name": bld.address if bld else "---",
+                    "action_title": a.title,
+                    "deadline": a.due_date.isoformat(),
+                    "priority": a.priority,
+                }
+            )
+    upcoming.sort(key=lambda x: x.get("deadline", ""))
+
+    # Pilot progress summary
+    completed_this_week = sum(
+        1
+        for a in actions
+        if a.status == "done"
+        and a.completed_at
+        and hasattr(a.completed_at, "date")
+        and a.completed_at.date() >= (today - timedelta(days=today.weekday()))
+    )
+    remaining = sum(1 for a in actions if a.status in ("open", "in_progress", "blocked"))
+
+    return {
+        "buildings_needing_attention": buildings_needing_attention,
+        "dossiers_in_progress": dossiers_in_progress,
+        "upcoming_deadlines": upcoming[:10],
+        "pilot_progress": f"{completed_this_week} actions completees, {remaining} restantes cette semaine",
     }
 
 
@@ -407,6 +503,12 @@ def _empty_feed() -> dict:
         "expiring_warranties": [],
         "freshness_alerts": [],
         "recent_activity": [],
+        "weekly_focus": {
+            "buildings_needing_attention": [],
+            "dossiers_in_progress": [],
+            "upcoming_deadlines": [],
+            "pilot_progress": "0 actions completees, 0 restantes cette semaine",
+        },
         "stats": {
             "total_buildings": 0,
             "buildings_ready": 0,

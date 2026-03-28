@@ -152,6 +152,7 @@ from app.api import (
     passport_export,
     permit_procedures,
     permit_tracking,
+    pilot_scorecard,
     pollutant_inventory,
     pollutant_map,
     portfolio,
@@ -467,4 +468,5 @@ api_router.include_router(rituals.router, prefix="", tags=["Truth Rituals"])
 api_router.include_router(review_queue.router, prefix="", tags=["Review Queue"])
 api_router.include_router(truth_api.router, prefix="", tags=["Truth API v1"])
 api_router.include_router(source_registry.router, prefix="", tags=["Source Registry"])
+api_router.include_router(pilot_scorecard.router, prefix="", tags=["Pilot Scorecard"])
 api_router.include_router(spatial_enrichment.router, prefix="", tags=["Spatial Enrichment"])
