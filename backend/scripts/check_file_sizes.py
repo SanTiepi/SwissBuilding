@@ -76,6 +76,7 @@ EXCEPTIONS = {
     "backend/app/services/passport_envelope_service.py": "sovereign passport lifecycle + transfer + diff",
     "backend/app/services/identity_chain_service.py": "canonical identity chain + reliability-grade (fallback/freshness/drift)",
     "backend/app/services/subsidy_source_service.py": "subsidy programs VD/GE/FR + reliability-grade (fallback/freshness/validation)",
+    "backend/app/services/cantonal_procedure_source_service.py": "cantonal authorities VD/GE/FR + reliability-grade (fallback/freshness/validation)",
     "backend/app/services/cost_benefit_analysis_service.py": "pre-existing",
     "backend/app/services/counterfactual_analysis_service.py": "pre-existing",
     "backend/app/services/cross_building_pattern_service.py": "pre-existing",

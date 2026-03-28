@@ -15,6 +15,12 @@ from app.services.source_registry_service import SourceRegistryService
 
 logger = logging.getLogger(__name__)
 
+# Schema validation: required fields for authority entries and filing requirements
+_REQUIRED_AUTHORITY_FIELDS: list[str] = ["name"]
+# An authority must have at least portal or email for contact
+_AUTHORITY_CONTACT_FIELDS: list[str] = ["portal", "email"]
+_REQUIRED_FILING_FIELDS: list[str] = ["procedure", "authority", "required_documents"]
+
 # Cache TTL — authority info changes infrequently
 CACHE_TTL_DAYS = 30
 
@@ -483,3 +489,208 @@ class CantonalProcedureSourceService:
             "authorities": CANTONAL_AUTHORITIES[canton],
             "total_authorities": len(CANTONAL_AUTHORITIES[canton]),
         }
+
+    # ------------------------------------------------------------------
+    # Reliability-grade: fallback, freshness, validation
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    async def get_canton_context_with_fallback(
+        db: AsyncSession,
+        building_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        """Try canton-specific data. If unknown canton, fall back to federal-level authorities.
+
+        Records degraded health event when fallback is used.
+        """
+        # Load building
+        result = await db.execute(select(Building).where(Building.id == building_id))
+        building = result.scalar_one_or_none()
+        if building is None:
+            return {
+                "error": "building_not_found",
+                "authorities": {},
+                "filing_requirements": {},
+                "fallback_used": False,
+                "fallback_source": None,
+            }
+
+        canton = (building.canton or "").upper()
+
+        # Try canton-specific data first
+        if canton in CANTONAL_AUTHORITIES:
+            # Known canton — use normal path
+            ctx = await CantonalProcedureSourceService.get_canton_context(db, building_id)
+            ctx["fallback_used"] = False
+            ctx["fallback_source"] = None
+            return ctx
+
+        # Unknown canton — fall back to federal-level authorities
+        try:
+            await SourceRegistryService.record_health_event(
+                db,
+                "cantonal_authorities_federal",
+                "degraded",
+                description=f"Canton {canton} not in catalog, federal fallback used",
+                fallback_used=True,
+                fallback_source_name="federal_authorities",
+            )
+        except Exception:
+            logger.debug("Failed to record degraded health event for canton %s", canton, exc_info=True)
+
+        return {
+            "canton": canton,
+            "building_id": str(building_id),
+            "authorities": FEDERAL_AUTHORITIES,
+            "filing_requirements": {},
+            "fetched_at": datetime.now(UTC).isoformat(),
+            "supported_domains": list(FEDERAL_AUTHORITIES.keys()),
+            "supported_procedures": [],
+            "fallback_used": True,
+            "fallback_source": "federal",
+            "detail": f"Canton {canton} not in cantonal catalog — federal-level authorities provided",
+        }
+
+    @staticmethod
+    async def check_procedure_freshness(
+        db: AsyncSession,
+        canton: str,
+    ) -> dict[str, Any]:
+        """Check if cantonal procedure data is current.
+
+        Authority contacts and filing requirements change.
+        Returns: {fresh, stale_domains, recommended_action}
+        """
+        canton = canton.upper()
+
+        if canton not in CANTONAL_AUTHORITIES:
+            return {
+                "canton": canton,
+                "fresh": False,
+                "stale_domains": [],
+                "recommended_action": "no_data_available",
+                "detail": "unknown_canton",
+            }
+
+        # Check in-memory cache freshness
+        entry = _cache.get(canton)
+        if entry is None:
+            return {
+                "canton": canton,
+                "fresh": False,
+                "stale_domains": list(CANTONAL_AUTHORITIES[canton].keys()),
+                "recommended_action": "refresh",
+                "detail": "no_cache_entry",
+            }
+
+        age = datetime.now(UTC) - entry["fetched_at"]
+        age_days = round(age.total_seconds() / 86400, 1)
+        is_fresh = age < timedelta(days=CACHE_TTL_DAYS)
+
+        if is_fresh:
+            return {
+                "canton": canton,
+                "fresh": True,
+                "stale_domains": [],
+                "age_days": age_days,
+                "recommended_action": "none",
+            }
+
+        return {
+            "canton": canton,
+            "fresh": False,
+            "stale_domains": list(CANTONAL_AUTHORITIES[canton].keys()),
+            "age_days": age_days,
+            "recommended_action": "refresh",
+            "detail": f"Cache is {age_days} days old (TTL: {CACHE_TTL_DAYS} days)",
+        }
+
+    @staticmethod
+    def _validate_authority_entry(entry: dict[str, Any]) -> dict[str, Any]:
+        """Validate an authority entry has required fields (name, portal or email).
+
+        Returns: {valid, missing_fields}
+        """
+        if not isinstance(entry, dict):
+            return {
+                "valid": False,
+                "missing_fields": [*_REQUIRED_AUTHORITY_FIELDS, "portal_or_email"],
+                "detail": "entry_is_not_a_dict",
+            }
+
+        missing: list[str] = []
+        for field in _REQUIRED_AUTHORITY_FIELDS:
+            if field not in entry or entry[field] is None:
+                missing.append(field)
+
+        # Must have at least portal or email
+        has_contact = any(entry.get(f) for f in _AUTHORITY_CONTACT_FIELDS)
+        if not has_contact:
+            missing.append("portal_or_email")
+
+        return {
+            "valid": len(missing) == 0,
+            "missing_fields": missing,
+            "detail": "all_fields_present" if not missing else f"missing: {missing}",
+        }
+
+    @staticmethod
+    def _validate_filing_requirements(requirements: dict[str, Any]) -> dict[str, Any]:
+        """Validate filing requirements have required structure.
+
+        Returns: {valid, missing_fields}
+        """
+        if not isinstance(requirements, dict):
+            return {
+                "valid": False,
+                "missing_fields": list(_REQUIRED_FILING_FIELDS),
+                "detail": "requirements_is_not_a_dict",
+            }
+
+        missing = [f for f in _REQUIRED_FILING_FIELDS if f not in requirements or requirements[f] is None]
+
+        # required_documents should be a non-empty list
+        docs = requirements.get("required_documents")
+        if isinstance(docs, list) and len(docs) == 0:
+            missing.append("required_documents_empty")
+
+        return {
+            "valid": len(missing) == 0,
+            "missing_fields": missing,
+            "detail": "all_fields_present" if not missing else f"missing: {missing}",
+        }
+
+
+# ---------------------------------------------------------------------------
+# Federal-level fallback authorities (used when canton is unknown)
+# ---------------------------------------------------------------------------
+FEDERAL_AUTHORITIES: dict[str, dict[str, Any]] = {
+    "environment": {
+        "name": "OFEV",
+        "full_name": "Office federal de l'environnement",
+        "portal": "https://www.bafu.admin.ch",
+        "filing": "portal",
+        "email": "info@bafu.admin.ch",
+    },
+    "construction": {
+        "name": "ARE",
+        "full_name": "Office federal du developpement territorial",
+        "portal": "https://www.are.admin.ch",
+        "filing": "portal",
+        "email": "info@are.admin.ch",
+    },
+    "energy": {
+        "name": "OFEN",
+        "full_name": "Office federal de l'energie",
+        "portal": "https://www.bfe.admin.ch",
+        "filing": "portal",
+        "email": "info@bfe.admin.ch",
+    },
+    "health": {
+        "name": "OFSP",
+        "full_name": "Office federal de la sante publique",
+        "portal": "https://www.bag.admin.ch",
+        "filing": "portal",
+        "email": "info@bag.admin.ch",
+    },
+}

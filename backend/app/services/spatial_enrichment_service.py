@@ -27,9 +27,16 @@ IDENTIFY_URL = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
 # swissBUILDINGS3D 3.0 layer on geo.admin
 LAYER_ID = "ch.swisstopo.swissbuildings3d_3_0.v2"
 
+# Basic building layer (fallback when swissBUILDINGS3D unavailable)
+FALLBACK_LAYER_ID = "ch.bfs.gebaeude_wohnungs_register"
+FALLBACK_SOURCE_KEY = "geo_admin_gwr_building"
+
 SOURCE_KEY = "swissbuildings3d"
 SOURCE_VERSION = "swissbuildings3d-v3.0"
 SPATIAL_CACHE_KEY = "spatial_enrichment"
+
+# Schema-drift: expected fields in a valid swissBUILDINGS3D response
+EXPECTED_SPATIAL_FIELDS: list[str] = ["height_m", "footprint_wkt", "roof_type"]
 
 
 def _build_map_extent(lon: float, lat: float, buffer: float = 0.005) -> str:
@@ -259,3 +266,210 @@ class SpatialEnrichmentService:
                 except (ValueError, TypeError):
                     pass
         return None
+
+    # ------------------------------------------------------------------
+    # Reliability-grade: fallback, freshness, schema-drift
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    async def enrich_building_spatial_with_fallback(
+        db: AsyncSession,
+        building_id: uuid.UUID,
+        *,
+        force: bool = False,
+    ) -> dict[str, Any]:
+        """Try swissBUILDINGS3D. If fails, try basic geo.admin building layer.
+
+        If both fail, return partial with explicit gap.
+        Records degraded health event on fallback.
+        """
+        # Try primary path first
+        result = await SpatialEnrichmentService.enrich_building_spatial(db, building_id, force=force)
+
+        # If primary succeeded, return as-is
+        if "error" not in result:
+            result["fallback_used"] = False
+            result["fallback_source"] = None
+            return result
+
+        # Primary failed — try fallback (basic building layer)
+        primary_error = result.get("error")
+
+        # Skip fallback for "no_coordinates" — no point retrying
+        if primary_error == "no_coordinates":
+            result["fallback_used"] = False
+            result["fallback_source"] = None
+            return result
+
+        # Load building for coordinates
+        bld_result = await db.execute(select(Building).where(Building.id == building_id))
+        building = bld_result.scalar_one_or_none()
+        if building is None or building.longitude is None or building.latitude is None:
+            result["fallback_used"] = False
+            result["fallback_source"] = None
+            return result
+
+        # Attempt fallback: basic geo.admin building layer
+        fallback_data = await SpatialEnrichmentService._fetch_fallback_building_layer(
+            building.longitude, building.latitude
+        )
+
+        # Record degraded health event for primary
+        try:
+            await SourceRegistryService.record_health_event(
+                db,
+                SOURCE_KEY,
+                "degraded",
+                description=f"Primary spatial fetch failed ({primary_error}), fallback used",
+                fallback_used=True,
+                fallback_source_name=FALLBACK_SOURCE_KEY,
+            )
+        except Exception:
+            logger.debug("Failed to record degraded health event for swissbuildings3d", exc_info=True)
+
+        if fallback_data and "error" not in fallback_data:
+            fallback_data["fallback_used"] = True
+            fallback_data["fallback_source"] = FALLBACK_SOURCE_KEY
+            fallback_data["primary_error"] = primary_error
+            return fallback_data
+
+        # Both failed — return gap descriptor
+        return {
+            "error": "all_sources_failed",
+            "detail": f"Primary ({primary_error}) and fallback both failed",
+            "fallback_used": True,
+            "fallback_source": FALLBACK_SOURCE_KEY,
+            "primary_error": primary_error,
+            "gap": "spatial_data_unavailable",
+        }
+
+    @staticmethod
+    async def _fetch_fallback_building_layer(
+        longitude: float,
+        latitude: float,
+    ) -> dict[str, Any] | None:
+        """Fetch basic building data from geo.admin GWR building layer (fallback)."""
+        extent = _build_map_extent(longitude, latitude)
+        params = {
+            "geometry": f"{longitude},{latitude}",
+            "geometryType": "esriGeometryPoint",
+            "sr": "4326",
+            "layers": f"all:{FALLBACK_LAYER_ID}",
+            "tolerance": "30",
+            "mapExtent": extent,
+            "imageDisplay": "500,500,96",
+            "returnGeometry": "false",
+            "f": "json",
+        }
+        try:
+            async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+                response = await client.get(IDENTIFY_URL, params=params)
+                response.raise_for_status()
+                data = response.json()
+                features = data.get("results") or []
+                if not features:
+                    return None
+                attrs = features[0].get("attributes") or features[0].get("properties") or {}
+                if not attrs:
+                    return None
+                return {
+                    "height_m": None,
+                    "roof_type": None,
+                    "volume_m3": None,
+                    "surface_m2": None,
+                    "footprint_wkt": None,
+                    "floors": None,
+                    "source": FALLBACK_LAYER_ID,
+                    "source_version": "gwr-fallback",
+                    "raw_attributes": attrs,
+                    "fetched_at": datetime.now(UTC).isoformat(),
+                }
+        except Exception:
+            logger.warning("Fallback building layer fetch failed for (%s, %s)", longitude, latitude, exc_info=True)
+            return None
+
+    @staticmethod
+    async def check_spatial_freshness(
+        db: AsyncSession,
+        building_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        """Check if cached spatial data is fresh (7-day TTL).
+
+        Returns: {fresh, stale_since, recommended_action}
+        """
+        existing = await db.execute(select(BuildingGeoContext).where(BuildingGeoContext.building_id == building_id))
+        cached = existing.scalar_one_or_none()
+
+        if cached is None or not cached.context_data or SPATIAL_CACHE_KEY not in (cached.context_data or {}):
+            return {
+                "fresh": False,
+                "stale_since": None,
+                "age_days": None,
+                "recommended_action": "full_fetch",
+            }
+
+        spatial = cached.context_data[SPATIAL_CACHE_KEY]
+        fetched_at_str = spatial.get("fetched_at")
+        if not fetched_at_str:
+            return {
+                "fresh": False,
+                "stale_since": None,
+                "age_days": None,
+                "recommended_action": "refresh",
+            }
+
+        try:
+            fetched_at = datetime.fromisoformat(fetched_at_str)
+            if fetched_at.tzinfo is None:
+                fetched_at = fetched_at.replace(tzinfo=UTC)
+        except (ValueError, TypeError):
+            return {
+                "fresh": False,
+                "stale_since": None,
+                "age_days": None,
+                "recommended_action": "refresh",
+            }
+
+        now = datetime.now(UTC)
+        age = now - fetched_at
+        age_days = round(age.total_seconds() / 86400, 1)
+        is_fresh = age < timedelta(days=CACHE_TTL_DAYS)
+
+        return {
+            "fresh": is_fresh,
+            "stale_since": fetched_at_str if not is_fresh else None,
+            "age_days": age_days,
+            "recommended_action": "none" if is_fresh else "refresh",
+        }
+
+    @staticmethod
+    def _validate_spatial_response(response_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate swissBUILDINGS3D response has expected fields (height, footprint, roof_type).
+
+        Returns: {valid, missing_fields, drift_detected}
+        """
+        if not isinstance(response_data, dict):
+            return {
+                "valid": False,
+                "missing_fields": list(EXPECTED_SPATIAL_FIELDS),
+                "drift_detected": True,
+                "detail": "response_is_not_a_dict",
+            }
+
+        if "error" in response_data:
+            return {
+                "valid": False,
+                "missing_fields": list(EXPECTED_SPATIAL_FIELDS),
+                "drift_detected": False,
+                "detail": f"response_is_error: {response_data.get('error')}",
+            }
+
+        missing = [f for f in EXPECTED_SPATIAL_FIELDS if f not in response_data or response_data[f] is None]
+        drift = len(missing) == len(EXPECTED_SPATIAL_FIELDS)
+
+        return {
+            "valid": len(missing) == 0,
+            "missing_fields": missing,
+            "drift_detected": drift,
+            "detail": "all_fields_present" if not missing else f"missing: {missing}",
+        }

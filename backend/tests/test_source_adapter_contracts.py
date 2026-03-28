@@ -637,3 +637,408 @@ class TestIdentityChainHealthEvents:
         result_db = await db.execute(stmt)
         events = list(result_db.scalars().all())
         assert len(events) >= 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TestSpatialEnrichmentContracts — spatial enrichment reliability contracts
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestSpatialEnrichmentContracts:
+    """Contract tests for spatial_enrichment_service reliability upgrades."""
+
+    @pytest.mark.asyncio
+    async def test_fallback_on_api_failure(self, db):
+        """When primary swissBUILDINGS3D fails, fallback to basic building layer."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        building = await _make_building(db, lat=46.52, lon=6.63)
+        await _make_source(db, "swissbuildings3d", family="spatial", circle=2)
+
+        # Primary returns error, fallback returns partial data
+        with (
+            patch.object(
+                SpatialEnrichmentService,
+                "enrich_building_spatial",
+                new_callable=AsyncMock,
+                return_value={"error": "timeout", "detail": "Timeout"},
+            ),
+            patch.object(
+                SpatialEnrichmentService,
+                "_fetch_fallback_building_layer",
+                new_callable=AsyncMock,
+                return_value={
+                    "height_m": None,
+                    "roof_type": None,
+                    "source": "ch.bfs.gebaeude_wohnungs_register",
+                    "raw_attributes": {"gkat": "1110"},
+                    "fetched_at": "2026-03-28T10:00:00+00:00",
+                },
+            ),
+        ):
+            result = await SpatialEnrichmentService.enrich_building_spatial_with_fallback(db, building.id)
+
+        assert result["fallback_used"] is True
+        assert result["fallback_source"] is not None
+        assert result.get("primary_error") == "timeout"
+
+    @pytest.mark.asyncio
+    async def test_freshness_detects_stale(self, db):
+        """Spatial data older than 7 days is flagged as stale."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        building = await _make_building(db, lat=46.52, lon=6.63)
+
+        # Insert stale cache (10 days old)
+        from app.models.building_geo_context import BuildingGeoContext
+
+        stale_time = (datetime.now(UTC) - timedelta(days=10)).isoformat()
+        geo_ctx = BuildingGeoContext(
+            building_id=building.id,
+            context_data={"spatial_enrichment": {"height_m": 12.0, "fetched_at": stale_time}},
+            fetched_at=datetime.now(UTC) - timedelta(days=10),
+            source_version="swissbuildings3d-v3.0",
+        )
+        db.add(geo_ctx)
+        await db.flush()
+
+        result = await SpatialEnrichmentService.check_spatial_freshness(db, building.id)
+
+        assert result["fresh"] is False
+        assert result["recommended_action"] == "refresh"
+        assert result["age_days"] > 7
+
+    @pytest.mark.asyncio
+    async def test_freshness_accepts_fresh(self, db):
+        """Spatial data less than 7 days old is considered fresh."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        building = await _make_building(db, lat=46.52, lon=6.63)
+
+        from app.models.building_geo_context import BuildingGeoContext
+
+        fresh_time = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+        geo_ctx = BuildingGeoContext(
+            building_id=building.id,
+            context_data={"spatial_enrichment": {"height_m": 12.0, "fetched_at": fresh_time}},
+            fetched_at=datetime.now(UTC) - timedelta(days=1),
+            source_version="swissbuildings3d-v3.0",
+        )
+        db.add(geo_ctx)
+        await db.flush()
+
+        result = await SpatialEnrichmentService.check_spatial_freshness(db, building.id)
+
+        assert result["fresh"] is True
+        assert result["recommended_action"] == "none"
+        assert result["age_days"] < 7
+
+    def test_schema_drift_missing_fields(self):
+        """Response missing all expected fields triggers drift detection."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        incomplete = {"source": "test", "raw_attributes": {}}
+        result = SpatialEnrichmentService._validate_spatial_response(incomplete)
+
+        assert result["valid"] is False
+        assert len(result["missing_fields"]) > 0
+        assert result["drift_detected"] is True
+
+    def test_schema_valid_response(self):
+        """Complete response passes schema validation."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        valid = {
+            "height_m": 12.0,
+            "footprint_wkt": "POLYGON((6.63 46.52, 6.631 46.52, 6.631 46.521, 6.63 46.52))",
+            "roof_type": "Flachdach",
+            "volume_m3": 2400.0,
+            "source": "test",
+        }
+        result = SpatialEnrichmentService._validate_spatial_response(valid)
+
+        assert result["valid"] is True
+        assert result["missing_fields"] == []
+        assert result["drift_detected"] is False
+
+    @pytest.mark.asyncio
+    async def test_health_event_on_success(self, db):
+        """Health event 'healthy' recorded on successful spatial enrichment."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        building = await _make_building(db, lat=46.52, lon=6.63)
+        await _make_source(db, "swissbuildings3d", family="spatial", circle=2)
+
+        with patch.object(
+            SpatialEnrichmentService,
+            "fetch_building_footprint",
+            new_callable=AsyncMock,
+            return_value={"height_m": 12.0, "roof_type": "flat", "source": "test"},
+        ):
+            await SpatialEnrichmentService.enrich_building_spatial(db, building.id, force=True)
+
+        from sqlalchemy import select as sa_select
+
+        stmt = (
+            sa_select(SourceHealthEvent)
+            .join(SourceRegistryEntry)
+            .where(
+                SourceRegistryEntry.name == "swissbuildings3d",
+                SourceHealthEvent.event_type == "healthy",
+            )
+        )
+        result = await db.execute(stmt)
+        events = list(result.scalars().all())
+        assert len(events) >= 1
+
+    @pytest.mark.asyncio
+    async def test_health_event_on_failure(self, db):
+        """Health event 'degraded' recorded when spatial enrichment returns error."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        building = await _make_building(db, lat=46.52, lon=6.63)
+        await _make_source(db, "swissbuildings3d", family="spatial", circle=2)
+
+        with patch.object(
+            SpatialEnrichmentService,
+            "fetch_building_footprint",
+            new_callable=AsyncMock,
+            return_value={"error": "no_data", "detail": "No data"},
+        ):
+            await SpatialEnrichmentService.enrich_building_spatial(db, building.id, force=True)
+
+        from sqlalchemy import select as sa_select
+
+        stmt = (
+            sa_select(SourceHealthEvent)
+            .join(SourceRegistryEntry)
+            .where(
+                SourceRegistryEntry.name == "swissbuildings3d",
+                SourceHealthEvent.event_type == "degraded",
+            )
+        )
+        result = await db.execute(stmt)
+        events = list(result.scalars().all())
+        assert len(events) >= 1
+
+    @pytest.mark.asyncio
+    async def test_fallback_records_degraded(self, db):
+        """When fallback is used, degraded health event is recorded for primary source."""
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        building = await _make_building(db, lat=46.52, lon=6.63)
+        await _make_source(db, "swissbuildings3d", family="spatial", circle=2)
+
+        with (
+            patch.object(
+                SpatialEnrichmentService,
+                "enrich_building_spatial",
+                new_callable=AsyncMock,
+                return_value={"error": "fetch_failed", "detail": "Connection refused"},
+            ),
+            patch.object(
+                SpatialEnrichmentService,
+                "_fetch_fallback_building_layer",
+                new_callable=AsyncMock,
+                return_value={
+                    "height_m": None,
+                    "source": "ch.bfs.gebaeude_wohnungs_register",
+                    "raw_attributes": {"gkat": "1110"},
+                    "fetched_at": "2026-03-28T10:00:00+00:00",
+                },
+            ),
+        ):
+            await SpatialEnrichmentService.enrich_building_spatial_with_fallback(db, building.id)
+
+        from sqlalchemy import select as sa_select
+
+        stmt = (
+            sa_select(SourceHealthEvent)
+            .join(SourceRegistryEntry)
+            .where(
+                SourceRegistryEntry.name == "swissbuildings3d",
+                SourceHealthEvent.event_type == "degraded",
+            )
+        )
+        result = await db.execute(stmt)
+        events = list(result.scalars().all())
+        assert len(events) >= 1
+        assert events[0].fallback_used is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TestCantonalProcedureContracts — cantonal procedure reliability contracts
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestCantonalProcedureContracts:
+    """Contract tests for cantonal_procedure_source_service reliability upgrades."""
+
+    @pytest.mark.asyncio
+    async def test_unknown_canton_fallback(self, db):
+        """Unknown canton falls back to federal-level authorities."""
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        building = await _make_building(db)
+        # Override canton to unknown
+        building.canton = "ZH"
+        await db.flush()
+
+        with patch(
+            "app.services.cantonal_procedure_source_service.SourceRegistryService.record_health_event",
+            new_callable=AsyncMock,
+        ):
+            result = await CantonalProcedureSourceService.get_canton_context_with_fallback(db, building.id)
+
+        assert result["fallback_used"] is True
+        assert result["fallback_source"] == "federal"
+        assert "environment" in result["authorities"]
+        assert "energy" in result["authorities"]
+
+    @pytest.mark.asyncio
+    async def test_known_canton_no_fallback(self, db):
+        """Known canton (VD) returns canton data without fallback."""
+        from app.services.cantonal_procedure_source_service import (
+            CantonalProcedureSourceService,
+            _cache,
+        )
+
+        # Clear cache to force fresh fetch
+        _cache.pop("VD", None)
+
+        building = await _make_building(db)
+        # VD is the default canton in _make_building
+
+        with patch(
+            "app.services.cantonal_procedure_source_service.SourceRegistryService.record_health_event",
+            new_callable=AsyncMock,
+        ):
+            result = await CantonalProcedureSourceService.get_canton_context_with_fallback(db, building.id)
+
+        assert result["fallback_used"] is False
+        assert result["fallback_source"] is None
+        assert result["canton"] == "VD"
+        assert "environment" in result["authorities"]
+
+    @pytest.mark.asyncio
+    async def test_freshness_detects_stale(self, db):
+        """Stale cantonal cache is detected as not fresh."""
+        from app.services.cantonal_procedure_source_service import (
+            CantonalProcedureSourceService,
+            _cache,
+        )
+
+        # Inject stale cache entry (40 days old)
+        _cache["VD"] = {
+            "authorities": {"environment": {"name": "DGE-DIREV"}},
+            "filing_requirements": {},
+            "fetched_at": datetime.now(UTC) - timedelta(days=40),
+        }
+
+        result = await CantonalProcedureSourceService.check_procedure_freshness(db, "VD")
+
+        assert result["fresh"] is False
+        assert result["recommended_action"] == "refresh"
+        assert len(result["stale_domains"]) > 0
+
+        # Cleanup
+        _cache.pop("VD", None)
+
+    @pytest.mark.asyncio
+    async def test_freshness_accepts_fresh(self, db):
+        """Fresh cantonal cache is accepted."""
+        from app.services.cantonal_procedure_source_service import (
+            CantonalProcedureSourceService,
+            _cache,
+        )
+
+        # Inject fresh cache entry (1 day old)
+        _cache["GE"] = {
+            "authorities": {"environment": {"name": "OCEV"}},
+            "filing_requirements": {},
+            "fetched_at": datetime.now(UTC) - timedelta(days=1),
+        }
+
+        result = await CantonalProcedureSourceService.check_procedure_freshness(db, "GE")
+
+        assert result["fresh"] is True
+        assert result["recommended_action"] == "none"
+
+        # Cleanup
+        _cache.pop("GE", None)
+
+    def test_authority_validation_complete(self):
+        """Complete authority entry passes validation."""
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        entry = {"name": "DGE-DIREV", "portal": "https://www.vd.ch/dge", "email": "info@vd.ch"}
+        result = CantonalProcedureSourceService._validate_authority_entry(entry)
+
+        assert result["valid"] is True
+        assert result["missing_fields"] == []
+
+    def test_authority_validation_missing_fields(self):
+        """Authority entry missing name and contact is flagged invalid."""
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        entry = {"full_name": "Some office"}  # missing 'name', no portal/email
+        result = CantonalProcedureSourceService._validate_authority_entry(entry)
+
+        assert result["valid"] is False
+        assert "name" in result["missing_fields"]
+        assert "portal_or_email" in result["missing_fields"]
+
+    def test_filing_validation_complete(self):
+        """Complete filing requirements pass validation."""
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        reqs = {
+            "procedure": "Permis de demolir",
+            "authority": "CAMAC",
+            "required_documents": ["Plan", "Diagnostic"],
+        }
+        result = CantonalProcedureSourceService._validate_filing_requirements(reqs)
+
+        assert result["valid"] is True
+        assert result["missing_fields"] == []
+
+    def test_filing_validation_missing(self):
+        """Filing requirements missing required fields are flagged invalid."""
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        reqs = {"fee_chf": 500}  # missing procedure, authority, required_documents
+        result = CantonalProcedureSourceService._validate_filing_requirements(reqs)
+
+        assert result["valid"] is False
+        assert "procedure" in result["missing_fields"]
+        assert "authority" in result["missing_fields"]
+
+    @pytest.mark.asyncio
+    async def test_health_event_on_context_fetch(self, db):
+        """Health event recorded when canton context is fetched."""
+        from app.services.cantonal_procedure_source_service import (
+            CantonalProcedureSourceService,
+            _cache,
+        )
+
+        # Clear cache to force fresh fetch
+        _cache.pop("VD", None)
+
+        building = await _make_building(db)
+        await _make_source(db, "cantonal_authorities_vd", family="procedure")
+
+        await CantonalProcedureSourceService.get_canton_context(db, building.id)
+
+        from sqlalchemy import select as sa_select
+
+        stmt = (
+            sa_select(SourceHealthEvent)
+            .join(SourceRegistryEntry)
+            .where(
+                SourceRegistryEntry.name == "cantonal_authorities_vd",
+                SourceHealthEvent.event_type == "healthy",
+            )
+        )
+        result = await db.execute(stmt)
+        events = list(result.scalars().all())
+        assert len(events) >= 1

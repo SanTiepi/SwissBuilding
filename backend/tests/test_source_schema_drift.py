@@ -120,3 +120,101 @@ class TestSubsidySchemaDrift:
         validate = self._get_validator()
         result = validate({})
         assert result["valid"] is False
+
+
+# ---------------------------------------------------------------------------
+# Spatial enrichment schema drift
+# ---------------------------------------------------------------------------
+
+
+class TestSpatialSchemaDrift:
+    """Schema-drift detection for swissBUILDINGS3D spatial responses."""
+
+    def _get_validator(self):
+        from app.services.spatial_enrichment_service import SpatialEnrichmentService
+
+        return SpatialEnrichmentService._validate_spatial_response
+
+    def test_spatial_response_valid(self):
+        validate = self._get_validator()
+        result = validate(
+            {
+                "height_m": 12.5,
+                "footprint_wkt": "POLYGON((6.63 46.52, 6.631 46.52, 6.631 46.521, 6.63 46.52))",
+                "roof_type": "Flachdach",
+                "volume_m3": 3200.0,
+            }
+        )
+        assert result["valid"] is True
+        assert result["drift_detected"] is False
+        assert result["missing_fields"] == []
+
+    def test_spatial_response_missing_fields(self):
+        validate = self._get_validator()
+        result = validate({"source": "test", "volume_m3": 100})
+        assert result["valid"] is False
+        assert "height_m" in result["missing_fields"]
+        assert "footprint_wkt" in result["missing_fields"]
+        assert "roof_type" in result["missing_fields"]
+
+    def test_spatial_response_empty(self):
+        validate = self._get_validator()
+        result = validate({})
+        assert result["valid"] is False
+        assert result["drift_detected"] is True
+        assert len(result["missing_fields"]) == 3  # height_m, footprint_wkt, roof_type
+
+
+# ---------------------------------------------------------------------------
+# Cantonal procedure schema drift
+# ---------------------------------------------------------------------------
+
+
+class TestCantonalProcedureSchemaDrift:
+    """Schema-drift detection for cantonal authority and filing data."""
+
+    def test_authority_entry_valid(self):
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        result = CantonalProcedureSourceService._validate_authority_entry(
+            {
+                "name": "DGE-DIREV",
+                "portal": "https://www.vd.ch/dge",
+                "email": "info@vd.ch",
+            }
+        )
+        assert result["valid"] is True
+        assert result["missing_fields"] == []
+
+    def test_authority_entry_missing_name(self):
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        result = CantonalProcedureSourceService._validate_authority_entry(
+            {
+                "portal": "https://www.vd.ch/dge",
+            }
+        )
+        assert result["valid"] is False
+        assert "name" in result["missing_fields"]
+
+    def test_filing_requirements_valid(self):
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        result = CantonalProcedureSourceService._validate_filing_requirements(
+            {
+                "procedure": "Permis de demolir",
+                "authority": "CAMAC",
+                "required_documents": ["Plan de situation", "Diagnostic polluants"],
+            }
+        )
+        assert result["valid"] is True
+        assert result["missing_fields"] == []
+
+    def test_filing_requirements_empty(self):
+        from app.services.cantonal_procedure_source_service import CantonalProcedureSourceService
+
+        result = CantonalProcedureSourceService._validate_filing_requirements({})
+        assert result["valid"] is False
+        assert "procedure" in result["missing_fields"]
+        assert "authority" in result["missing_fields"]
+        assert "required_documents" in result["missing_fields"]

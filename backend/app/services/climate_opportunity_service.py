@@ -2,6 +2,11 @@
 
 Builds structured climate/environmental profiles from geo.admin data
 and detects favorable windows for building actions.
+
+Reliability note: this service derives its exposure profile from geo_context_service
+which has its own reliability-grade coverage (fallback, freshness, drift).
+Climate data itself is heuristic/estimated, not a direct external source fetch.
+No separate reliability contract needed -- covered transitively.
 """
 
 from __future__ import annotations
