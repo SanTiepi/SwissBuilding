@@ -44,7 +44,9 @@ async def get_requalification_timeline(
     """
     # ── 1. Fetch change signals ───────────────────────────────────
     sig_result = await db.execute(
-        select(BuildingSignal).where(BuildingSignal.building_id == building_id).order_by(BuildingSignal.detected_at.desc())
+        select(BuildingSignal)
+        .where(BuildingSignal.building_id == building_id)
+        .order_by(BuildingSignal.detected_at.desc())
     )
     signals = list(sig_result.scalars().all())
 
@@ -178,7 +180,9 @@ async def get_state_change_summary(
 ) -> dict:
     """Return a compact summary of state-change activity for a building."""
     sig_result = await db.execute(
-        select(BuildingSignal).where(BuildingSignal.building_id == building_id).order_by(BuildingSignal.detected_at.desc())
+        select(BuildingSignal)
+        .where(BuildingSignal.building_id == building_id)
+        .order_by(BuildingSignal.detected_at.desc())
     )
     signals = list(sig_result.scalars().all())
 
@@ -241,7 +245,9 @@ async def detect_requalification_triggers(
     snapshots = list(snap_result.scalars().all())
 
     sig_result = await db.execute(
-        select(BuildingSignal).where(BuildingSignal.building_id == building_id).order_by(BuildingSignal.detected_at.desc())
+        select(BuildingSignal)
+        .where(BuildingSignal.building_id == building_id)
+        .order_by(BuildingSignal.detected_at.desc())
     )
     signals = list(sig_result.scalars().all())
 

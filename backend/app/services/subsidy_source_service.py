@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 # Cache TTL — subsidy data refreshed weekly at most
 CACHE_TTL_DAYS = 7
 
+# Programs change annually; data older than this is considered stale
+PROGRAM_STALENESS_DAYS = 365
+
+# Required fields for a valid subsidy program entry
+_REQUIRED_PROGRAM_FIELDS: list[str] = ["name", "category"]
+
 # ---------------------------------------------------------------------------
 # Known subsidy program catalogues per canton
 # ---------------------------------------------------------------------------
@@ -131,6 +137,27 @@ _SOURCE_NAME_MAP: dict[str, str] = {
     "VD": "subsidy_programs_vd",
     "GE": "subsidy_programs_ge",
     "FR": "subsidy_programs_fr",
+}
+
+# Federal-level fallback programs (Programme Batiments federal)
+FEDERAL_PROGRAMS: dict[str, Any] = {
+    "name": "Programme Batiments federal",
+    "url": "https://www.leprogrammebatiments.ch",
+    "last_updated": "2026-01-01",
+    "programs": [
+        {
+            "name": "Isolation thermique (federal)",
+            "category": "energy",
+            "max_chf_m2": 30,
+            "conditions": "CECB requis, amelioration energetique significative",
+        },
+        {
+            "name": "Remplacement chauffage fossile (federal)",
+            "category": "heating",
+            "max_chf": 6000,
+            "conditions": "Remplacement chauffage fossile par renouvelable",
+        },
+    ],
 }
 
 # In-memory cache: canton -> {data, fetched_at}
@@ -372,3 +399,197 @@ class SubsidySourceService:
     ) -> dict[str, Any]:
         """Force-refresh cached subsidy data for a canton. Records health event."""
         return await SubsidySourceService.get_subsidy_catalog(db, canton, force_refresh=True)
+
+    @staticmethod
+    async def get_applicable_subsidies_with_fallback(
+        db: AsyncSession,
+        building_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        """If canton-specific data unavailable, fall back to federal-level programs.
+
+        Records degraded health event when fallback is used.
+        """
+        # Load building
+        result = await db.execute(select(Building).where(Building.id == building_id))
+        building = result.scalar_one_or_none()
+        if building is None:
+            return {"error": "building_not_found", "programs": [], "total_potential_chf": 0}
+
+        canton = (building.canton or "").upper()
+        used_fallback = False
+
+        if canton in SUBSIDY_PROGRAMS:
+            catalog = await SubsidySourceService.get_subsidy_catalog(db, canton)
+            if catalog.get("error"):
+                # Canton known but catalog fetch failed — fall back to federal
+                used_fallback = True
+                programs = FEDERAL_PROGRAMS["programs"]
+                catalog_name = FEDERAL_PROGRAMS["name"]
+                catalog_url = FEDERAL_PROGRAMS["url"]
+                last_updated = FEDERAL_PROGRAMS["last_updated"]
+            else:
+                programs = catalog.get("programs", [])
+                catalog_name = catalog.get("name")
+                catalog_url = catalog.get("url")
+                last_updated = catalog.get("last_updated")
+        else:
+            # Unknown canton — fall back to federal programs
+            used_fallback = True
+            programs = FEDERAL_PROGRAMS["programs"]
+            catalog_name = FEDERAL_PROGRAMS["name"]
+            catalog_url = FEDERAL_PROGRAMS["url"]
+            last_updated = FEDERAL_PROGRAMS["last_updated"]
+
+        # Record health event for fallback
+        if used_fallback:
+            try:
+                await SourceRegistryService.record_health_event(
+                    db,
+                    "subsidy_programs_federal",
+                    "degraded",
+                    description=f"Federal fallback used for canton {canton}",
+                    fallback_used=True,
+                    fallback_source_name="federal_programs",
+                )
+            except Exception:
+                logger.debug("Failed to record federal fallback health event", exc_info=True)
+
+        # Filter programs by building age where applicable
+        applicable: list[dict[str, Any]] = []
+        total_potential = 0.0
+
+        for program in programs:
+            age_cutoff = program.get("building_age_cutoff")
+            if age_cutoff and building.construction_year and building.construction_year > age_cutoff:
+                continue
+            applicable.append(program)
+            if "max_chf" in program:
+                total_potential += program["max_chf"]
+            elif "max_chf_m2" in program:
+                total_potential += program["max_chf_m2"] * 200
+
+        return {
+            "canton": canton,
+            "building_id": str(building_id),
+            "catalog_name": catalog_name,
+            "catalog_url": catalog_url,
+            "programs": applicable,
+            "total_programs": len(applicable),
+            "total_potential_chf": total_potential,
+            "last_updated": last_updated,
+            "used_fallback": used_fallback,
+            "fallback_source": "federal" if used_fallback else None,
+        }
+
+    @staticmethod
+    async def check_subsidy_freshness(
+        db: AsyncSession,
+        canton: str,
+    ) -> dict[str, Any]:
+        """Check if subsidy data is still current. Programs change annually.
+
+        Returns: {fresh: bool, stale_since: str | None, recommended_action: str}
+        """
+        canton = canton.upper()
+
+        if canton not in SUBSIDY_PROGRAMS:
+            return {
+                "canton": canton,
+                "fresh": False,
+                "stale_since": None,
+                "recommended_action": "no_data_available",
+                "detail": "unknown_canton",
+            }
+
+        program_data = SUBSIDY_PROGRAMS[canton]
+        last_updated_str = program_data.get("last_updated")
+        if not last_updated_str:
+            return {
+                "canton": canton,
+                "fresh": False,
+                "stale_since": None,
+                "recommended_action": "refresh",
+                "detail": "no_last_updated_field",
+            }
+
+        try:
+            last_updated = datetime.fromisoformat(last_updated_str).replace(tzinfo=UTC)
+        except (ValueError, TypeError):
+            return {
+                "canton": canton,
+                "fresh": False,
+                "stale_since": None,
+                "recommended_action": "refresh",
+                "detail": "invalid_last_updated_format",
+            }
+
+        now = datetime.now(UTC)
+        age = now - last_updated
+        is_fresh = age < timedelta(days=PROGRAM_STALENESS_DAYS)
+
+        # Also check in-memory cache freshness
+        cache_fresh = _is_cache_fresh(canton)
+
+        result: dict[str, Any] = {
+            "canton": canton,
+            "fresh": is_fresh,
+            "age_days": round(age.total_seconds() / 86400, 1),
+            "last_updated": last_updated_str,
+            "cache_fresh": cache_fresh,
+        }
+
+        if is_fresh:
+            result["stale_since"] = None
+            result["recommended_action"] = "none"
+        else:
+            result["stale_since"] = last_updated_str
+            result["recommended_action"] = "refresh"
+
+        # Record health event for staleness
+        source_name = _SOURCE_NAME_MAP.get(canton)
+        if source_name and not is_fresh:
+            try:
+                await SourceRegistryService.record_health_event(
+                    db,
+                    source_name,
+                    "degraded",
+                    description=f"Subsidy data for {canton} is stale ({round(age.total_seconds() / 86400)} days old)",
+                )
+            except Exception:
+                logger.debug("Failed to record staleness event for %s", canton, exc_info=True)
+
+        return result
+
+    @staticmethod
+    def _validate_subsidy_program(program: dict[str, Any]) -> dict[str, Any]:
+        """Validate a subsidy program entry has required fields.
+
+        Detect if program structure changed.
+        Returns: {valid: bool, missing_fields: [...], detail: str}
+        """
+        if not isinstance(program, dict):
+            return {
+                "valid": False,
+                "missing_fields": _REQUIRED_PROGRAM_FIELDS,
+                "detail": "program_is_not_a_dict",
+            }
+
+        missing = [f for f in _REQUIRED_PROGRAM_FIELDS if f not in program or program[f] is None]
+        if missing:
+            return {
+                "valid": False,
+                "missing_fields": missing,
+                "detail": f"missing_required_fields: {missing}",
+            }
+
+        # Validate category is a known value
+        known_categories = {"energy", "heating", "pollutant", "windows", "ventilation", "solar"}
+        cat = program.get("category")
+        if cat and cat not in known_categories:
+            return {
+                "valid": True,
+                "missing_fields": [],
+                "detail": f"unknown_category: {cat}",
+            }
+
+        return {"valid": True, "missing_fields": [], "detail": "ok"}

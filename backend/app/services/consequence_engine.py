@@ -223,9 +223,7 @@ class ConsequenceEngine:
             from app.services.invalidation_engine import InvalidationEngine
 
             inv_engine = InvalidationEngine()
-            invalidations = await inv_engine.scan_for_invalidations(
-                db, building_id, trigger_type, trigger_id=None
-            )
+            invalidations = await inv_engine.scan_for_invalidations(db, building_id, trigger_type, trigger_id=None)
             result["invalidations_detected"] = len(invalidations)
         except Exception:
             logger.exception("consequence_engine: invalidation_engine failed for %s", building_id)

@@ -2,10 +2,16 @@
 
 Chains the canonical Swiss building identity using public geo.admin.ch APIs.
 Every resolved value carries source, confidence, and resolved_at for auditability.
+
+Reliability features:
+- Explicit fallback chains (primary -> coordinate-based -> partial with gap)
+- Freshness enforcement (TTL-based staleness check per component)
+- Schema-drift detection (validates API response shape)
 """
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from datetime import UTC, datetime
 from typing import Any
@@ -27,6 +33,67 @@ RDPPF_EXTRACT_API = "https://rdppf.geo.admin.ch/api/v1/full"
 # Timeouts
 _TIMEOUT = 15.0
 
+# ---------------------------------------------------------------------------
+# Schema-drift detection: expected fields per API response type
+# ---------------------------------------------------------------------------
+EXPECTED_EGID_FIELDS = {"egid", "address", "municipality", "canton"}
+EXPECTED_EGRID_FIELDS = {"egrid", "coordinates", "source"}
+EXPECTED_RDPPF_FIELDS = {"restrictions", "themes", "parcel_info", "source"}
+
+# Known optional fields per response type (not flagged as unexpected)
+_EGID_OPTIONAL = {"coordinates", "confidence", "source", "fallback_used", "gap"}
+_EGRID_OPTIONAL = {"parcel_number", "municipality", "area_m2", "fallback_used", "gap"}
+_RDPPF_OPTIONAL = {"fallback_used", "gap"}
+
+
+def validate_response_schema(
+    response_data: dict[str, Any],
+    expected_fields: set[str],
+    optional_fields: set[str] | None = None,
+) -> dict[str, Any]:
+    """Validate that an API response contains expected fields. Detect schema drift.
+
+    Returns: {valid: bool, missing_fields: [...], unexpected_fields: [...]}
+    """
+    if not response_data:
+        return {"valid": False, "missing_fields": list(expected_fields), "unexpected_fields": []}
+
+    actual = set(response_data.keys())
+    missing = expected_fields - actual
+    known = expected_fields | (optional_fields or set())
+    unexpected = actual - known
+
+    return {
+        "valid": len(missing) == 0,
+        "missing_fields": sorted(missing),
+        "unexpected_fields": sorted(unexpected),
+    }
+
+
+async def _record_schema_drift(
+    db: AsyncSession | None,
+    source_name: str,
+    validation: dict[str, Any],
+) -> None:
+    """Record a schema_drift health event if validation failed."""
+    if db is None or validation["valid"]:
+        return
+    try:
+        desc = f"Missing: {validation['missing_fields']}, Unexpected: {validation['unexpected_fields']}"
+        await SourceRegistryService.record_health_event(
+            db,
+            source_name,
+            "schema_drift",
+            description=desc,
+        )
+    except Exception:
+        logger.debug("Failed to record schema drift event for %s", source_name, exc_info=True)
+
+
+# ---------------------------------------------------------------------------
+# Low-level HTTP fetch
+# ---------------------------------------------------------------------------
+
 
 async def _fetch_json(url: str, params: dict[str, Any]) -> dict[str, Any]:
     """Fetch JSON from a URL with error handling."""
@@ -38,6 +105,47 @@ async def _fetch_json(url: str, params: dict[str, Any]) -> dict[str, Any]:
     except Exception as exc:
         logger.warning("Identity chain API request failed: %s — %s", url, exc)
         return {}
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers for coordinate-based fallback
+# ---------------------------------------------------------------------------
+
+
+async def _egid_from_coordinates(coordinates: tuple[float, float]) -> dict[str, Any]:
+    """Resolve EGID from coordinates via the identify API (fallback path)."""
+    lat, lon = coordinates
+    data = await _fetch_json(
+        CADASTRE_IDENTIFY_API,
+        {
+            "geometry": f"{lon},{lat}",
+            "geometryType": "esriGeometryPoint",
+            "layers": "all:ch.bfs.gebaeude_wohnungs_register",
+            "tolerance": 10,
+            "sr": 4326,
+            "returnGeometry": "false",
+            "limit": 1,
+        },
+    )
+    results = data.get("results", [])
+    if results:
+        attrs = results[0].get("attributes", {})
+        if attrs.get("egid"):
+            return {
+                "egid": int(attrs["egid"]),
+                "address": attrs.get("strname_deinr"),
+                "municipality": attrs.get("gdename"),
+                "canton": attrs.get("gkanton"),
+                "coordinates": coordinates,
+                "source": "madd",
+                "confidence": 0.85,
+            }
+    return {}
+
+
+# ---------------------------------------------------------------------------
+# EGID resolution (with fallback)
+# ---------------------------------------------------------------------------
 
 
 async def resolve_egid(
@@ -110,6 +218,71 @@ async def resolve_egid(
                 }
 
     return result
+
+
+async def resolve_egid_with_fallback(
+    db: AsyncSession | None = None,
+    *,
+    address: str | None = None,
+    coordinates: tuple[float, float] | None = None,
+) -> dict[str, Any]:
+    """Resolve EGID with explicit fallback chain and health events.
+
+    Fallback chain:
+    1. Primary: MADD API address search
+    2. Fallback: coordinate-based identify API
+    3. Partial: return gap descriptor
+
+    Returns dict with egid or gap description. Always includes fallback_used flag.
+    """
+    try:
+        result = await resolve_egid(address=address, coordinates=coordinates)
+        if result.get("egid"):
+            if db:
+                with contextlib.suppress(Exception):
+                    await SourceRegistryService.record_health_event(db, "geo_admin_madd", "healthy")
+            # Validate schema
+            schema_check = validate_response_schema(result, EXPECTED_EGID_FIELDS, _EGID_OPTIONAL)
+            if not schema_check["valid"]:
+                await _record_schema_drift(db, "geo_admin_madd", schema_check)
+            return result
+    except Exception as e:
+        logger.warning("EGID primary resolution failed: %s", e)
+        if db:
+            with contextlib.suppress(Exception):
+                await SourceRegistryService.record_health_event(db, "geo_admin_madd", "error", error=str(e))
+
+    # Fallback: try coordinate-based lookup if address failed or returned empty
+    if coordinates:
+        try:
+            result = await _egid_from_coordinates(coordinates)
+            if result.get("egid"):
+                if db:
+                    with contextlib.suppress(Exception):
+                        await SourceRegistryService.record_health_event(
+                            db,
+                            "geo_admin_madd",
+                            "degraded",
+                            description="Primary MADD failed, fell back to coordinate lookup",
+                            fallback_used=True,
+                        )
+                return {**result, "fallback_used": True}
+        except Exception:
+            pass
+
+    # All paths exhausted
+    return {
+        "egid": None,
+        "source": "unavailable",
+        "confidence": 0.0,
+        "fallback_used": True,
+        "gap": "EGID resolution failed on both primary and fallback paths",
+    }
+
+
+# ---------------------------------------------------------------------------
+# EGRID resolution (with fallback)
+# ---------------------------------------------------------------------------
 
 
 async def resolve_egrid(
@@ -189,6 +362,70 @@ async def resolve_egrid(
         result["source"] = "cadastre"
 
     return result
+
+
+async def resolve_egrid_with_fallback(
+    db: AsyncSession | None = None,
+    *,
+    egid: int | None = None,
+    coordinates: tuple[float, float] | None = None,
+) -> dict[str, Any]:
+    """Resolve EGRID with explicit fallback chain and health events.
+
+    Fallback chain:
+    1. Primary: cadastre identify API via EGID
+    2. Fallback: coordinate-based lookup (if coordinates provided)
+    3. Partial: return gap descriptor
+
+    Returns dict with egrid or gap description. Always includes fallback_used flag.
+    """
+    try:
+        result = await resolve_egrid(egid=egid, coordinates=coordinates)
+        if result.get("egrid"):
+            if db:
+                with contextlib.suppress(Exception):
+                    await SourceRegistryService.record_health_event(db, "geo_admin_cadastre", "healthy")
+            schema_check = validate_response_schema(result, EXPECTED_EGRID_FIELDS, _EGRID_OPTIONAL)
+            if not schema_check["valid"]:
+                await _record_schema_drift(db, "geo_admin_cadastre", schema_check)
+            return result
+    except Exception as e:
+        logger.warning("EGRID primary resolution failed: %s", e)
+        if db:
+            with contextlib.suppress(Exception):
+                await SourceRegistryService.record_health_event(db, "geo_admin_cadastre", "error", error=str(e))
+
+    # Fallback: try coordinate-based directly if we have coords and primary failed
+    if coordinates and egid:
+        try:
+            fallback_result = await resolve_egrid(egid=None, coordinates=coordinates)
+            if fallback_result.get("egrid"):
+                if db:
+                    with contextlib.suppress(Exception):
+                        await SourceRegistryService.record_health_event(
+                            db,
+                            "geo_admin_cadastre",
+                            "degraded",
+                            description="Primary cadastre failed, fell back to coordinate lookup",
+                            fallback_used=True,
+                        )
+                return {**fallback_result, "fallback_used": True}
+        except Exception:
+            pass
+
+    # All paths exhausted
+    return {
+        "egrid": None,
+        "source": "unavailable",
+        "confidence": 0.0,
+        "fallback_used": True,
+        "gap": "EGRID resolution failed on both primary and fallback paths",
+    }
+
+
+# ---------------------------------------------------------------------------
+# RDPPF fetch (with fallback)
+# ---------------------------------------------------------------------------
 
 
 async def fetch_rdppf(egrid: str) -> dict[str, Any]:
@@ -276,6 +513,108 @@ async def fetch_rdppf(egrid: str) -> dict[str, Any]:
         "parcel_info": {"egrid": egrid},
         "source": "geo.admin.ch",
     }
+
+
+async def fetch_rdppf_with_fallback(
+    db: AsyncSession | None = None,
+    *,
+    egrid: str,
+) -> dict[str, Any]:
+    """Fetch RDPPF with explicit fallback and health events.
+
+    Fallback chain:
+    1. Primary: full RDPPF fetch via geo.admin.ch
+    2. Partial: return empty restrictions with gap descriptor
+
+    Returns dict with restrictions or gap description. Always includes fallback_used flag.
+    """
+    try:
+        result = await fetch_rdppf(egrid)
+        has_data = bool(result.get("restrictions") or result.get("themes"))
+        if has_data:
+            if db:
+                with contextlib.suppress(Exception):
+                    await SourceRegistryService.record_health_event(db, "rdppf_federal", "healthy")
+            schema_check = validate_response_schema(result, EXPECTED_RDPPF_FIELDS, _RDPPF_OPTIONAL)
+            if not schema_check["valid"]:
+                await _record_schema_drift(db, "rdppf_federal", schema_check)
+            return result
+        # API succeeded but returned no data (not an error per se)
+        return result
+    except Exception as e:
+        logger.warning("RDPPF fallback-aware fetch failed for EGRID %s: %s", egrid, e)
+        if db:
+            with contextlib.suppress(Exception):
+                await SourceRegistryService.record_health_event(db, "rdppf_federal", "error", error=str(e))
+
+    # Return partial with gap
+    return {
+        "restrictions": [],
+        "themes": [],
+        "parcel_info": {"egrid": egrid},
+        "source": "unavailable",
+        "fallback_used": True,
+        "gap": "RDPPF fetch failed",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Freshness enforcement
+# ---------------------------------------------------------------------------
+
+
+async def check_freshness(db: AsyncSession, building_id: UUID) -> dict[str, Any]:
+    """Check if the cached identity chain is still fresh per source registry TTL.
+
+    Returns: {fresh: bool, stale_components: [...], recommended_action: str}
+    """
+    chain = await get_identity_chain(db, building_id)
+    if not chain or chain.get("error"):
+        return {
+            "fresh": False,
+            "stale_components": ["all"],
+            "recommended_action": "resolve",
+        }
+
+    stale_components: list[str] = []
+
+    # Check EGID freshness
+    egid_freshness = await SourceRegistryService.check_source_freshness(db, "geo_admin_madd", building_id)
+    if not egid_freshness.get("is_fresh", True):
+        stale_components.append("egid")
+
+    # Check EGRID freshness
+    egrid_freshness = await SourceRegistryService.check_source_freshness(db, "geo_admin_cadastre", building_id)
+    if not egrid_freshness.get("is_fresh", True):
+        stale_components.append("egrid")
+
+    # Check RDPPF freshness
+    rdppf_freshness = await SourceRegistryService.check_source_freshness(db, "rdppf_federal", building_id)
+    if not rdppf_freshness.get("is_fresh", True):
+        stale_components.append("rdppf")
+
+    fresh = len(stale_components) == 0
+
+    if not fresh:
+        recommended_action = "refresh"
+    else:
+        recommended_action = "none"
+
+    return {
+        "fresh": fresh,
+        "stale_components": stale_components,
+        "recommended_action": recommended_action,
+        "component_freshness": {
+            "egid": egid_freshness,
+            "egrid": egrid_freshness,
+            "rdppf": rdppf_freshness,
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# Full chain resolution (unchanged success path, enhanced error handling)
+# ---------------------------------------------------------------------------
 
 
 async def resolve_full_chain(db: AsyncSession, building_id: UUID) -> dict[str, Any]:

@@ -21,6 +21,20 @@ logger = logging.getLogger(__name__)
 CACHE_TTL_DAYS = 7
 DEFAULT_TIMEOUT = 15.0
 
+# Expected attribute keys per layer — used for schema drift detection
+_LAYER_EXPECTED_KEYS: dict[str, list[str]] = {
+    "radon": ["zone", "radonrisiko", "description", "radon_bq_m3"],
+    "noise_road": ["lre_d", "lr_d", "description"],
+    "noise_rail": ["lre_d", "lr_d", "description"],
+    "solar": ["klasse", "eignung", "description", "stromertrag", "gstrahlung"],
+    "natural_hazards": ["gefahrenstufe", "description"],
+    "groundwater_protection": ["schutzzone", "typ", "description"],
+    "contaminated_sites": ["status", "description", "kategorie", "belastungskategorie"],
+    "heritage_isos": ["ortsbildbedeutung", "description", "ortsbildname", "name"],
+    "public_transport": ["klasse", "gueteklasse", "description"],
+    "thermal_networks": ["name", "description", "status"],
+}
+
 # geo.admin REST API base
 BASE_URL = "https://api3.geo.admin.ch/rest/services/api/MapServer/identify"
 
@@ -172,6 +186,189 @@ async def fetch_context(
                 # Skip this layer — don't fail the whole request
 
     return results
+
+
+def _validate_layer_response(layer_name: str, response_data: dict[str, Any]) -> dict[str, Any]:
+    """Validate response from a specific geo.admin layer has expected structure.
+
+    Detect when geo.admin changes response format (schema drift).
+    Returns: {valid: bool, drift_detected: bool, missing_keys: [...], detail: str}
+    """
+    if layer_name not in _LAYER_EXPECTED_KEYS:
+        return {"valid": True, "drift_detected": False, "missing_keys": [], "detail": "no_schema_defined"}
+
+    expected = _LAYER_EXPECTED_KEYS[layer_name]
+    attrs = response_data.get("raw_attributes") or {}
+    if not attrs:
+        return {
+            "valid": False,
+            "drift_detected": True,
+            "missing_keys": expected,
+            "detail": "no_attributes_in_response",
+        }
+
+    # Check if at least one expected key is present
+    present = [k for k in expected if k in attrs]
+    if not present:
+        return {
+            "valid": False,
+            "drift_detected": True,
+            "missing_keys": expected,
+            "detail": f"none_of_expected_keys_found: {expected}",
+        }
+
+    return {"valid": True, "drift_detected": False, "missing_keys": [], "detail": "ok"}
+
+
+async def fetch_context_with_fallback(
+    longitude: float,
+    latitude: float,
+    layers: list[str] | None = None,
+    *,
+    db: AsyncSession | None = None,
+) -> dict[str, Any]:
+    """Fetch context with explicit per-layer fallback and health tracking.
+
+    Returns results for successful layers + explicit gap list for failed layers.
+    Records per-layer health events when db is provided.
+    """
+    target_layers = layers or list(LAYERS.keys())
+    results: dict[str, Any] = {}
+    failed_layers: list[str] = []
+    drift_layers: list[str] = []
+    extent = _build_map_extent(longitude, latitude)
+
+    async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+        for layer_key in target_layers:
+            if layer_key not in LAYERS:
+                continue
+            layer_id = LAYERS[layer_key]["layer_id"]
+            params = {
+                "geometry": f"{longitude},{latitude}",
+                "geometryType": "esriGeometryPoint",
+                "sr": "4326",
+                "layers": f"all:{layer_id}",
+                "tolerance": "50",
+                "mapExtent": extent,
+                "imageDisplay": "500,500,96",
+                "returnGeometry": "false",
+                "f": "json",
+            }
+            try:
+                response = await client.get(BASE_URL, params=params)
+                response.raise_for_status()
+                data = response.json()
+                features = data.get("results") or []
+                parsed = _parse_layer_response(layer_key, features)
+                if parsed:
+                    # Validate schema
+                    validation = _validate_layer_response(layer_key, parsed)
+                    if validation["drift_detected"]:
+                        drift_layers.append(layer_key)
+                        if db:
+                            source_name = f"geo_admin_{layer_key}"
+                            try:
+                                await SourceRegistryService.record_health_event(
+                                    db,
+                                    source_name,
+                                    "schema_drift",
+                                    description=f"Schema drift on {layer_key}: {validation['detail']}",
+                                )
+                            except Exception:
+                                logger.debug("Failed to record schema_drift event for %s", layer_key, exc_info=True)
+                    results[layer_key] = parsed
+                # Record per-layer success health event
+                if db:
+                    source_name = f"geo_admin_{layer_key}"
+                    try:
+                        await SourceRegistryService.record_health_event(
+                            db, source_name, "healthy", description=f"Layer {layer_key} fetched ok"
+                        )
+                    except Exception:
+                        logger.debug("Failed to record healthy event for %s", layer_key, exc_info=True)
+            except Exception:
+                logger.warning(
+                    "geo.admin layer %s fetch failed for (%s, %s)", layer_key, longitude, latitude, exc_info=True
+                )
+                failed_layers.append(layer_key)
+                # Record per-layer failure health event
+                if db:
+                    source_name = f"geo_admin_{layer_key}"
+                    try:
+                        await SourceRegistryService.record_health_event(
+                            db,
+                            source_name,
+                            "degraded",
+                            description=f"Layer {layer_key} failed",
+                            fallback_used=True,
+                            fallback_source_name="partial_result",
+                        )
+                    except Exception:
+                        logger.debug("Failed to record degraded event for %s", layer_key, exc_info=True)
+
+    return {
+        "layers": results,
+        "failed_layers": failed_layers,
+        "drift_layers": drift_layers,
+        "total_requested": len(target_layers),
+        "total_succeeded": len(results),
+        "total_failed": len(failed_layers),
+    }
+
+
+async def check_context_freshness(
+    db: AsyncSession,
+    building_id: uuid.UUID,
+) -> dict[str, Any]:
+    """Check if cached geo context is fresh per source TTL (7 days).
+
+    Returns: {fresh: bool, stale_layers: [...], recommended_action: str}
+    """
+    existing = await db.execute(select(BuildingGeoContext).where(BuildingGeoContext.building_id == building_id))
+    cached = existing.scalar_one_or_none()
+
+    if cached is None:
+        return {
+            "fresh": False,
+            "stale_layers": list(LAYERS.keys()),
+            "recommended_action": "full_fetch",
+            "detail": "no_cached_context",
+        }
+
+    if cached.fetched_at is None:
+        return {
+            "fresh": False,
+            "stale_layers": list(LAYERS.keys()),
+            "recommended_action": "full_fetch",
+            "detail": "no_fetched_at_timestamp",
+        }
+
+    now = datetime.now(UTC)
+    age = now - cached.fetched_at.replace(tzinfo=UTC)
+    is_fresh = age < timedelta(days=CACHE_TTL_DAYS)
+
+    if is_fresh:
+        return {
+            "fresh": True,
+            "stale_layers": [],
+            "recommended_action": "none",
+            "age_days": round(age.total_seconds() / 86400, 1),
+            "fetched_at": cached.fetched_at.isoformat(),
+        }
+
+    # Stale: determine which layers are in the cached data
+    cached_layers = list((cached.context_data or {}).keys())
+    # All layers not in cached data are stale, plus the whole cache is expired
+    all_layer_keys = list(LAYERS.keys())
+    missing_layers = [k for k in all_layer_keys if k not in cached_layers]
+
+    return {
+        "fresh": False,
+        "stale_layers": cached_layers + missing_layers,
+        "recommended_action": "refresh",
+        "age_days": round(age.total_seconds() / 86400, 1),
+        "fetched_at": cached.fetched_at.isoformat(),
+    }
 
 
 async def enrich_building_context(

@@ -198,9 +198,7 @@ async def list_portfolio_signals(
     db: AsyncSession = Depends(get_db),
 ):
     """List recent signals across all buildings (portfolio-level)."""
-    return await change_tracker_service.get_portfolio_signals(
-        db, severity=severity, status=status, limit=limit
-    )
+    return await change_tracker_service.get_portfolio_signals(db, severity=severity, status=status, limit=limit)
 
 
 # ---------------------------------------------------------------------------
