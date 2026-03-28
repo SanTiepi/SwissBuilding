@@ -52,7 +52,7 @@ For large missions:
 | Command | Purpose |
 |---------|---------|
 | `npm run validate` | tsc + eslint + prettier (fast gate) |
-| `npm test` | vitest unit (299 tests) |
+| `npm test` | vitest unit (~977 tests) |
 | `npm run test:e2e` | playwright mock (no backend) |
 | `npm run test:e2e:real` | playwright real (needs backend:8000, runs preflight auto) |
 | `npm run build` | prod build + PWA artifacts |
@@ -64,7 +64,7 @@ For large missions:
 |---------|---------|
 | `ruff check app/ tests/` | lint (must be 0 errors) |
 | `ruff format --check app/ tests/` | format (must be 0 errors) |
-| `python -m pytest tests/ -q` | 4563 tests |
+| `python -m pytest tests/ -q` | ~6950 tests |
 | `python -m app.seeds.seed_verify` | verify seed dataset |
 | `ruff check --fix app/ tests/ && ruff format app/ tests/` | auto-fix |
 

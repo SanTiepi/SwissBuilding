@@ -65,7 +65,7 @@ Backend (`cd backend`):
 ```
 ruff check app/ tests/              # lint (must be 0 errors)
 ruff format --check app/ tests/     # format (must be 0 errors)
-python -m pytest tests/ -q          # 4563 tests
+python -m pytest tests/ -q          # ~6950 tests
 ruff check --fix app/ tests/ && ruff format app/ tests/  # auto-fix
 ```
 
