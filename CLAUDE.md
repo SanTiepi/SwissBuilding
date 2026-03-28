@@ -52,7 +52,7 @@ For large missions:
 | Command | Purpose |
 |---------|---------|
 | `npm run validate` | tsc + eslint + prettier (fast gate) |
-| `npm test` | vitest unit (~977 tests) |
+| `npm test` | vitest unit (980 tests) |
 | `npm run test:e2e` | playwright mock (no backend) |
 | `npm run test:e2e:real` | playwright real (needs backend:8000, runs preflight auto) |
 | `npm run build` | prod build + PWA artifacts |
