@@ -13,224 +13,14 @@ import {
   type ExtractedData,
   type ExtractedSample,
 } from '@/api/extractions';
-import {
-  ArrowLeft,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Loader2,
-  Plus,
-  Shield,
-  FileText,
-  Beaker,
-  Scale,
-  ClipboardList,
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, AlertTriangle, Loader2, Shield, FileText } from 'lucide-react';
 import { ConfidenceIndicator } from '@/components/ConfidenceIndicator';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-
-function statusBadge(status: string): { className: string; label: string } {
-  switch (status) {
-    case 'draft':
-      return {
-        className: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-        label: 'Brouillon',
-      };
-    case 'reviewed':
-      return {
-        className: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-        label: 'Revu',
-      };
-    case 'applied':
-      return {
-        className: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-        label: 'Applique',
-      };
-    case 'rejected':
-      return {
-        className: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
-        label: 'Rejete',
-      };
-    default:
-      return {
-        className: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300',
-        label: status,
-      };
-  }
-}
-
-function resultBadge(result: string): { className: string; label: string } {
-  switch (result) {
-    case 'positive':
-      return { className: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300', label: 'Positif' };
-    case 'negative':
-      return { className: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300', label: 'Negatif' };
-    case 'trace':
-      return { className: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', label: 'Trace' };
-    default:
-      return { className: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300', label: 'Non teste' };
-  }
-}
-
-const REPORT_TYPES = [
-  { value: 'asbestos', label: 'Amiante' },
-  { value: 'pcb', label: 'PCB' },
-  { value: 'lead', label: 'Plomb' },
-  { value: 'hap', label: 'HAP' },
-  { value: 'radon', label: 'Radon' },
-  { value: 'pfas', label: 'PFAS' },
-  { value: 'multi', label: 'Multi-polluants' },
-  { value: 'unknown', label: 'Inconnu' },
-];
-
-const OVERALL_RESULTS = [
-  { value: 'presence', label: 'Presence' },
-  { value: 'absence', label: 'Absence' },
-  { value: 'partial', label: 'Partiel' },
-];
-
-const RISK_LEVELS = [
-  { value: 'low', label: 'Faible' },
-  { value: 'medium', label: 'Moyen' },
-  { value: 'high', label: 'Eleve' },
-  { value: 'critical', label: 'Critique' },
-  { value: 'unknown', label: 'Inconnu' },
-];
-
-const WORK_CATEGORIES = [
-  { value: '', label: 'Non defini' },
-  { value: 'minor', label: 'Mineurs' },
-  { value: 'medium', label: 'Moyens' },
-  { value: 'major', label: 'Majeurs' },
-];
-
-const SAMPLE_RESULTS = [
-  { value: 'positive', label: 'Positif' },
-  { value: 'negative', label: 'Negatif' },
-  { value: 'trace', label: 'Trace' },
-  { value: 'not_tested', label: 'Non teste' },
-];
-
-// ---------------------------------------------------------------------------
-// Editable field components
-// ---------------------------------------------------------------------------
-
-interface EditableTextProps {
-  value: string | null;
-  originalValue: string | null;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  className?: string;
-}
-
-function EditableText({ value, originalValue, onChange, placeholder, className }: EditableTextProps) {
-  const isModified = value !== originalValue;
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className={cn(
-          'w-full px-3 py-2 text-sm rounded-lg border transition-colors',
-          'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-600',
-          'focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none',
-          isModified && 'border-amber-400 dark:border-amber-500 ring-1 ring-amber-200 dark:ring-amber-800',
-          className,
-        )}
-      />
-      {isModified && originalValue != null && (
-        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 line-through">{originalValue}</p>
-      )}
-    </div>
-  );
-}
-
-interface EditableSelectProps {
-  value: string | null;
-  originalValue: string | null;
-  options: { value: string; label: string }[];
-  onChange: (v: string) => void;
-  className?: string;
-}
-
-function EditableSelect({ value, originalValue, options, onChange, className }: EditableSelectProps) {
-  const isModified = value !== originalValue;
-  return (
-    <div className="relative">
-      <select
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
-        className={cn(
-          'w-full px-3 py-2 text-sm rounded-lg border transition-colors',
-          'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-600',
-          'focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none',
-          isModified && 'border-amber-400 dark:border-amber-500 ring-1 ring-amber-200 dark:ring-amber-800',
-          className,
-        )}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      {isModified && originalValue != null && (
-        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 line-through">
-          {options.find((o) => o.value === originalValue)?.label ?? originalValue}
-        </p>
-      )}
-    </div>
-  );
-}
-
-interface EditableDateProps {
-  value: string | null;
-  originalValue: string | null;
-  onChange: (v: string) => void;
-  className?: string;
-}
-
-function EditableDate({ value, originalValue, onChange, className }: EditableDateProps) {
-  const isModified = value !== originalValue;
-  return (
-    <div className="relative">
-      <input
-        type="date"
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
-        className={cn(
-          'w-full px-3 py-2 text-sm rounded-lg border transition-colors',
-          'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-600',
-          'focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none',
-          isModified && 'border-amber-400 dark:border-amber-500 ring-1 ring-amber-200 dark:ring-amber-800',
-          className,
-        )}
-      />
-      {isModified && originalValue != null && (
-        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 line-through">{originalValue}</p>
-      )}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Section components
-// ---------------------------------------------------------------------------
-
-function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
-  return (
-    <h3 className="flex items-center gap-2 text-base font-semibold text-gray-800 dark:text-slate-100 mb-4">
-      <Icon className="w-5 h-5 text-red-500" />
-      {title}
-    </h3>
-  );
-}
+import { statusBadge } from './shared';
+import { MetadataSection } from './MetadataSection';
+import { ScopeSection } from './ScopeSection';
+import { SamplesTable } from './SamplesTable';
+import { ConclusionsSection } from './ConclusionsSection';
+import { RegulatorySection } from './RegulatorySection';
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -381,29 +171,23 @@ export default function ExtractionReview() {
     [handleFieldChange],
   );
 
-  const addScopeItem = useCallback(
-    (field: 'zones_covered' | 'zones_excluded') => {
-      setLocalData((prev) => {
-        if (!prev) return prev;
-        const copy = structuredClone(prev);
-        copy.scope[field].push('');
-        return copy;
-      });
-    },
-    [],
-  );
+  const addScopeItem = useCallback((field: 'zones_covered' | 'zones_excluded') => {
+    setLocalData((prev) => {
+      if (!prev) return prev;
+      const copy = structuredClone(prev);
+      copy.scope[field].push('');
+      return copy;
+    });
+  }, []);
 
-  const removeScopeItem = useCallback(
-    (field: 'zones_covered' | 'zones_excluded', index: number) => {
-      setLocalData((prev) => {
-        if (!prev) return prev;
-        const copy = structuredClone(prev);
-        copy.scope[field].splice(index, 1);
-        return copy;
-      });
-    },
-    [],
-  );
+  const removeScopeItem = useCallback((field: 'zones_covered' | 'zones_excluded', index: number) => {
+    setLocalData((prev) => {
+      if (!prev) return prev;
+      const copy = structuredClone(prev);
+      copy.scope[field].splice(index, 1);
+      return copy;
+    });
+  }, []);
 
   // Loading / error states
   if (isLoading) {
@@ -450,7 +234,7 @@ export default function ExtractionReview() {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                {t('extraction.review_title') || 'Revue de l\'extraction'}
+                {t('extraction.review_title') || "Revue de l'extraction"}
               </h1>
               <span className={cn('px-2.5 py-0.5 text-xs font-medium rounded-full', badge.className)}>
                 {badge.label}
@@ -474,376 +258,31 @@ export default function ExtractionReview() {
       </div>
 
       {/* Section 1: Metadata */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
-        <SectionHeader icon={FileText} title={t('extraction.section_metadata') || 'Metadonnees du rapport'} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Type de rapport
-            </label>
-            <EditableSelect
-              value={localData.report_type}
-              originalValue={originalData?.report_type ?? null}
-              options={REPORT_TYPES}
-              onChange={(v) => handleFieldChange('report_type', v)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Laboratoire</label>
-            <EditableText
-              value={localData.lab_name}
-              originalValue={originalData?.lab_name ?? null}
-              onChange={(v) => handleFieldChange('lab_name', v)}
-              placeholder="Nom du laboratoire"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Reference</label>
-            <EditableText
-              value={localData.lab_reference}
-              originalValue={originalData?.lab_reference ?? null}
-              onChange={(v) => handleFieldChange('lab_reference', v)}
-              placeholder="Numero de reference"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Date du rapport
-            </label>
-            <EditableDate
-              value={localData.report_date}
-              originalValue={originalData?.report_date ?? null}
-              onChange={(v) => handleFieldChange('report_date', v)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Date de validite
-            </label>
-            <EditableDate
-              value={localData.validity_date}
-              originalValue={originalData?.validity_date ?? null}
-              onChange={(v) => handleFieldChange('validity_date', v)}
-            />
-          </div>
-        </div>
-      </div>
+      <MetadataSection extracted={localData} original={originalData} onFieldChange={handleFieldChange} />
 
       {/* Section 2: Scope */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
-        <SectionHeader icon={ClipboardList} title={t('extraction.section_scope') || 'Perimetre'} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Zones covered */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">
-              Zones couvertes
-            </label>
-            <div className="space-y-2">
-              {localData.scope.zones_covered.map((zone, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={zone}
-                    onChange={(e) => handleScopeListChange('zones_covered', i, e.target.value)}
-                    className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-red-500 outline-none"
-                  />
-                  <button
-                    onClick={() => removeScopeItem('zones_covered', i)}
-                    className="text-gray-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
-                  >
-                    <XCircle className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => addScopeItem('zones_covered')}
-                className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:underline"
-              >
-                <Plus className="w-3 h-3" /> Ajouter
-              </button>
-            </div>
-          </div>
-
-          {/* Zones excluded */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">Zones exclues</label>
-            <div className="space-y-2">
-              {localData.scope.zones_excluded.map((zone, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={zone}
-                    onChange={(e) => handleScopeListChange('zones_excluded', i, e.target.value)}
-                    className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-red-500 outline-none"
-                  />
-                  <button
-                    onClick={() => removeScopeItem('zones_excluded', i)}
-                    className="text-gray-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
-                  >
-                    <XCircle className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => addScopeItem('zones_excluded')}
-                className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:underline"
-              >
-                <Plus className="w-3 h-3" /> Ajouter
-              </button>
-            </div>
-          </div>
-
-          {/* Counts */}
-          <div className="flex gap-6">
-            <div>
-              <span className="text-xs text-gray-500 dark:text-slate-400">Elements echantillonnes</span>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                {localData.scope.elements_sampled}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs text-gray-500 dark:text-slate-400">Elements positifs</span>
-              <p className="text-lg font-semibold text-red-600 dark:text-red-400">
-                {localData.scope.elements_positive}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ScopeSection
+        extracted={localData}
+        original={originalData}
+        onFieldChange={handleFieldChange}
+        onScopeListChange={handleScopeListChange}
+        onAddScopeItem={addScopeItem}
+        onRemoveScopeItem={removeScopeItem}
+      />
 
       {/* Section 3: Samples */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
-        <SectionHeader icon={Beaker} title={t('extraction.section_samples') || 'Echantillons'} />
-        {localData.samples.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-slate-700">
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">ID</th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">
-                    Localisation
-                  </th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">
-                    Materiau
-                  </th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">
-                    Resultat
-                  </th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">
-                    Concentration
-                  </th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">Unite</th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">
-                    Seuil depasse
-                  </th>
-                  <th className="text-center py-2 px-2 text-xs font-medium text-gray-500 dark:text-slate-400">
-                    Confiance
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {localData.samples.map((sample, idx) => {
-                  const rb = resultBadge(sample.result);
-                  return (
-                    <tr
-                      key={idx}
-                      className="border-b border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30"
-                    >
-                      <td className="py-2 px-2">
-                        <input
-                          type="text"
-                          value={sample.sample_id}
-                          onChange={(e) => handleSampleChange(idx, 'sample_id', e.target.value)}
-                          className="w-24 px-2 py-1 text-xs rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-red-500"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <input
-                          type="text"
-                          value={sample.location ?? ''}
-                          onChange={(e) => handleSampleChange(idx, 'location', e.target.value || null)}
-                          className="w-32 px-2 py-1 text-xs rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-red-500"
-                          placeholder="-"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <input
-                          type="text"
-                          value={sample.material_type ?? ''}
-                          onChange={(e) => handleSampleChange(idx, 'material_type', e.target.value || null)}
-                          className="w-32 px-2 py-1 text-xs rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-red-500"
-                          placeholder="-"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <select
-                          value={sample.result}
-                          onChange={(e) => handleSampleChange(idx, 'result', e.target.value)}
-                          className={cn(
-                            'px-2 py-1 text-xs rounded font-medium border-0 outline-none focus:ring-1 focus:ring-red-500',
-                            rb.className,
-                          )}
-                        >
-                          {SAMPLE_RESULTS.map((r) => (
-                            <option key={r.value} value={r.value}>
-                              {r.label}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="py-2 px-2">
-                        <input
-                          type="number"
-                          step="any"
-                          value={sample.concentration ?? ''}
-                          onChange={(e) =>
-                            handleSampleChange(
-                              idx,
-                              'concentration',
-                              e.target.value ? parseFloat(e.target.value) : null,
-                            )
-                          }
-                          className="w-24 px-2 py-1 text-xs rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-red-500"
-                          placeholder="-"
-                        />
-                      </td>
-                      <td className="py-2 px-2">
-                        <input
-                          type="text"
-                          value={sample.unit ?? ''}
-                          onChange={(e) => handleSampleChange(idx, 'unit', e.target.value || null)}
-                          className="w-20 px-2 py-1 text-xs rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-red-500"
-                          placeholder="-"
-                        />
-                      </td>
-                      <td className="py-2 px-2 text-center">
-                        <select
-                          value={sample.threshold_exceeded === null ? '' : sample.threshold_exceeded ? 'true' : 'false'}
-                          onChange={(e) =>
-                            handleSampleChange(
-                              idx,
-                              'threshold_exceeded',
-                              e.target.value === '' ? null : e.target.value === 'true',
-                            )
-                          }
-                          className="px-2 py-1 text-xs rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-red-500"
-                        >
-                          <option value="">-</option>
-                          <option value="true">Oui</option>
-                          <option value="false">Non</option>
-                        </select>
-                      </td>
-                      <td className="py-2 px-2 text-center">
-                        <div className="flex items-center justify-center">
-                          <ConfidenceIndicator value={sample.confidence} size="sm" showValue />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500 dark:text-slate-400 text-center py-4">Aucun echantillon extrait</p>
-        )}
-        {canEdit && (
-          <button
-            onClick={addSample}
-            className="mt-3 flex items-center gap-1 text-sm text-red-600 dark:text-red-400 hover:underline"
-          >
-            <Plus className="w-4 h-4" /> Ajouter un echantillon
-          </button>
-        )}
-      </div>
+      <SamplesTable
+        extracted={localData}
+        onSampleChange={handleSampleChange}
+        onAddSample={addSample}
+        canEdit={canEdit}
+      />
 
       {/* Section 4: Conclusions */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
-        <SectionHeader icon={CheckCircle2} title={t('extraction.section_conclusions') || 'Conclusions'} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Resultat global
-            </label>
-            <EditableSelect
-              value={localData.conclusions.overall_result}
-              originalValue={originalData?.conclusions.overall_result ?? null}
-              options={OVERALL_RESULTS}
-              onChange={(v) => handleFieldChange('conclusions.overall_result', v)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Niveau de risque
-            </label>
-            <EditableSelect
-              value={localData.conclusions.risk_level}
-              originalValue={originalData?.conclusions.risk_level ?? null}
-              options={RISK_LEVELS}
-              onChange={(v) => handleFieldChange('conclusions.risk_level', v)}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Recommandations
-            </label>
-            <textarea
-              value={localData.conclusions.recommendations.join('\n')}
-              onChange={(e) =>
-                handleFieldChange(
-                  'conclusions.recommendations',
-                  e.target.value.split('\n').filter((l) => l.trim()),
-                )
-              }
-              rows={3}
-              className={cn(
-                'w-full px-3 py-2 text-sm rounded-lg border transition-colors',
-                'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-600',
-                'focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none',
-              )}
-              placeholder="Une recommandation par ligne"
-            />
-          </div>
-        </div>
-      </div>
+      <ConclusionsSection extracted={localData} original={originalData} onFieldChange={handleFieldChange} />
 
       {/* Section 5: Regulatory context */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
-        <SectionHeader icon={Scale} title={t('extraction.section_regulatory') || 'Contexte reglementaire'} />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Reference reglementaire
-            </label>
-            <EditableText
-              value={localData.regulatory_context.regulation_ref}
-              originalValue={originalData?.regulatory_context.regulation_ref ?? null}
-              onChange={(v) => handleFieldChange('regulatory_context.regulation_ref', v)}
-              placeholder="Ex: OTConst Art. 60a"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Seuil applique</label>
-            <EditableText
-              value={localData.regulatory_context.threshold_applied}
-              originalValue={originalData?.regulatory_context.threshold_applied ?? null}
-              onChange={(v) => handleFieldChange('regulatory_context.threshold_applied', v)}
-              placeholder="Ex: 50.0 mg/kg"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              Categorie de travaux
-            </label>
-            <EditableSelect
-              value={localData.regulatory_context.work_category ?? ''}
-              originalValue={originalData?.regulatory_context.work_category ?? ''}
-              options={WORK_CATEGORIES}
-              onChange={(v) => handleFieldChange('regulatory_context.work_category', v || null)}
-            />
-          </div>
-        </div>
-      </div>
+      <RegulatorySection extracted={localData} original={originalData} onFieldChange={handleFieldChange} />
 
       {/* Footer: Actions + Provenance */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
@@ -853,9 +292,7 @@ export default function ExtractionReview() {
             <Shield className="w-3.5 h-3.5" />
             Methode: rule_based_v1
           </span>
-          <span>
-            Extraction: {formatDate(extraction.created_at)}
-          </span>
+          <span>Extraction: {formatDate(extraction.created_at)}</span>
           {(extraction.corrections?.length ?? 0) > 0 && (
             <span>{extraction.corrections!.length} correction(s) enregistree(s)</span>
           )}
