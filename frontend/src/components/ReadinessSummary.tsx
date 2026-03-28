@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { readinessApi } from '@/api/readiness';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import { Shield, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { Shield, CheckCircle2, XCircle, AlertTriangle, ChevronRight } from 'lucide-react';
 import type { ReadinessAssessment, ReadinessStatus } from '@/types';
 import { AsyncStateWrapper } from './AsyncStateWrapper';
 
@@ -20,7 +20,19 @@ const READINESS_LABELS: Record<string, string> = {
   safe_to_requalify: 'readiness.safe_to_requalify',
 };
 
-export function ReadinessSummary({ buildingId }: { buildingId: string }) {
+/** Map blocker label keywords to building detail tab keys */
+function blockerToTab(label: string): string | null {
+  const lower = label.toLowerCase();
+  if (lower.includes('diagnostic') || lower.includes('sample') || lower.includes('pollutant')) return 'diagnostics';
+  if (lower.includes('document') || lower.includes('evidence') || lower.includes('report') || lower.includes('proof')) return 'documents';
+  if (lower.includes('ownership') || lower.includes('owner')) return 'ownership';
+  if (lower.includes('lease') || lower.includes('tenant')) return 'leases';
+  if (lower.includes('contract')) return 'contracts';
+  if (lower.includes('procedure') || lower.includes('compliance') || lower.includes('regulatory')) return 'procedures';
+  return null;
+}
+
+export function ReadinessSummary({ buildingId, onNavigateTab }: { buildingId: string; onNavigateTab?: (tab: string) => void }) {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['building-readiness', buildingId],
@@ -95,12 +107,24 @@ export function ReadinessSummary({ buildingId }: { buildingId: string }) {
             {Array.from(latestByType.values())
               .flatMap((a) => a.blockers_json ?? [])
               .slice(0, 3)
-              .map((blocker, i) => (
-                <li key={i} className="text-xs text-gray-600 dark:text-slate-300 flex items-start gap-1">
-                  <XCircle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
-                  {blocker.label}
-                </li>
-              ))}
+              .map((blocker, i) => {
+                const targetTab = blockerToTab(blocker.label);
+                return (
+                  <li key={i} className="text-xs text-gray-600 dark:text-slate-300 flex items-start gap-1">
+                    <XCircle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
+                    <span className="flex-1">{blocker.label}</span>
+                    {onNavigateTab && targetTab && (
+                      <button
+                        onClick={() => onNavigateTab(targetTab)}
+                        className="flex-shrink-0 inline-flex items-center text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+                        title={t('form.view') || 'Voir'}
+                      >
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
           </ul>
         </div>
       )}

@@ -23,3 +23,29 @@ backend/**/__pycache__/
 tmp/
 tmp_*.json
 *.log
+
+# Local-only artifacts (never track)
+*.sqlite
+*.sqlite3
+*.db
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+*.egg
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Repo health (generated artifacts)
+backend/scripts/baselines/
+backend/scripts/repo_health_report.json

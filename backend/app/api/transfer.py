@@ -26,7 +26,8 @@ async def create_transfer_package(
 ):
     """Generate a building memory transfer package."""
     include_sections = body.include_sections if body else None
-    result = await generate_transfer_package(db, building_id, include_sections)
+    redact_financials = body.redact_financials if body else False
+    result = await generate_transfer_package(db, building_id, include_sections, redact_financials)
     if result is None:
         raise HTTPException(status_code=404, detail="Building not found")
     return result

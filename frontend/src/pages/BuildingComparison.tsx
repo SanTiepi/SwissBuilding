@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under PortfolioCommand.
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { buildingsApi } from '@/api/buildings';

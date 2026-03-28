@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view (cross-cutting risk simulation).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBuildings } from '@/hooks/useBuildings';

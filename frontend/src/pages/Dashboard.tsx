@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO Today
+ * This page will be absorbed into the Today master workspace.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { lazy, Suspense, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +35,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { DashboardSkeleton } from '@/components/Skeleton';
+import { PredictiveAlertsPortfolio } from '@/components/PredictiveAlerts';
 
 const DashboardCharts = lazy(() =>
   import('@/components/DashboardCharts').then((m) => ({ default: m.DashboardCharts })),
@@ -786,6 +793,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Predictive Readiness Alerts */}
+      <PredictiveAlertsPortfolio />
 
       {/* Recent Activity — Enhanced */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">

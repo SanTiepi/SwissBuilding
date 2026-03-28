@@ -6,8 +6,8 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from app.models.building import Building
+from app.models.building_change import BuildingSignal
 from app.models.building_snapshot import BuildingSnapshot
-from app.models.change_signal import ChangeSignal
 from app.models.diagnostic import Diagnostic
 from app.models.intervention import Intervention
 from app.models.unknown_issue import UnknownIssue
@@ -85,17 +85,20 @@ def _make_unknown(building_id: uuid.UUID, **kwargs) -> UnknownIssue:
     return UnknownIssue(**defaults)
 
 
-def _make_change_signal(building_id: uuid.UUID, **kwargs) -> ChangeSignal:
+def _make_change_signal(building_id: uuid.UUID, **kwargs) -> BuildingSignal:
     defaults = {
         "id": uuid.uuid4(),
         "building_id": building_id,
         "signal_type": "trust_erosion",
         "severity": "medium",
         "title": "Test change signal",
+        "description": "",
+        "based_on_type": "event",
+        "status": "active",
         "detected_at": datetime.now(UTC),
     }
     defaults.update(kwargs)
-    return ChangeSignal(**defaults)
+    return BuildingSignal(**defaults)
 
 
 # ── Service Tests ───────────────────────────────────────────────────
@@ -446,7 +449,7 @@ async def test_watch_rules_listing():
 
 @pytest.mark.asyncio
 async def test_signal_history_from_change_signals(db_session, admin_user):
-    """Signal history should map relevant ChangeSignals to WeakSignals."""
+    """Signal history should map relevant BuildingSignals to WeakSignals."""
     building = _make_building(admin_user.id)
     db_session.add(building)
 

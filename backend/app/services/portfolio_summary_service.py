@@ -16,10 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.constants import ALL_POLLUTANTS
 from app.models.action_item import ActionItem
 from app.models.building import Building
+from app.models.building_change import BuildingSignal
 from app.models.building_risk_score import BuildingRiskScore
 from app.models.building_snapshot import BuildingSnapshot
 from app.models.campaign import Campaign
-from app.models.change_signal import ChangeSignal
 from app.models.diagnostic import Diagnostic
 from app.models.document import Document
 from app.models.intervention import Intervention
@@ -397,12 +397,12 @@ async def _build_actions(db: AsyncSession, org_id: UUID | None) -> PortfolioActi
 async def _build_alerts(db: AsyncSession, org_id: UUID | None) -> PortfolioAlertSummary:
     filters = _active_buildings_filter(org_id)
 
-    # Weak signals (active change signals)
+    # Weak signals (active building signals)
     signals_q = await db.execute(
         select(func.count())
-        .select_from(ChangeSignal)
-        .join(Building, Building.id == ChangeSignal.building_id)
-        .where(*filters, ChangeSignal.status == "active")
+        .select_from(BuildingSignal)
+        .join(Building, Building.id == BuildingSignal.building_id)
+        .where(*filters, BuildingSignal.status == "active")
     )
     total_weak_signals = signals_q.scalar() or 0
 

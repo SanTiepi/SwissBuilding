@@ -1072,6 +1072,10 @@ export interface AuthorityPackResult {
   overall_completeness: number;
   generated_at: string;
   warnings: string[];
+  caveats_count: number;
+  pack_version: string;
+  sha256_hash: string | null;
+  financials_redacted?: boolean;
 }
 
 // Evidence Summary (facade)

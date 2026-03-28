@@ -50,6 +50,24 @@ from app.models.award_confirmation import AwardConfirmation as _AC  # noqa: E402
 from app.models.bounded_embed import BoundedEmbedToken as _BET  # noqa: E402, F401
 from app.models.bounded_embed import ExternalViewerProfile as _EVP  # noqa: E402, F401
 from app.models.building import Building  # noqa: E402
+
+# V3 Doctrine models
+from app.models.building_case import BuildingCase as _BC  # noqa: E402, F401
+from app.models.building_change import BuildingDelta as _BD  # noqa: E402, F401
+from app.models.building_change import BuildingEvent as _BEv  # noqa: E402, F401
+from app.models.building_change import BuildingObservation as _BO  # noqa: E402, F401
+from app.models.building_change import BuildingSignal as _BS  # noqa: E402, F401
+from app.models.building_claim import BuildingClaim as _BCl  # noqa: E402, F401
+from app.models.building_claim import BuildingDecision as _BDe  # noqa: E402, F401
+from app.models.building_genealogy import HistoricalClaim as _HC  # noqa: E402, F401
+from app.models.building_genealogy import OwnershipEpisode as _OE  # noqa: E402, F401
+from app.models.building_genealogy import TransformationEpisode as _TE  # noqa: E402, F401
+from app.models.building_geo_context import BuildingGeoContext as _BGC  # noqa: E402, F401
+from app.models.building_identity import BuildingIdentityChain as _BIC  # noqa: E402, F401
+from app.models.building_intent import BuildingIntent as _BI  # noqa: E402, F401
+from app.models.building_intent import BuildingQuestion as _BQ  # noqa: E402, F401
+from app.models.building_intent import DecisionContext as _DC  # noqa: E402, F401
+from app.models.building_intent import SafeToXState as _STX  # noqa: E402, F401
 from app.models.building_portfolio import BuildingPortfolio as _BP  # noqa: E402, F401
 from app.models.case_study_template import CaseStudyTemplate as _CST  # noqa: E402, F401
 
@@ -70,6 +88,9 @@ from app.models.company_profile import CompanyProfile as _CP  # noqa: E402, F401
 from app.models.company_subscription import CompanySubscription as _CS  # noqa: E402, F401
 from app.models.company_verification import CompanyVerification as _CV  # noqa: E402, F401
 from app.models.completion_confirmation import CompletionConfirmation as _CC  # noqa: E402, F401
+from app.models.conformance import ConformanceCheck as _ConfC  # noqa: E402, F401
+from app.models.conformance import RequirementProfile as _RP  # noqa: E402, F401
+from app.models.consequence_run import ConsequenceRun as _CRun  # noqa: E402, F401
 
 # BC1 backbone models — must be imported before _build_sqlite_metadata()
 # so their tables are registered in Base.metadata.
@@ -87,6 +108,7 @@ from app.models.delegated_access import DelegatedAccessGrant as _DAG  # noqa: E4
 from app.models.delegated_access import PrivilegedAccessEvent as _PAE  # noqa: E402, F401
 from app.models.delegated_access import TenantBoundary as _TB  # noqa: E402, F401
 from app.models.demo_scenario import DemoScenario as _DS  # noqa: E402, F401
+from app.models.diagnostic_extraction import DiagnosticExtraction as _DEx  # noqa: E402, F401
 from app.models.document_inbox import DocumentInboxItem as _DII  # noqa: E402, F401
 from app.models.document_link import DocumentLink as _DL  # noqa: E402, F401
 from app.models.domain_event import DomainEvent as _DE  # noqa: E402, F401
@@ -94,16 +116,23 @@ from app.models.domain_event import DomainEvent as _DE  # noqa: E402, F401
 # Enrichment tracking models
 from app.models.enrichment_run import BuildingEnrichmentRun as _BER  # noqa: E402, F401
 from app.models.exchange_contract import ExchangeContractVersion as _ECV  # noqa: E402, F401
+from app.models.exchange_contract import PartnerExchangeContract as _PEC  # noqa: E402, F401
+from app.models.exchange_contract import PartnerExchangeEvent as _PEE  # noqa: E402, F401
 from app.models.exchange_validation import ExchangeValidationReport as _EVR  # noqa: E402, F401
 from app.models.exchange_validation import ExternalRelianceSignal as _ERS  # noqa: E402, F401
 from app.models.expansion_signal import AccountExpansionTrigger as _AET  # noqa: E402, F401
 from app.models.expansion_signal import DistributionLoopSignal as _DLS  # noqa: E402, F401
 from app.models.expansion_signal import ExpansionOpportunity as _EO  # noqa: E402, F401
 from app.models.financial_entry import FinancialEntry as _FE  # noqa: E402, F401
+from app.models.form_instance import FormInstance as _FI  # noqa: E402, F401
+from app.models.form_instance import FormTemplate as _FT  # noqa: E402, F401
 from app.models.governance_signal import PublicAssetGovernanceSignal as _PAGS  # noqa: E402, F401
 from app.models.import_receipt import PassportImportReceipt as _PIR  # noqa: E402, F401
+from app.models.incident import DamageObservation as _DO  # noqa: E402, F401
+from app.models.incident import IncidentEpisode as _IEp  # noqa: E402, F401
 from app.models.insurance_policy import InsurancePolicy as _IP  # noqa: E402, F401
 from app.models.intake_request import IntakeRequest as _IR  # noqa: E402, F401
+from app.models.invalidation import InvalidationEvent as _IE  # noqa: E402, F401
 from app.models.inventory_item import InventoryItem as _II  # noqa: E402, F401
 from app.models.lease import Lease as _Lease  # noqa: E402, F401
 from app.models.municipality_review_pack import MunicipalityReviewPack as _MRP  # noqa: E402, F401
@@ -115,6 +144,8 @@ from app.models.partner_trust import PartnerTrustSignal as _PTS  # noqa: E402, F
 from app.models.partner_webhook import PartnerDeliveryAttempt as _PDA  # noqa: E402, F401
 from app.models.partner_webhook import PartnerWebhookSubscription as _PWS  # noqa: E402, F401
 from app.models.party_role_assignment import PartyRoleAssignment as _PRA  # noqa: E402, F401
+from app.models.passport_envelope import BuildingPassportEnvelope as _BPE  # noqa: E402, F401
+from app.models.passport_envelope import PassportTransferReceipt as _PTR  # noqa: E402, F401
 from app.models.passport_publication import PassportPublication as _PPub  # noqa: E402, F401
 from app.models.passport_state_diff import PassportStateDiff as _PSD  # noqa: E402, F401
 from app.models.permit_procedure import PermitProcedure as _PP  # noqa: E402, F401
@@ -122,21 +153,32 @@ from app.models.permit_step import PermitStep as _PS  # noqa: E402, F401
 from app.models.pilot_scorecard import PilotScorecard as _PSc  # noqa: E402, F401
 from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
 from app.models.post_works_link import PostWorksLink as _PWL  # noqa: E402, F401
+from app.models.procedure import ProcedureInstance as _ProcI  # noqa: E402, F401
+from app.models.procedure import ProcedureTemplate as _ProcT  # noqa: E402, F401
 from app.models.proof_delivery import ProofDelivery as _PD  # noqa: E402, F401
 from app.models.public_owner_mode import PublicOwnerOperatingMode as _POOM  # noqa: E402, F401
 from app.models.quote import Quote as _Q  # noqa: E402, F401
+from app.models.recurring_service import RecurringService as _RS2  # noqa: E402, F401
+from app.models.recurring_service import WarrantyRecord as _WR  # noqa: E402, F401
 from app.models.redaction_profile import DecisionCaveatProfile as _DCP  # noqa: E402, F401
 from app.models.redaction_profile import ExternalAudienceRedactionProfile as _EARP  # noqa: E402, F401
 from app.models.request_document import RequestDocument as _RD  # noqa: E402, F401
 from app.models.request_invitation import RequestInvitation as _RI  # noqa: E402, F401
 from app.models.review import Review as _Rev  # noqa: E402, F401
+from app.models.review_queue import ReviewTask as _RQT  # noqa: E402, F401
+from app.models.rfq import TenderComparison as _TCo  # noqa: E402, F401
+from app.models.rfq import TenderInvitation as _TI  # noqa: E402, F401
+from app.models.rfq import TenderQuote as _TQ  # noqa: E402, F401
+from app.models.rfq import TenderRequest as _TR  # noqa: E402, F401
 from app.models.rule_change_event import RuleChangeEvent as _RCE  # noqa: E402, F401
 from app.models.source_snapshot import BuildingSourceSnapshot as _BSS  # noqa: E402, F401
 from app.models.subscription_change import SubscriptionChange as _SC  # noqa: E402, F401
 from app.models.swiss_rules_source import RuleSource as _RS  # noqa: E402, F401
 from app.models.tax_context import TaxContext as _TC  # noqa: E402, F401
+from app.models.truth_ritual import TruthRitual as _TRit  # noqa: E402, F401
 from app.models.unit import Unit as _Unit  # noqa: E402, F401
 from app.models.unit_zone import UnitZone as _UZ  # noqa: E402, F401
+from app.models.unknowns_ledger import UnknownEntry as _UE  # noqa: E402, F401
 from app.models.user import User  # noqa: E402
 from app.models.workspace_membership import WorkspaceMembership as _WM  # noqa: E402, F401
 
@@ -222,6 +264,12 @@ async def db_session(test_engine):
     TestSession = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
     async with TestSession() as session:
         yield session
+
+
+@pytest.fixture(scope="function")
+async def db(db_session):
+    """Alias for db_session — used by V3 test files."""
+    yield db_session
 
 
 @pytest.fixture(scope="function")

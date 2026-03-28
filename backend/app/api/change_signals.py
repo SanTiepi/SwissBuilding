@@ -1,8 +1,13 @@
-"""Change signal management API routes."""
+# COMPATIBILITY SURFACE — ChangeSignal is frozen per ADR-004.
+# Canonical change objects are in building_change.py (BuildingSignal).
+# No new semantics should be added here.
+# RETIREMENT PLANNED: Sunset 2026-09-30, successor = /api/v1/truth/buildings/{id}/changes
+
+"""Change signal management API routes (DEPRECATED — use building_changes API)."""
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,6 +23,13 @@ from app.schemas.change_signal import (
 from app.schemas.common import PaginatedResponse
 
 router = APIRouter()
+
+
+async def _deprecation_headers(response: Response) -> None:
+    """Inject deprecation headers on all change_signals endpoints (RFC 8594)."""
+    response.headers["Deprecation"] = "true"
+    response.headers["Sunset"] = "2026-09-30"
+    response.headers["Link"] = '</api/v1/buildings/{id}/signals>; rel="successor-version"'
 
 
 async def _get_building_or_404(db: AsyncSession, building_id: UUID):
@@ -45,6 +57,8 @@ async def _get_signal_or_404(db: AsyncSession, building_id: UUID, signal_id: UUI
 @router.get(
     "/portfolio/change-signals",
     response_model=PaginatedResponse[ChangeSignalRead],
+    deprecated=True,
+    dependencies=[Depends(_deprecation_headers)],
 )
 async def list_portfolio_change_signals(
     page: int = Query(1, ge=1),
@@ -89,6 +103,8 @@ async def list_portfolio_change_signals(
 @router.get(
     "/buildings/{building_id}/change-signals",
     response_model=PaginatedResponse[ChangeSignalRead],
+    deprecated=True,
+    dependencies=[Depends(_deprecation_headers)],
 )
 async def list_change_signals_endpoint(
     building_id: UUID,
@@ -137,6 +153,8 @@ async def list_change_signals_endpoint(
     "/buildings/{building_id}/change-signals",
     response_model=ChangeSignalRead,
     status_code=201,
+    deprecated=True,
+    dependencies=[Depends(_deprecation_headers)],
 )
 async def create_change_signal_endpoint(
     building_id: UUID,
@@ -160,6 +178,8 @@ async def create_change_signal_endpoint(
 @router.get(
     "/buildings/{building_id}/change-signals/{signal_id}",
     response_model=ChangeSignalRead,
+    deprecated=True,
+    dependencies=[Depends(_deprecation_headers)],
 )
 async def get_change_signal_endpoint(
     building_id: UUID,
@@ -175,6 +195,8 @@ async def get_change_signal_endpoint(
 @router.put(
     "/buildings/{building_id}/change-signals/{signal_id}",
     response_model=ChangeSignalRead,
+    deprecated=True,
+    dependencies=[Depends(_deprecation_headers)],
 )
 async def update_change_signal_endpoint(
     building_id: UUID,
@@ -198,6 +220,8 @@ async def update_change_signal_endpoint(
 @router.delete(
     "/buildings/{building_id}/change-signals/{signal_id}",
     status_code=204,
+    deprecated=True,
+    dependencies=[Depends(_deprecation_headers)],
 )
 async def delete_change_signal_endpoint(
     building_id: UUID,

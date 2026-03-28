@@ -28,6 +28,7 @@ class AuthorityPackConfig(BaseModel):
     include_sections: list[str] | None = None  # all sections if None
     include_photos: bool = True
     language: str = "fr"
+    redact_financials: bool = False
 
 
 class AuthorityPackResult(BaseModel):
@@ -41,6 +42,10 @@ class AuthorityPackResult(BaseModel):
     overall_completeness: float
     generated_at: datetime
     warnings: list[str]
+    caveats_count: int = 0
+    pack_version: str = "1.0.0"
+    sha256_hash: str | None = None
+    financials_redacted: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

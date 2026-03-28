@@ -4,6 +4,7 @@ import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
 import { ShieldCheck, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { AsyncStateWrapper } from './AsyncStateWrapper';
+import { ConfidenceBadge, type ConfidenceLevel } from './ConfidenceBadge';
 
 const TREND_ICON: Record<string, typeof TrendingUp> = {
   improving: TrendingUp,
@@ -23,6 +24,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   declared: 'bg-yellow-500',
   obsolete: 'bg-orange-500',
   contradictory: 'bg-red-500',
+};
+
+const CATEGORY_CONFIDENCE: Record<string, ConfidenceLevel> = {
+  proven: 'validated',
+  inferred: 'enriched',
+  declared: 'raw',
+  obsolete: 'inherited',
+  contradictory: 'contradictory',
 };
 
 function TrustScoreContent({ trustScore }: { trustScore: any }) {
@@ -70,7 +79,7 @@ function TrustScoreContent({ trustScore }: { trustScore: any }) {
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {categories.map((cat) => (
           <div key={cat.key} className="flex items-center gap-1.5 text-xs">
-            <span className={cn('w-2 h-2 rounded-full', CATEGORY_COLORS[cat.key])} />
+            <ConfidenceBadge level={CATEGORY_CONFIDENCE[cat.key] ?? 'raw'} size="sm" />
             <span className="text-gray-600 dark:text-slate-300">{t(`trust_score.${cat.key}`) || cat.key}</span>
             <span className="text-gray-400 dark:text-slate-500">{cat.count}</span>
           </div>

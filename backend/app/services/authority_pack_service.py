@@ -2,10 +2,16 @@
 
 Assembles authority-ready evidence packs with structured sections covering
 building identity, diagnostics, samples, compliance, actions, risk, interventions,
-and document inventory.
+document inventory, passport summary, readiness verdict, pollutant inventory,
+completeness report, contradictions, and explicit caveats.
+
+This is the KEY deliverable for the pilot: a generable, downloadable pack that
+contains everything needed for an authority submission.
 """
 
+import hashlib
 import json
+import logging
 import uuid
 from datetime import UTC, datetime
 
@@ -30,26 +36,42 @@ from app.schemas.authority_pack import (
 )
 from app.services.eco_clause_template_service import generate_eco_clauses
 
+logger = logging.getLogger(__name__)
+
+AUTHORITY_PACK_VERSION = "2.0.0"
+
 ALL_SECTION_TYPES = [
     "building_identity",
+    "passport_summary",
+    "completeness_report",
+    "readiness_verdict",
     "diagnostic_summary",
     "sample_results",
+    "pollutant_inventory",
     "compliance_status",
     "action_plan",
     "risk_assessment",
     "intervention_history",
     "document_inventory",
+    "contradictions",
+    "caveats",
 ]
 
 _SECTION_NAMES = {
     "building_identity": "Identite du batiment",
+    "passport_summary": "Resume du passeport batiment",
+    "completeness_report": "Rapport de completude du dossier",
+    "readiness_verdict": "Verdict de readiness reglementaire",
     "diagnostic_summary": "Synthese des diagnostics",
     "sample_results": "Resultats des echantillons",
+    "pollutant_inventory": "Inventaire des polluants",
     "compliance_status": "Statut de conformite",
     "action_plan": "Plan d'actions",
     "risk_assessment": "Evaluation des risques",
     "intervention_history": "Historique des interventions",
     "document_inventory": "Inventaire des documents",
+    "contradictions": "Contradictions detectees",
+    "caveats": "Reserves et limites",
 }
 
 
@@ -301,6 +323,425 @@ async def _build_document_inventory(db: AsyncSession, building_id: uuid.UUID) ->
     )
 
 
+async def _build_passport_summary(db: AsyncSession, building_id: uuid.UUID) -> AuthorityPackSection:
+    """Build the passport summary section from passport_service."""
+    items: list[dict] = []
+    completeness = 0.0
+    notes = None
+    try:
+        from app.services.passport_service import get_passport_summary
+
+        passport = await get_passport_summary(db, building_id)
+        if passport:
+            items.append(
+                {
+                    "passport_grade": passport.get("passport_grade", "F"),
+                    "overall_trust": passport.get("knowledge_state", {}).get("overall_trust", 0.0),
+                    "total_data_points": passport.get("knowledge_state", {}).get("total_data_points", 0),
+                    "diagnostics_count": passport.get("evidence_coverage", {}).get("diagnostics_count", 0),
+                    "documents_count": passport.get("evidence_coverage", {}).get("documents_count", 0),
+                    "pollutant_coverage_ratio": passport.get("pollutant_coverage", {}).get("coverage_ratio", 0.0),
+                    "blind_spots_total": passport.get("blind_spots", {}).get("total_open", 0),
+                    "contradictions_unresolved": passport.get("contradictions", {}).get("unresolved", 0),
+                    "assessed_at": passport.get("assessed_at"),
+                    "source": "passport_service",
+                }
+            )
+            grade = passport.get("passport_grade", "F")
+            completeness = {"A": 1.0, "B": 0.8, "C": 0.6, "D": 0.4}.get(grade, 0.2)
+            notes = f"Grade passeport: {grade}"
+    except Exception as e:
+        logger.warning("Failed to build passport summary for %s: %s", building_id, e)
+        notes = "Impossible de generer le resume du passeport"
+
+    return AuthorityPackSection(
+        section_name="Resume du passeport batiment",
+        section_type="passport_summary",
+        items=items,
+        completeness=completeness,
+        notes=notes,
+    )
+
+
+async def _build_completeness_report(db: AsyncSession, building_id: uuid.UUID) -> AuthorityPackSection:
+    """Build the completeness report section from completeness_engine."""
+    items: list[dict] = []
+    completeness = 0.0
+    notes = None
+    try:
+        from app.services.completeness_engine import evaluate_completeness
+
+        result = await evaluate_completeness(db, building_id)
+        checks_data = []
+        for c in result.checks:
+            checks_data.append(
+                {
+                    "id": c.id,
+                    "category": c.category,
+                    "status": c.status,
+                    "weight": c.weight,
+                    "details": c.details,
+                }
+            )
+        items.append(
+            {
+                "overall_score": result.overall_score,
+                "ready_to_proceed": result.ready_to_proceed,
+                "workflow_stage": result.workflow_stage,
+                "missing_items": result.missing_items,
+                "checks": checks_data,
+                "source": "completeness_engine",
+            }
+        )
+        completeness = result.overall_score
+        notes = (
+            f"Score: {round(result.overall_score * 100)}% — "
+            f"{'Pret a proceder' if result.ready_to_proceed else f'{len(result.missing_items)} element(s) manquant(s)'}"
+        )
+    except Exception as e:
+        logger.warning("Failed to build completeness report for %s: %s", building_id, e)
+        notes = "Impossible d'evaluer la completude"
+
+    return AuthorityPackSection(
+        section_name="Rapport de completude du dossier",
+        section_type="completeness_report",
+        items=items,
+        completeness=completeness,
+        notes=notes,
+    )
+
+
+async def _build_readiness_verdict(db: AsyncSession, building_id: uuid.UUID) -> AuthorityPackSection:
+    """Build the readiness verdict section from readiness_reasoner."""
+    items: list[dict] = []
+    completeness = 0.0
+    notes = None
+    try:
+        from app.services.readiness_reasoner import READINESS_TYPES, evaluate_readiness
+
+        for rtype in READINESS_TYPES:
+            try:
+                assessment = await evaluate_readiness(db, building_id, rtype)
+                blockers = [b.get("message", str(b)) for b in (assessment.blockers_json or [])]
+                conditions = [c.get("message", str(c)) for c in (assessment.conditions_json or [])]
+                items.append(
+                    {
+                        "readiness_type": rtype,
+                        "status": assessment.status,
+                        "score": assessment.score or 0.0,
+                        "blockers": blockers,
+                        "conditions": conditions,
+                        "assessed_at": assessment.assessed_at.isoformat() if assessment.assessed_at else None,
+                        "source": "readiness_reasoner",
+                    }
+                )
+            except ValueError:
+                items.append(
+                    {
+                        "readiness_type": rtype,
+                        "status": "error",
+                        "score": 0.0,
+                        "blockers": [],
+                        "conditions": [],
+                        "source": "readiness_reasoner",
+                    }
+                )
+
+        if items:
+            avg_score = sum(i["score"] for i in items) / len(items)
+            completeness = avg_score
+            ready_count = sum(1 for i in items if i["status"] == "ready")
+            blocked_count = sum(1 for i in items if i["status"] == "blocked")
+            notes = f"{ready_count}/{len(items)} pret(s), {blocked_count} bloque(s)"
+    except Exception as e:
+        logger.warning("Failed to build readiness verdict for %s: %s", building_id, e)
+        notes = "Impossible d'evaluer la readiness"
+
+    return AuthorityPackSection(
+        section_name="Verdict de readiness reglementaire",
+        section_type="readiness_verdict",
+        items=items,
+        completeness=completeness,
+        notes=notes,
+    )
+
+
+async def _build_pollutant_inventory(db: AsyncSession, building_id: uuid.UUID) -> AuthorityPackSection:
+    """Build per-pollutant status inventory."""
+    from app.constants import ALL_POLLUTANTS
+
+    result = await db.execute(
+        select(Diagnostic).options(selectinload(Diagnostic.samples)).where(Diagnostic.building_id == building_id)
+    )
+    diagnostics = result.scalars().all()
+
+    # Aggregate per pollutant
+    pollutant_data: dict[str, dict] = {}
+    for p in ALL_POLLUTANTS:
+        pollutant_data[p] = {
+            "pollutant": p,
+            "status": "unknown",
+            "diagnostic_count": 0,
+            "sample_count": 0,
+            "positive_count": 0,
+            "latest_diagnostic_date": None,
+            "max_risk_level": None,
+            "actions_pending": 0,
+        }
+
+    for diag in diagnostics:
+        dtype = (diag.diagnostic_type or "").lower()
+        if dtype in pollutant_data:
+            pd = pollutant_data[dtype]
+            pd["diagnostic_count"] += 1
+            date_str = str(diag.date_inspection) if diag.date_inspection else None
+            if date_str and (pd["latest_diagnostic_date"] is None or date_str > pd["latest_diagnostic_date"]):
+                pd["latest_diagnostic_date"] = date_str
+
+        for s in diag.samples:
+            stype = (s.pollutant_type or "").lower()
+            if stype in pollutant_data:
+                pd = pollutant_data[stype]
+                pd["sample_count"] += 1
+                if s.threshold_exceeded:
+                    pd["positive_count"] += 1
+                    pd["status"] = "present"
+                elif pd["status"] == "unknown":
+                    pd["status"] = "absent"
+                # Track max risk level
+                risk_order = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+                current_max = risk_order.get(pd["max_risk_level"] or "", 0)
+                sample_risk = risk_order.get((s.risk_level or "").lower(), 0)
+                if sample_risk > current_max:
+                    pd["max_risk_level"] = s.risk_level
+
+    # Count pending actions per pollutant
+    action_result = await db.execute(
+        select(ActionItem).where(ActionItem.building_id == building_id, ActionItem.status == "open")
+    )
+    open_actions = action_result.scalars().all()
+    for a in open_actions:
+        atype = (a.action_type or "").lower()
+        for p in ALL_POLLUTANTS:
+            if p in atype:
+                pollutant_data[p]["actions_pending"] += 1
+                break
+
+    items = list(pollutant_data.values())
+
+    covered = sum(1 for i in items if i["status"] != "unknown")
+    completeness = covered / len(items) if items else 0.0
+    present_count = sum(1 for i in items if i["status"] == "present")
+    notes = f"{covered}/{len(items)} polluant(s) evalue(s), {present_count} present(s)"
+
+    return AuthorityPackSection(
+        section_name="Inventaire des polluants",
+        section_type="pollutant_inventory",
+        items=items,
+        completeness=completeness,
+        notes=notes,
+    )
+
+
+async def _build_contradictions(db: AsyncSession, building_id: uuid.UUID) -> AuthorityPackSection:
+    """Build contradictions section."""
+    items: list[dict] = []
+    completeness = 1.0
+    notes = None
+    try:
+        from app.models.data_quality_issue import DataQualityIssue
+
+        result = await db.execute(
+            select(DataQualityIssue).where(
+                DataQualityIssue.building_id == building_id,
+                DataQualityIssue.issue_type == "contradiction",
+            )
+        )
+        contradictions = result.scalars().all()
+
+        for c in contradictions:
+            items.append(
+                {
+                    "field": c.field_name,
+                    "description": c.description,
+                    "status": c.status,
+                    "severity": c.severity,
+                    "source": "contradiction_detector",
+                }
+            )
+
+        unresolved = sum(1 for c in contradictions if c.status != "resolved")
+        if unresolved > 0:
+            completeness = max(0.0, 1.0 - (unresolved * 0.2))
+            notes = f"{unresolved} contradiction(s) non resolue(s) sur {len(contradictions)}"
+        elif contradictions:
+            notes = f"{len(contradictions)} contradiction(s) — toutes resolues"
+        else:
+            notes = "Aucune contradiction detectee"
+    except Exception as e:
+        logger.warning("Failed to build contradictions for %s: %s", building_id, e)
+        notes = "Impossible de verifier les contradictions"
+
+    return AuthorityPackSection(
+        section_name="Contradictions detectees",
+        section_type="contradictions",
+        items=items,
+        completeness=completeness,
+        notes=notes,
+    )
+
+
+async def _build_caveats(
+    sections: list[AuthorityPackSection], building: Building, db: AsyncSession | None = None
+) -> AuthorityPackSection:
+    """Build explicit caveats listing what is NOT covered or NOT verified.
+
+    Includes first-class Caveat records from the database when db is provided.
+    """
+    caveats: list[dict] = []
+
+    # 1. First-class caveats from the database (Commitment & Caveat graph)
+    if db is not None:
+        try:
+            from app.services.commitment_service import get_caveats_for_pack
+
+            db_caveats = await get_caveats_for_pack(db, building.id, "authority")
+            for c in db_caveats:
+                caveats.append(
+                    {
+                        "caveat_type": c.caveat_type,
+                        "message": f"{c.subject}: {c.description}" if c.description else c.subject,
+                        "severity": c.severity,
+                        "source": "commitment_graph",
+                        "caveat_id": str(c.id),
+                    }
+                )
+        except Exception:
+            logger.warning("Failed to load first-class caveats for building %s", building.id)
+
+    # Always present caveat: this is not a legal compliance guarantee
+    caveats.append(
+        {
+            "caveat_type": "liability",
+            "message": (
+                "Ce pack ne constitue pas une garantie de conformite legale. "
+                "Il s'agit d'un outil d'aide a la decision base sur les donnees disponibles."
+            ),
+            "severity": "info",
+        }
+    )
+
+    # Check for low-completeness sections
+    for s in sections:
+        if s.completeness < 0.5 and s.section_type not in ("caveats",):
+            caveats.append(
+                {
+                    "caveat_type": "incomplete_section",
+                    "message": f"Section '{s.section_name}' incomplete ({round(s.completeness * 100)}%)",
+                    "severity": "warning",
+                    "section_type": s.section_type,
+                }
+            )
+
+    # Check building age
+    if building.construction_year and building.construction_year < 1990:
+        caveats.append(
+            {
+                "caveat_type": "building_age",
+                "message": (
+                    f"Batiment construit en {building.construction_year} — verifier la couverture amiante, PCB et plomb"
+                ),
+                "severity": "info",
+            }
+        )
+
+    # Check missing EGID
+    if not building.egid:
+        caveats.append(
+            {
+                "caveat_type": "missing_identity",
+                "message": "EGID manquant — identification officielle incomplete",
+                "severity": "warning",
+            }
+        )
+
+    # PFAS caveat — regulatory framework still provisional
+    caveats.append(
+        {
+            "caveat_type": "regulatory",
+            "message": (
+                "Le cadre reglementaire PFAS est encore provisoire (OSEC/OFEV). "
+                "Les seuils et obligations peuvent evoluer."
+            ),
+            "severity": "info",
+        }
+    )
+
+    # No PDF generation caveat
+    caveats.append(
+        {
+            "caveat_type": "format",
+            "message": "Le pack est genere au format JSON. La generation PDF est prevue dans une version ulterieure.",
+            "severity": "info",
+        }
+    )
+
+    # Completeness is 1.0 because caveats are always complete (they are what they are)
+    return AuthorityPackSection(
+        section_name="Reserves et limites",
+        section_type="caveats",
+        items=caveats,
+        completeness=1.0,
+        notes=f"{len(caveats)} reserve(s) identifiee(s)",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Financial field redaction
+# ---------------------------------------------------------------------------
+
+_REDACTED_PLACEHOLDER = "[confidentiel]"
+_REDACTED_COST_MESSAGE = "[Montants masques a la demande du proprietaire]"
+
+_FINANCIAL_FIELD_NAMES = frozenset(
+    {
+        "total_amount_chf",
+        "cost",
+        "amount",
+        "price",
+        "amount_chf",
+        "claimed_amount_chf",
+        "approved_amount_chf",
+        "paid_amount_chf",
+        "insured_value_chf",
+        "premium_annual_chf",
+    }
+)
+
+
+def _redact_authority_item(item: dict) -> dict:
+    """Return a copy of *item* with financial fields replaced by placeholders."""
+    redacted = {}
+    for key, value in item.items():
+        if key in _FINANCIAL_FIELD_NAMES:
+            redacted[key] = _REDACTED_PLACEHOLDER
+        else:
+            redacted[key] = value
+    return redacted
+
+
+def _redact_authority_section(section: AuthorityPackSection) -> AuthorityPackSection:
+    """Return a redacted copy of a section, masking financial data."""
+    redacted_items = [_redact_authority_item(item) for item in section.items]
+    return AuthorityPackSection(
+        section_name=section.section_name,
+        section_type=section.section_type,
+        items=redacted_items,
+        completeness=section.completeness,
+        notes=section.notes,
+    )
+
+
 _SECTION_BUILDERS = {
     "building_identity": _build_building_identity,
     "diagnostic_summary": _build_diagnostic_summary,
@@ -310,6 +751,11 @@ _SECTION_BUILDERS = {
     "risk_assessment": _build_risk_assessment,
     "intervention_history": _build_intervention_history,
     "document_inventory": _build_document_inventory,
+    "passport_summary": _build_passport_summary,
+    "completeness_report": _build_completeness_report,
+    "readiness_verdict": _build_readiness_verdict,
+    "pollutant_inventory": _build_pollutant_inventory,
+    "contradictions": _build_contradictions,
 }
 
 
@@ -337,9 +783,11 @@ async def generate_authority_pack(
         if s not in _SECTION_BUILDERS:
             warnings.append(f"Unknown section type: {s}")
 
-    # Build sections
+    # Build sections (excluding caveats — built after all others)
     sections: list[AuthorityPackSection] = []
     for section_type in valid_section_types:
+        if section_type == "caveats":
+            continue  # built after all others
         builder = _SECTION_BUILDERS[section_type]
         if section_type == "building_identity":
             section = await builder(db, building)
@@ -347,9 +795,15 @@ async def generate_authority_pack(
             section = await builder(db, building_id)
         sections.append(section)
 
-    # Compute overall completeness
-    if sections:
-        overall_completeness = sum(s.completeness for s in sections) / len(sections)
+    # Build caveats section (always included, references other sections + first-class caveats)
+    if "caveats" in valid_section_types or config.include_sections is None:
+        caveats_section = await _build_caveats(sections, building, db=db)
+        sections.append(caveats_section)
+
+    # Compute overall completeness (exclude caveats from calculation)
+    scorable = [s for s in sections if s.section_type != "caveats"]
+    if scorable:
+        overall_completeness = sum(s.completeness for s in scorable) / len(scorable)
     else:
         overall_completeness = 0.0
 
@@ -366,8 +820,47 @@ async def generate_authority_pack(
         except ValueError:
             pass  # Building not found handled above; safe to skip
 
+    # Apply financial redaction to exported view if requested
+    output_sections = sections
+    if config.redact_financials:
+        output_sections = [_redact_authority_section(s) for s in sections]
+
     generated_at = datetime.now(UTC)
     pack_id = uuid.uuid4()
+
+    # Count caveats for metadata
+    caveats_section_data = next((s for s in sections if s.section_type == "caveats"), None)
+    caveats_count = len(caveats_section_data.items) if caveats_section_data else 0
+
+    # Build metadata dict
+    metadata_inner = {
+        "canton": canton,
+        "overall_completeness": overall_completeness,
+        "total_sections": len(sections),
+        "warnings": warnings,
+        "language": config.language,
+        "include_photos": config.include_photos,
+        "sections": [
+            {
+                "section_type": s.section_type,
+                "section_name": s.section_name,
+                "completeness": s.completeness,
+                "item_count": len(s.items),
+            }
+            for s in sections
+        ],
+        "eco_clauses": eco_clause_summary,
+        "caveats_count": caveats_count,
+        "pack_version": AUTHORITY_PACK_VERSION,
+        "generated_by": str(user_id),
+        "generation_date": generated_at.isoformat(),
+        "financials_redacted": config.redact_financials,
+    }
+
+    # Compute SHA-256 hash of the pack content for traceability
+    content_for_hash = json.dumps(metadata_inner, sort_keys=True, default=str)
+    content_hash = hashlib.sha256(content_for_hash.encode("utf-8")).hexdigest()
+    metadata_inner["sha256_hash"] = content_hash
 
     # Create EvidencePack record
     pack_record = EvidencePack(
@@ -382,26 +875,7 @@ async def generate_authority_pack(
             {"section_type": s.section_type, "label": s.section_name, "required": True, "included": True}
             for s in sections
         ],
-        notes=json.dumps(
-            {
-                "canton": canton,
-                "overall_completeness": overall_completeness,
-                "total_sections": len(sections),
-                "warnings": warnings,
-                "language": config.language,
-                "include_photos": config.include_photos,
-                "sections": [
-                    {
-                        "section_type": s.section_type,
-                        "section_name": s.section_name,
-                        "completeness": s.completeness,
-                        "item_count": len(s.items),
-                    }
-                    for s in sections
-                ],
-                "eco_clauses": eco_clause_summary,
-            }
-        ),
+        notes=json.dumps(metadata_inner),
     )
     db.add(pack_record)
     await db.commit()
@@ -410,11 +884,15 @@ async def generate_authority_pack(
         pack_id=pack_id,
         building_id=building_id,
         canton=canton,
-        sections=sections,
-        total_sections=len(sections),
+        sections=output_sections,
+        total_sections=len(output_sections),
         overall_completeness=overall_completeness,
         generated_at=generated_at,
         warnings=warnings,
+        caveats_count=caveats_count,
+        pack_version=AUTHORITY_PACK_VERSION,
+        sha256_hash=content_hash,
+        financials_redacted=config.redact_financials,
     )
 
 
@@ -493,6 +971,18 @@ async def get_authority_pack(db: AsyncSession, pack_id: uuid.UUID) -> AuthorityP
         except (json.JSONDecodeError, TypeError):
             pass
 
+    caveats_count = 0
+    pack_version = "1.0.0"
+    sha256_hash = None
+    if pack.notes:
+        try:
+            meta = json.loads(pack.notes)
+            caveats_count = meta.get("caveats_count", 0)
+            pack_version = meta.get("pack_version", "1.0.0")
+            sha256_hash = meta.get("sha256_hash")
+        except (json.JSONDecodeError, TypeError):
+            pass
+
     return AuthorityPackResult(
         pack_id=pack.id,
         building_id=pack.building_id,
@@ -502,4 +992,7 @@ async def get_authority_pack(db: AsyncSession, pack_id: uuid.UUID) -> AuthorityP
         overall_completeness=overall_completeness,
         generated_at=pack.created_at,
         warnings=warnings,
+        caveats_count=caveats_count,
+        pack_version=pack_version,
+        sha256_hash=sha256_hash,
     )

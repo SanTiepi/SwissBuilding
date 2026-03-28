@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under BuildingDetail (Building Home).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';

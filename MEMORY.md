@@ -11,12 +11,36 @@ It is not a changelog. Keep it concise and high-signal.
 
 - The active next-work backlog and Claude batch packs live in `docs/roadmap-next-batches.md`.
 - The long-range strategic north star lives in `docs/vision-100x-master-brief.md`.
+- The practical "ultimate product" north star for BatiConnect now also lives in `docs/projects/baticonnect-ultimate-product-manifesto-2026-03-28.md`.
 - The broadest frontier of known ideas, uncovered uses, product engines, internal tools, and moonshots lives in `docs/product-frontier-map.md`.
 - `docs/product-frontier-map.md` is the canonical idea bank for product frontier thinking:
   - new ideas should be captured there or merged into existing entries
   - ideas are not considered discarded unless they are explicitly rejected or subsumed
   - once additions become mostly duplicates, the next step is triage and sequencing, not infinite repetition
 - Use that file for prioritized future work; keep this memory file limited to durable decisions.
+- The canonical future-direction stack for V3 and beyond is now split across four complementary docs:
+  - `docs/projects/v3-master-future-steps-plan-2026-03-28.md`
+  - `docs/projects/v3-master-plan-addendum-frontier-layers-2026-03-28.md`
+  - `docs/projects/v3-meta-layers-plan-2026-03-28.md`
+  - `docs/projects/claude-moonshot-evaluation-and-feedback-pack-2026-03-28.md`
+- Use that stack together:
+  - master future steps = phased roadmap spine
+  - frontier layers addendum = 15 high-leverage future layers
+  - meta-layers plan = 8 systemic governance layers
+  - moonshot evaluation pack = acceptance tests and feedback discipline for Claude execution
+- A reserve expansion path also exists if Claude closes the current moonshot faster than expected:
+  - `docs/projects/swissbuilding-moonshot-v2-autonomous-market-infrastructure-plan-2026-03-28.md`
+- That V2 plan should only activate after the current moonshot is completed and accepted:
+  - it is now a closure-first benchmark for `infrastructure volume`, not a loose "bigger vision" plan
+  - it treats time as telemetry, not as the main planning unit
+  - it keeps market-infrastructure ambition as context, but scores only real closure
+  - it is not a replacement for the current moonshot or a reason to reopen core doctrine debates
+- To help Claude move faster on the active moonshot without over-constraining implementation autonomy, use:
+  - `docs/projects/claude-moonshot-v1-acceleration-pack-2026-03-28.md`
+  - `docs/templates/claude-moonshot-v1-instruction-snippets.md`
+- For later repo-hardening and governance work, the execution-ready source is:
+  - `docs/projects/repo-excellence-brief-2026-03-28.md`
+  - `docs/templates/claude-repo-excellence-instruction-snippets.md`
 - The roadmap is structured around 3 mega-programs delivered through 5 rupture layers:
   - Evidence OS
   - Building Memory OS

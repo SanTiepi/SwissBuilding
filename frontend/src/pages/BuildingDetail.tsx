@@ -22,6 +22,7 @@ import { RoleGate } from '@/components/RoleGate';
 import type { Diagnostic, PollutantType, BuildingRiskScore, Document as DocType, ActionItem } from '@/types';
 import type { FieldError } from 'react-hook-form';
 import { ArrowLeft, Edit3, Trash2, Loader2, MapPin, Calendar, Building2, X, AlertTriangle } from 'lucide-react';
+import { InvalidationBadge } from '@/components/InvalidationAlerts';
 
 const LazyOverviewTab = lazy(() => import('@/components/building-detail/OverviewTab'));
 const LazyActivityTab = lazy(() => import('@/components/building-detail/ActivityTab'));
@@ -31,9 +32,16 @@ const LazyLeasesTab = lazy(() => import('@/components/building-detail/LeasesTab'
 const LazyContractsTab = lazy(() => import('@/components/building-detail/ContractsTab'));
 const LazyOwnershipTab = lazy(() => import('@/components/building-detail/OwnershipTab'));
 const LazyProceduresSection = lazy(() => import('@/components/building-detail/ProceduresSection'));
+const LazyTenderTab = lazy(() => import('@/components/building-detail/TenderTab'));
+const LazyBuildingLifeTab = lazy(() => import('@/components/building-detail/BuildingLifeTab'));
+const LazyUnknownsLedger = lazy(() => import('@/components/building-detail/UnknownsLedger'));
 const LazyTransferPackagePanel = lazy(() =>
   import('@/components/TransferPackagePanel').then((m) => ({ default: m.TransferPackagePanel })),
 );
+const LazyPassportDiffView = lazy(() => import('@/components/building-detail/PassportDiffView'));
+const LazyBuildingExplorerEmbed = lazy(() => import('@/pages/BuildingExplorer'));
+const LazyBuildingPlansEmbed = lazy(() => import('@/pages/BuildingPlans'));
+const LazyBuildingInterventionsEmbed = lazy(() => import('@/pages/BuildingInterventions'));
 
 // ErrorBoundary to catch crashes in individual tab content
 interface TabErrorBoundaryProps {
@@ -107,20 +115,133 @@ type EditFormData = z.infer<typeof editSchema>;
 
 type TabKey =
   | 'overview'
-  | 'activity'
-  | 'diagnostics'
-  | 'documents'
-  | 'ownership'
-  | 'leases'
-  | 'contracts'
-  | 'procedures'
-  | 'details';
+  | 'spatial'
+  | 'truth'
+  | 'change'
+  | 'cases'
+  | 'passport'
+  | 'questions';
+
+/** Map legacy tab keys (used by onNavigateTab callbacks) to new doctrinal keys */
+const LEGACY_TAB_MAP: Record<string, TabKey> = {
+  overview: 'overview',
+  activity: 'change',
+  diagnostics: 'truth',
+  documents: 'truth',
+  ownership: 'truth',
+  leases: 'cases',
+  contracts: 'cases',
+  procedures: 'cases',
+  tenders: 'cases',
+  'building-life': 'overview',
+  details: 'overview',
+  spatial: 'spatial',
+  truth: 'truth',
+  change: 'change',
+  cases: 'cases',
+  passport: 'passport',
+  questions: 'questions',
+};
 
 const TabFallback = (
   <div className="flex items-center justify-center py-12">
     <Loader2 className="w-8 h-8 animate-spin text-red-600" />
   </div>
 );
+
+/** Envelope version diff selector — embedded in the passport tab */
+function PassportDiffSection({ buildingId }: { buildingId: string }) {
+  const { t } = useTranslation();
+  const [selectedA, setSelectedA] = useState('');
+  const [selectedB, setSelectedB] = useState('');
+  const [showDiff, setShowDiff] = useState(false);
+
+  const { data: history } = useQuery({
+    queryKey: ['passport-envelope-history', buildingId],
+    queryFn: async () => {
+      const { apiClient } = await import('@/api/client');
+      const res = await apiClient.get<{
+        items: Array<{ id: string; version: number; version_label: string | null; status: string; created_at: string }>;
+        count: number;
+      }>(`/buildings/${buildingId}/passport-envelope/history`);
+      return res.data;
+    },
+  });
+
+  const items = history?.items ?? [];
+
+  if (items.length < 2) return null;
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        {t('passport_diff.compare_versions') || 'Compare Passport Versions'}
+      </h3>
+      <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+        <div className="flex-1 w-full">
+          <label className="block text-xs text-gray-500 dark:text-slate-400 mb-1">
+            {t('passport_diff.version_a') || 'Version A (older)'}
+          </label>
+          <select
+            value={selectedA}
+            onChange={(e) => {
+              setSelectedA(e.target.value);
+              setShowDiff(false);
+            }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white"
+          >
+            <option value="">{t('passport_diff.select') || 'Select...'}</option>
+            {items.map((env) => (
+              <option key={env.id} value={env.id}>
+                v{env.version} - {env.status}
+                {env.version_label ? ` (${env.version_label})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1 w-full">
+          <label className="block text-xs text-gray-500 dark:text-slate-400 mb-1">
+            {t('passport_diff.version_b') || 'Version B (newer)'}
+          </label>
+          <select
+            value={selectedB}
+            onChange={(e) => {
+              setSelectedB(e.target.value);
+              setShowDiff(false);
+            }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white"
+          >
+            <option value="">{t('passport_diff.select') || 'Select...'}</option>
+            {items.map((env) => (
+              <option key={env.id} value={env.id}>
+                v{env.version} - {env.status}
+                {env.version_label ? ` (${env.version_label})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          disabled={!selectedA || !selectedB || selectedA === selectedB}
+          onClick={() => setShowDiff(true)}
+          className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+        >
+          {t('passport_diff.compare') || 'Compare'}
+        </button>
+      </div>
+      {showDiff && selectedA && selectedB && selectedA !== selectedB && (
+        <div className="mt-4">
+          <Suspense fallback={TabFallback}>
+            <LazyPassportDiffView
+              envelopeIdA={selectedA}
+              envelopeIdB={selectedB}
+              onClose={() => setShowDiff(false)}
+            />
+          </Suspense>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function BuildingDetail() {
   const { t } = useTranslation();
@@ -170,7 +291,7 @@ export default function BuildingDetail() {
   } = useQuery({
     queryKey: ['building-activity', id],
     queryFn: () => buildingsApi.getActivity(id!),
-    enabled: !!id && activeTab === 'activity',
+    enabled: !!id && activeTab === 'change',
     retry: false,
   });
 
@@ -195,14 +316,12 @@ export default function BuildingDetail() {
 
   const tabs: { key: TabKey; label: string; count?: number }[] = [
     { key: 'overview', label: t('building.tab.overview') },
-    { key: 'activity', label: t('building.tab.activity') },
-    { key: 'diagnostics', label: t('building.tab.diagnostics'), count: diagnostics.length },
-    { key: 'documents', label: t('building.tab.documents'), count: documents.length },
-    { key: 'ownership', label: t('building.tab.ownership') || 'Ownership' },
-    { key: 'leases', label: t('building.tab.leases') || 'Leases' },
-    { key: 'contracts', label: t('building.tab.contracts') || 'Contracts' },
-    { key: 'procedures', label: t('building.tab.procedures') || 'Procedures' },
-    { key: 'details', label: t('building.tab.details') },
+    { key: 'spatial', label: t('building.tab.spatial') || 'Spatial' },
+    { key: 'truth', label: t('building.tab.truth') || 'Verite' },
+    { key: 'change', label: t('building.tab.change') || 'Changements' },
+    { key: 'cases', label: t('building.tab.cases') || 'Dossiers' },
+    { key: 'passport', label: t('building.tab.passport') || 'Passeport & Transfert' },
+    { key: 'questions', label: t('building.tab.questions') || 'Questions' },
   ];
 
   const {
@@ -307,6 +426,7 @@ export default function BuildingDetail() {
               <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
                 {building.canton}
               </span>
+              <InvalidationBadge buildingId={id} />
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-slate-400">
               <span className="flex items-center gap-1">
@@ -382,7 +502,7 @@ export default function BuildingDetail() {
 
         <div className="p-6">
           <TabErrorBoundary tabKey={activeTab}>
-          {/* Overview Tab */}
+          {/* Vue d'ensemble — daily operating surface */}
           {activeTab === 'overview' && (
             <Suspense fallback={TabFallback}>
               <LazyOverviewTab
@@ -399,12 +519,121 @@ export default function BuildingDetail() {
                 completenessCount={completenessCount}
                 completenessTotal={completenessTotal}
                 completenessPct={completenessPct}
+                onNavigateTab={(tab: string) => setActiveTab(LEGACY_TAB_MAP[tab] ?? 'overview')}
               />
+              {/* Building Life summary */}
+              <div className="mt-6">
+                <Suspense fallback={TabFallback}>
+                  <LazyBuildingLifeTab buildingId={id!} />
+                </Suspense>
+              </div>
+              {/* Building details grid (absorbed from old Details tab) */}
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  {t('building.tab.details')}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    { label: t('building.address'), value: building.address },
+                    { label: t('building.city'), value: `${building.postal_code} ${building.city}` },
+                    { label: t('building.canton'), value: building.canton },
+                    { label: t('building.construction_year'), value: building.construction_year },
+                    { label: t('building.renovation_year'), value: building.renovation_year || '-' },
+                    {
+                      label: t('building.building_type'),
+                      value: t(`building_type.${building.building_type}`) || building.building_type,
+                    },
+                    { label: t('building.floors_above'), value: building.floors_above ?? '-' },
+                    { label: t('building.floors_below'), value: building.floors_below ?? '-' },
+                    {
+                      label: t('building.surface_area'),
+                      value: building.surface_area_m2 ? `${building.surface_area_m2} m\u00B2` : '-',
+                    },
+                    {
+                      label: t('building.volume'),
+                      value: building.volume_m3 ? `${building.volume_m3} m\u00B3` : '-',
+                    },
+                    { label: t('building.egrid'), value: building.egrid || '-' },
+                    { label: t('building.official_id'), value: building.official_id || '-' },
+                    { label: t('building.parcel_number'), value: building.parcel_number || '-' },
+                    {
+                      label: t('building.latitude'),
+                      value: building.latitude != null ? String(building.latitude) : '-',
+                    },
+                    {
+                      label: t('building.longitude'),
+                      value: building.longitude != null ? String(building.longitude) : '-',
+                    },
+                    {
+                      label: t('building.last_diagnostic'),
+                      value: diagnostics.length > 0 ? formatDate(diagnostics[0].date_inspection) : '-',
+                    },
+                    { label: t('form.created_at') || 'Created', value: formatDate(building.created_at) },
+                    { label: t('form.updated_at') || 'Updated', value: formatDate(building.updated_at) },
+                  ].map((item) => (
+                    <div key={item.label} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
+                      <p className="text-xs text-gray-500 dark:text-slate-400">{item.label}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{item.value || '-'}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </Suspense>
           )}
 
-          {/* Activity Tab */}
-          {activeTab === 'activity' && (
+          {/* Spatial — zone/element explorer + plans */}
+          {activeTab === 'spatial' && (
+            <Suspense fallback={TabFallback}>
+              <div className="space-y-8">
+                <LazyBuildingExplorerEmbed />
+                <div className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <LazyBuildingPlansEmbed />
+                </div>
+              </div>
+            </Suspense>
+          )}
+
+          {/* Verite — what is true: diagnostics, documents, ownership */}
+          {activeTab === 'truth' && (
+            <Suspense fallback={TabFallback}>
+              <div className="space-y-8">
+                <section>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.diagnostics')}
+                  </h3>
+                  <LazyDiagnosticsTab
+                    buildingId={id!}
+                    diagnostics={diagnostics}
+                    onCreateClick={() => setShowDiagnosticForm(true)}
+                  />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.documents')}
+                  </h3>
+                  <LazyDocumentsTab
+                    documents={documents}
+                    isLoadingDocs={isLoadingDocs}
+                    documentsError={documentsError}
+                    buildingId={id!}
+                    onUpload={handleDocumentUpload}
+                  />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.ownership') || 'Ownership'}
+                  </h3>
+                  <LazyOwnershipTab buildingId={id!} />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <LazyUnknownsLedger buildingId={id!} />
+                </section>
+              </div>
+            </Suspense>
+          )}
+
+          {/* Changements — what changed: timeline, activity */}
+          {activeTab === 'change' && (
             <Suspense fallback={TabFallback}>
               <LazyActivityTab
                 buildingId={id!}
@@ -415,118 +644,68 @@ export default function BuildingDetail() {
             </Suspense>
           )}
 
-          {/* Diagnostics Tab */}
-          {activeTab === 'diagnostics' && (
+          {/* Dossiers — active episodes: cases, interventions, tenders, leases, contracts, procedures */}
+          {activeTab === 'cases' && (
             <Suspense fallback={TabFallback}>
-              <LazyDiagnosticsTab
-                buildingId={id!}
-                diagnostics={diagnostics}
-                onCreateClick={() => setShowDiagnosticForm(true)}
-              />
-            </Suspense>
-          )}
-
-          {/* Documents Tab */}
-          {activeTab === 'documents' && (
-            <Suspense fallback={TabFallback}>
-              <LazyDocumentsTab
-                documents={documents}
-                isLoadingDocs={isLoadingDocs}
-                documentsError={documentsError}
-                onUpload={handleDocumentUpload}
-              />
-            </Suspense>
-          )}
-
-          {/* Ownership Tab */}
-          {activeTab === 'ownership' && (
-            <Suspense fallback={TabFallback}>
-              <LazyOwnershipTab buildingId={id!} />
-            </Suspense>
-          )}
-
-          {/* Leases Tab */}
-          {activeTab === 'leases' && (
-            <Suspense fallback={TabFallback}>
-              <LazyLeasesTab buildingId={id!} />
-            </Suspense>
-          )}
-
-          {/* Contracts Tab */}
-          {activeTab === 'contracts' && (
-            <Suspense fallback={TabFallback}>
-              <LazyContractsTab buildingId={id!} />
-            </Suspense>
-          )}
-
-          {/* Procedures Tab */}
-          {activeTab === 'procedures' && (
-            <Suspense fallback={TabFallback}>
-              <LazyProceduresSection buildingId={id!} />
-            </Suspense>
-          )}
-
-          {/* Details Tab */}
-          {activeTab === 'details' && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { label: t('building.address'), value: building.address },
-                  { label: t('building.city'), value: `${building.postal_code} ${building.city}` },
-                  { label: t('building.canton'), value: building.canton },
-                  { label: t('building.construction_year'), value: building.construction_year },
-                  { label: t('building.renovation_year'), value: building.renovation_year || '-' },
-                  {
-                    label: t('building.building_type'),
-                    value: t(`building_type.${building.building_type}`) || building.building_type,
-                  },
-                  { label: t('building.floors_above'), value: building.floors_above ?? '-' },
-                  { label: t('building.floors_below'), value: building.floors_below ?? '-' },
-                  {
-                    label: t('building.surface_area'),
-                    value: building.surface_area_m2 ? `${building.surface_area_m2} m\u00B2` : '-',
-                  },
-                  {
-                    label: t('building.volume'),
-                    value: building.volume_m3 ? `${building.volume_m3} m\u00B3` : '-',
-                  },
-                  { label: t('building.egrid'), value: building.egrid || '-' },
-                  { label: t('building.official_id'), value: building.official_id || '-' },
-                  { label: t('building.parcel_number'), value: building.parcel_number || '-' },
-                  {
-                    label: t('building.latitude'),
-                    value: building.latitude != null ? String(building.latitude) : '-',
-                  },
-                  {
-                    label: t('building.longitude'),
-                    value: building.longitude != null ? String(building.longitude) : '-',
-                  },
-                  {
-                    label: t('building.last_diagnostic'),
-                    value: diagnostics.length > 0 ? formatDate(diagnostics[0].date_inspection) : '-',
-                  },
-                  { label: t('form.created_at') || 'Created', value: formatDate(building.created_at) },
-                  { label: t('form.updated_at') || 'Updated', value: formatDate(building.updated_at) },
-                ].map((item) => (
-                  <div key={item.label} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
-                    <p className="text-xs text-gray-500 dark:text-slate-400">{item.label}</p>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{item.value || '-'}</p>
-                  </div>
-                ))}
+              <div className="space-y-8">
+                <section>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.leases') || 'Leases'}
+                  </h3>
+                  <LazyLeasesTab buildingId={id!} />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.contracts') || 'Contracts'}
+                  </h3>
+                  <LazyContractsTab buildingId={id!} />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.procedures') || 'Procedures'}
+                  </h3>
+                  <LazyProceduresSection buildingId={id!} />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.tenders') || "Appels d'offres"}
+                  </h3>
+                  <LazyTenderTab buildingId={id!} />
+                </section>
+                <section className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {t('building.tab.interventions') || 'Interventions'}
+                  </h3>
+                  <LazyBuildingInterventionsEmbed />
+                </section>
               </div>
-              <div className="mt-6">
-                <Suspense
-                  fallback={
-                    <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400 py-4">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {t('app.loading') || 'Loading...'}
-                    </div>
-                  }
-                >
-                  <LazyTransferPackagePanel buildingId={id!} />
-                </Suspense>
+            </Suspense>
+          )}
+
+          {/* Passeport & Transfert — passport envelope, transfer receipts, version diff */}
+          {activeTab === 'passport' && (
+            <div className="space-y-6">
+              <Suspense fallback={TabFallback}>
+                <LazyTransferPackagePanel buildingId={id!} />
+              </Suspense>
+              <Suspense fallback={TabFallback}>
+                <PassportDiffSection buildingId={id!} />
+              </Suspense>
+            </div>
+          )}
+
+          {/* Questions — readiness, intent queries, SafeToX verdicts */}
+          {activeTab === 'questions' && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
+                {t('building.tab.questions_description') || 'Readiness verdicts, intent queries and SafeToX evaluations for this building.'}
+              </p>
+              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-6 text-center">
+                <p className="text-gray-500 dark:text-slate-400 text-sm">
+                  {t('building.tab.questions_coming_soon') || 'Full readiness workspace coming soon.'}
+                </p>
               </div>
-            </>
+            </div>
           )}
           </TabErrorBoundary>
         </div>

@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.action_item import ActionItem
 from app.models.assignment import Assignment
 from app.models.building import Building
-from app.models.change_signal import ChangeSignal
+from app.models.building_change import BuildingSignal
 from app.models.diagnostic import Diagnostic
 from app.models.intervention import Intervention
 from app.models.notification import Notification
@@ -200,9 +200,9 @@ async def _build_signals_section(db: AsyncSession, building_ids: list[UUID], per
         return DigestSection(title="New signals", items=[], count=0)
 
     result = await db.execute(
-        select(ChangeSignal).where(
-            ChangeSignal.building_id.in_(building_ids),
-            ChangeSignal.detected_at >= period_start,
+        select(BuildingSignal).where(
+            BuildingSignal.building_id.in_(building_ids),
+            BuildingSignal.detected_at >= period_start,
         )
     )
     signals = result.scalars().all()
@@ -213,7 +213,7 @@ async def _build_signals_section(db: AsyncSession, building_ids: list[UUID], per
                 "title": s.title,
                 "description": s.description or "",
                 "priority": s.severity or "info",
-                "resource_type": "change_signal",
+                "resource_type": "building_signal",
                 "resource_id": str(s.id),
                 "timestamp": s.detected_at.isoformat() if s.detected_at else None,
             }
@@ -346,9 +346,9 @@ async def get_digest_preview(db: AsyncSession, user_id: UUID, period: str = "dai
     signal_count = 0
     if building_ids:
         result = await db.execute(
-            select(ChangeSignal.id).where(
-                ChangeSignal.building_id.in_(building_ids),
-                ChangeSignal.detected_at >= period_start,
+            select(BuildingSignal.id).where(
+                BuildingSignal.building_id.in_(building_ids),
+                BuildingSignal.detected_at >= period_start,
             )
         )
         signal_count = len(result.all())

@@ -9,10 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.action_item import ActionItem
 from app.models.building import Building
+from app.models.building_change import BuildingSignal
 from app.models.building_risk_score import BuildingRiskScore
 from app.models.building_snapshot import BuildingSnapshot
 from app.models.campaign import Campaign
-from app.models.change_signal import ChangeSignal
 from app.models.diagnostic import Diagnostic
 from app.models.document import Document
 from app.models.intervention import Intervention
@@ -334,29 +334,35 @@ async def test_alert_summary_weak_signals(db_session: AsyncSession):
     await db_session.flush()
 
     db_session.add(
-        ChangeSignal(
+        BuildingSignal(
             id=uuid.uuid4(),
             building_id=b.id,
             signal_type="decay",
             title="Signal 1",
+            description="",
+            based_on_type="event",
             status="active",
         )
     )
     db_session.add(
-        ChangeSignal(
+        BuildingSignal(
             id=uuid.uuid4(),
             building_id=b.id,
             signal_type="regulatory",
             title="Signal 2",
+            description="",
+            based_on_type="event",
             status="active",
         )
     )
     db_session.add(
-        ChangeSignal(
+        BuildingSignal(
             id=uuid.uuid4(),
             building_id=b.id,
             signal_type="other",
             title="Signal 3",
+            description="",
+            based_on_type="event",
             status="acknowledged",  # not active
         )
     )

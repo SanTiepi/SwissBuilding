@@ -19,7 +19,11 @@ from app.database import AsyncSessionLocal
 from app.importers.vaud_public import apply_records, harvest_vd_buildings, write_output_json
 from app.seeds.seed_data import seed
 from app.seeds.seed_demo_enrich import enrich_demo_buildings
+from app.seeds.seed_demo_prospect import seed_prospect_demo
 from app.seeds.seed_demo_workspace import seed_demo_workspace
+from app.seeds.seed_form_templates import seed_form_templates
+from app.seeds.seed_procedure_templates import seed_procedure_templates
+from app.seeds.seed_source_registry import seed_source_registry
 
 
 def parse_args() -> argparse.Namespace:
@@ -71,6 +75,27 @@ async def main() -> None:
         f"leases={workspace_stats['leases_count']}, "
         f"contracts={workspace_stats['contracts_count']}"
     )
+
+    # Seed form templates (idempotent)
+    async with AsyncSessionLocal() as db:
+        form_count = await seed_form_templates(db)
+        await db.commit()
+    if form_count:
+        print(f"[SEED-DEMO] Form templates: {form_count} created")
+
+    # Seed source registry (idempotent)
+    async with AsyncSessionLocal() as db:
+        source_count = await seed_source_registry(db)
+        await db.commit()
+    if source_count:
+        print(f"[SEED-DEMO] Source registry: {source_count} sources registered")
+
+    # Seed procedure templates (idempotent)
+    async with AsyncSessionLocal() as db:
+        proc_count = await seed_procedure_templates(db)
+        await db.commit()
+    if proc_count:
+        print(f"[SEED-DEMO] Procedure templates: {proc_count} created")
 
     if args.skip_vaud:
         print("[SEED-DEMO] Synthetic demo seed completed. Vaud import skipped.")
@@ -124,6 +149,13 @@ async def main() -> None:
             f"documents={enrich_stats['documents']}, "
             f"events={enrich_stats['events']}"
         )
+
+    # Step 4: prospect demo scenario (requires VD buildings)
+    async with AsyncSessionLocal() as db:
+        prospect_result = await seed_prospect_demo(db)
+    print(f"[SEED-DEMO] Prospect demo: status={prospect_result.get('status')}")
+    if prospect_result.get("status") == "completed":
+        print(f"  building: {prospect_result.get('building_address')}")
 
 
 if __name__ == "__main__":

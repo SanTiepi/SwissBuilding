@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO PortfolioCommand
+ * This page will be absorbed into the PortfolioCommand master workspace as the buildings list view.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -6,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useBuildings, useCreateBuilding } from '@/hooks/useBuildings';
 import { buildingsApi } from '@/api/buildings';
+import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { buildingDashboardApi } from '@/api/buildingDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -196,6 +203,7 @@ export default function BuildingsList() {
 
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [editingBuilding, setEditingBuilding] = useState<Building | null>(null);
   const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const [formSuccess, setFormSuccess] = useState(false);
@@ -401,14 +409,24 @@ export default function BuildingsList() {
           </p>
         </div>
         <RoleGate allowedRoles={['admin', 'diagnostician']}>
-          <button
-            onClick={openCreateModal}
-            data-testid="buildings-create-button"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            {t('building.add')}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowOnboardingWizard(true)}
+              data-testid="buildings-wizard-button"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              {t('building.add')}
+            </button>
+            <button
+              onClick={openCreateModal}
+              data-testid="buildings-create-button"
+              className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              title="Ajout manuel"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
         </RoleGate>
       </div>
 
@@ -618,6 +636,9 @@ export default function BuildingsList() {
           </button>
         </div>
       )}
+
+      {/* Onboarding Wizard */}
+      <OnboardingWizard open={showOnboardingWizard} onClose={() => setShowOnboardingWizard(false)} />
 
       {/* Create/Edit Modal */}
       {showCreateModal && (

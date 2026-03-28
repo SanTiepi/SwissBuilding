@@ -6,9 +6,9 @@ from datetime import date, datetime, timedelta
 import pytest
 
 from app.models.building import Building
+from app.models.building_change import BuildingSignal
 from app.models.building_risk_score import BuildingRiskScore
 from app.models.building_snapshot import BuildingSnapshot
-from app.models.change_signal import ChangeSignal
 from app.services.portfolio_risk_trends_service import (
     compare_portfolio_risk_periods,
     get_building_risk_trajectory,
@@ -67,12 +67,15 @@ async def _create_snapshot(db, building_id, captured_at, overall_trust=None, pas
 
 
 async def _create_signal(db, building_id, severity="high", detected_at=None):
-    sig = ChangeSignal(
+    sig = BuildingSignal(
         id=uuid.uuid4(),
         building_id=building_id,
         signal_type="risk_change",
         severity=severity,
         title="Risk signal",
+        description="",
+        based_on_type="event",
+        status="active",
         detected_at=detected_at or datetime.now(),
     )
     db.add(sig)

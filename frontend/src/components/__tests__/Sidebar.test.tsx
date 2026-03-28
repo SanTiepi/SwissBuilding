@@ -40,7 +40,7 @@ function renderSidebar(props: Partial<Parameters<typeof Sidebar>[0]> = {}) {
     onToggle: vi.fn(),
   };
   return render(
-    <MemoryRouter initialEntries={['/dashboard']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={['/today']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Sidebar {...defaultProps} {...props} />
     </MemoryRouter>,
   );
@@ -54,38 +54,61 @@ describe('Sidebar', () => {
   it('renders the app name when not collapsed', () => {
     renderSidebar({ collapsed: false });
 
-    expect(screen.getByText('SwissBuildingOS')).toBeInTheDocument();
+    expect(screen.getByText('BatiConnect')).toBeInTheDocument();
   });
 
   it('hides the app name when collapsed', () => {
     renderSidebar({ collapsed: true });
 
-    expect(screen.queryByText('SwissBuildingOS')).not.toBeInTheDocument();
+    expect(screen.queryByText('BatiConnect')).not.toBeInTheDocument();
   });
 
-  it('renders all nav items for admin role', () => {
+  it('renders primary hub nav items', () => {
     renderSidebar();
 
-    expect(screen.getByText('nav.dashboard')).toBeInTheDocument();
+    expect(screen.getByText('nav.today')).toBeInTheDocument();
     expect(screen.getByText('nav.buildings')).toBeInTheDocument();
-    expect(screen.getByText('nav.map')).toBeInTheDocument();
-    expect(screen.getByText('nav.simulation')).toBeInTheDocument();
-    expect(screen.getByText('nav.documents')).toBeInTheDocument();
+    expect(screen.getByText('nav.cases')).toBeInTheDocument();
     expect(screen.getByText('nav.settings')).toBeInTheDocument();
   });
 
-  it('hides risk-simulator for owner role (not in allowedRoles)', () => {
+  it('shows secondary items after expanding the Plus section', async () => {
+    const user = userEvent.setup();
+    renderSidebar();
+
+    // Secondary items hidden by default
+    expect(screen.queryByText('nav.simulation')).not.toBeInTheDocument();
+
+    // Expand the "Plus" section
+    const plusButton = screen.getByText('nav.more');
+    await user.click(plusButton);
+
+    // Now secondary items (including simulation for admin) should appear
+    expect(screen.getByText('nav.simulation')).toBeInTheDocument();
+    expect(screen.getByText('nav.map')).toBeInTheDocument();
+  });
+
+  it('hides risk-simulator for owner role even when secondary expanded', async () => {
+    const user = userEvent.setup();
     currentMockUser = { ...mockUser, role: 'owner' };
     renderSidebar();
 
-    expect(screen.getByText('nav.dashboard')).toBeInTheDocument();
+    // Expand secondary
+    const plusButton = screen.getByText('nav.more');
+    await user.click(plusButton);
+
     expect(screen.getByText('nav.buildings')).toBeInTheDocument();
     expect(screen.queryByText('nav.simulation')).not.toBeInTheDocument();
   });
 
-  it('shows risk-simulator for diagnostician role', () => {
+  it('shows risk-simulator for diagnostician role when secondary expanded', async () => {
+    const user = userEvent.setup();
     currentMockUser = { ...mockUser, role: 'diagnostician' };
     renderSidebar();
+
+    // Expand secondary
+    const plusButton = screen.getByText('nav.more');
+    await user.click(plusButton);
 
     expect(screen.getByText('nav.simulation')).toBeInTheDocument();
   });

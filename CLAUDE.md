@@ -31,7 +31,7 @@ See `AGENTS.md` (section "Ecosystem Invariants") for the 6 hard rules.
 
 - `egid` != `egrid` != `official_id` (see AGENTS.md for types)
 - no partially wired features — hide or simplify incomplete work
-- no backend expansion unless explicitly gated
+- no backend expansion unless explicitly gated (EXCEPTION: Robin has authorized aggressive building — build wide and deep, see manifesto)
 - hub files (i18n, router.py, models/__init__, schemas/__init__) = supervisor merge only
 - shared constants in `backend/app/constants.py`
 - imports: idempotent + explicit upserts
@@ -67,6 +67,17 @@ For large missions:
 | `python -m pytest tests/ -q` | 4563 tests |
 | `python -m app.seeds.seed_verify` | verify seed dataset |
 | `ruff check --fix app/ tests/ && ruff format app/ tests/` | auto-fix |
+
+### Repo Health (`cd backend`)
+
+| Command | Purpose |
+|---------|---------|
+| `python scripts/pre_commit_check.py` | all fitness functions (route shell, file sizes, compatibility, API, canonical) |
+| `python scripts/pre_commit_check.py --fast` | fast gate (route shell + compatibility only) |
+| `python scripts/pre_commit_check.py --json` | full check with JSON report to stdout |
+| `python scripts/check_repo_health.py` | full health report with JSON file output |
+| `make check` | lint + format + health (full pre-merge gate) |
+| `make health` | all fitness functions via Makefile |
 
 ### Strategy
 
