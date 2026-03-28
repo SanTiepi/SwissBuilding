@@ -32,11 +32,10 @@ const EcosystemEngagementsView = lazy(() => import('@/components/building-detail
 const OperationalGatesView = lazy(() => import('@/components/building-detail/OperationalGatesView'));
 const MemoryTransferView = lazy(() => import('@/components/building-detail/MemoryTransferView'));
 const AuthorityPackPanel = lazy(() => import('@/components/building-detail/AuthorityPackPanel'));
-const RenovationReadinessPanel = lazy(
-  () => import('@/components/building-detail/RenovationReadinessPanel'),
-);
+const RenovationReadinessPanel = lazy(() => import('@/components/building-detail/RenovationReadinessPanel'));
 const PackBuilderPanel = lazy(() => import('@/components/building-detail/PackBuilderPanel'));
 const ProjectWizard = lazy(() => import('@/components/building-detail/ProjectWizard'));
+const DossierWorkflowPanel = lazy(() => import('@/components/building-detail/DossierWorkflowPanel'));
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
@@ -307,6 +306,11 @@ export function OverviewTab({
         )}
         <DossierStatusPanel buildingId={buildingId} onNavigateTab={onNavigateTab} />
       </div>
+
+      {/* === DOSSIER WORKFLOW: Full pre-works dossier lifecycle === */}
+      <Suspense fallback={null}>
+        <DossierWorkflowPanel buildingId={buildingId} onNavigateTab={onNavigateTab} />
+      </Suspense>
 
       {/* === AUTHORITY PACK: Generate authority-ready dossier === */}
       <Suspense fallback={null}>

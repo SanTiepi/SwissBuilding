@@ -76,6 +76,7 @@ from app.api import (
     documents,
     dossier,
     dossier_completion,
+    dossier_workflow,
     due_diligence,
     eco_clauses,
     ecosystem_engagements,
@@ -353,6 +354,7 @@ api_router.include_router(transaction_readiness.router, prefix="", tags=["Transa
 api_router.include_router(contractor_acknowledgment.router, prefix="", tags=["Contractor Acknowledgments"])
 api_router.include_router(contractor_matching.router, prefix="", tags=["Contractor Matching"])
 api_router.include_router(dossier_completion.router, prefix="", tags=["Dossier Completion"])
+api_router.include_router(dossier_workflow.router, prefix="", tags=["Dossier Workflow"])
 api_router.include_router(energy_performance.router, prefix="", tags=["Energy Performance"])
 api_router.include_router(environmental_impact.router, prefix="", tags=["Environmental Impact"])
 api_router.include_router(bulk_operations.router, prefix="", tags=["Bulk Operations"])
