@@ -52,6 +52,7 @@ CANONICAL = {
     "dossier_workflow",
     "renovation_readiness",
     "pilot_scorecard",
+    "transaction_workflow",
 }
 
 # Compatibility: frozen surfaces kept for backward compat

@@ -215,6 +215,7 @@ from app.api import (
     timeline_enrichment,
     today,
     transaction_readiness,
+    transaction_workflow,
     transfer,
     trust_scores,
     truth_api,
@@ -352,6 +353,7 @@ api_router.include_router(requalification.router, prefix="", tags=["Requalificat
 api_router.include_router(rfq.router, prefix="", tags=["RFQ"])
 api_router.include_router(building_comparison.router, prefix="", tags=["Building Comparison"])
 api_router.include_router(transaction_readiness.router, prefix="", tags=["Transaction Readiness"])
+api_router.include_router(transaction_workflow.router, prefix="", tags=["Transaction Workflow"])
 api_router.include_router(contractor_acknowledgment.router, prefix="", tags=["Contractor Acknowledgments"])
 api_router.include_router(contractor_matching.router, prefix="", tags=["Contractor Matching"])
 api_router.include_router(dossier_completion.router, prefix="", tags=["Dossier Completion"])

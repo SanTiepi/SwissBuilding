@@ -54,7 +54,7 @@ Checkpoint rule:
 Frontend (`cd frontend`):
 ```
 npm run validate          # tsc + eslint + prettier (fast gate)
-npm test                  # vitest unit (299 tests)
+npm test                  # vitest unit (~980 tests)
 npm run test:e2e          # playwright mock (no backend)
 npm run test:e2e:real     # playwright real (needs backend:8000)
 npm run build             # prod build + PWA
@@ -156,6 +156,48 @@ Everything else: read from repo docs. Don't restate.
 Template references:
 - full: `docs/templates/project-brief-template.md`
 - compact: `docs/templates/wave-brief-compact-template.md`
+
+## Codex → Claude Prompting Rules
+
+Use one prompt = one mandate.
+
+Default prompt shape:
+1. context (3 lines max: what is already closed / assumed)
+2. mission (1 sentence)
+3. what this is / what this is not
+4. concrete deliverables
+5. hard rules (5-8 lines max)
+6. closure order (only if >1 meaningful sublot)
+7. validation
+8. return format
+
+Prompt size guidance:
+- hygiene / registry / test debt lots: 30-50 lines
+- bounded technical lots: 80-150 lines
+- vertical slices: 150-250 lines
+- mega campaigns: 200-350 lines
+- avoid prompts >350 lines unless absolutely necessary
+
+Reason:
+- above ~350 lines, execution quality drops and the agent starts reprioritizing instead of coding
+
+What to avoid:
+- manifesto prompts
+- 15+ item to-do lists with equal priority
+- "continue until the end" without explicit exclusions
+- prompts that mix doctrine rewriting + code + docs in one lot
+
+Preferred formats:
+- YAML brief for technical lots
+- compact mandate for product / vertical lots
+
+Feedback loop:
+- keep feedback short and sharp:
+  - `Verdict`
+  - `Ce qui tient`
+  - `Ce qui manque`
+  - `Prochaine action`
+- short corrective feedback outperforms long analytical essays between lots
 
 ## Wave Debrief (in ORCHESTRATOR.md)
 

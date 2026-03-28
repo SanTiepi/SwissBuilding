@@ -44,6 +44,7 @@ For large missions:
 - `ORCHESTRATOR.md` = durable execution board (maintain Next 10, wave status, debriefs)
 - `Lead Feed` section = Codex→Claude channel
 - repo docs = standing context (don't expect prompt to contain everything)
+- prompt structure / size rules live in `AGENTS.md` (`Codex → Claude Prompting Rules`)
 
 ## Validation Commands
 
