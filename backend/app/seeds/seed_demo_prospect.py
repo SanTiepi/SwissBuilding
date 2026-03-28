@@ -37,7 +37,7 @@ from app.models.sample import Sample
 logger = logging.getLogger(__name__)
 
 # Stable UUIDs for idempotency
-_NS = uuid.UUID("pr05p3c7-de40-7890-abcd-ef1234567890")
+_NS = uuid.UUID("a105a3c7-de40-7890-abcd-ef1234567890")
 _DIAG_IDS = {
     "expired": uuid.uuid5(_NS, "prospect-diag-expired"),
     "partial_scope": uuid.uuid5(_NS, "prospect-diag-partial-scope"),
