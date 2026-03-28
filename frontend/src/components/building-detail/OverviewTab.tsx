@@ -32,6 +32,9 @@ const EcosystemEngagementsView = lazy(() => import('@/components/building-detail
 const OperationalGatesView = lazy(() => import('@/components/building-detail/OperationalGatesView'));
 const MemoryTransferView = lazy(() => import('@/components/building-detail/MemoryTransferView'));
 const AuthorityPackPanel = lazy(() => import('@/components/building-detail/AuthorityPackPanel'));
+const RenovationReadinessPanel = lazy(
+  () => import('@/components/building-detail/RenovationReadinessPanel'),
+);
 const PackBuilderPanel = lazy(() => import('@/components/building-detail/PackBuilderPanel'));
 const ProjectWizard = lazy(() => import('@/components/building-detail/ProjectWizard'));
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
@@ -308,6 +311,11 @@ export function OverviewTab({
       {/* === AUTHORITY PACK: Generate authority-ready dossier === */}
       <Suspense fallback={null}>
         <AuthorityPackPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === RENOVATION READINESS: Assess and prepare renovation === */}
+      <Suspense fallback={null}>
+        <RenovationReadinessPanel buildingId={buildingId} />
       </Suspense>
 
       {/* === PACK BUILDER: Multi-audience pack generation === */}

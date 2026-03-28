@@ -2711,6 +2711,12 @@ export const fr: TranslationMap = {
   'authority_packs.close': 'Fermer',
   'authority_packs.cancel': 'Annuler',
 
+  // Renovation Readiness
+  'renovation_readiness.title': 'Preparation renovation',
+  'renovation_readiness.assess': 'Selectionner un type de travaux...',
+  'renovation_readiness.generate_pack': 'Generer le pack',
+  'renovation_readiness.not_evaluated': 'Non evalue',
+
   // Pack Builder
   'pack_builder.title': 'Pack Builder',
   'pack_builder.subtitle': 'Generez des packs adaptes a chaque audience depuis la meme base de verite',

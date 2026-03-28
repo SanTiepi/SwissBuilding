@@ -178,6 +178,7 @@ from app.api import (
     remediation_summary,
     remediation_tracking,
     remediation_workspace,
+    renovation_readiness,
     renovation_sequencer,
     reporting_metrics,
     requalification,
@@ -406,6 +407,7 @@ api_router.include_router(counterfactual_analysis.router, prefix="", tags=["Coun
 api_router.include_router(due_diligence.router, prefix="", tags=["Due Diligence"])
 api_router.include_router(handoff_pack.router, prefix="", tags=["Handoff Pack"])
 api_router.include_router(quality_assurance.router, prefix="", tags=["Quality Assurance"])
+api_router.include_router(renovation_readiness.router, prefix="", tags=["Renovation Readiness"])
 api_router.include_router(renovation_sequencer.router, prefix="", tags=["Renovation Sequencer"])
 api_router.include_router(risk_communication.router, prefix="", tags=["Risk Communication"])
 api_router.include_router(scenario_engine.router, prefix="", tags=["Counterfactual Scenarios"])
