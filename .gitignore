@@ -49,3 +49,7 @@ Thumbs.db
 # Repo health (generated artifacts)
 backend/scripts/baselines/
 backend/scripts/repo_health_report.json
+
+# Generated pack artifacts (runtime output, not source)
+artifacts/
+backend/artifacts/

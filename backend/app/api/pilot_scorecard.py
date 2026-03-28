@@ -44,6 +44,14 @@ async def building_scorecard(
     db: AsyncSession = Depends(get_db),
 ):
     """Get per-building pilot scorecard with before/after metrics."""
+    # Org isolation: non-admin users can only see their own org's buildings
+    if getattr(current_user, "role", None) != "admin":
+        from app.services.building_service import get_building
+
+        building = await get_building(db, building_id)
+        user_org = getattr(current_user, "organization_id", None)
+        if not building or (user_org and building.organization_id != user_org):
+            return {"error": "building_not_found", "building_id": str(building_id)}
     return await get_building_scorecard(db, building_id)
 
 

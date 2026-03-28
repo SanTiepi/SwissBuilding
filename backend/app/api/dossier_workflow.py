@@ -53,12 +53,18 @@ class FixBlockerRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-async def _get_building_or_404(db: AsyncSession, building_id: UUID):
+async def _get_building_or_404(db: AsyncSession, building_id: UUID, user: User | None = None):
+    """Fetch building by ID.  If *user* is provided (non-admin), also verify
+    that the building belongs to the user's organization."""
     from app.services.building_service import get_building
 
     building = await get_building(db, building_id)
     if not building:
         raise HTTPException(status_code=404, detail="Building not found")
+    if user and getattr(user, "role", None) != "admin":
+        user_org = getattr(user, "organization_id", None)
+        if user_org and building.organization_id != user_org:
+            raise HTTPException(status_code=404, detail="Building not found")
     return building
 
 
@@ -75,7 +81,7 @@ async def get_dossier_status(
     db: AsyncSession = Depends(get_db),
 ):
     """Get the current dossier lifecycle status for a building + work type."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     try:
         return await _service.get_dossier_status(db, building_id, work_type)
     except ValueError as e:
@@ -91,7 +97,7 @@ async def fix_blocker(
     db: AsyncSession = Depends(get_db),
 ):
     """Resolve a specific blocker and re-evaluate readiness."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     try:
         return await _service.fix_blocker(db, building_id, body.blocker_type, body.resolution_data, current_user.id)
     except ValueError as e:
@@ -107,7 +113,7 @@ async def generate_dossier_pack(
     db: AsyncSession = Depends(get_db),
 ):
     """Generate the authority-ready pack for this dossier."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     org_id = body.org_id if body else None
     try:
         return await _service.generate_dossier_pack(db, building_id, work_type, current_user.id, org_id)
@@ -124,7 +130,7 @@ async def submit_to_authority(
     db: AsyncSession = Depends(get_db),
 ):
     """Mark the pack as submitted to the authority."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     try:
         return await _service.submit_to_authority(
             db,
@@ -147,7 +153,7 @@ async def handle_complement(
     db: AsyncSession = Depends(get_db),
 ):
     """Handle authority complement request."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     try:
         return await _service.handle_complement_request(
             db,
@@ -169,7 +175,7 @@ async def resubmit_pack(
     db: AsyncSession = Depends(get_db),
 ):
     """Regenerate and resubmit after fixing complement issues."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     org_id = body.org_id if body else None
     try:
         return await _service.resubmit_pack(db, building_id, work_type, current_user.id, org_id)
@@ -186,7 +192,7 @@ async def acknowledge_receipt(
     db: AsyncSession = Depends(get_db),
 ):
     """Record that the authority acknowledged the submission."""
-    await _get_building_or_404(db, building_id)
+    await _get_building_or_404(db, building_id, current_user)
     try:
         return await _service.acknowledge_receipt(
             db,

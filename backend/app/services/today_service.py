@@ -243,6 +243,11 @@ async def get_today_feed(
             except (ValueError, AttributeError):
                 pass
 
+        # Org isolation: when org_id is set, only include entries linked to
+        # buildings in this org (or entries without a building reference).
+        if org_id and building_id_str is None and details.get("building_id"):
+            continue  # references a building outside our org
+
         recent_activity.append(
             {
                 "building_name": building_name,

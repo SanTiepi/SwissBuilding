@@ -45,6 +45,11 @@ async def get_action_queue(
     building = await get_building(db, building_id)
     if not building:
         raise HTTPException(status_code=404, detail="Building not found")
+    # Org isolation: non-admin users can only see their own org's buildings
+    if getattr(current_user, "role", None) != "admin":
+        user_org = getattr(current_user, "organization_id", None)
+        if user_org and building.organization_id != user_org:
+            raise HTTPException(status_code=404, detail="Building not found")
 
     return await get_building_queue(db, building_id, filter_status=status)
 
@@ -92,5 +97,10 @@ async def get_weekly_summary_endpoint(
     building = await get_building(db, building_id)
     if not building:
         raise HTTPException(status_code=404, detail="Building not found")
+    # Org isolation: non-admin users can only see their own org's buildings
+    if getattr(current_user, "role", None) != "admin":
+        user_org = getattr(current_user, "organization_id", None)
+        if user_org and building.organization_id != user_org:
+            raise HTTPException(status_code=404, detail="Building not found")
 
     return await get_weekly_summary(db, building_id)

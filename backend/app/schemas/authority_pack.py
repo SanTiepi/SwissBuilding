@@ -61,3 +61,24 @@ class AuthorityPackListItem(BaseModel):
     status: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AuthorityPackArtifactMetadata(BaseModel):
+    """Metadata attached to a written authority pack artifact file."""
+
+    building_id: str
+    generated_at: str
+    generated_by: str
+    version: str
+    financials_redacted: bool = False
+
+
+class AuthorityPackArtifactResult(BaseModel):
+    """Result of generating a real authority pack artifact file."""
+
+    pack_data: AuthorityPackResult
+    artifact_path: str
+    sha256: str
+    metadata: AuthorityPackArtifactMetadata
+
+    model_config = ConfigDict(from_attributes=True)

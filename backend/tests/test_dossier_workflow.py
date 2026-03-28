@@ -4,18 +4,24 @@ End-to-end integration tests proving the FULL lifecycle:
   assess -> fix gaps -> generate pack -> submit -> complement -> resubmit -> acknowledged
 """
 
+import json
+import os
 import uuid
 from datetime import date
 
 import pytest
+from sqlalchemy import select
 
 from app.models.action_item import ActionItem
 from app.models.building import Building
 from app.models.diagnostic import Diagnostic
 from app.models.document import Document
+from app.models.evidence_pack import EvidencePack
 from app.models.organization import Organization
 from app.models.sample import Sample
 from app.models.zone import Zone
+from app.schemas.authority_pack import AuthorityPackConfig
+from app.services.authority_pack_service import generate_pack_artifact
 from app.services.dossier_workflow_service import DossierWorkflowService
 
 # ---------------------------------------------------------------------------
@@ -536,3 +542,178 @@ class TestDossierWorkflowLifecycle:
         fake_id = uuid.uuid4()
         with pytest.raises(ValueError, match="not found"):
             await _service.get_dossier_status(db_session, fake_id)
+
+    @pytest.mark.asyncio
+    async def test_complement_creates_invalidation_and_actions(self, db_session, admin_user):
+        """Proving the complement loop: submit -> complement -> invalidation + new actions -> resubmit.
+
+        This test verifies the full invalidation chain:
+        1. Generate pack and submit to authority
+        2. Authority requests complement (complement_requested)
+        3. Old pack is marked with complement details in notes
+        4. New action is created for the complement request
+        5. Readiness is re-evaluated
+        6. Resubmit generates a new pack that supersedes the old one
+        7. Old pack is marked as expired
+        8. New pack is submitted and has a different ID
+        """
+        building, org = await _create_ready_building(db_session, admin_user)
+
+        # 1. Generate pack
+        pack_result = await _service.generate_dossier_pack(
+            db_session, building.id, "asbestos_removal", admin_user.id, org.id
+        )
+        original_pack_id = uuid.UUID(pack_result["pack_id"])
+        original_hash = pack_result["sha256_hash"]
+        assert original_hash is not None
+
+        # 2. Submit
+        status = await _service.submit_to_authority(db_session, building.id, original_pack_id, admin_user.id, org.id)
+        assert status["lifecycle_stage"] == "submitted"
+
+        # Count open actions before complement
+        actions_before = status["actions"]["total_open"]
+
+        # 3. Handle complement request
+        complement_text = "Manque le plan de gestion des dechets et la notification SUVA actualisee."
+        status = await _service.handle_complement_request(
+            db_session,
+            building.id,
+            original_pack_id,
+            complement_text,
+            admin_user.id,
+        )
+
+        # 4. Verify complement effects
+        assert status["lifecycle_stage"] == "complement_requested"
+        assert status["pack"]["status"] == "complement_requested"
+
+        # Verify new actions were created (more than before)
+        assert status["actions"]["total_open"] > actions_before
+
+        # Verify the pack notes contain complement details
+        result = await db_session.execute(select(EvidencePack).where(EvidencePack.id == original_pack_id))
+        old_pack = result.scalar_one()
+        notes_data = json.loads(old_pack.notes)
+        assert notes_data["complement_requested"] is True
+        assert complement_text in notes_data["complement_details"]
+
+        # Verify complement action exists in DB
+        action_result = await db_session.execute(
+            select(ActionItem).where(
+                ActionItem.building_id == building.id,
+                ActionItem.source_type == "dossier_workflow",
+            )
+        )
+        complement_actions = action_result.scalars().all()
+        assert len(complement_actions) >= 1
+        assert any("Complement" in (a.title or "") for a in complement_actions)
+
+        # 5. Resubmit (generates new pack, supersedes old)
+        resubmit_result = await _service.resubmit_pack(
+            db_session, building.id, "asbestos_removal", admin_user.id, org.id
+        )
+
+        new_pack_id = uuid.UUID(resubmit_result["pack_id"])
+        assert new_pack_id != original_pack_id
+
+        # 6. Verify old pack is expired (superseded)
+        await db_session.refresh(old_pack)
+        assert old_pack.status == "expired"
+
+        # 7. Verify new pack is submitted
+        result = await db_session.execute(select(EvidencePack).where(EvidencePack.id == new_pack_id))
+        new_pack = result.scalar_one()
+        assert new_pack.status == "submitted"
+        assert new_pack.submitted_at is not None
+
+        # 8. New pack has different hash (different content/timestamp)
+        assert resubmit_result["sha256_hash"] is not None
+        assert resubmit_result["sha256_hash"] != original_hash
+
+        # 9. Final lifecycle should be submitted
+        assert resubmit_result["status"]["lifecycle_stage"] == "submitted"
+
+
+class TestAuthorityPackArtifact:
+    """Tests for the authority pack artifact file generation."""
+
+    @pytest.mark.asyncio
+    async def test_generate_pack_artifact_writes_file(self, db_session, admin_user, tmp_path):
+        """generate_pack_artifact writes a real JSON file to disk."""
+        building, _org = await _create_ready_building(db_session, admin_user)
+
+        config = AuthorityPackConfig(building_id=building.id, language="fr")
+        output_dir = str(tmp_path / "artifacts")
+
+        result = await generate_pack_artifact(db_session, building.id, config, admin_user.id, output_dir=output_dir)
+
+        # Verify the file was written
+        assert os.path.isfile(result.artifact_path)
+        assert result.artifact_path.startswith(output_dir)
+        assert result.artifact_path.endswith(".json")
+
+        # Verify the file content is valid JSON and contains sections
+        with open(result.artifact_path, encoding="utf-8") as f:
+            content = f.read()
+        pack_from_file = json.loads(content)
+        assert "sections" in pack_from_file
+        assert len(pack_from_file["sections"]) > 0
+
+        # Verify SHA-256 hash matches file content
+        import hashlib
+
+        expected_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        assert result.sha256 == expected_hash
+
+        # Verify metadata
+        assert result.metadata.building_id == str(building.id)
+        assert result.metadata.generated_by == str(admin_user.id)
+        assert result.metadata.version == "2.0.0"
+        assert result.metadata.financials_redacted is False
+
+        # Verify pack_data is populated
+        assert result.pack_data.pack_id is not None
+        assert result.pack_data.building_id == building.id
+        assert result.pack_data.total_sections > 0
+
+    @pytest.mark.asyncio
+    async def test_artifact_with_redaction(self, db_session, admin_user, tmp_path):
+        """Artifact with redact_financials=True produces redacted output."""
+        building, _org = await _create_ready_building(db_session, admin_user)
+
+        config = AuthorityPackConfig(
+            building_id=building.id,
+            language="fr",
+            redact_financials=True,
+        )
+        output_dir = str(tmp_path / "artifacts-redacted")
+
+        result = await generate_pack_artifact(db_session, building.id, config, admin_user.id, output_dir=output_dir)
+
+        assert result.metadata.financials_redacted is True
+        assert result.pack_data.financials_redacted is True
+        assert os.path.isfile(result.artifact_path)
+
+    @pytest.mark.asyncio
+    async def test_artifact_filename_contains_building_id(self, db_session, admin_user, tmp_path):
+        """Artifact filename embeds building ID for traceability."""
+        building, _org = await _create_ready_building(db_session, admin_user)
+
+        config = AuthorityPackConfig(building_id=building.id, language="fr")
+        output_dir = str(tmp_path / "artifacts-named")
+
+        result = await generate_pack_artifact(db_session, building.id, config, admin_user.id, output_dir=output_dir)
+
+        filename = os.path.basename(result.artifact_path)
+        assert str(building.id) in filename
+        assert filename.startswith("authority-pack-")
+
+    @pytest.mark.asyncio
+    async def test_artifact_nonexistent_building_raises(self, db_session, admin_user, tmp_path):
+        """Generating artifact for non-existent building raises ValueError."""
+        fake_id = uuid.uuid4()
+        config = AuthorityPackConfig(building_id=fake_id, language="fr")
+
+        with pytest.raises(ValueError, match="not found"):
+            await generate_pack_artifact(db_session, fake_id, config, admin_user.id, output_dir=str(tmp_path))

@@ -12,6 +12,7 @@ contains everything needed for an authority submission.
 import hashlib
 import json
 import logging
+import os
 import uuid
 from datetime import UTC, datetime
 
@@ -29,6 +30,8 @@ from app.models.evidence_pack import EvidencePack
 from app.models.intervention import Intervention
 from app.models.zone import Zone
 from app.schemas.authority_pack import (
+    AuthorityPackArtifactMetadata,
+    AuthorityPackArtifactResult,
     AuthorityPackConfig,
     AuthorityPackListItem,
     AuthorityPackResult,
@@ -995,4 +998,64 @@ async def get_authority_pack(db: AsyncSession, pack_id: uuid.UUID) -> AuthorityP
         caveats_count=caveats_count,
         pack_version=pack_version,
         sha256_hash=sha256_hash,
+    )
+
+
+async def generate_pack_artifact(
+    db: AsyncSession,
+    building_id: uuid.UUID,
+    config: AuthorityPackConfig,
+    user_id: uuid.UUID,
+    output_dir: str | None = None,
+) -> AuthorityPackArtifactResult:
+    """Generate the authority pack AND write it as a real JSON artifact file.
+
+    Returns an AuthorityPackArtifactResult containing:
+      - pack_data: the full AuthorityPackResult
+      - artifact_path: path to the written JSON file
+      - sha256: SHA-256 hash of the artifact file content
+      - metadata: generation metadata (building_id, timestamps, version, etc.)
+    """
+    # Generate the pack using the existing function
+    pack = await generate_authority_pack(db, building_id, config, user_id)
+
+    # Determine output directory
+    if output_dir is None:
+        output_dir = os.path.join(os.getcwd(), "artifacts", "packs")
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Build the filename with building ID and timestamp
+    timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+    filename = f"authority-pack-{building_id}-{timestamp}.json"
+    filepath = os.path.join(output_dir, filename)
+
+    # Serialize the full pack to JSON
+    pack_dict = pack.model_dump(mode="json")
+    content = json.dumps(pack_dict, indent=2, default=str, ensure_ascii=False)
+    sha256 = hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+    # Write the artifact file
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    logger.info(
+        "Authority pack artifact written: %s (sha256=%s, building=%s)",
+        filepath,
+        sha256[:16],
+        building_id,
+    )
+
+    generated_at = datetime.now(UTC).isoformat()
+
+    return AuthorityPackArtifactResult(
+        pack_data=pack,
+        artifact_path=filepath,
+        sha256=sha256,
+        metadata=AuthorityPackArtifactMetadata(
+            building_id=str(building_id),
+            generated_at=generated_at,
+            generated_by=str(user_id),
+            version=pack.pack_version,
+            financials_redacted=config.redact_financials,
+        ),
     )
