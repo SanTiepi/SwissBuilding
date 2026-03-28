@@ -85,61 +85,44 @@ Enforce these invariants across all waves and merge passes:
 
 ## Current Program
 
-- Program: `Mega-Program 1 — Living and Actionable Building Dossier` (finishing)
-- Overlap: `Mega-Program 2 — Multi-Actor Orchestration` (governance layer largely complete, search + agents remain)
-- Product intent:
-  - make the building navigable as a physical object
-  - make scores and recommendations provable
-  - make the dossier exportable and defensible
-  - orchestrate actions across buildings (campaigns)
-  - make building data searchable cross-entity
+- Program: `Moonshot V2 — Closure-First Infrastructure Volume Benchmark`
+- Previous: Moonshot V1 completed (committed 6650d68, 2026-03-28)
+- Doctrine: V3 (14 canonical root families, 5-hub shell, BuildingCase operating root)
+- Reference docs:
+  - `docs/projects/swissbuilding-moonshot-v2-autonomous-market-infrastructure-plan-2026-03-28.md`
+  - `docs/projects/claude-moonshot-evaluation-and-feedback-pack-2026-03-28.md`
+  - `docs/projects/repo-excellence-brief-2026-03-28.md`
+
+## Current Benchmark
+
+- Grade: **B+** (19 closed V2 CapabilityUnits across 6 rails)
+- Target: Grade A (Market Infrastructure Candidate)
+- Pre-commit: 5/5 fitness functions pass
+- V2 tests: 157+
+- V1 session tests: 706+
+- ChangeSignal: fully migrated, API deprecated with sunset 2026-09-30
+- Route shell: 5 hubs, 6 absorbed, 12 bounded
 
 ## Current Execution Doctrine
 
-The product is now large enough that the default optimization is no longer "more surfaces".
-The default optimization is:
+Closure before breadth. Infrastructure-grade durability.
 
-- better before broader
-- productization before primitive proliferation
-- composition before standalone calculators
-- full-chain truth before more isolated services
-- dataset depth before synthetic comfort
-- real validation before further speculative expansion
-- signal quality before raw test-count growth
+- do not reopen settled doctrine
+- do not create new top-level product centers
+- do not create parallel truths
+- do not broaden just because a new frontier idea is attractive
+- do not score doc-only or scaffold-only work as meaningful progress
+- prefer work that closes a whole CapabilityUnit
+- prefer machine-checkable enforcement over aspirational docs
+- prefer reducing route/surface/compat drift over adding features
 
-Practical rule:
+## Active Priorities (2026-03-28)
 
-- do not add a new backend primitive unless it clearly:
-  - unlocks the active maturity gate,
-  - removes structural debt,
-  - or closes an integration gap that existing services cannot cover cleanly
-- prefer consolidating existing capabilities into:
-  - UI surfaces
-  - aggregate read models
-  - facades / bounded contexts
-  - richer datasets
-  - real end-to-end validation
-
-## Current Maturity Gate
-
-- active gate: `Gate 2 — Building operating system`
-- preserve from Gate 1:
-  - evidence quality
-  - readiness clarity
-  - dossier and pack credibility
-- build toward Gate 3:
-  - portfolio execution
-  - scenario persistence
-  - trust comparability
-  - capital allocation logic
-
-Rule:
-- do not use calendar timing as the primary organizing principle
-- use maturity gates:
-  - wedge dominance
-  - building operating system
-  - portfolio and capital system
-  - infrastructure and market standard
+1. ~~Commit checkpoint~~ — done (6650d68 + 8344a08)
+2. ~~Fix test_seed_demo~~ — done (8344a08)
+3. Add 1 e2e smoke test for 5-hub shell
+4. ~~Update ORCHESTRATOR.md~~ — done (this update)
+5. Finish partner-submissions agent, report Wave 5 checkpoint
 
 ## International-Class Standard
 
