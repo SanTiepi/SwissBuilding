@@ -58,7 +58,6 @@ EXCEPTIONS = {
     "backend/app/services/address_preview_service.py": "pre-existing",
     "backend/app/services/audience_pack_service.py": "pre-existing",
     "backend/app/services/audit_readiness_service.py": "pre-existing",
-    "backend/app/services/authority_extraction_service.py": "pre-existing",
     "backend/app/services/authority_pack_service.py": "pre-existing",
     "backend/app/services/building_age_analysis_service.py": "pre-existing",
     "backend/app/services/building_certification_service.py": "pre-existing",

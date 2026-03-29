@@ -239,7 +239,7 @@ CANONICAL_SERVICES: dict[str, str] = {
     "rfq_service": "canonical",
     "diagnostic_extraction_service": "canonical",
     "quote_extraction_service": "canonical",
-    "authority_extraction_service": "canonical",
+    # "authority_extraction_service" removed — dead code (SB-04)
     "contract_extraction_service": "canonical",
     "geo_context_service": "canonical",
     "identity_chain_service": "canonical",
