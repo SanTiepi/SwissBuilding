@@ -146,8 +146,8 @@ Reject gate acceptance if any condition is true:
 
 If preflight fails, use this recovery order:
 
-1. Ensure infra is running (`docker compose up -d`).
-2. Re-seed with full scenario data:
+1. Ensure VPS infra is running: `ssh ubuntu@83.228.221.188 "cd /opt/swissbuilding/infrastructure && docker compose ps"`
+2. Re-seed via SSH:
    - `python -m app.seeds.seed_data` (ensures scenario buildings exist)
    - `python -m app.seeds.seed_demo --commune Lausanne --limit 150`
 3. Re-verify:
