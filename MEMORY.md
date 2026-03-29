@@ -9,6 +9,10 @@ It is not a changelog. Keep it concise and high-signal.
 
 ### Roadmap Tracking
 
+- Duo Mode archive decision (`2026-03-29`):
+  - the autonomous cleanup backlog is retired
+  - future work should be milestone-driven (`pilot`, `blocker`, `business bug`) rather than auto-generated hygiene queues
+  - `DUO_MODE.md` and `DUO_TASKS.md` are historical references, not active execution sources
 - The active next-work backlog and Claude batch packs live in `docs/roadmap-next-batches.md`.
 - The long-range strategic north star lives in `docs/vision-100x-master-brief.md`.
 - The practical "ultimate product" north star for BatiConnect now also lives in `docs/projects/baticonnect-ultimate-product-manifesto-2026-03-28.md`.

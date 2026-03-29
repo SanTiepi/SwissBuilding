@@ -49,6 +49,12 @@ Checkpoint rule:
 - one checkpoint at wave completion (not per micro-task) unless blocker
 - user confirmation is not required between normal waves; continue autonomously while repo-visible work remains
 
+### Direction Source
+- autonomous execution should follow explicit roadmap briefs, ORCHESTRATOR priorities, or direct user/Codex mandates
+- do not create or extend self-generated cleanup backlogs as a standing workflow
+- the former `Duo Mode` backlog loop is archived as of `2026-03-29`
+- cleanup-only work must tie to a business milestone, a concrete bug, delivery risk reduction, or an explicit request
+
 ### Validation Commands
 
 Frontend (`cd frontend`):

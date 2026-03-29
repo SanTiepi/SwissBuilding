@@ -1,12 +1,13 @@
-# DUO_TASKS — Autonomous Improvement Backlog
+# DUO_TASKS — Archived
 
-## Active
-- (backlog empty — awaiting new tasks)
-
-## Pending (Priority Order)
-- (none)
+## Status
+- Archived on `2026-03-29`
+- No active backlog
+- Do not append new auto-generated cleanup tasks here
+- Use milestone-specific briefs instead
 
 ## Completed
+- `BUG-01` `_classify_generic_result`: fixed false positive on `"non détecté"` / `"not detected"` via negative-first matching + regression tests (2026-03-29)
 - `SB-11` Alert system for stale evidence: SKIP — already implemented (freshness_watch_service, change_signal_generator, notification_digest_service) (2026-03-29)
 - `SB-10` Building dossier export: SKIP — already implemented (dossier_service + Gotenberg PDF + API route) (2026-03-29)
 - `SB-09` Risk scoring engine: SKIP — already fully implemented with tests and 8 API routes (2026-03-29)
@@ -18,12 +19,6 @@
 - `SB-02` Classify 24 orphan services — 16 active (inventory error), 4 dead code, 2 broken import, 2 planned (2026-03-29)
 - `SB-01` Inventory + consumer graph — 258 services, 24 orphans identified, hub services mapped (2026-03-29)
 
-## Bugs Found
-- `BUG-01` `_classify_generic_result` in diagnostic_extraction_service: positive keyword "détecté" matches as substring inside "non détecté", causing false positives. Negative keywords should be checked BEFORE positive ones.
-
-## Rules
-- One task at a time
-- Run targeted tests after each change (not full suite unless justified)
-- Run `pre_commit_check.py --fast` as gate
-- Commit on branch `duo/improvements` only
-- If tests break unexpectedly → stop, report, don't push forward
+## Historical Note
+- `docs/duo_inventory.md` is a snapshot from the duo pass, not a living queue
+- any new work should be justified by milestone value, delivery risk, or a concrete bug
