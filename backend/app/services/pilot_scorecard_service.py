@@ -443,14 +443,17 @@ async def get_pilot_scorecard(
     complements_received = sum(1 for p in packs if p.notes and "complement_requested" in (p.notes or ""))
     acknowledged = sum(1 for p in packs if p.status == "acknowledged")
 
-    # 6. Ready buildings
-    buildings_valid_diags: set[UUID] = set()
-    for d in diagnostics:
-        if d.status in ("completed", "validated") and _is_diagnostic_valid(d.date_report, today):
-            buildings_valid_diags.add(d.building_id)
+    # 6. Ready buildings — use readiness_reasoner for canonical verdict
+    from app.services.readiness_reasoner import evaluate_readiness
 
-    ready_buildings = buildings_valid_diags - buildings_with_blockers
-    ready_count = len(ready_buildings & buildings_with_docs)
+    ready_count = 0
+    for b in buildings:
+        try:
+            assessment = await evaluate_readiness(db, b.id, "safe_to_start")
+            if assessment.status in ("ready", "conditional"):
+                ready_count += 1
+        except Exception:
+            logger.debug("Readiness evaluation failed for building %s", b.id, exc_info=True)
 
     # 7. Time to safe_to_start
     time_to_sts: list[float] = []
