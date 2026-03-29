@@ -53,6 +53,7 @@ CANONICAL = {
     "renovation_readiness",
     "pilot_scorecard",
     "transaction_workflow",
+    "pack_export",
 }
 
 # Compatibility: frozen surfaces kept for backward compat

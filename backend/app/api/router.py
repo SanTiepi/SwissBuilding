@@ -141,6 +141,7 @@ from app.api import (
     owner_ops,
     ownership,
     pack_builder,
+    pack_export,
     pack_impact,
     package_presets,
     partner_contracts,
@@ -367,6 +368,7 @@ api_router.include_router(document_templates.router, prefix="", tags=["Document 
 api_router.include_router(completion_workspace.router, prefix="", tags=["Completion Workspace"])
 api_router.include_router(multi_org_dashboard.router, prefix="/multi-org", tags=["Multi Org Dashboard"])
 api_router.include_router(pack_builder.router, prefix="", tags=["Pack Builder"])
+api_router.include_router(pack_export.router, prefix="", tags=["Pack Export"])
 api_router.include_router(pack_impact.router, prefix="", tags=["Pack Impact"])
 api_router.include_router(field_observations.router, prefix="", tags=["Field Observations"])
 api_router.include_router(authority_packs.router, prefix="", tags=["Authority Packs"])

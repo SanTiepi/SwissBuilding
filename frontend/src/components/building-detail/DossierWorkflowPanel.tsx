@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn, formatDateTime } from '@/utils/formatters';
 import { dossierWorkflowApi, type DossierStatus, type DossierStepProgress } from '@/api/dossierWorkflow';
+import { packExportApi } from '@/api/packExport';
 import {
   FileStack,
   ChevronDown,
@@ -21,6 +22,10 @@ import {
   ArrowRight,
   AlertOctagon,
   Info,
+  Download,
+  Share2,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -276,6 +281,101 @@ function CompletenessSection({
   );
 }
 
+/** PDF download + share buttons shown after pack generation */
+function PackExportButtons({ buildingId }: { buildingId: string }) {
+  const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [shareExpiry, setShareExpiry] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const blob = await packExportApi.generateAuthorityPdf(buildingId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pack-autorite-${buildingId.slice(0, 8)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent — button resets
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const result = await packExportApi.createShareLink(buildingId, 'authority');
+      setShareLink(result.share_url);
+      setShareExpiry(result.expires_at);
+    } catch {
+      // silent
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleDownloadPdf}
+          disabled={downloading}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors"
+        >
+          {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+          Telecharger PDF
+        </button>
+        <button
+          onClick={handleShare}
+          disabled={sharing}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors"
+        >
+          {sharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
+          Partager
+        </button>
+      </div>
+      {shareLink && (
+        <div className="flex items-center gap-2 p-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <input
+            type="text"
+            value={shareLink}
+            readOnly
+            className="flex-1 text-xs text-blue-700 dark:text-blue-300 bg-transparent outline-none truncate font-mono"
+          />
+          <button
+            onClick={handleCopy}
+            className="flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            {copied ? 'Copie' : 'Copier'}
+          </button>
+          {shareExpiry && (
+            <span className="flex-shrink-0 text-[10px] text-blue-500 dark:text-blue-400">
+              Expire le {new Date(shareExpiry).toLocaleDateString('fr-CH')}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Pack status display and actions */
 function PackSection({
   status,
@@ -374,6 +474,9 @@ function PackSection({
           )}
         </div>
 
+        {/* PDF download + share */}
+        <PackExportButtons buildingId={status.building_id} />
+
         {/* Submit button */}
         {!showSubmitModal ? (
           <button
@@ -435,6 +538,9 @@ function PackSection({
             )}
           </div>
         </div>
+
+        {/* PDF download + share */}
+        <PackExportButtons buildingId={status.building_id} />
 
         {!showComplementModal ? (
           <button

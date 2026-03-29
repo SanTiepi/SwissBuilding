@@ -171,6 +171,7 @@ from app.models.rfq import TenderInvitation as _TI  # noqa: E402, F401
 from app.models.rfq import TenderQuote as _TQ  # noqa: E402, F401
 from app.models.rfq import TenderRequest as _TR  # noqa: E402, F401
 from app.models.rule_change_event import RuleChangeEvent as _RCE  # noqa: E402, F401
+from app.models.shared_artifact import SharedArtifact as _SA  # noqa: E402, F401
 from app.models.source_snapshot import BuildingSourceSnapshot as _BSS  # noqa: E402, F401
 from app.models.subscription_change import SubscriptionChange as _SC  # noqa: E402, F401
 from app.models.swiss_rules_source import RuleSource as _RS  # noqa: E402, F401

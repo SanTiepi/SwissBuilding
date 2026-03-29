@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { packBuilderApi } from '@/api/packBuilder';
+import { packExportApi } from '@/api/packExport';
 import type { PackResult, PackTypeInfo, PackConformanceResult } from '@/api/packBuilder';
 import { useTranslation } from '@/i18n';
 import { cn, formatDateTime } from '@/utils/formatters';
@@ -23,6 +24,7 @@ import {
   X,
   EyeOff,
   Info,
+  FileDown,
 } from 'lucide-react';
 
 interface PackBuilderPanelProps {
@@ -217,12 +219,36 @@ function PackResultView({
   result,
   onClose,
   onDownload,
+  buildingId,
 }: {
   result: PackResult;
   onClose: () => void;
   onDownload: () => void;
+  buildingId: string;
 }) {
   const [showSections, setShowSections] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setDownloadingPdf(true);
+    try {
+      const blob = await packExportApi.generatePackPdf(
+        buildingId,
+        result.pack_type,
+        result.financials_redacted ?? false,
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pack-${result.pack_type}-${buildingId.slice(0, 8)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
@@ -347,11 +373,19 @@ function PackResultView({
         {/* Actions */}
         <div className="flex items-center gap-3 pt-1">
           <button
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+          >
+            {downloadingPdf ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+            Telecharger PDF
+          </button>
+          <button
             onClick={onDownload}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
-            Telecharger (JSON)
+            Telecharger JSON
           </button>
         </div>
       </div>
@@ -438,7 +472,12 @@ export default function PackBuilderPanel({ buildingId }: PackBuilderPanelProps) 
 
       {/* Generated pack result */}
       {generatedPack && (
-        <PackResultView result={generatedPack} onClose={() => setGeneratedPack(null)} onDownload={handleDownload} />
+        <PackResultView
+          result={generatedPack}
+          onClose={() => setGeneratedPack(null)}
+          onDownload={handleDownload}
+          buildingId={buildingId}
+        />
       )}
 
       {/* Financial redaction option */}

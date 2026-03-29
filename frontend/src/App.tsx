@@ -10,6 +10,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 // error boundary before the login page fully settled.
 import Login from '@/pages/Login';
 import SharedView from '@/pages/SharedView';
+import SharedArtifactView from '@/pages/SharedArtifactView';
 import PublicIntake from '@/pages/PublicIntake';
 import NotFound from '@/pages/NotFound';
 
@@ -95,6 +96,14 @@ export default function App() {
           element={
             <Suspense fallback={<LoadingSpinner />}>
               <SharedView />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/shared/:accessToken/artifact"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <SharedArtifactView />
             </Suspense>
           }
         />

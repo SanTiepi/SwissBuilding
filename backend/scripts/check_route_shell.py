@@ -27,7 +27,7 @@ CONTEXTUAL_PREFIXES = [
 ]
 
 # Public / auth routes (no layout, no hub)
-AUTH_ROUTES = {"login", "shared/:token", "intake"}
+AUTH_ROUTES = {"login", "shared/:token", "shared/:accessToken/artifact", "intake"}
 
 # Admin routes (operator-only, not user-facing hubs)
 ADMIN_PREFIX = "admin/"

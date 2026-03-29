@@ -149,6 +149,7 @@ from app.models.rule_change_event import RuleChangeEvent
 from app.models.sample import Sample
 from app.models.saved_simulation import SavedSimulation
 from app.models.scenario import CounterfactualScenario
+from app.models.shared_artifact import SharedArtifact
 from app.models.shared_link import SharedLink
 from app.models.source_registry import SourceHealthEvent, SourceRegistryEntry
 from app.models.source_snapshot import BuildingSourceSnapshot
@@ -331,6 +332,7 @@ __all__ = [
     "SafeToXState",
     "Sample",
     "SavedSimulation",
+    "SharedArtifact",
     "SharedLink",
     "SourceHealthEvent",
     "SourceRegistryEntry",
