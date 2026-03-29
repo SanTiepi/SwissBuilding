@@ -487,7 +487,7 @@ def extract_scope(text: str) -> dict:
     ]
     for pattern in zone_patterns:
         for m in re.finditer(pattern, text, re.IGNORECASE | re.MULTILINE):
-            zone = m.group(0).strip() if m.lastindex == 0 else m.group(1).strip()
+            zone = m.group(1).strip() if m.lastindex and m.lastindex >= 1 else m.group(0).strip()
             if zone and zone not in scope["zones_mentioned"]:
                 scope["zones_mentioned"].append(zone)
 
