@@ -71,7 +71,7 @@ EXCEPTIONS = {
     "backend/app/services/compliance_gap_service.py": "pre-existing",
     "backend/app/services/compliance_timeline_service.py": "pre-existing",
     "backend/app/services/constraint_graph_service.py": "pre-existing",
-    "backend/app/services/contract_extraction_service.py": "pre-existing",
+    # contract_extraction_service removed — dead code (SB-04)
     "backend/app/services/partner_submission_service.py": "governed partner submission flows (diagnostic + quote + ack)",
     "backend/app/services/passport_envelope_service.py": "sovereign passport lifecycle + transfer + diff",
     "backend/app/services/identity_chain_service.py": "canonical identity chain + reliability-grade (fallback/freshness/drift)",

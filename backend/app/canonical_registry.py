@@ -240,7 +240,7 @@ CANONICAL_SERVICES: dict[str, str] = {
     "diagnostic_extraction_service": "canonical",
     "quote_extraction_service": "canonical",
     # "authority_extraction_service" removed — dead code (SB-04)
-    "contract_extraction_service": "canonical",
+    # "contract_extraction_service" removed — dead code (SB-04)
     "geo_context_service": "canonical",
     "identity_chain_service": "canonical",
     "spatial_enrichment_service": "canonical",
