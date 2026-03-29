@@ -440,7 +440,7 @@ CANONICAL_SERVICES: dict[str, str] = {
     "flywheel_metrics_service": "infrastructure",
     "pattern_learning_service": "infrastructure",
     "trust_annotation_service": "infrastructure",
-    "value_notification_hooks": "infrastructure",
+    # "value_notification_hooks" removed — dead code (SB-04)
     "imported_diagnostic_dossier": "infrastructure",
     "imported_diagnostic_service": "infrastructure",
     # -- Exchange services --
