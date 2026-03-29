@@ -259,7 +259,7 @@ CANONICAL_SERVICES: dict[str, str] = {
     "partner_trust_service": "canonical",
     "passport_exchange_service": "canonical",
     "project_setup_service": "canonical",
-    "temporal_utils": "canonical",
+    # "temporal_utils" removed — dead code (SB-04)
     "domain_event_projector": "canonical",
     "counterfactual_service": "canonical",
     # -- Subordinate services --
