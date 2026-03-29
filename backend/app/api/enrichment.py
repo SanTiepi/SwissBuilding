@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -48,7 +49,8 @@ async def enrich_single_building(
             skip_image=skip_image,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Enrichment failed: {e}") from e
+        logging.getLogger(__name__).exception("Enrichment failed for building %s", building_id)
+        raise HTTPException(status_code=500, detail="Enrichment failed") from e
 
     if result.errors and not result.fields_updated:
         raise HTTPException(status_code=404, detail=result.errors[0])

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -27,7 +28,8 @@ async def get_identity_chain(
     try:
         result = await _get_chain(db, building_id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Identity chain resolution failed: {e}") from e
+        logging.getLogger(__name__).exception("Identity chain resolution failed for building %s", building_id)
+        raise HTTPException(status_code=500, detail="Identity chain resolution failed") from e
 
     if result.get("error") == "building_not_found":
         raise HTTPException(status_code=404, detail="Building not found")
@@ -48,7 +50,8 @@ async def resolve_identity_chain(
     try:
         result = await resolve_full_chain(db, building_id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Identity chain resolution failed: {e}") from e
+        logging.getLogger(__name__).exception("Identity chain resolution failed for building %s", building_id)
+        raise HTTPException(status_code=500, detail="Identity chain resolution failed") from e
 
     if result.get("error") == "building_not_found":
         raise HTTPException(status_code=404, detail="Building not found")
@@ -70,7 +73,8 @@ async def get_rdppf(
     try:
         chain = await _get_chain(db, building_id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"RDPPF fetch failed: {e}") from e
+        logging.getLogger(__name__).exception("RDPPF fetch failed for building %s", building_id)
+        raise HTTPException(status_code=500, detail="RDPPF fetch failed") from e
 
     if chain.get("error") == "building_not_found":
         raise HTTPException(status_code=404, detail="Building not found")

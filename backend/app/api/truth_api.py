@@ -9,6 +9,7 @@ NO mutations — all endpoints are GET-only.
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -205,7 +206,8 @@ async def get_identity_chain(
     try:
         chain = await _get_chain(db, building_id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Identity chain resolution failed: {e}") from e
+        logging.getLogger(__name__).exception("Identity chain resolution failed for building %s", building_id)
+        raise HTTPException(status_code=500, detail="Identity chain resolution failed") from e
 
     if chain.get("error") == "building_not_found":
         raise HTTPException(status_code=404, detail="Building not found")

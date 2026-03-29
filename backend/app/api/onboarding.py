@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 
 import httpx
@@ -95,9 +96,11 @@ async def egid_lookup(
         )
 
     except httpx.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"Public data source unavailable: {e}") from e
+        logging.getLogger(__name__).exception("Public data source unavailable during EGID lookup")
+        raise HTTPException(status_code=502, detail="Public data source unavailable") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"EGID lookup failed: {e}") from e
+        logging.getLogger(__name__).exception("EGID lookup failed")
+        raise HTTPException(status_code=500, detail="EGID lookup failed") from e
 
 
 @router.post("/onboarding/create-building", status_code=201)
