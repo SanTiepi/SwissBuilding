@@ -85,43 +85,34 @@ Enforce these invariants across all waves and merge passes:
 
 ## Current Program
 
-- Program: `Moonshot V2 — Closure-First Infrastructure Volume Benchmark`
-- Previous: Moonshot V1 completed (committed 6650d68, 2026-03-28)
+- Program: `Wedge Verticals + Infrastructure` (post-moonshot)
+- Completed lots: G1, G2, M1, T1, P1, I1, F1, C1-C3, S1-S6, Rail 3 B1-B2
 - Doctrine: V3 (14 canonical root families, 5-hub shell, BuildingCase operating root)
-- Reference docs:
-  - `docs/projects/swissbuilding-moonshot-v2-autonomous-market-infrastructure-plan-2026-03-28.md`
-  - `docs/projects/claude-moonshot-evaluation-and-feedback-pack-2026-03-28.md`
-  - `docs/projects/repo-excellence-brief-2026-03-28.md`
 
-## Current Benchmark
+## 4 Wedge Verticals (all closed, 2026-03-29)
 
-- Grade: **B+** (19 closed V2 CapabilityUnits across 6 rails)
-- Target: Grade A (Market Infrastructure Candidate)
+| Wedge | Lot | Pack | PDF | Share | Tests |
+|---|---|---|---|---|---|
+| Safe-to-Start (pollutants) | G1+G2+M1 | Authority | Yes | Yes | 22+26+17 |
+| Transaction-Ready (sale) | T1 | Transfer | Yes | Yes | 15 |
+| Insurance-Ready | I1 | Insurer | Yes | Yes | 16 |
+| Finance-Ready (lender) | F1 | Lender | Yes | Yes | 15 |
+
+## Current State
+
 - Pre-commit: 5/5 fitness functions pass
-- V2 tests: 157+
-- V1 session tests: 706+
-- ChangeSignal: fully migrated, API deprecated with sunset 2026-09-30
-- Route shell: 5 hubs, 6 absorbed, 12 bounded
+- Backend tests: ~7000+ (11 pre-existing fixed)
+- Frontend tests: ~996
+- Working tree: clean
+- ChangeSignal: fully migrated, API deprecated sunset 2026-09-30
+- Benchmark: B+ infrastructure-grade
 
-## Current Execution Doctrine
+## Next Logical Lots
 
-Closure before breadth. Infrastructure-grade durability.
-
-- do not reopen settled doctrine
-- do not create new top-level product centers
-- do not create parallel truths
-- do not broaden just because a new frontier idea is attractive
-- do not score doc-only or scaffold-only work as meaningful progress
-- prefer work that closes a whole CapabilityUnit
-- prefer machine-checkable enforcement over aspirational docs
-- prefer reducing route/surface/compat drift over adding features
-
-## Active Priorities (2026-03-28)
-
-1. ~~Commit checkpoint~~ — done (6650d68 + 8344a08)
-2. ~~Fix test_seed_demo~~ — done (8344a08)
-3. Add 1 e2e smoke test for 5-hub shell
-4. ~~Update ORCHESTRATOR.md~~ — done (this update)
+1. Backend-live full e2e with real seed (all 4 wedges)
+2. Frontend polish on Building Home (4 readiness panels coexist)
+3. Portfolio-level readiness summary across wedges
+4. Real pilot onboarding with prospect client
 5. Finish partner-submissions agent, report Wave 5 checkpoint
 
 ## International-Class Standard
