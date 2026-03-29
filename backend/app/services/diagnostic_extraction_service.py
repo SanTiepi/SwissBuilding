@@ -342,16 +342,18 @@ def _classify_concentration_result(sample: dict, report_type: str) -> dict:
 
 def _classify_generic_result(sample: dict, block_lower: str) -> dict:
     """Classify sample result using generic presence/absence keywords."""
+    # Check negative FIRST — multi-word negations ("non détecté") must be matched
+    # before their positive substrings ("détecté") to avoid false positives.
+    negative_keywords = ["non détecté", "not detected", "négatif", "negative", "absence", "conforme"]
     positive_keywords = ["positif", "positive", "présence", "presence", "détecté", "detected", "contaminé"]
-    negative_keywords = ["négatif", "negative", "absence", "non détecté", "not detected", "conforme"]
 
-    if any(kw in block_lower for kw in positive_keywords):
-        sample["result"] = "positive"
-        sample["threshold_exceeded"] = True
-        sample["confidence"] = max(sample["confidence"], 0.7)
-    elif any(kw in block_lower for kw in negative_keywords):
+    if any(kw in block_lower for kw in negative_keywords):
         sample["result"] = "negative"
         sample["threshold_exceeded"] = False
+        sample["confidence"] = max(sample["confidence"], 0.7)
+    elif any(kw in block_lower for kw in positive_keywords):
+        sample["result"] = "positive"
+        sample["threshold_exceeded"] = True
         sample["confidence"] = max(sample["confidence"], 0.7)
 
     return sample

@@ -163,10 +163,20 @@ class TestClassifyGenericResult:
         assert result["result"] == "positive"
 
     def test_negative_text(self):
-        # Use a string that only has negative keywords (not "non détecté" which
-        # also matches positive keyword "détecté" due to substring matching)
         sample = {"result": None, "confidence": 0.3}
         result = _classify_generic_result(sample, "négatif absence conforme")
+        assert result["result"] == "negative"
+
+    def test_non_detecte_is_negative(self):
+        """BUG-01 regression: 'non détecté' must be negative, not positive."""
+        sample = {"result": None, "confidence": 0.3}
+        result = _classify_generic_result(sample, "non détecté dans l'échantillon")
+        assert result["result"] == "negative"
+        assert result["threshold_exceeded"] is False
+
+    def test_not_detected_is_negative(self):
+        sample = {"result": None, "confidence": 0.3}
+        result = _classify_generic_result(sample, "substance not detected in sample")
         assert result["result"] == "negative"
 
 
