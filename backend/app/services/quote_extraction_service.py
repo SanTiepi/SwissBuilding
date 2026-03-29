@@ -353,7 +353,7 @@ def _detect_work_category(description: str) -> str | None:
         "demolition": ["démolition", "abbruch", "rückbau"],
         "waste_disposal": ["évacuation", "déchets", "entsorgung", "abfall"],
         "containment": ["confinement", "encapsulage", "abdichtung"],
-        "protection": ["protection", "sécurité", "sicherheit", "epi"],
+        "protection": ["protection individuelle", "sécurité", "sicherheit", "équipement de protection"],
         "installation": ["installation", "montage", "einbau"],
         "transport": ["transport", "manutention"],
         "analysis": ["analyse", "prélèvement", "labor", "messung"],
@@ -653,7 +653,7 @@ def extract_regulatory_mentions(text: str) -> dict:
     if any(
         kw in text_lower
         for kw in [
-            "epi",
+            "équipement de protection",
             "equipement de protection",
             "mesures de sécurité",
             "sicherheitsmassnahmen",

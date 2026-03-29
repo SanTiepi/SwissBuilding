@@ -195,6 +195,17 @@ class TestExtractRegulatoryMentions:
         mentions = extract_regulatory_mentions(text)
         assert isinstance(mentions, dict)
 
+    def test_safety_measures_with_full_keyword(self):
+        text = "Équipement de protection individuelle obligatoire sur le chantier"
+        mentions = extract_regulatory_mentions(text)
+        assert mentions["safety_measures_mentioned"] is True
+
+    def test_epi_substring_no_false_positive(self):
+        """BUG-03 regression: 'epi' as substring should not trigger safety_measures."""
+        text = "L'épicerie du quartier est fermée pendant les travaux"
+        mentions = extract_regulatory_mentions(text)
+        assert mentions["safety_measures_mentioned"] is False
+
     def test_no_regulations(self):
         mentions = extract_regulatory_mentions("simple text without regulations")
         assert isinstance(mentions, dict)
