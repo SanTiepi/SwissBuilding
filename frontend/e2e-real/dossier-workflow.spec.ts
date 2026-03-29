@@ -11,7 +11,7 @@ import {
 
 test.describe('Safe-to-Start Dossier Workflow (real backend)', () => {
   // This test requires:
-  // 1. Backend running at localhost:8000
+  // 1. Backend running (VPS or local — configured via playwright baseURL)
   // 2. Database seeded with seed_data (includes scenario buildings)
   // 3. Auth credentials via auth.setup.ts (admin session)
 

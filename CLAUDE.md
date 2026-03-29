@@ -55,7 +55,7 @@ For large missions:
 | `npm run validate` | tsc + eslint + prettier (fast gate) |
 | `npm test` | vitest unit (~996 tests) |
 | `npm run test:e2e` | playwright mock (no backend) |
-| `npm run test:e2e:real` | playwright real (needs backend:8000, runs preflight auto) |
+| `npm run test:e2e:real` | playwright real (needs backend running — VPS or local, runs preflight auto) |
 | `npm run build` | prod build + PWA artifacts |
 | `npm run lint:fix && npm run format:fix` | auto-fix |
 

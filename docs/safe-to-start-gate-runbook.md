@@ -58,9 +58,14 @@ Run commands from repo root in this order.
 
 1. Infrastructure up
 
-```powershell
-cd infrastructure
-docker compose up -d
+Infrastructure runs on VPS via Docker Compose (not local Docker Desktop).
+Ensure the VPS backend is reachable before proceeding.
+
+```bash
+# On VPS (via SSH):
+cd infrastructure && docker compose up -d
+# Or verify VPS is already running:
+curl -s https://<vps-domain>/api/v1/health
 ```
 
 2. Backend seed for realistic Vaud scenario
