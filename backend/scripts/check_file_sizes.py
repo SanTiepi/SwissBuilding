@@ -83,6 +83,7 @@ EXCEPTIONS = {
     "backend/app/services/today_service.py": "today feed + weekly_focus (22 lines over, marginal)",
     "backend/app/services/transaction_workflow_service.py": "T1 transaction readiness orchestrator",
     "backend/app/services/pdf_generator_service.py": "P1 PDF generation (reportlab, 25 lines over, marginal)",
+    "backend/app/services/insurance_workflow_service.py": "I1 insurance readiness orchestrator",
     "backend/app/services/cost_benefit_analysis_service.py": "pre-existing",
     "backend/app/services/counterfactual_analysis_service.py": "pre-existing",
     "backend/app/services/cross_building_pattern_service.py": "pre-existing",
@@ -160,6 +161,7 @@ EXCEPTIONS = {
     "frontend/src/components/extractions/ExtractionReview.tsx": "pre-existing",
     "frontend/src/components/building-detail/DossierWorkflowPanel.tsx": "G1 wedge — full lifecycle state machine (9 stages)",
     "frontend/src/components/building-detail/TransactionReadinessPanel.tsx": "T1 transaction readiness — verdict + gaps + buyer summary",
+    "frontend/src/components/building-detail/InsuranceReadinessPanel.tsx": "I1 insurance readiness — risk profile + incidents + insurer summary",
     # --- frontend/src/pages/ (threshold 800) ---
     "frontend/src/pages/Actions.tsx": "pre-existing",
     "frontend/src/pages/AdminAuditLogs.tsx": "pre-existing",

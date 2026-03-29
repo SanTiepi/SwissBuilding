@@ -38,6 +38,7 @@ const PackBuilderPanel = lazy(() => import('@/components/building-detail/PackBui
 const ProjectWizard = lazy(() => import('@/components/building-detail/ProjectWizard'));
 const DossierWorkflowPanel = lazy(() => import('@/components/building-detail/DossierWorkflowPanel'));
 const TransactionReadinessPanel = lazy(() => import('@/components/building-detail/TransactionReadinessPanel'));
+const InsuranceReadinessPanel = lazy(() => import('@/components/building-detail/InsuranceReadinessPanel'));
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
@@ -317,6 +318,11 @@ export function OverviewTab({
       {/* === TRANSACTION READINESS: Prepare building for sale/transaction === */}
       <Suspense fallback={null}>
         <TransactionReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === INSURANCE READINESS: Assess building for insurance === */}
+      <Suspense fallback={null}>
+        <InsuranceReadinessPanel buildingId={buildingId} />
       </Suspense>
 
       {/* === AUTHORITY PACK: Generate authority-ready dossier === */}
