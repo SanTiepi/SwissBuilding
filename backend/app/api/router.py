@@ -97,6 +97,7 @@ from app.api import (
     exports,
     extractions,
     field_observations,
+    finance_readiness,
     financial_entries,
     forms,
     freshness_watch,
@@ -395,6 +396,7 @@ api_router.include_router(risk_mitigation.router, prefix="", tags=["Risk Mitigat
 api_router.include_router(portfolio_optimization.router, prefix="", tags=["Portfolio Optimization"])
 api_router.include_router(workflow_orchestration.router, prefix="", tags=["Workflow Orchestration"])
 api_router.include_router(insurance_readiness.router, prefix="", tags=["Insurance Readiness"])
+api_router.include_router(finance_readiness.router, prefix="", tags=["Finance Readiness"])
 api_router.include_router(insurance_risk_assessment.router, prefix="", tags=["Insurance Risk Assessment"])
 api_router.include_router(knowledge_gap.router, prefix="", tags=["Knowledge Gap"])
 api_router.include_router(lab_result.router, prefix="", tags=["Lab Results"])

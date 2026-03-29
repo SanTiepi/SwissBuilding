@@ -55,6 +55,7 @@ CANONICAL = {
     "transaction_workflow",
     "pack_export",
     "insurance_readiness",
+    "finance_readiness",
 }
 
 # Compatibility: frozen surfaces kept for backward compat

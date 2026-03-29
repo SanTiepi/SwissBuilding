@@ -39,6 +39,7 @@ const ProjectWizard = lazy(() => import('@/components/building-detail/ProjectWiz
 const DossierWorkflowPanel = lazy(() => import('@/components/building-detail/DossierWorkflowPanel'));
 const TransactionReadinessPanel = lazy(() => import('@/components/building-detail/TransactionReadinessPanel'));
 const InsuranceReadinessPanel = lazy(() => import('@/components/building-detail/InsuranceReadinessPanel'));
+const FinanceReadinessPanel = lazy(() => import('@/components/building-detail/FinanceReadinessPanel'));
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
@@ -323,6 +324,11 @@ export function OverviewTab({
       {/* === INSURANCE READINESS: Assess building for insurance === */}
       <Suspense fallback={null}>
         <InsuranceReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === FINANCE READINESS: Assess building for lending/finance === */}
+      <Suspense fallback={null}>
+        <FinanceReadinessPanel buildingId={buildingId} />
       </Suspense>
 
       {/* === AUTHORITY PACK: Generate authority-ready dossier === */}
