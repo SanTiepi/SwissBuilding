@@ -50,6 +50,7 @@ from app.models.award_confirmation import AwardConfirmation as _AC  # noqa: E402
 from app.models.bounded_embed import BoundedEmbedToken as _BET  # noqa: E402, F401
 from app.models.bounded_embed import ExternalViewerProfile as _EVP  # noqa: E402, F401
 from app.models.building import Building  # noqa: E402
+from app.models.building_activity import BuildingActivity as _BAct  # noqa: E402, F401
 
 # V3 Doctrine models
 from app.models.building_case import BuildingCase as _BC  # noqa: E402, F401

@@ -1,5 +1,6 @@
 """Field observation service — CRUD, verification, and summary."""
 
+import json
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -34,6 +35,10 @@ async def create_observation(
         observed_at=data.observed_at or datetime.now(UTC),
         photo_reference=data.photo_reference,
         metadata_json=data.metadata_json,
+        observer_role=data.observer_role,
+        tags=json.dumps(data.tags) if data.tags else None,
+        context_json=json.dumps(data.context_json) if data.context_json else None,
+        confidence=data.confidence,
     )
     db.add(obs)
     await db.commit()
@@ -95,6 +100,12 @@ async def update_observation(
         return None
 
     update_data = data.model_dump(exclude_unset=True)
+    # Serialize tags and context_json if present
+    if "tags" in update_data and update_data["tags"] is not None:
+        update_data["tags"] = json.dumps(update_data["tags"])
+    if "context_json" in update_data and update_data["context_json"] is not None:
+        update_data["context_json"] = json.dumps(update_data["context_json"])
+
     for field, value in update_data.items():
         setattr(obs, field, value)
 
@@ -115,6 +126,7 @@ async def verify_observation(
         return None
 
     obs.verified = data.verified
+    obs.is_verified = data.verified
     obs.verified_by_id = verifier_id if data.verified else None
     obs.verified_at = datetime.now(UTC) if data.verified else None
 

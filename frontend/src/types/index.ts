@@ -1150,16 +1150,30 @@ export interface ComplianceSummary {
 }
 
 // Field Observation
-export type ObservationType = 'visual_inspection' | 'safety_hazard' | 'material_condition' | 'general_note';
+export type ObservationType =
+  | 'visual_inspection'
+  | 'safety_hazard'
+  | 'material_condition'
+  | 'general_note'
+  | 'anomaly'
+  | 'pattern'
+  | 'tip'
+  | 'warning'
+  | 'material_note'
+  | 'environmental_note'
+  | 'access_note'
+  | 'safety_note';
 export type ObservationSeverity = 'info' | 'minor' | 'moderate' | 'major' | 'critical';
+export type ObservationConfidence = 'certain' | 'likely' | 'possible' | 'speculation';
 
 export interface FieldObservation {
   id: string;
-  building_id: string;
+  building_id?: string;
   zone_id?: string;
   element_id?: string;
   observer_id: string;
   observer_name?: string;
+  observer_role?: string;
   observation_type: ObservationType;
   severity: ObservationSeverity;
   title: string;
@@ -1172,12 +1186,17 @@ export interface FieldObservation {
   verified_at?: string;
   status?: string;
   metadata_json?: string;
+  tags?: string;
+  context_json?: string;
+  confidence: string;
+  upvotes: number;
+  is_verified: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface FieldObservationCreate {
-  building_id: string;
+  building_id?: string;
   observation_type: ObservationType;
   severity: ObservationSeverity;
   title: string;
@@ -1187,6 +1206,10 @@ export interface FieldObservationCreate {
   location_description?: string;
   observed_at?: string;
   photo_reference?: string;
+  observer_role?: string;
+  tags?: string[];
+  context_json?: Record<string, unknown>;
+  confidence?: ObservationConfidence;
 }
 
 export interface FieldObservationSummary {
@@ -1195,6 +1218,15 @@ export interface FieldObservationSummary {
   by_severity: Record<string, number>;
   unverified_count: number;
   latest_observation_at?: string;
+}
+
+export interface PatternInsight {
+  pattern: string;
+  occurrences: number;
+  confidence: string;
+  buildings_count: number;
+  recommendation: string;
+  tags: string[];
 }
 
 // Compliance Artefact

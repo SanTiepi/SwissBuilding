@@ -15,6 +15,7 @@ from app.api import (
     authority_packs,
     background_jobs,
     budget_tracking,
+    building_activities,
     building_age_analysis,
     building_benchmark,
     building_cases,
@@ -69,8 +70,11 @@ from app.api import (
     diagnostic_quality,
     diagnostics,
     digital_vault,
+    document_checklist,
     document_classification,
+    document_classifier,
     document_completeness,
+    document_extraction,
     document_inbox,
     document_templates,
     documents,
@@ -88,6 +92,7 @@ from app.api import (
     evidence_chain,
     evidence_graph,
     evidence_packs,
+    evidence_score,
     evidence_summary,
     exchange,
     exchange_hardening,
@@ -99,6 +104,7 @@ from app.api import (
     field_observations,
     finance_readiness,
     financial_entries,
+    flywheel,
     forms,
     freshness_watch,
     gdpr,
@@ -134,6 +140,7 @@ from app.api import (
     notification_preferences,
     notification_rules,
     notifications,
+    nudges,
     obligations,
     occupancy_risks,
     occupant_safety,
@@ -161,18 +168,23 @@ from app.api import (
     portfolio,
     portfolio_command,
     portfolio_optimization,
+    portfolio_risk,
     portfolio_summary,
     portfolio_trends,
     portfolio_triage,
     post_works,
     predictive_readiness,
     priority_matrix,
+    proactive_alerts,
     procedures,
     project_setup,
     proof_delivery,
+    proof_of_state,
     public_sector,
     quality_assurance,
     readiness,
+    recommendations,
+    registry,
     regulatory_change_impact,
     regulatory_deadlines,
     regulatory_filing,
@@ -198,6 +210,7 @@ from app.api import (
     sample_optimization,
     samples,
     sampling_planner,
+    sampling_quality,
     saved_simulations,
     scenario_engine,
     scenario_planning,
@@ -279,6 +292,7 @@ api_router.include_router(ownership.router, prefix="", tags=["Ownership"])
 api_router.include_router(technical_plans.router, prefix="", tags=["Technical Plans"])
 api_router.include_router(evidence.router, prefix="", tags=["Evidence"])
 api_router.include_router(evidence_chain.router, prefix="", tags=["Evidence Chain"])
+api_router.include_router(evidence_score.router, prefix="", tags=["Evidence Score"])
 api_router.include_router(evidence_graph.router, prefix="", tags=["Evidence Graph"])
 api_router.include_router(evidence_packs.router, prefix="", tags=["Evidence Packs"])
 api_router.include_router(expert_reviews.router, prefix="", tags=["Expert Reviews"])
@@ -307,6 +321,7 @@ api_router.include_router(control_tower_v2.router, prefix="", tags=["Control Tow
 api_router.include_router(permit_procedures.router, prefix="", tags=["Permit Procedures"])
 api_router.include_router(procedures.router, prefix="", tags=["Procedures"])
 api_router.include_router(proof_delivery.router, prefix="", tags=["Proof Delivery"])
+api_router.include_router(proof_of_state.router, prefix="", tags=["Proof of State"])
 api_router.include_router(demo_path.router, prefix="", tags=["Demo Path"])
 api_router.include_router(demo_pilot.router, prefix="", tags=["Demo Pilot"])
 api_router.include_router(exchange.router, prefix="", tags=["Exchange"])
@@ -366,6 +381,7 @@ api_router.include_router(environmental_impact.router, prefix="", tags=["Environ
 api_router.include_router(bulk_operations.router, prefix="", tags=["Bulk Operations"])
 api_router.include_router(sample_optimization.router, prefix="", tags=["Sample Optimization"])
 api_router.include_router(sampling_planner.router, prefix="", tags=["Sampling Planner"])
+api_router.include_router(sampling_quality.router, prefix="", tags=["Sampling Quality"])
 api_router.include_router(document_templates.router, prefix="", tags=["Document Templates"])
 api_router.include_router(completion_workspace.router, prefix="", tags=["Completion Workspace"])
 api_router.include_router(multi_org_dashboard.router, prefix="/multi-org", tags=["Multi Org Dashboard"])
@@ -390,10 +406,14 @@ api_router.include_router(monitoring_plan.router, prefix="", tags=["Monitoring P
 api_router.include_router(regulatory_deadlines.router, prefix="", tags=["Regulatory Deadlines"])
 api_router.include_router(remediation_costs.router, prefix="", tags=["Remediation Costs"])
 api_router.include_router(remediation_tracking.router, prefix="", tags=["Remediation Tracking"])
+api_router.include_router(document_checklist.router, prefix="", tags=["Document Checklist"])
 api_router.include_router(document_classification.router, prefix="", tags=["Document Classification"])
+api_router.include_router(document_classifier.router, prefix="", tags=["Document Classifier"])
 api_router.include_router(document_completeness.router, prefix="", tags=["Document Completeness"])
+api_router.include_router(document_extraction.router, prefix="", tags=["Document Extraction"])
 api_router.include_router(risk_mitigation.router, prefix="", tags=["Risk Mitigation"])
 api_router.include_router(portfolio_optimization.router, prefix="", tags=["Portfolio Optimization"])
+api_router.include_router(portfolio_risk.router, prefix="", tags=["Portfolio Risk"])
 api_router.include_router(workflow_orchestration.router, prefix="", tags=["Workflow Orchestration"])
 api_router.include_router(insurance_readiness.router, prefix="", tags=["Insurance Readiness"])
 api_router.include_router(finance_readiness.router, prefix="", tags=["Finance Readiness"])
@@ -477,4 +497,10 @@ api_router.include_router(review_queue.router, prefix="", tags=["Review Queue"])
 api_router.include_router(truth_api.router, prefix="", tags=["Truth API v1"])
 api_router.include_router(source_registry.router, prefix="", tags=["Source Registry"])
 api_router.include_router(pilot_scorecard.router, prefix="", tags=["Pilot Scorecard"])
+api_router.include_router(recommendations.router, prefix="", tags=["Recommendations"])
+api_router.include_router(nudges.router, prefix="", tags=["Compliance Nudges"])
+api_router.include_router(registry.router, prefix="", tags=["Registry"])
 api_router.include_router(spatial_enrichment.router, prefix="", tags=["Spatial Enrichment"])
+api_router.include_router(building_activities.router, prefix="", tags=["Building Activities"])
+api_router.include_router(proactive_alerts.router, prefix="", tags=["Proactive Alerts"])
+api_router.include_router(flywheel.router, prefix="", tags=["Flywheel Learning"])

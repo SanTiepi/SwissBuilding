@@ -6,6 +6,7 @@ from app.models.artifact_version import ArtifactVersion
 from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
+from app.models.building_activity import BuildingActivity
 from app.models.authority_request import AuthorityRequest
 from app.models.award_confirmation import AwardConfirmation
 from app.models.background_job import BackgroundJob
@@ -177,6 +178,7 @@ __all__ = [
     "Assignment",
     "AudiencePack",
     "AuditLog",
+    "BuildingActivity",
     "AuthorityRequest",
     "AwardConfirmation",
     "BackgroundJob",

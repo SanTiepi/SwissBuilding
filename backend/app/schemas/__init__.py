@@ -8,6 +8,11 @@ from app.schemas.building import (
     BuildingRead,
     BuildingUpdate,
 )
+from app.schemas.building_activity import (
+    BuildingActivityListRead,
+    BuildingActivityRead,
+    ChainIntegrityRead,
+)
 from app.schemas.building_case import (
     BuildingCaseAdvance,
     BuildingCaseCreate,
@@ -33,9 +38,31 @@ from app.schemas.climate_exposure import (
 from app.schemas.common import PaginatedResponse
 from app.schemas.diagnostic import DiagnosticCreate, DiagnosticRead, DiagnosticUpdate
 from app.schemas.document import DocumentRead
+from app.schemas.document_checklist import ChecklistItemRead, DocumentChecklistRead
+from app.schemas.document_extraction import ExtractionField, ExtractionResult
+from app.schemas.document_classifier import (
+    BatchClassificationResult,
+    ClassificationCandidate,
+    ClassificationResult,
+    DocumentTypeInfo,
+)
+from app.schemas.flywheel import (
+    AccuracyMetrics,
+    ClassificationFeedbackCreate,
+    ExtractionFeedbackCreate,
+    FlywheelDashboardRead,
+    LearnedRule,
+)
 from app.schemas.event import EventCreate, EventRead
 from app.schemas.evidence_link import EvidenceLinkCreate, EvidenceLinkRead
+from app.schemas.evidence_score import EvidenceScoreRead
 from app.schemas.export_job import ExportJobCreate, ExportJobRead
+from app.schemas.field_observation import (
+    FieldObservationCreate,
+    FieldObservationListRead,
+    FieldObservationRead,
+    PatternInsightRead,
+)
 from app.schemas.freshness_watch import (
     FreshnessWatchCreate,
     FreshnessWatchDashboard,
@@ -44,6 +71,12 @@ from app.schemas.freshness_watch import (
     FreshnessWatchRead,
 )
 from app.schemas.geo_context import GeoContextRefreshResponse, GeoContextResponse
+from app.schemas.registry import (
+    AddressSearchResult,
+    EnrichmentResult,
+    NaturalHazardsResult,
+    RegistryLookupResult,
+)
 from app.schemas.intervention import (
     InterventionCreate,
     InterventionRead,
@@ -56,11 +89,22 @@ from app.schemas.notification import (
     NotificationPreferenceUpdate,
     NotificationRead,
 )
+from app.schemas.nudge import (
+    CostOfInaction,
+    NudgeListRead,
+    NudgeRead,
+)
 from app.schemas.organization import (
     OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
+from app.schemas.portfolio_risk import (
+    BuildingRiskPointRead,
+    PortfolioRiskOverviewRead,
+    RiskDistributionRead,
+)
+from app.schemas.proactive_alert import AlertRead, AlertSummaryRead, PortfolioAlertSummaryRead
 from app.schemas.procedure import (
     ApplicableProcedureRead,
     ProcedureAdvanceStep,
@@ -71,6 +115,16 @@ from app.schemas.procedure import (
     ProcedureResolve,
     ProcedureSubmit,
     ProcedureTemplateRead,
+)
+from app.schemas.proof_of_state import (
+    ProofOfStateMetadata,
+    ProofOfStateRead,
+    ProofOfStateSummaryRead,
+)
+from app.schemas.recommendation import (
+    CostEstimate,
+    RecommendationListRead,
+    RecommendationRead,
 )
 from app.schemas.rfq import (
     TenderAttributeRequest,
@@ -91,6 +145,11 @@ from app.schemas.risk import (
     RiskScoreRead,
 )
 from app.schemas.sample import SampleCreate, SampleRead, SampleUpdate
+from app.schemas.sampling_quality import (
+    BuildingSamplingQualityRead,
+    SamplingCriterionRead,
+    SamplingQualityRead,
+)
 from app.schemas.spatial_enrichment import SpatialEnrichmentRefreshResponse, SpatialEnrichmentResponse
 from app.schemas.technical_plan import TechnicalPlanCreate, TechnicalPlanRead
 from app.schemas.user import UserCreate, UserRead, UserUpdate
@@ -101,10 +160,14 @@ __all__ = [
     "ActionItemRead",
     "ActionItemUpdate",
     "ActivityItemRead",
+    "AlertRead",
+    "AlertSummaryRead",
     "ApplicableProcedureRead",
     "AssignmentCreate",
     "AssignmentRead",
     "BestTimingResponse",
+    "BuildingActivityListRead",
+    "BuildingActivityRead",
     "BuildingCaseAdvance",
     "BuildingCaseCreate",
     "BuildingCaseLinkIntervention",
@@ -118,20 +181,37 @@ __all__ = [
     "BuildingElementUpdate",
     "BuildingListRead",
     "BuildingRead",
+    "BuildingRiskPointRead",
     "BuildingUpdate",
+    "BatchClassificationResult",
+    "ChainIntegrityRead",
+    "ClassificationCandidate",
+    "ClassificationResult",
     "ClimateExposureProfileRead",
     "ClimateExposureRefreshResponse",
     "ComplianceRequirementDetail",
+    "CostEstimate",
+    "CostOfInaction",
     "DiagnosticCreate",
     "DiagnosticRead",
     "DiagnosticUpdate",
+    "ChecklistItemRead",
+    "DocumentChecklistRead",
     "DocumentRead",
+    "ExtractionField",
+    "ExtractionResult",
+    "DocumentTypeInfo",
     "EventCreate",
     "EventRead",
     "EvidenceLinkCreate",
     "EvidenceLinkRead",
+    "EvidenceScoreRead",
     "ExportJobCreate",
     "ExportJobRead",
+    "FieldObservationCreate",
+    "FieldObservationListRead",
+    "FieldObservationRead",
+    "PatternInsightRead",
     "FreshnessWatchCreate",
     "FreshnessWatchDashboard",
     "FreshnessWatchDismiss",
@@ -151,6 +231,8 @@ __all__ = [
     "NotificationPreferenceRead",
     "NotificationPreferenceUpdate",
     "NotificationRead",
+    "NudgeListRead",
+    "NudgeRead",
     "OpportunityDetectResponse",
     "OpportunityWindowRead",
     "OpportunityWindowsResponse",
@@ -159,6 +241,8 @@ __all__ = [
     "OrganizationUpdate",
     "PaginatedResponse",
     "PollutantRiskDetail",
+    "PortfolioAlertSummaryRead",
+    "PortfolioRiskOverviewRead",
     "ProcedureAdvanceStep",
     "ProcedureBlockerRead",
     "ProcedureComplement",
@@ -167,13 +251,23 @@ __all__ = [
     "ProcedureResolve",
     "ProcedureSubmit",
     "ProcedureTemplateRead",
+    "RecommendationListRead",
+    "RecommendationRead",
+    "RegistryLookupResult",
+    "AddressSearchResult",
+    "NaturalHazardsResult",
+    "EnrichmentResult",
     "RegisterRequest",
     "RenovationSimulationRequest",
     "RenovationSimulationResponse",
+    "RiskDistributionRead",
     "RiskScoreRead",
     "SampleCreate",
     "SampleRead",
     "SampleUpdate",
+    "SamplingCriterionRead",
+    "SamplingQualityRead",
+    "BuildingSamplingQualityRead",
     "SpatialEnrichmentRefreshResponse",
     "SpatialEnrichmentResponse",
     "TechnicalPlanCreate",
