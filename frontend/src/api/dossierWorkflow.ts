@@ -75,6 +75,11 @@ export interface DossierAcknowledgeData {
   pack_id: string;
 }
 
+export interface DossierFixBlockerData {
+  blocker_type: string;
+  resolution_data?: Record<string, unknown>;
+}
+
 /* ------------------------------------------------------------------ */
 /*  API                                                                */
 /* ------------------------------------------------------------------ */
@@ -82,6 +87,18 @@ export interface DossierAcknowledgeData {
 export const dossierWorkflowApi = {
   getStatus: async (buildingId: string, workType: string): Promise<DossierStatus> => {
     const response = await apiClient.get<DossierStatus>(`/buildings/${buildingId}/dossier/${workType}/status`);
+    return response.data;
+  },
+
+  fixBlocker: async (
+    buildingId: string,
+    workType: string,
+    data: DossierFixBlockerData,
+  ): Promise<DossierStatus> => {
+    const response = await apiClient.post<DossierStatus>(
+      `/buildings/${buildingId}/dossier/${workType}/fix-blocker`,
+      data,
+    );
     return response.data;
   },
 
