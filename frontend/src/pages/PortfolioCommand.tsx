@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n';
@@ -14,8 +14,24 @@ import {
   ChevronDown,
   Target,
   DollarSign,
+  Brain,
+  Bell,
+  Zap,
+  Shield,
 } from 'lucide-react';
 import { cn, formatDate } from '@/utils/formatters';
+
+// Lazy-load Building Life OS widgets (heavy, fetch internally)
+const PortfolioRiskDashboard = lazy(() =>
+  import('@/components/PortfolioRiskDashboard').then((m) => ({ default: m.PortfolioRiskDashboard })),
+);
+const PortfolioIntelligence = lazy(() =>
+  import('@/components/PortfolioIntelligence').then((m) => ({ default: m.PortfolioIntelligence })),
+);
+const AlertDashboard = lazy(() =>
+  import('@/components/AlertDashboard').then((m) => ({ default: m.AlertDashboard })),
+);
+const FlywheelDashboard = lazy(() => import('@/components/FlywheelDashboard'));
 
 // ---------------------------------------------------------------------------
 // Types
@@ -401,6 +417,49 @@ function HeatmapChart({ points }: { points: HeatmapPoint[] }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function LazyFallback() {
+  return (
+    <div className="h-32 flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+function CollapsibleSection({
+  title,
+  icon: Icon,
+  iconColor,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon: React.ElementType;
+  iconColor: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors"
+      >
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <Icon className={cn('w-5 h-5', iconColor)} />
+          {title}
+        </h2>
+        {open ? (
+          <ChevronUp className="w-5 h-5 text-gray-400 dark:text-slate-500" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-400 dark:text-slate-500" />
+        )}
+      </button>
+      {open && <div className="px-6 pb-6">{children}</div>}
     </div>
   );
 }
@@ -835,6 +894,54 @@ export default function PortfolioCommand() {
         </p>
         <HeatmapChart points={heatmapData?.buildings || []} />
       </div>
+
+      {/* Section 7 - Portfolio Risk Dashboard */}
+      <CollapsibleSection
+        title={t('portfolio_cmd.risk_dashboard') || 'Tableau de bord des risques'}
+        icon={Shield}
+        iconColor="text-red-500"
+        defaultOpen={false}
+      >
+        <Suspense fallback={<LazyFallback />}>
+          <PortfolioRiskDashboard />
+        </Suspense>
+      </CollapsibleSection>
+
+      {/* Section 8 - Cross-Layer Intelligence */}
+      <CollapsibleSection
+        title={t('portfolio_cmd.intelligence') || 'Intelligence transversale'}
+        icon={Brain}
+        iconColor="text-indigo-500"
+        defaultOpen={false}
+      >
+        <Suspense fallback={<LazyFallback />}>
+          <PortfolioIntelligence />
+        </Suspense>
+      </CollapsibleSection>
+
+      {/* Section 9 - Proactive Alerts */}
+      <CollapsibleSection
+        title={t('portfolio_cmd.alerts') || 'Alertes proactives'}
+        icon={Bell}
+        iconColor="text-amber-500"
+        defaultOpen={false}
+      >
+        <Suspense fallback={<LazyFallback />}>
+          <AlertDashboard />
+        </Suspense>
+      </CollapsibleSection>
+
+      {/* Section 10 - AI Flywheel Metrics */}
+      <CollapsibleSection
+        title={t('portfolio_cmd.flywheel') || 'Metriques AI Flywheel'}
+        icon={Zap}
+        iconColor="text-purple-500"
+        defaultOpen={false}
+      >
+        <Suspense fallback={<LazyFallback />}>
+          <FlywheelDashboard />
+        </Suspense>
+      </CollapsibleSection>
     </div>
   );
 }

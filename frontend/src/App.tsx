@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { ErrorBoundary, PageErrorBoundary } from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -71,6 +71,18 @@ const Cases = lazy(() => import('@/pages/Cases'));
 const CaseRoom = lazy(() => import('@/pages/CaseRoom'));
 const Finance = lazy(() => import('@/pages/Finance'));
 
+const CertificateVerificationLazy = lazy(() =>
+  import('@/components/CertificateVerification').then((m) => ({
+    default: m.CertificateVerification,
+  })),
+);
+
+function CertificateVerifyRoute() {
+  const { certificateId } = useParams<{ certificateId: string }>();
+  if (!certificateId) return null;
+  return <CertificateVerificationLazy certificateId={certificateId} />;
+}
+
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -112,6 +124,14 @@ export default function App() {
           element={
             <Suspense fallback={<LoadingSpinner />}>
               <PublicIntake />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/verify/:certificateId"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <CertificateVerifyRoute />
             </Suspense>
           }
         />

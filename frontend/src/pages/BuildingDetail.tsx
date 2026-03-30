@@ -23,6 +23,7 @@ import type { Diagnostic, PollutantType, BuildingRiskScore, Document as DocType,
 import type { FieldError } from 'react-hook-form';
 import { ArrowLeft, Edit3, Trash2, Loader2, MapPin, Calendar, Building2, X, AlertTriangle } from 'lucide-react';
 import { InvalidationBadge } from '@/components/InvalidationAlerts';
+import { BuildingAlertBadge } from '@/components/BuildingAlertBadge';
 
 const LazyOverviewTab = lazy(() => import('@/components/building-detail/OverviewTab'));
 const LazyActivityTab = lazy(() => import('@/components/building-detail/ActivityTab'));
@@ -42,6 +43,25 @@ const LazyPassportDiffView = lazy(() => import('@/components/building-detail/Pas
 const LazyBuildingExplorerEmbed = lazy(() => import('@/pages/BuildingExplorer'));
 const LazyBuildingPlansEmbed = lazy(() => import('@/pages/BuildingPlans'));
 const LazyBuildingInterventionsEmbed = lazy(() => import('@/pages/BuildingInterventions'));
+const LazyIntelligencePanel = lazy(() =>
+  import('@/components/IntelligencePanel').then((m) => ({ default: m.IntelligencePanel })),
+);
+const LazyRecommendationList = lazy(() =>
+  import('@/components/RecommendationList').then((m) => ({ default: m.RecommendationList })),
+);
+const LazyFieldMemoryPanel = lazy(() =>
+  import('@/components/FieldMemoryPanel').then((m) => ({ default: m.FieldMemoryPanel })),
+);
+const LazyDocumentChecklist = lazy(() => import('@/components/DocumentChecklist'));
+const LazyActivityLedger = lazy(() =>
+  import('@/components/ActivityLedger').then((m) => ({ default: m.ActivityLedger })),
+);
+const LazyCertificateGenerator = lazy(() =>
+  import('@/components/CertificateGenerator').then((m) => ({ default: m.CertificateGenerator })),
+);
+const LazyProofOfStateExport = lazy(() =>
+  import('@/components/ProofOfStateExport').then((m) => ({ default: m.ProofOfStateExport })),
+);
 
 // ErrorBoundary to catch crashes in individual tab content
 interface TabErrorBoundaryProps {
@@ -113,7 +133,7 @@ const editSchema = z.object({
 
 type EditFormData = z.infer<typeof editSchema>;
 
-type TabKey = 'overview' | 'spatial' | 'truth' | 'change' | 'cases' | 'passport' | 'questions';
+type TabKey = 'overview' | 'spatial' | 'truth' | 'change' | 'cases' | 'passport' | 'intelligence' | 'questions';
 
 /** Map legacy tab keys (used by onNavigateTab callbacks) to new doctrinal keys */
 const LEGACY_TAB_MAP: Record<string, TabKey> = {
@@ -133,6 +153,7 @@ const LEGACY_TAB_MAP: Record<string, TabKey> = {
   change: 'change',
   cases: 'cases',
   passport: 'passport',
+  intelligence: 'intelligence',
   questions: 'questions',
 };
 
@@ -310,6 +331,7 @@ export default function BuildingDetail() {
     { key: 'change', label: t('building.tab.change') || 'Changements' },
     { key: 'cases', label: t('building.tab.cases') || 'Dossiers' },
     { key: 'passport', label: t('building.tab.passport') || 'Passeport & Transfert' },
+    { key: 'intelligence', label: t('building.tab.intelligence') || 'Intelligence' },
     { key: 'questions', label: t('building.tab.questions') || 'Questions' },
   ];
 
@@ -416,6 +438,7 @@ export default function BuildingDetail() {
                 {building.canton}
               </span>
               <InvalidationBadge buildingId={id} />
+              <BuildingAlertBadge buildingId={id!} />
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-slate-400">
               <span className="flex items-center gap-1">
@@ -587,6 +610,11 @@ export default function BuildingDetail() {
               <Suspense fallback={TabFallback}>
                 <div className="space-y-8">
                   <section>
+                    <Suspense fallback={null}>
+                      <LazyDocumentChecklist buildingId={id!} />
+                    </Suspense>
+                  </section>
+                  <section>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                       {t('building.tab.diagnostics')}
                     </h3>
@@ -630,6 +658,11 @@ export default function BuildingDetail() {
                   activityLoading={activityLoading}
                   activityError={activityError}
                 />
+                <div className="mt-6">
+                  <Suspense fallback={null}>
+                    <LazyActivityLedger buildingId={id!} />
+                  </Suspense>
+                </div>
               </Suspense>
             )}
 
@@ -680,7 +713,24 @@ export default function BuildingDetail() {
                 <Suspense fallback={TabFallback}>
                   <PassportDiffSection buildingId={id!} />
                 </Suspense>
+                <Suspense fallback={null}>
+                  <LazyCertificateGenerator buildingId={id!} />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <LazyProofOfStateExport buildingId={id!} />
+                </Suspense>
               </div>
+            )}
+
+            {/* Intelligence — AI recommendations, field memory, insights */}
+            {activeTab === 'intelligence' && (
+              <Suspense fallback={TabFallback}>
+                <div className="space-y-6">
+                  <LazyIntelligencePanel buildingId={id!} />
+                  <LazyRecommendationList buildingId={id!} />
+                  <LazyFieldMemoryPanel buildingId={id!} />
+                </div>
+              </Suspense>
             )}
 
             {/* Questions — readiness, intent queries, SafeToX verdicts */}

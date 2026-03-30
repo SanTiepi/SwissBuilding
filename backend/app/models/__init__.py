@@ -6,13 +6,14 @@ from app.models.artifact_version import ArtifactVersion
 from app.models.assignment import Assignment
 from app.models.audience_pack import AudiencePack
 from app.models.audit_log import AuditLog
-from app.models.building_activity import BuildingActivity
 from app.models.authority_request import AuthorityRequest
 from app.models.award_confirmation import AwardConfirmation
 from app.models.background_job import BackgroundJob
 from app.models.bounded_embed import BoundedEmbedToken, ExternalViewerProfile
 from app.models.building import Building
+from app.models.building_activity import BuildingActivity
 from app.models.building_case import BuildingCase
+from app.models.building_certificate import BuildingCertificate
 from app.models.building_change import (
     BuildingDelta,
     BuildingEvent,
@@ -178,13 +179,14 @@ __all__ = [
     "Assignment",
     "AudiencePack",
     "AuditLog",
-    "BuildingActivity",
     "AuthorityRequest",
     "AwardConfirmation",
     "BackgroundJob",
     "BoundedEmbedToken",
     "Building",
+    "BuildingActivity",
     "BuildingCase",
+    "BuildingCertificate",
     "BuildingClaim",
     "BuildingDecision",
     "BuildingDelta",

@@ -17,6 +17,9 @@ import {
 } from 'lucide-react';
 import ReviewQueuePanel from '@/components/ReviewQueuePanel';
 import InvalidationAlerts from '@/components/InvalidationAlerts';
+import { NudgePanel } from '@/components/NudgePanel';
+import { AlertDashboard } from '@/components/AlertDashboard';
+import { PortfolioIntelligence } from '@/components/PortfolioIntelligence';
 
 // ---------------------------------------------------------------------------
 // Priority / deadline badge helpers
@@ -341,6 +344,9 @@ export default function Today() {
       {/* Invalidation Alerts */}
       <InvalidationAlerts />
 
+      {/* Nudge Panel — portfolio-level compliance nudges */}
+      <NudgePanel context="dashboard" />
+
       {/* Review Queue */}
       <ReviewQueuePanel />
 
@@ -439,6 +445,12 @@ export default function Today() {
           )}
         </Section>
       </div>
+
+      {/* Alert Dashboard — proactive alerts summary */}
+      <AlertDashboard />
+
+      {/* Portfolio Intelligence — cross-layer insights */}
+      <PortfolioIntelligence />
     </div>
   );
 }

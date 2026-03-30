@@ -38,6 +38,7 @@ from app.api import (
     campaign_tracking,
     campaigns,
     capex_planning,
+    certificates,
     change_signals,
     climate_exposure,
     co_ownership,
@@ -60,6 +61,7 @@ from app.api import (
     cost_benefit_analysis,
     counterfactual_analysis,
     cross_building_pattern,
+    cross_layer_intelligence,
     data_provenance,
     data_quality,
     decision_replay,
@@ -458,9 +460,11 @@ api_router.include_router(incidents.router, prefix="", tags=["Incidents"])
 api_router.include_router(indispensability.router, prefix="", tags=["Indispensability"])
 api_router.include_router(reporting_metrics.router, prefix="", tags=["Reporting Metrics"])
 api_router.include_router(cross_building_pattern.router, prefix="", tags=["Cross Building Patterns"])
+api_router.include_router(cross_layer_intelligence.router, prefix="", tags=["Cross-Layer Intelligence"])
 api_router.include_router(eco_clauses.router, prefix="", tags=["Eco Clauses"])
 api_router.include_router(ecosystem_engagements.router, prefix="", tags=["Ecosystem Engagements"])
 api_router.include_router(erp_integration.router, prefix="", tags=["ERP Integration"])
+api_router.include_router(certificates.router, prefix="", tags=["Certificates"])
 api_router.include_router(
     building_certifications.router, prefix="/building-certifications", tags=["Building Certifications"]
 )

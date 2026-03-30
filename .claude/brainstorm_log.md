@@ -1,0 +1,3 @@
+- 2026-03-29 deep pivot Pilot-Readiness Milestone — Codex: "pivot, resserrez le brief avant de coder". Infra OK, mais proof canon manque: G1 pas dans org pilote, fix-blocker pas câblé UI, scorecard sur legacy, real e2e ne prouve pas la transition.
+- 2026-03-29 deep go Chemin pilote commercial — Codex: "go couloir étroit, 3-5j produit + 1-3sem commercial". Vrais blocages: real e2e ne prouve pas la transition, UI ne consomme pas fix-blocker, fix-blocker réévalue sans résoudre. Blocages imaginaires: "plus de backend", "redesign", "Docker off = produit pas prêt".
+- [2026-03-30] [Explore] [3 directions: Wire&Ship / Proof&Sell / Learn&Lock] Next steps post-Building Life OS — PMF, moat, premier client payant

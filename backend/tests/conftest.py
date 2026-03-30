@@ -54,6 +54,7 @@ from app.models.building_activity import BuildingActivity as _BAct  # noqa: E402
 
 # V3 Doctrine models
 from app.models.building_case import BuildingCase as _BC  # noqa: E402, F401
+from app.models.building_certificate import BuildingCertificate as _BCert  # noqa: E402, F401
 from app.models.building_change import BuildingDelta as _BD  # noqa: E402, F401
 from app.models.building_change import BuildingEvent as _BEv  # noqa: E402, F401
 from app.models.building_change import BuildingObservation as _BO  # noqa: E402, F401

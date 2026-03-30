@@ -24,6 +24,10 @@ import InstantCardView from '@/components/building-detail/InstantCardView';
 import { DossierJourney } from '@/components/building-detail/DossierJourney';
 import { ActionQueue } from '@/components/building-detail/ActionQueue';
 import { PilotScorecardPanel } from '@/components/building-detail/PilotScorecardPanel';
+import { EvidenceScoreWidget } from '@/components/EvidenceScoreWidget';
+import { NudgePanel } from '@/components/NudgePanel';
+
+const LazyRegistryEnrichment = lazy(() => import('@/components/RegistryEnrichment'));
 
 // Below-the-fold intelligence views — lazy-loaded to reduce OverviewTab chunk
 const LazyFormsWorkspace = lazy(() => import('@/components/building-detail/FormsWorkspace'));
@@ -223,6 +227,9 @@ export function OverviewTab({
           </div>
         </div>
       )}
+
+      {/* Evidence Score — the headline score the owner sees */}
+      <EvidenceScoreWidget buildingId={buildingId} />
 
       {/* Instant Card — full intelligence overview */}
       {instantCard && <InstantCardView data={instantCard} />}
@@ -846,6 +853,14 @@ export function OverviewTab({
       {currentUser?.organization_id && <PublicOwnerModePanel orgId={currentUser.organization_id} />}
       <ReviewPackCard buildingId={buildingId} />
       <CommitteePackCard buildingId={buildingId} />
+
+      {/* Registry Enrichment — auto-fill from public registries */}
+      <Suspense fallback={null}>
+        <LazyRegistryEnrichment buildingId={buildingId} />
+      </Suspense>
+
+      {/* Nudge Panel — contextual nudges for the owner */}
+      <NudgePanel buildingId={buildingId} />
 
       {/* Dossier Export (handled by DossierStatusPanel above) */}
     </div>
