@@ -21,6 +21,7 @@ from app.models.climate_exposure import ClimateExposureProfile, OpportunityWindo
 from app.models.inventory_item import InventoryItem
 from app.models.lease import Lease
 from app.models.obligation import Obligation
+from app.models.permit_procedure import PermitProcedure
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,12 @@ WARRANTY_WINDOW_THRESHOLD_DAYS = 180
 
 # Obligation due within this many days triggers a window
 OBLIGATION_WINDOW_THRESHOLD_DAYS = 180
+
+# Permit expiring within this many days triggers a window
+PERMIT_WINDOW_THRESHOLD_DAYS = 180
+
+# Subsidy deadline approaching within this many days triggers a window
+SUBSIDY_WINDOW_THRESHOLD_DAYS = 180
 
 # Swiss altitude thresholds for weather window sizing
 ALTITUDE_MOUNTAIN_THRESHOLD = 1000  # metres
@@ -320,6 +327,148 @@ async def _regulatory_windows(
     return windows
 
 
+async def _permit_windows(
+    db: AsyncSession,
+    building_id: uuid.UUID,
+    today: date,
+    horizon: date,
+) -> list[dict[str, Any]]:
+    """Detect permit windows from permits approaching expiry."""
+    windows: list[dict[str, Any]] = []
+
+    result = await db.execute(
+        select(PermitProcedure).where(
+            and_(
+                PermitProcedure.building_id == building_id,
+                PermitProcedure.status == "approved",
+            )
+        )
+    )
+    permits = list(result.scalars().all())
+
+    for permit in permits:
+        if permit.expires_at is None:
+            continue
+
+        expires = permit.expires_at.date() if hasattr(permit.expires_at, "date") else permit.expires_at
+        threshold = today + timedelta(days=PERMIT_WINDOW_THRESHOLD_DAYS)
+
+        if expires < today or expires > threshold:
+            continue
+
+        # Window: act now before permit expires
+        window_start = today
+        window_end = min(expires, horizon)
+
+        if window_start >= window_end:
+            continue
+
+        days_until = (expires - today).days
+        expiry_risk = "high" if days_until < 60 else ("medium" if days_until < 120 else "low")
+
+        windows.append(
+            {
+                "window_type": "permit",
+                "title": f"Permis {permit.procedure_type} expire le {expires.isoformat()}",
+                "description": (
+                    f"Le permis « {permit.title} » ({permit.procedure_type}) "
+                    f"expire le {expires.isoformat()}. Planifier les travaux avant expiration "
+                    f"ou demander un renouvellement."
+                ),
+                "window_start": window_start,
+                "window_end": window_end,
+                "optimal_date": expires - timedelta(days=30) if days_until > 30 else today,
+                "advantage": "Permis encore valide, travaux autorises",
+                "expiry_risk": expiry_risk,
+                "cost_of_missing": "Nouvelle demande de permis necessaire (delai + frais)",
+                "confidence": 0.95,
+            }
+        )
+
+    return windows
+
+
+def _subsidy_windows(
+    today: date,
+    horizon: date,
+    canton: str | None = None,
+) -> list[dict[str, Any]]:
+    """Detect subsidy windows from known Swiss program deadlines.
+
+    Uses the hardcoded program catalog from subsidy_tracking_service.
+    Programs with application_deadline within threshold generate a window.
+    Programs without deadline but status 'open' generate a lower-confidence
+    awareness window for the current fiscal year.
+    """
+    from app.services.subsidy_tracking_service import _PROGRAMS
+
+    windows: list[dict[str, Any]] = []
+
+    for prog in _PROGRAMS:
+        # Filter by canton if building has one
+        if canton and prog.get("canton") and prog["canton"] != canton:
+            continue
+
+        deadline = prog.get("application_deadline")
+
+        if deadline is not None:
+            # Program has a real deadline
+            threshold = today + timedelta(days=SUBSIDY_WINDOW_THRESHOLD_DAYS)
+            if deadline < today or deadline > threshold:
+                continue
+
+            days_until = (deadline - today).days
+            expiry_risk = "high" if days_until < 60 else ("medium" if days_until < 120 else "low")
+
+            windows.append(
+                {
+                    "window_type": "subsidy",
+                    "title": f"Echeance subvention: {prog['name']}",
+                    "description": (
+                        f"Le programme {prog['name']} ({prog['provider']}) "
+                        f"a une echeance de depot au {deadline.isoformat()}. "
+                        f"Montant max: CHF {prog['max_amount_chf']:,.0f} "
+                        f"({prog['coverage_percentage']:.0f}% de couverture)."
+                    ),
+                    "window_start": today,
+                    "window_end": deadline,
+                    "optimal_date": deadline - timedelta(days=30) if days_until > 30 else today,
+                    "advantage": f"Subvention disponible (max CHF {prog['max_amount_chf']:,.0f})",
+                    "expiry_risk": expiry_risk,
+                    "cost_of_missing": (
+                        f"Perte de subvention potentielle de CHF {prog['max_amount_chf']:,.0f}"
+                    ),
+                    "confidence": 0.90,
+                }
+            )
+        elif prog.get("status") == "open":
+            # No deadline but program is open — fiscal year awareness window
+            year_end = date(today.year, 12, 31)
+            if year_end > horizon:
+                continue
+
+            windows.append(
+                {
+                    "window_type": "subsidy",
+                    "title": f"Subvention ouverte: {prog['name']}",
+                    "description": (
+                        f"Le programme {prog['name']} ({prog['provider']}) "
+                        f"est ouvert sans echeance fixe. Budgets annuels limites — "
+                        f"deposer tot dans l'annee augmente les chances."
+                    ),
+                    "window_start": today,
+                    "window_end": year_end,
+                    "optimal_date": date(today.year, 3, 31) if today.month <= 3 else today,
+                    "advantage": f"Programme ouvert, max CHF {prog['max_amount_chf']:,.0f}",
+                    "expiry_risk": "low",
+                    "cost_of_missing": "Budget annuel potentiellement epuise en fin d'annee",
+                    "confidence": 0.60,
+                }
+            )
+
+    return windows
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -376,6 +525,17 @@ async def detect_windows(
         raw_windows.extend(await _regulatory_windows(db, building_id, today, horizon))
     except Exception:
         logger.warning("Regulatory window detection failed for building %s", building_id, exc_info=True)
+
+    try:
+        raw_windows.extend(await _permit_windows(db, building_id, today, horizon))
+    except Exception:
+        logger.warning("Permit window detection failed for building %s", building_id, exc_info=True)
+
+    try:
+        canton = building.canton if hasattr(building, "canton") else None
+        raw_windows.extend(_subsidy_windows(today, horizon, canton=canton))
+    except Exception:
+        logger.warning("Subsidy window detection failed for building %s", building_id, exc_info=True)
 
     # Expire old active windows past their end date
     expired_result = await db.execute(

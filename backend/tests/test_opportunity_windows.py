@@ -18,11 +18,14 @@ from app.models.climate_exposure import ClimateExposureProfile, OpportunityWindo
 from app.models.inventory_item import InventoryItem
 from app.models.lease import Lease
 from app.models.obligation import Obligation
+from app.models.permit_procedure import PermitProcedure
 from app.schemas.opportunity_window import OpportunityWindowResponse
 from app.services.opportunity_window_service import (
     _lease_windows,
     _maintenance_windows,
+    _permit_windows,
     _regulatory_windows,
+    _subsidy_windows,
     _weather_window_from_profile,
     detect_windows,
     list_building_windows,
@@ -121,6 +124,22 @@ async def _make_obligation(db, building_id, due_date, **kwargs):
     db.add(obl)
     await db.flush()
     return obl
+
+
+async def _make_permit(db, building_id, expires_at, **kwargs):
+    defaults = {
+        "id": uuid.uuid4(),
+        "building_id": building_id,
+        "procedure_type": "construction_permit",
+        "title": "Permis de construire",
+        "status": "approved",
+        "expires_at": expires_at,
+    }
+    defaults.update(kwargs)
+    permit = PermitProcedure(**defaults)
+    db.add(permit)
+    await db.flush()
+    return permit
 
 
 def _today():
