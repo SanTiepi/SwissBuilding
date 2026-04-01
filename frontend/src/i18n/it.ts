@@ -4354,4 +4354,23 @@ export const it: TranslationMap = {
   'cost_prediction.complexity_simple': 'Semplice',
   'cost_prediction.complexity_moyenne': 'Media',
   'cost_prediction.complexity_complexe': 'Complesso',
+
+  // Building Reports & Readiness Radar
+  'report.generate_pdf': 'Generare il rapporto PDF',
+  'report.generating': 'Generazione in corso...',
+  'readiness.radar_title': 'Radar di preparazione',
+  'readiness.safe_to_sell': 'Pronto alla vendita',
+  'readiness.safe_to_insure': 'Pronto per assicurare',
+  'readiness.safe_to_finance': 'Pronto per finanziare',
+  'readiness.safe_to_renovate': 'Pronto per rinnovare',
+  'readiness.safe_to_occupy': 'Pronto per occupare',
+  'readiness.safe_to_transfer': 'Pronto per il trasferimento',
+  'opportunity.title': 'Finestre di opportunita',
+  'opportunity.weather': 'Meteo favorevole',
+  'opportunity.lease': 'Fine locazione',
+  'opportunity.maintenance': 'Manutenzione',
+  'opportunity.regulatory': 'Scadenza normativa',
+  'opportunity.days_left': 'giorni rimanenti',
+  'opportunity.empty': 'Nessuna finestra attiva',
+  'scores.title': 'Punteggi edificio',
 };

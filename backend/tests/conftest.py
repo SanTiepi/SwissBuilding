@@ -84,6 +84,7 @@ from app.models.committee_decision import CommitteeDecisionPack as _CDP  # noqa:
 from app.models.committee_decision import ReviewDecisionTrace as _RDT  # noqa: E402, F401
 from app.models.communal_adapter import CommunalAdapterProfile as _CAP  # noqa: E402, F401
 from app.models.communal_override import CommunalRuleOverride as _CRO  # noqa: E402, F401
+from app.models.commune_profile import CommuneProfile as _CommP  # noqa: E402, F401
 
 # Marketplace models
 from app.models.company_profile import CompanyProfile as _CP  # noqa: E402, F401

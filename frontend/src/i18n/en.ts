@@ -4344,4 +4344,23 @@ export const en: TranslationMap = {
   'cost_prediction.complexity_simple': 'Simple',
   'cost_prediction.complexity_moyenne': 'Medium',
   'cost_prediction.complexity_complexe': 'Complex',
+
+  // Building Reports & Readiness Radar
+  'report.generate_pdf': 'Generate PDF Report',
+  'report.generating': 'Generating...',
+  'readiness.radar_title': 'Readiness Radar',
+  'readiness.safe_to_sell': 'Safe to Sell',
+  'readiness.safe_to_insure': 'Safe to Insure',
+  'readiness.safe_to_finance': 'Safe to Finance',
+  'readiness.safe_to_renovate': 'Safe to Renovate',
+  'readiness.safe_to_occupy': 'Safe to Occupy',
+  'readiness.safe_to_transfer': 'Safe to Transfer',
+  'opportunity.title': 'Opportunity Windows',
+  'opportunity.weather': 'Favorable Weather',
+  'opportunity.lease': 'Lease Ending',
+  'opportunity.maintenance': 'Maintenance',
+  'opportunity.regulatory': 'Regulatory Deadline',
+  'opportunity.days_left': 'days left',
+  'opportunity.empty': 'No active windows',
+  'scores.title': 'Building Scores',
 };

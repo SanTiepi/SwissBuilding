@@ -30,6 +30,7 @@ from app.api import (
     building_life,
     building_lifecycle,
     building_quality,
+    building_reports,
     building_snapshots,
     building_truth,
     building_valuations,
@@ -48,6 +49,7 @@ from app.api import (
     compliance_artefacts,
     compliance_calendar,
     compliance_gap,
+    compliance_scanner,
     compliance_summary,
     compliance_timeline,
     conformance,
@@ -116,6 +118,7 @@ from app.api import (
     handoff_pack,
     identity_chain,
     incident_response,
+    incident_workflow,
     incidents,
     indispensability,
     instant_card,
@@ -514,3 +517,6 @@ api_router.include_router(flywheel.router, prefix="", tags=["Flywheel Learning"]
 api_router.include_router(defect_timeline.router, prefix="", tags=["Defect Timeline"])
 api_router.include_router(cost_prediction.router, prefix="", tags=["Cost Prediction"])
 api_router.include_router(opportunity_windows.router, prefix="", tags=["Opportunity Windows"])
+api_router.include_router(compliance_scanner.router, prefix="", tags=["Compliance Scanner"])
+api_router.include_router(incident_workflow.router, prefix="", tags=["Incident Workflow"])
+api_router.include_router(building_reports.router, prefix="", tags=["Building Reports"])

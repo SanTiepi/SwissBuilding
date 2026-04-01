@@ -45,6 +45,7 @@ from app.models.commitment import Caveat, Commitment
 from app.models.committee_decision import CommitteeDecisionPack, ReviewDecisionTrace
 from app.models.communal_adapter import CommunalAdapterProfile
 from app.models.communal_override import CommunalRuleOverride
+from app.models.commune_profile import CommuneProfile
 from app.models.company_profile import CompanyProfile
 from app.models.company_subscription import CompanySubscription
 from app.models.company_verification import CompanyVerification
@@ -137,6 +138,7 @@ from app.models.post_works_state import PostWorksState
 from app.models.prework_trigger import PreworkTrigger
 from app.models.procedure import ProcedureInstance, ProcedureTemplate
 from app.models.proof_delivery import ProofDelivery
+from app.models.public_law_restriction import PublicLawRestriction
 from app.models.public_owner_mode import PublicOwnerOperatingMode
 from app.models.quote import Quote
 from app.models.readiness_assessment import ReadinessAssessment
@@ -219,6 +221,7 @@ __all__ = [
     "CommitteeDecisionPack",
     "CommunalAdapterProfile",
     "CommunalRuleOverride",
+    "CommuneProfile",
     "CompanyProfile",
     "CompanySubscription",
     "CompanyVerification",
@@ -323,6 +326,7 @@ __all__ = [
     "ProcedureTemplate",
     "ProofDelivery",
     "PublicAssetGovernanceSignal",
+    "PublicLawRestriction",
     "PublicOwnerOperatingMode",
     "Quote",
     "ReadinessAssessment",

@@ -4363,4 +4363,23 @@ export const fr: TranslationMap = {
   'cost_prediction.complexity_simple': 'Simple',
   'cost_prediction.complexity_moyenne': 'Moyenne',
   'cost_prediction.complexity_complexe': 'Complexe',
+
+  // Building Reports & Readiness Radar
+  'report.generate_pdf': 'Generer le rapport PDF',
+  'report.generating': 'Generation en cours...',
+  'readiness.radar_title': 'Radar de preparation',
+  'readiness.safe_to_sell': 'Pret a vendre',
+  'readiness.safe_to_insure': 'Pret a assurer',
+  'readiness.safe_to_finance': 'Pret a financer',
+  'readiness.safe_to_renovate': 'Pret a renover',
+  'readiness.safe_to_occupy': 'Pret a occuper',
+  'readiness.safe_to_transfer': 'Pret a transferer',
+  'opportunity.title': "Fenetres d'opportunite",
+  'opportunity.weather': 'Meteo favorable',
+  'opportunity.lease': 'Fin de bail',
+  'opportunity.maintenance': 'Maintenance',
+  'opportunity.regulatory': 'Echeance reglementaire',
+  'opportunity.days_left': 'jours restants',
+  'opportunity.empty': 'Aucune fenetre active',
+  'scores.title': 'Scores du batiment',
 };
