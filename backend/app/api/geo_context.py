@@ -11,9 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import require_permission
 from app.models.user import User
-from app.schemas.geo_context import GeoContextRefreshResponse, GeoContextResponse
+from app.schemas.geo_context import GeoContextRefreshResponse, GeoContextResponse, GeoRiskScoreResponse
 from app.services.geo_context_service import enrich_building_context, get_building_context
-from app.services.geo_risk_score_service import get_geo_risk_score
+from app.services.geo_risk_score_service import compute_geo_risk_score, get_geo_risk_score
 
 router = APIRouter()
 
@@ -29,6 +29,13 @@ async def get_geo_context(
         result = await get_building_context(db, building_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
+    # Attach risk score if context data is available
+    context_data = result.get("context") if isinstance(result, dict) else {}
+    if context_data and "error" not in result:
+        score_data = compute_geo_risk_score(context_data)
+        result["risk_score"] = GeoRiskScoreResponse(**score_data).model_dump()
+
     return result
 
 

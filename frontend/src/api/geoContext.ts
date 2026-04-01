@@ -18,6 +18,15 @@ export interface GeoLayerResult {
   network_name?: string | null;
 }
 
+export interface GeoRiskScore {
+  score: number;
+  inondation: number;
+  seismic: number;
+  grele: number;
+  contamination: number;
+  radon: number;
+}
+
 export interface GeoContextResponse {
   context: Record<string, GeoLayerResult>;
   fetched_at: string | null;
@@ -25,6 +34,7 @@ export interface GeoContextResponse {
   cached: boolean;
   error?: string | null;
   detail?: string | null;
+  risk_score?: GeoRiskScore | null;
 }
 
 export const geoContextApi = {

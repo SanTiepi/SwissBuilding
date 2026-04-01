@@ -99,12 +99,113 @@ def test_parse_layer_response_thermal():
 
 
 def test_all_layers_defined():
-    """Ensure all 10 layers have label and layer_id."""
-    assert len(LAYERS) == 10
+    """Ensure all 24 layers have label and layer_id."""
+    assert len(LAYERS) == 24
     for key, info in LAYERS.items():
         assert "layer_id" in info, f"Layer {key} missing layer_id"
         assert "label" in info, f"Layer {key} missing label"
         assert info["layer_id"].startswith("ch."), f"Layer {key} has unexpected layer_id format"
+
+
+def test_parse_layer_response_seismic():
+    features = [{"attributes": {"erdbebenzone": "Z2", "bauwerksklasse": "C"}}]
+    result = _parse_layer_response("seismic", features)
+    assert result is not None
+    assert result["zone"] == "Z2"
+    assert result["value"] == "C"
+
+
+def test_parse_layer_response_flood_zones():
+    features = [{"attributes": {"gefahrenstufe": "erheblich", "wiederkehrperiode": "100"}}]
+    result = _parse_layer_response("flood_zones", features)
+    assert result is not None
+    assert result["hazard_level"] == "erheblich"
+    assert result["value"] == "100 ans"
+
+
+def test_parse_layer_response_aircraft_noise():
+    features = [{"attributes": {"lr_tag": 62}}]
+    result = _parse_layer_response("aircraft_noise", features)
+    assert result is not None
+    assert result["level_db"] == 62
+
+
+def test_parse_layer_response_building_zones():
+    features = [{"attributes": {"zonentyp": "Wohnzone", "bezeichnung": "W2"}}]
+    result = _parse_layer_response("building_zones", features)
+    assert result is not None
+    assert result["zone_type"] == "Wohnzone"
+    assert result["value"] == "W2"
+
+
+def test_parse_layer_response_mobile_coverage():
+    features = [{"attributes": {"technology": "5G"}}]
+    result = _parse_layer_response("mobile_coverage", features)
+    assert result is not None
+    assert result["status"] == "5G disponible"
+
+
+def test_parse_layer_response_broadband():
+    features = [{"attributes": {"technologie": "FTTH", "max_speed": "1000"}}]
+    result = _parse_layer_response("broadband", features)
+    assert result is not None
+    assert result["value"] == "FTTH"
+    assert result["name"] == "1000 Mbps"
+
+
+def test_parse_layer_response_ev_charging():
+    features = [{"attributes": {"distance": "250"}}]
+    result = _parse_layer_response("ev_charging", features)
+    assert result is not None
+    assert result["status"] == "Borne(s) a proximite"
+    assert result["value"] == "250 m"
+
+
+def test_parse_layer_response_protected_monuments():
+    features = [{"attributes": {"kategorie": "A"}}]
+    result = _parse_layer_response("protected_monuments", features)
+    assert result is not None
+    assert result["status"] == "Monument protege"
+    assert result["category"] == "A"
+
+
+def test_parse_layer_response_agricultural_zones():
+    features = [{"attributes": {"eignung": "gut", "zone": "Landwirtschaftszone"}}]
+    result = _parse_layer_response("agricultural_zones", features)
+    assert result is not None
+    assert result["value"] == "gut"
+    assert result["zone"] == "Landwirtschaftszone"
+
+
+def test_parse_layer_response_forest_reserves():
+    features = [{"attributes": {"name": "Reserve du Jorat"}}]
+    result = _parse_layer_response("forest_reserves", features)
+    assert result is not None
+    assert result["status"] == "Reserve forestiere"
+    assert result["name"] == "Reserve du Jorat"
+
+
+def test_parse_layer_response_accident_sites():
+    features = [{"attributes": {"name": "Chimique SA"}}]
+    result = _parse_layer_response("accident_sites", features)
+    assert result is not None
+    assert result["status"] == "Site Seveso a proximite"
+    assert result["name"] == "Chimique SA"
+
+
+def test_parse_layer_response_groundwater_areas():
+    features = [{"attributes": {"schutzzone": "S2", "typ": "Areal"}}]
+    result = _parse_layer_response("groundwater_areas", features)
+    assert result is not None
+    assert result["zone_type"] == "S2"
+    assert result["value"] == "Areal"
+
+
+def test_parse_layer_response_landslides():
+    features = [{"attributes": {"stufe": "mittel"}}]
+    result = _parse_layer_response("landslides", features)
+    assert result is not None
+    assert result["hazard_level"] == "mittel"
 
 
 @pytest.mark.asyncio

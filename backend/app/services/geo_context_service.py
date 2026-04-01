@@ -33,6 +33,20 @@ _LAYER_EXPECTED_KEYS: dict[str, list[str]] = {
     "heritage_isos": ["ortsbildbedeutung", "description", "ortsbildname", "name"],
     "public_transport": ["klasse", "gueteklasse", "description"],
     "thermal_networks": ["name", "description", "status"],
+    "seismic": ["zone", "erdbebenzone", "klasse", "bauwerksklasse"],
+    "flood_zones": ["gefahrenstufe", "stufe", "wiederkehrperiode"],
+    "aircraft_noise": ["lr_tag", "db", "lrpegel"],
+    "building_zones": ["zone_type", "zonentyp", "bezeichnung"],
+    "mobile_coverage": ["technology", "provider"],
+    "broadband": ["technology", "technologie", "max_speed"],
+    "ev_charging": ["distance", "entfernung"],
+    "protected_monuments": ["kategorie", "category", "klasse"],
+    "agricultural_zones": ["eignung", "klasse", "zone"],
+    "forest_reserves": ["name", "bezeichnung", "reservatname"],
+    "military_zones": ["distance", "entfernung"],
+    "accident_sites": ["name", "bezeichnung", "betrieb"],
+    "groundwater_areas": ["zone", "schutzzone", "typ"],
+    "landslides": ["stufe", "level", "intensitaet"],
 }
 
 # geo.admin REST API base
@@ -79,6 +93,62 @@ LAYERS: dict[str, dict[str, str]] = {
     "thermal_networks": {
         "layer_id": "ch.bfe.fernwaermenetze",
         "label": "Reseaux de chaleur",
+    },
+    "seismic": {
+        "layer_id": "ch.bafu.erdbeben-erdbebenzonen",
+        "label": "Zone sismique",
+    },
+    "flood_zones": {
+        "layer_id": "ch.bafu.gefahrenkarte-hochwasser",
+        "label": "Carte de danger crues",
+    },
+    "aircraft_noise": {
+        "layer_id": "ch.bazl.laermbelastungskataster-zivilflugplaetze",
+        "label": "Bruit aerien",
+    },
+    "building_zones": {
+        "layer_id": "ch.are.bauzonen",
+        "label": "Zones a batir",
+    },
+    "mobile_coverage": {
+        "layer_id": "ch.bakom.mobilnetz-5g",
+        "label": "Couverture 5G",
+    },
+    "broadband": {
+        "layer_id": "ch.bakom.breitband-technologien",
+        "label": "Haut debit",
+    },
+    "ev_charging": {
+        "layer_id": "ch.bfe.ladestellen-elektromobilitaet",
+        "label": "Bornes de recharge EV",
+    },
+    "protected_monuments": {
+        "layer_id": "ch.bak.bundesinventar-schuetzenswerte-denkmaler",
+        "label": "Monuments proteges",
+    },
+    "agricultural_zones": {
+        "layer_id": "ch.blw.bodeneignungskarte",
+        "label": "Aptitude des sols",
+    },
+    "forest_reserves": {
+        "layer_id": "ch.bafu.waldreservate",
+        "label": "Reserves forestieres",
+    },
+    "military_zones": {
+        "layer_id": "ch.vbs.schiessplaetze",
+        "label": "Zones militaires",
+    },
+    "accident_sites": {
+        "layer_id": "ch.bafu.stoerfallverordnung",
+        "label": "Sites Seveso",
+    },
+    "groundwater_areas": {
+        "layer_id": "ch.bafu.grundwasserschutzareale",
+        "label": "Aires de protection des eaux",
+    },
+    "landslides": {
+        "layer_id": "ch.bafu.showme-gemeinden_rutschungen",
+        "label": "Glissements de terrain",
     },
 }
 
@@ -137,6 +207,67 @@ def _parse_layer_response(layer_key: str, features: list[dict[str, Any]]) -> dic
     elif layer_key == "thermal_networks":
         result["network_name"] = attrs.get("name") or attrs.get("description")
         result["status"] = attrs.get("status")
+
+    elif layer_key == "seismic":
+        result["zone"] = attrs.get("zone") or attrs.get("erdbebenzone") or attrs.get("description")
+        result["value"] = attrs.get("klasse") or attrs.get("bauwerksklasse")
+
+    elif layer_key == "flood_zones":
+        result["hazard_level"] = attrs.get("gefahrenstufe") or attrs.get("stufe") or attrs.get("description")
+        period = attrs.get("wiederkehrperiode") or attrs.get("return_period")
+        if period is not None:
+            result["value"] = f"{period} ans"
+
+    elif layer_key == "aircraft_noise":
+        result["level_db"] = attrs.get("lr_tag") or attrs.get("db") or attrs.get("lrpegel")
+
+    elif layer_key == "building_zones":
+        result["zone_type"] = attrs.get("zone_type") or attrs.get("zonentyp") or attrs.get("typ")
+        result["value"] = attrs.get("bezeichnung") or attrs.get("zone_description") or attrs.get("description")
+
+    elif layer_key == "mobile_coverage":
+        result["status"] = "5G disponible" if attrs else "Non couvert"
+
+    elif layer_key == "broadband":
+        result["value"] = attrs.get("technology") or attrs.get("technologie")
+        speed = attrs.get("max_speed") or attrs.get("geschwindigkeit") or attrs.get("speed_down")
+        if speed is not None:
+            result["name"] = f"{speed} Mbps"
+
+    elif layer_key == "ev_charging":
+        result["status"] = "Borne(s) a proximite" if attrs else "Aucune borne"
+        dist = attrs.get("distance") or attrs.get("entfernung")
+        if dist is not None:
+            result["value"] = f"{dist} m"
+
+    elif layer_key == "protected_monuments":
+        result["status"] = "Monument protege" if attrs else "Non classe"
+        result["category"] = attrs.get("kategorie") or attrs.get("category") or attrs.get("klasse")
+
+    elif layer_key == "agricultural_zones":
+        result["value"] = attrs.get("eignung") or attrs.get("soil_quality") or attrs.get("klasse")
+        result["zone"] = attrs.get("zone") or attrs.get("agricultural_zone") or attrs.get("typ")
+
+    elif layer_key == "forest_reserves":
+        result["status"] = "Reserve forestiere" if attrs else "Hors reserve"
+        result["name"] = attrs.get("name") or attrs.get("bezeichnung") or attrs.get("reservatname")
+
+    elif layer_key == "military_zones":
+        result["status"] = "Zone militaire a proximite" if attrs else "Hors zone"
+        dist = attrs.get("distance") or attrs.get("entfernung")
+        if dist is not None:
+            result["value"] = f"{dist} m"
+
+    elif layer_key == "accident_sites":
+        result["status"] = "Site Seveso a proximite" if attrs else "Hors perimetre"
+        result["name"] = attrs.get("name") or attrs.get("bezeichnung") or attrs.get("betrieb")
+
+    elif layer_key == "groundwater_areas":
+        result["zone_type"] = attrs.get("zone") or attrs.get("schutzzone") or attrs.get("azone")
+        result["value"] = attrs.get("typ") or attrs.get("zone_type") or attrs.get("art")
+
+    elif layer_key == "landslides":
+        result["hazard_level"] = attrs.get("stufe") or attrs.get("level") or attrs.get("intensitaet") or attrs.get("description")
 
     return result
 

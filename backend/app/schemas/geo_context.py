@@ -29,6 +29,17 @@ class GeoLayerResult(BaseModel):
     network_name: str | None = None
 
 
+class GeoRiskScoreResponse(BaseModel):
+    """Geo risk composite score response."""
+
+    score: int = 0
+    inondation: float = 0.0
+    seismic: float = 0.0
+    grele: float = 0.0
+    contamination: float = 0.0
+    radon: float = 0.0
+
+
 class GeoContextResponse(BaseModel):
     """Full geo context response for a building."""
 
@@ -38,6 +49,7 @@ class GeoContextResponse(BaseModel):
     cached: bool = False
     error: str | None = None
     detail: str | None = None
+    risk_score: GeoRiskScoreResponse | None = None
 
 
 class GeoContextRefreshResponse(BaseModel):
