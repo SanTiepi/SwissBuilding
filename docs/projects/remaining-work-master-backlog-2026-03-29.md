@@ -7,9 +7,9 @@ Purpose: replace repeated micro-session framing with one merged view of the rema
 Depends on:
 - `MEMORY.md`
 - `ORCHESTRATOR.md`
-- `docs/projects/swissbuilding-moonshot-v2-autonomous-market-infrastructure-plan-2026-03-28.md`
-- `docs/projects/repo-excellence-brief-2026-03-28.md`
-- `docs/projects/consolidation-hotspot-brief-2026-03-28.md`
+- `docs/archive/session-artifacts/swissbuilding-moonshot-v2-autonomous-market-infrastructure-plan-2026-03-28.md`
+- `docs/archive/session-artifacts/repo-excellence-brief-2026-03-28.md`
+- `docs/archive/session-artifacts/consolidation-hotspot-brief-2026-03-28.md`
 - `docs/market/baticonnect-board-investor-memo-2026-03-28.md`
 - `docs/projects/baticonnect-ultimate-product-manifesto-2026-03-28.md`
 - `docs/product-frontier-map.md`

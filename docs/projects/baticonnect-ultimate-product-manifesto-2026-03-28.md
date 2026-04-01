@@ -35,7 +35,7 @@ Il doit etre lu avec les documents deja existants qui poussent certains axes plu
   - vision categorie, anneaux strategiques, scope map 12 macro-domaines
 - `docs/product-frontier-map.md`
   - frontier complet, engines majeurs, uses deja couverts vs encore manquants
-- `docs/projects/swissbuilding-10-15-20-year-vision-and-synergy-map-2026-03-25.md`
+- `docs/archive/operating-packs/swissbuilding-10-15-20-year-vision-and-synergy-map-2026-03-25.md`
   - trajectoire 10/15/20 ans, standards d'echange, outils complementaires
 - `docs/projects/openbim-digital-logbook-and-passport-convergence-program.md`
   - convergence `openBIM`, `IFC`, `BCF`, `IDS`, digital logbook, renovation passport
