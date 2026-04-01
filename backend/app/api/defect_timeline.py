@@ -17,12 +17,15 @@ from app.schemas.defect_timeline import (
     DefectAlertResponse,
     DefectTimelineCreate,
     DefectTimelineResponse,
+    DefectTimelineUpdate,
 )
 from app.services.defect_timeline_service import (
+    VALID_STATUS_TRANSITIONS,
     create_timeline,
     get_active_alerts,
     get_timeline,
     list_building_timelines,
+    update_defect_status,
     update_timeline_status,
 )
 
@@ -43,6 +46,13 @@ async def create_defect_timeline(
         raise HTTPException(status_code=404, detail="Building not found")
 
     timeline = await create_timeline(db, data)
+
+    # Fire alert if deadline is already approaching or passed
+    from app.services.defect_alert_service import check_deadline_on_create
+
+    await check_deadline_on_create(db, timeline, user_id=current_user.id)
+    await db.commit()
+
     return timeline
 
 
@@ -60,6 +70,87 @@ async def list_defect_timelines(
         raise HTTPException(status_code=404, detail="Building not found")
 
     return await list_building_timelines(db, building_id)
+
+
+@router.get("/defects/timelines/{timeline_id}", response_model=DefectTimelineResponse)
+async def get_defect_timeline(
+    timeline_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Fetch a single defect timeline by ID."""
+    timeline = await get_timeline(db, timeline_id)
+    if not timeline:
+        raise HTTPException(status_code=404, detail="Defect timeline not found")
+    return timeline
+
+
+@router.patch("/defects/timelines/{timeline_id}", response_model=DefectTimelineResponse)
+async def patch_defect_timeline(
+    timeline_id: UUID,
+    data: DefectTimelineUpdate,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update defect timeline status with validated state transitions.
+
+    Valid transitions: active→{notified,expired,resolved}, notified→resolved,
+    expired→resolved. 'resolved' is terminal.
+    """
+    timeline = await get_timeline(db, timeline_id)
+    if not timeline:
+        raise HTTPException(status_code=404, detail="Defect timeline not found")
+
+    if data.status and data.status != timeline.status:
+        allowed = VALID_STATUS_TRANSITIONS.get(timeline.status, set())
+        if data.status not in allowed:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Invalid transition: {timeline.status} → {data.status}. "
+                    f"Allowed: {sorted(allowed) if allowed else 'none (terminal state)'}"
+                ),
+            )
+        try:
+            kwargs = {}
+            if data.notified_at is not None:
+                kwargs["notified_at"] = data.notified_at
+            if data.notification_pdf_url is not None:
+                kwargs["notification_pdf_url"] = data.notification_pdf_url
+            if data.description is not None:
+                kwargs["description"] = data.description
+            timeline = await update_defect_status(db, timeline_id, data.status, **kwargs)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        # Fire alert notification on state change
+        from app.services.defect_alert_service import on_status_change
+
+        await on_status_change(db, timeline, data.status, current_user.id)
+        await db.commit()
+    elif data.description is not None:
+        # Allow updating description without status change
+        timeline.description = data.description
+        await db.commit()
+        await db.refresh(timeline)
+
+    return timeline
+
+
+@router.delete("/defects/timelines/{timeline_id}", status_code=200)
+async def delete_defect_timeline(
+    timeline_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft-delete a defect timeline (mark as deleted, don't remove)."""
+    timeline = await get_timeline(db, timeline_id)
+    if not timeline:
+        raise HTTPException(status_code=404, detail="Defect timeline not found")
+
+    timeline.status = "deleted"
+    await db.commit()
+    return {"detail": "Defect timeline soft-deleted", "id": str(timeline_id)}
 
 
 @router.get("/defects/alerts", response_model=list[DefectAlertResponse])
