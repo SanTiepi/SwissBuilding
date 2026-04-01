@@ -21,7 +21,6 @@ from app.services.defect_letter_service import (
 )
 from app.services.defect_timeline_service import (
     create_timeline,
-    get_timeline,
 )
 
 # ---------------------------------------------------------------------------
