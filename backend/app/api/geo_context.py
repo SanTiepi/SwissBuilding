@@ -13,6 +13,7 @@ from app.dependencies import require_permission
 from app.models.user import User
 from app.schemas.geo_context import GeoContextRefreshResponse, GeoContextResponse
 from app.services.geo_context_service import enrich_building_context, get_building_context
+from app.services.geo_risk_score_service import get_geo_risk_score
 
 router = APIRouter()
 
@@ -52,3 +53,16 @@ async def refresh_geo_context(
         source_version="geo.admin-v1",
         layers_count=len(context_data),
     )
+
+
+@router.get("/buildings/{building_id}/geo-risk-score")
+async def get_geo_risk_score_endpoint(
+    building_id: uuid.UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get composite geospatial risk score for a building."""
+    result = await get_geo_risk_score(db, building_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Building not found or no geo context available")
+    return result
