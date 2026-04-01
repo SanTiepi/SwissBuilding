@@ -681,3 +681,199 @@ async def test_detect_expires_old_windows(db, admin_user):
     result = await db.execute(select(OpportunityWindow).where(OpportunityWindow.id == old.id))
     refreshed = result.scalar_one()
     assert refreshed.status == "expired"
+
+
+# ---------------------------------------------------------------------------
+# Permit window tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_detect_permit_window(db, admin_user):
+    """Approved permit expiring in 3 months generates a permit window."""
+    building = await _make_building(db, admin_user.id)
+    today = _today()
+    expires = datetime(today.year, today.month, today.day, tzinfo=UTC) + timedelta(days=90)
+    await _make_permit(db, building.id, expires_at=expires)
+    await db.commit()
+
+    horizon = today + timedelta(days=365)
+    windows = await _permit_windows(db, building.id, today, horizon)
+    assert len(windows) == 1
+    assert windows[0]["window_type"] == "permit"
+    assert "permis" in windows[0]["title"].lower()
+    assert windows[0]["confidence"] == 0.95
+
+
+@pytest.mark.asyncio
+async def test_no_permit_window_far_expiry(db, admin_user):
+    """Permit expiring in 2 years -> no window (outside threshold)."""
+    building = await _make_building(db, admin_user.id)
+    today = _today()
+    expires = datetime(today.year + 2, today.month, today.day, tzinfo=UTC)
+    await _make_permit(db, building.id, expires_at=expires)
+    await db.commit()
+
+    horizon = today + timedelta(days=365)
+    windows = await _permit_windows(db, building.id, today, horizon)
+    assert len(windows) == 0
+
+
+@pytest.mark.asyncio
+async def test_no_permit_window_non_approved(db, admin_user):
+    """Non-approved permit -> no window."""
+    building = await _make_building(db, admin_user.id)
+    today = _today()
+    expires = datetime(today.year, today.month, today.day, tzinfo=UTC) + timedelta(days=90)
+    await _make_permit(db, building.id, expires_at=expires, status="draft")
+    await db.commit()
+
+    horizon = today + timedelta(days=365)
+    windows = await _permit_windows(db, building.id, today, horizon)
+    assert len(windows) == 0
+
+
+@pytest.mark.asyncio
+async def test_permit_window_high_expiry_risk(db, admin_user):
+    """Permit expiring in 30 days -> high expiry risk."""
+    building = await _make_building(db, admin_user.id)
+    today = _today()
+    expires = datetime(today.year, today.month, today.day, tzinfo=UTC) + timedelta(days=30)
+    await _make_permit(db, building.id, expires_at=expires)
+    await db.commit()
+
+    horizon = today + timedelta(days=365)
+    windows = await _permit_windows(db, building.id, today, horizon)
+    assert len(windows) == 1
+    assert windows[0]["expiry_risk"] == "high"
+
+
+# ---------------------------------------------------------------------------
+# Subsidy window tests
+# ---------------------------------------------------------------------------
+
+
+class TestSubsidyWindowsWithDeadline:
+    """Subsidy programs with application_deadline."""
+
+    def test_subsidy_with_deadline(self):
+        """Program with deadline in 3 months generates a subsidy window."""
+        from unittest.mock import patch
+
+        today = date(2026, 3, 1)
+        horizon = today + timedelta(days=365)
+        deadline = today + timedelta(days=90)
+
+        mock_programs = [
+            {
+                "program_id": "test-prog",
+                "name": "Test Program",
+                "provider": "cantonal",
+                "canton": "VD",
+                "eligible_pollutants": ["asbestos"],
+                "max_amount_chf": 30000.0,
+                "coverage_percentage": 30.0,
+                "application_deadline": deadline,
+                "requirements": [],
+                "status": "open",
+            }
+        ]
+
+        with patch("app.services.subsidy_tracking_service._PROGRAMS", mock_programs):
+            windows = _subsidy_windows(today, horizon, canton="VD")
+
+        assert len(windows) >= 1
+        sub = [w for w in windows if w["window_type"] == "subsidy" and "Test Program" in w["title"]]
+        assert len(sub) == 1
+        assert sub[0]["confidence"] == 0.90
+        assert "CHF" in sub[0]["cost_of_missing"]
+
+    def test_subsidy_deadline_past(self):
+        """Program with past deadline generates no window."""
+        from unittest.mock import patch
+
+        today = date(2026, 6, 1)
+        horizon = today + timedelta(days=365)
+
+        mock_programs = [
+            {
+                "program_id": "past-prog",
+                "name": "Past Program",
+                "provider": "federal",
+                "canton": None,
+                "max_amount_chf": 10000.0,
+                "coverage_percentage": 20.0,
+                "application_deadline": date(2026, 1, 1),
+                "status": "closed",
+            }
+        ]
+
+        with patch("app.services.subsidy_tracking_service._PROGRAMS", mock_programs):
+            windows = _subsidy_windows(today, horizon)
+
+        deadline_windows = [w for w in windows if "Past Program" in w.get("title", "")]
+        assert len(deadline_windows) == 0
+
+
+class TestSubsidyWindowsOpenProgram:
+    """Subsidy programs with no deadline but open status."""
+
+    def test_open_program_generates_awareness_window(self):
+        """Open program without deadline -> fiscal year awareness window."""
+        today = date(2026, 2, 1)
+        horizon = today + timedelta(days=365)
+        # The default _PROGRAMS from subsidy_tracking_service have no deadlines
+        # and status 'open' -> should generate awareness windows
+        windows = _subsidy_windows(today, horizon, canton="VD")
+        subsidy_windows = [w for w in windows if w["window_type"] == "subsidy"]
+        assert len(subsidy_windows) >= 1
+        # All should have lower confidence (awareness)
+        for w in subsidy_windows:
+            assert w["confidence"] == 0.60
+            assert w["expiry_risk"] == "low"
+            assert w["window_end"] == date(2026, 12, 31)
+
+    def test_canton_filtering(self):
+        """Canton filter excludes programs from other cantons."""
+        today = date(2026, 2, 1)
+        horizon = today + timedelta(days=365)
+        vd_windows = _subsidy_windows(today, horizon, canton="VD")
+        ge_windows = _subsidy_windows(today, horizon, canton="GE")
+        # VD-only programs shouldn't appear in GE results and vice versa
+        vd_titles = {w["title"] for w in vd_windows}
+        ge_titles = {w["title"] for w in ge_windows}
+        # Canton-specific programs differ
+        assert vd_titles != ge_titles
+
+    def test_no_canton_returns_all(self):
+        """No canton filter returns all programs."""
+        today = date(2026, 2, 1)
+        horizon = today + timedelta(days=365)
+        all_windows = _subsidy_windows(today, horizon, canton=None)
+        vd_windows = _subsidy_windows(today, horizon, canton="VD")
+        assert len(all_windows) >= len(vd_windows)
+
+
+# ---------------------------------------------------------------------------
+# Full detection includes permit + subsidy
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_detect_includes_permit_and_subsidy(db, admin_user):
+    """detect_windows includes permit and subsidy window types."""
+    building = await _make_building(db, admin_user.id, canton="VD")
+    today = _today()
+
+    # Add an expiring permit
+    expires = datetime(today.year, today.month, today.day, tzinfo=UTC) + timedelta(days=90)
+    await _make_permit(db, building.id, expires_at=expires)
+    await db.commit()
+
+    created = await detect_windows(db, building.id)
+    await db.commit()
+
+    types = {w.window_type for w in created}
+    assert "weather" in types
+    assert "permit" in types
+    assert "subsidy" in types
