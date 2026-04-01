@@ -49,12 +49,18 @@ Checkpoint rule:
 - one checkpoint at wave completion (not per micro-task) unless blocker
 - user confirmation is not required between normal waves; continue autonomously while repo-visible work remains
 
+### Direction Source
+- autonomous execution should follow explicit roadmap briefs, ORCHESTRATOR priorities, or direct user/Codex mandates
+- do not create or extend self-generated cleanup backlogs as a standing workflow
+- the former `Duo Mode` backlog loop is archived as of `2026-03-29`
+- cleanup-only work must tie to a business milestone, a concrete bug, delivery risk reduction, or an explicit request
+
 ### Validation Commands
 
 Frontend (`cd frontend`):
 ```
 npm run validate          # tsc + eslint + prettier (fast gate)
-npm test                  # vitest unit (299 tests)
+npm test                  # vitest unit (~996 tests)
 npm run test:e2e          # playwright mock (no backend)
 npm run test:e2e:real     # playwright real (needs backend:8000)
 npm run build             # prod build + PWA
@@ -65,7 +71,7 @@ Backend (`cd backend`):
 ```
 ruff check app/ tests/              # lint (must be 0 errors)
 ruff format --check app/ tests/     # format (must be 0 errors)
-python -m pytest tests/ -q          # 4563 tests
+python -m pytest tests/ -q          # ~7150 tests
 ruff check --fix app/ tests/ && ruff format app/ tests/  # auto-fix
 ```
 
@@ -79,7 +85,7 @@ ruff check --fix app/ tests/ && ruff format app/ tests/  # auto-fix
 
 ## Hub-File Discipline
 
-Never edited by agents during waves (supervisor merge only):
+Protected hub files (merge-conflict risk, import-order sensitivity):
 ```
 frontend/src/i18n/{en,fr,de,it}.ts
 backend/app/api/router.py
@@ -87,7 +93,17 @@ backend/app/models/__init__.py
 backend/app/schemas/__init__.py
 ```
 
-i18n workaround: `t(key) || 'inline fallback'`
+Default rule: supervisor merge only during multi-agent waves.
+
+Exception: during moonshot/bulk sessions where >10 new modules are added, agents MAY edit hub files directly IF:
+- the session has explicit supervisor authorization (e.g., "continue until done")
+- each hub-file edit is additive only (append imports, no reordering)
+- a post-session reconciliation pass verifies import order and completeness
+- the `check_canonical_registry.py` and `check_api_registry.py` guards pass after the wave
+
+This exception was exercised in the 2026-03-28 moonshot session (1,167 hub-file insertions across 7 files). The guards pass.
+
+i18n workaround for small changes: `t(key) || 'inline fallback'`
 
 ## Architecture Invariants
 
@@ -147,6 +163,48 @@ Template references:
 - full: `docs/templates/project-brief-template.md`
 - compact: `docs/templates/wave-brief-compact-template.md`
 
+## Codex → Claude Prompting Rules
+
+Use one prompt = one mandate.
+
+Default prompt shape:
+1. context (3 lines max: what is already closed / assumed)
+2. mission (1 sentence)
+3. what this is / what this is not
+4. concrete deliverables
+5. hard rules (5-8 lines max)
+6. closure order (only if >1 meaningful sublot)
+7. validation
+8. return format
+
+Prompt size guidance:
+- hygiene / registry / test debt lots: 30-50 lines
+- bounded technical lots: 80-150 lines
+- vertical slices: 150-250 lines
+- mega campaigns: 200-350 lines
+- avoid prompts >350 lines unless absolutely necessary
+
+Reason:
+- above ~350 lines, execution quality drops and the agent starts reprioritizing instead of coding
+
+What to avoid:
+- manifesto prompts
+- 15+ item to-do lists with equal priority
+- "continue until the end" without explicit exclusions
+- prompts that mix doctrine rewriting + code + docs in one lot
+
+Preferred formats:
+- YAML brief for technical lots
+- compact mandate for product / vertical lots
+
+Feedback loop:
+- keep feedback short and sharp:
+  - `Verdict`
+  - `Ce qui tient`
+  - `Ce qui manque`
+  - `Prochaine action`
+- short corrective feedback outperforms long analytical essays between lots
+
 ## Wave Debrief (in ORCHESTRATOR.md)
 
 ```
@@ -196,3 +254,7 @@ New service must unlock an active gate or remove structural debt.
 - risk scoring: reuse existing services, don't duplicate
 - validate on real source data before claiming success
 - no importer change without matching tests
+
+## Lessons Learned
+
+- Consolidate ideas in a single roadmap document. Do not scatter brainstorms across separate files — they get lost.

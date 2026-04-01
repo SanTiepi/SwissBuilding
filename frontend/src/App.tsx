@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { ErrorBoundary, PageErrorBoundary } from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -10,10 +10,11 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 // error boundary before the login page fully settled.
 import Login from '@/pages/Login';
 import SharedView from '@/pages/SharedView';
+import SharedArtifactView from '@/pages/SharedArtifactView';
 import PublicIntake from '@/pages/PublicIntake';
 import NotFound from '@/pages/NotFound';
 
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Today = lazy(() => import('@/pages/Today'));
 const BuildingsList = lazy(() => import('@/pages/BuildingsList'));
 const BuildingDetail = lazy(() => import('@/pages/BuildingDetail'));
 const DiagnosticView = lazy(() => import('@/pages/DiagnosticView'));
@@ -31,13 +32,10 @@ const RulesPackStudio = lazy(() => import('@/pages/RulesPackStudio'));
 
 const PollutantMap = lazy(() => import('@/pages/PollutantMap'));
 const RiskSimulator = lazy(() => import('@/pages/RiskSimulator'));
-const Documents = lazy(() => import('@/pages/Documents'));
-const Actions = lazy(() => import('@/pages/Actions'));
 const BuildingExplorer = lazy(() => import('@/pages/BuildingExplorer'));
 const BuildingInterventions = lazy(() => import('@/pages/BuildingInterventions'));
 const BuildingPlans = lazy(() => import('@/pages/BuildingPlans'));
 const BuildingTimelinePage = lazy(() => import('@/pages/BuildingTimeline'));
-const Portfolio = lazy(() => import('@/pages/Portfolio'));
 const Campaigns = lazy(() => import('@/pages/Campaigns'));
 const ExportJobs = lazy(() => import('@/pages/ExportJobs'));
 const ReadinessWallet = lazy(() => import('@/pages/ReadinessWallet'));
@@ -46,7 +44,6 @@ const SafeToXCockpit = lazy(() => import('@/pages/SafeToXCockpit'));
 const BuildingComparison = lazy(() => import('@/pages/BuildingComparison'));
 const AuthorityPacks = lazy(() => import('@/pages/AuthorityPacks'));
 const FieldObservations = lazy(() => import('@/pages/FieldObservations'));
-const ControlTower = lazy(() => import('@/pages/ControlTower'));
 const AuthoritySubmissionRoom = lazy(() => import('@/pages/AuthoritySubmissionRoom'));
 const DemoRunbook = lazy(() => import('@/pages/DemoRunbook'));
 const PilotDashboard = lazy(() => import('@/pages/PilotDashboard'));
@@ -61,14 +58,30 @@ const CompanyWorkspace = lazy(() => import('@/pages/CompanyWorkspace'));
 const OperatorWorkspace = lazy(() => import('@/pages/OperatorWorkspace'));
 const RemediationIntelligence = lazy(() => import('@/pages/RemediationIntelligence'));
 const AddressPreview = lazy(() => import('@/pages/AddressPreview'));
-const PortfolioTriage = lazy(() => import('@/pages/PortfolioTriage'));
 const AdminImportReview = lazy(() => import('@/pages/AdminImportReview'));
 const AdminContributorGateway = lazy(() => import('@/pages/AdminContributorGateway'));
 const BuildingDecisionView = lazy(() => import('@/pages/BuildingDecisionView'));
 const DemoPath = lazy(() => import('@/pages/DemoPath'));
 const PilotScorecard = lazy(() => import('@/pages/PilotScorecard'));
+const ExtractionReview = lazy(() => import('@/pages/ExtractionReview'));
 const IndispensabilityDashboard = lazy(() => import('@/pages/IndispensabilityDashboard'));
 const IndispensabilityExportView = lazy(() => import('@/pages/IndispensabilityExportView'));
+const PortfolioCommand = lazy(() => import('@/pages/PortfolioCommand'));
+const Cases = lazy(() => import('@/pages/Cases'));
+const CaseRoom = lazy(() => import('@/pages/CaseRoom'));
+const Finance = lazy(() => import('@/pages/Finance'));
+
+const CertificateVerificationLazy = lazy(() =>
+  import('@/components/CertificateVerification').then((m) => ({
+    default: m.CertificateVerification,
+  })),
+);
+
+function CertificateVerifyRoute() {
+  const { certificateId } = useParams<{ certificateId: string }>();
+  if (!certificateId) return null;
+  return <CertificateVerificationLazy certificateId={certificateId} />;
+}
 
 function LoadingSpinner() {
   return (
@@ -99,6 +112,14 @@ export default function App() {
           }
         />
         <Route
+          path="/shared/:accessToken/artifact"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <SharedArtifactView />
+            </Suspense>
+          }
+        />
+        <Route
           path="/intake"
           element={
             <Suspense fallback={<LoadingSpinner />}>
@@ -106,29 +127,31 @@ export default function App() {
             </Suspense>
           }
         />
+        <Route
+          path="/verify/:certificateId"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <CertificateVerifyRoute />
+            </Suspense>
+          }
+        />
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/today" replace />} />
             <Route
-              path="/dashboard"
+              path="/today"
               element={
-                <PageErrorBoundary pageName="Dashboard">
+                <PageErrorBoundary pageName="Today">
                   <Suspense fallback={<LoadingSpinner />}>
-                    <Dashboard />
+                    <Today />
                   </Suspense>
                 </PageErrorBoundary>
               }
             />
-            <Route
-              path="/control-tower"
-              element={
-                <PageErrorBoundary pageName="Control Tower">
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <ControlTower />
-                  </Suspense>
-                </PageErrorBoundary>
-              }
-            />
+            {/* ABSORBED: /dashboard -> /today (was Dashboard.tsx) */}
+            <Route path="/dashboard" element={<Navigate to="/today" replace />} />
+            {/* ABSORBED: /control-tower -> /today (was ControlTower.tsx) */}
+            <Route path="/control-tower" element={<Navigate to="/today" replace />} />
             <Route
               path="/buildings"
               element={
@@ -230,6 +253,16 @@ export default function App() {
               }
             />
             <Route
+              path="/buildings/:buildingId/extractions/:extractionId"
+              element={
+                <PageErrorBoundary pageName="Extraction Review">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <ExtractionReview />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
               path="/buildings/:buildingId/field-observations"
               element={
                 <PageErrorBoundary pageName="Field Observations">
@@ -259,12 +292,44 @@ export default function App() {
                 </PageErrorBoundary>
               }
             />
+            {/* ABSORBED: /portfolio -> /portfolio-command (was Portfolio.tsx) */}
+            <Route path="/portfolio" element={<Navigate to="/portfolio-command" replace />} />
             <Route
-              path="/portfolio"
+              path="/portfolio-command"
               element={
-                <PageErrorBoundary pageName="Portfolio">
+                <PageErrorBoundary pageName="Portfolio Command">
                   <Suspense fallback={<LoadingSpinner />}>
-                    <Portfolio />
+                    <PortfolioCommand />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/cases"
+              element={
+                <PageErrorBoundary pageName="Cases">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Cases />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/cases/:caseId"
+              element={
+                <PageErrorBoundary pageName="Case Room">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <CaseRoom />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/finance"
+              element={
+                <PageErrorBoundary pageName="Finance">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Finance />
                   </Suspense>
                 </PageErrorBoundary>
               }
@@ -309,16 +374,8 @@ export default function App() {
                 </PageErrorBoundary>
               }
             />
-            <Route
-              path="/actions"
-              element={
-                <PageErrorBoundary pageName="Actions">
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Actions />
-                  </Suspense>
-                </PageErrorBoundary>
-              }
-            />
+            {/* ABSORBED: /actions -> /today (was Actions.tsx) */}
+            <Route path="/actions" element={<Navigate to="/today" replace />} />
             <Route
               path="/exports"
               element={
@@ -339,16 +396,8 @@ export default function App() {
                 </PageErrorBoundary>
               }
             />
-            <Route
-              path="/documents"
-              element={
-                <PageErrorBoundary pageName="Documents">
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Documents />
-                  </Suspense>
-                </PageErrorBoundary>
-              }
-            />
+            {/* ABSORBED: /documents -> /today (was Documents.tsx) */}
+            <Route path="/documents" element={<Navigate to="/today" replace />} />
             <Route
               path="/settings"
               element={
@@ -569,16 +618,8 @@ export default function App() {
                 </PageErrorBoundary>
               }
             />
-            <Route
-              path="/portfolio-triage"
-              element={
-                <PageErrorBoundary pageName="Portfolio Triage">
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <PortfolioTriage />
-                  </Suspense>
-                </PageErrorBoundary>
-              }
-            />
+            {/* ABSORBED: /portfolio-triage -> /portfolio-command (was PortfolioTriage.tsx) */}
+            <Route path="/portfolio-triage" element={<Navigate to="/portfolio-command" replace />} />
             <Route
               path="/admin/import-review"
               element={

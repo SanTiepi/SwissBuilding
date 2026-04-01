@@ -1,7 +1,11 @@
+// MIGRATED to canonical BuildingSignal API (2026-03-28, Rail 1).
+// Previously read from legacy ChangeSignal API — now reads from
+// /buildings/{id}/signals (BuildingSignal model via change_tracker_service).
+
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { changeSignalsApi } from '@/api/changeSignals';
-import type { ChangeSignal } from '@/api/changeSignals';
+import { buildingSignalsApi } from '@/api/buildingSignals';
+import type { BuildingSignal } from '@/api/buildingSignals';
 import { useTranslation } from '@/i18n';
 import { cn, formatDate } from '@/utils/formatters';
 import {
@@ -45,14 +49,15 @@ const SIGNAL_TYPE_COLOR: Record<string, string> = {
 
 export function ChangeSignalsFeed({ buildingId }: { buildingId: string }) {
   const { t } = useTranslation();
+  // Canonical: reads from /buildings/{id}/signals (BuildingSignal)
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['building-change-signals', buildingId],
-    queryFn: () => changeSignalsApi.list(buildingId),
+    queryKey: ['building-signals', buildingId],
+    queryFn: () => buildingSignalsApi.listActive(buildingId),
     enabled: !!buildingId,
   });
 
-  const signals = data?.items ?? [];
-  const activeSignals = signals.filter((s) => s.status === 'active');
+  const signals = data ?? [];
+  const activeSignals = signals.filter((s: BuildingSignal) => s.status === 'active');
 
   return (
     <AsyncStateWrapper
@@ -86,7 +91,7 @@ export function ChangeSignalsFeed({ buildingId }: { buildingId: string }) {
         </div>
       </div>
       <ul className="space-y-2">
-        {activeSignals.slice(0, 5).map((signal: ChangeSignal) => {
+        {activeSignals.slice(0, 5).map((signal: BuildingSignal) => {
           const Icon = SIGNAL_TYPE_ICON[signal.signal_type] || Bell;
           const iconColor = SIGNAL_TYPE_COLOR[signal.signal_type] || 'text-gray-400';
           return (

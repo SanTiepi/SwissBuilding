@@ -1,7 +1,7 @@
 import process from 'node:process';
 
 const DEFAULTS = {
-  apiBase: 'http://localhost:8000',
+  apiBase: process.env.E2E_REAL_API_BASE || 'https://swissbuilding.batiscan.ch',
   email: 'admin@swissbuildingos.ch',
   password: 'noob42',
   minBuildings: 3,
@@ -59,13 +59,12 @@ function logWarn(message) {
 
 function makeFailureError(message) {
   console.error(`[preflight:error] ${message}`);
-  console.error('[preflight:hint] Typical recovery flow:');
-  console.error('  1) cd infrastructure && docker compose up -d');
-  console.error('  2) cd backend && python -m app.seeds.seed_demo --commune Lausanne --limit 150');
-  console.error('  3) cd backend && python -m app.seeds.seed_verify');
-  console.error('[preflight:hint] If another API already uses :8000, point frontend/e2e to SwissBuilding explicitly:');
-  console.error('  - set E2E_REAL_API_BASE=http://localhost:<your_backend_port>');
-  console.error('  - set VITE_API_PROXY_TARGET=http://localhost:<your_backend_port>');
+  console.error('[preflight:hint] Backend runs on VPS (swissbuilding.batiscan.ch), not locally.');
+  console.error('[preflight:hint] Check VPS is up: curl -sf https://swissbuilding.batiscan.ch/api/v1/health');
+  console.error('[preflight:hint] If seeding needed, SSH to VPS and run seed commands.');
+  console.error('[preflight:hint] To override API target:');
+  console.error('  - set E2E_REAL_API_BASE=https://swissbuilding.batiscan.ch');
+  console.error('  - set VITE_API_PROXY_TARGET=https://swissbuilding.batiscan.ch');
   console.error('[preflight:hint] If admin credentials differ, set:');
   console.error('  - E2E_REAL_ADMIN_EMAIL');
   console.error('  - E2E_REAL_ADMIN_PASSWORD');

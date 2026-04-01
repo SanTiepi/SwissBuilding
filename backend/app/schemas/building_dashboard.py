@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DashboardTrustSummary(BaseModel):
@@ -81,6 +81,13 @@ class DashboardAlertsSummary(BaseModel):
     open_unknowns: int = 0
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BatchDashboardRequest(BaseModel):
+    """Request schema for batch building dashboard lookup."""
+
+    building_ids: list[UUID]
+    max: int = Field(default=20, ge=1, le=100)
 
 
 class BuildingDashboard(BaseModel):

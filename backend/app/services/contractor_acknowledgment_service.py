@@ -132,6 +132,10 @@ async def acknowledge(
     ack.contractor_notes = notes
     ack.ip_address = ip_address
     ack.acknowledgment_hash = _compute_hash(ack.safety_requirements)
+
+    # Record partner trust signal based on acknowledgment delay
+    await _record_ack_trust_signal(db, ack)
+
     return ack
 
 
@@ -203,6 +207,40 @@ async def get_intervention_ack_status(db: AsyncSession, intervention_id: UUID) -
         "acknowledged": acknowledged_count,
         "all_acknowledged": acknowledged_count == len(acks),
     }
+
+
+async def _record_ack_trust_signal(db: AsyncSession, ack: ContractorAcknowledgment) -> None:
+    """Record response_fast or response_slow signal based on acknowledgment delay.
+
+    Fast = acknowledged within 48 hours of being sent.
+    Slow = acknowledged after 48 hours.
+    If sent_at is unknown, defaults to response_fast (benefit of doubt).
+    """
+    from app.models.user import User
+    from app.services.partner_trust_service import record_signal
+
+    # Resolve contractor org_id from the contractor user
+    user_result = await db.execute(select(User).where(User.id == ack.contractor_user_id))
+    user = user_result.scalar_one_or_none()
+    if user is None or user.organization_id is None:
+        return  # Cannot record signal without org
+
+    if ack.sent_at and ack.acknowledged_at:
+        delay = ack.acknowledged_at - ack.sent_at
+        signal_type = "response_fast" if delay.total_seconds() <= 48 * 3600 else "response_slow"
+    else:
+        signal_type = "response_fast"
+
+    await record_signal(
+        db,
+        {
+            "partner_org_id": user.organization_id,
+            "signal_type": signal_type,
+            "source_entity_type": "contractor_acknowledgment",
+            "source_entity_id": ack.id,
+            "notes": f"Acknowledgment {signal_type.replace('_', ' ')} for intervention",
+        },
+    )
 
 
 def _compute_hash(safety_requirements: list | dict) -> str:

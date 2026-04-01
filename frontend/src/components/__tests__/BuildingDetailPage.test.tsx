@@ -211,7 +211,7 @@ describe('BuildingDetail page', () => {
     mockGetActivity.mockRejectedValue(new Error('boom'));
 
     renderPage();
-    fireEvent.click(screen.getByRole('tab', { name: 'building.tab.activity' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'building.tab.change' }));
 
     expect(await screen.findByText('app.error')).toBeInTheDocument();
   });

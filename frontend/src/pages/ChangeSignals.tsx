@@ -1,3 +1,12 @@
+/**
+ * MIGRATION: DEPRECATE
+ * This page is scheduled for removal. Do not add new features.
+ * Its functionality is covered by BuildingDetail activity tab + building_changes API.
+ * Not routed in App.tsx — orphaned page file. Frozen per ADR-004.
+ */
+// COMPATIBILITY SURFACE — ChangeSignal reads are frozen per ADR-004.
+// New change consumers should use building_changes API.
+
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
@@ -234,6 +243,17 @@ export default function ChangeSignals() {
 
   return (
     <div className="space-y-6">
+      {/* Deprecation banner — migrated to canonical BuildingSignal (2026-03-28, Rail 1) */}
+      <div className="rounded-xl border-2 border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 p-4">
+        <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+          Cette page est obsolete. Les signaux sont disponibles dans Changements du batiment.
+        </p>
+        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+          This page reads from the legacy ChangeSignal API and will be retired. Use the Building Changes timeline
+          instead.
+        </p>
+      </div>
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link

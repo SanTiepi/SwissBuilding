@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view (address lookup utility).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';

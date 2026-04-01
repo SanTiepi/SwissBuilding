@@ -11,7 +11,7 @@ export default function NotFound() {
         <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">{t('error.not_found')}</h2>
         <p className="text-slate-600 dark:text-slate-400 mb-8">{t('error.not_found_desc')}</p>
         <Link
-          to="/dashboard"
+          to="/today"
           className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
           {t('error.back_home')}

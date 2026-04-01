@@ -168,8 +168,7 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
   const proofDeliveries = what_is_reusable.proof_deliveries || [];
   const subsidies = execution.subsidies || [];
 
-  const blockerCount =
-    proceduralBlockers.length + missingProof.length + overdueObligations.length;
+  const blockerCount = proceduralBlockers.length + missingProof.length + overdueObligations.length;
 
   const riskEntries = Object.entries(what_is_risky.pollutant_risk || {}).filter(([, v]) => typeof v === 'number') as [
     string,
@@ -510,9 +509,7 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
               <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 {t('intelligence.packs') || 'Packs generes'}
               </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                {packsGenerated.length} pack(s)
-              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">{packsGenerated.length} pack(s)</p>
             </div>
           )}
           {proofDeliveries.length > 0 && (
@@ -525,13 +522,11 @@ export default function InstantCardView({ data }: InstantCardViewProps) {
               </p>
             </div>
           )}
-          {diagnosticPublications.length === 0 &&
-            packsGenerated.length === 0 &&
-            proofDeliveries.length === 0 && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 italic">
-                {t('intelligence.reusable_empty') || 'Chaque action enrichit le batiment de maniere permanente'}
-              </p>
-            )}
+          {diagnosticPublications.length === 0 && packsGenerated.length === 0 && proofDeliveries.length === 0 && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+              {t('intelligence.reusable_empty') || 'Chaque action enrichit le batiment de maniere permanente'}
+            </p>
+          )}
         </div>
       </CardSection>
 

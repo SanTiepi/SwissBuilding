@@ -1,3 +1,10 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view (org settings).
+ * Not currently routed in App.tsx but used as component reference.
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';

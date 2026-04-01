@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under Marketplace.
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { marketplaceApi } from '@/api/marketplace';

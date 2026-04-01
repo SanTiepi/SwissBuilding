@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view (demo guided path).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';

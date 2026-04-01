@@ -1,7 +1,11 @@
+// MIGRATED to canonical BuildingSignal API (2026-03-28).
+// Previously read from legacy ChangeSignal API — now reads from
+// /portfolio/signals (BuildingSignal model via change_tracker_service).
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { changeSignalsApi } from '@/api/changeSignals';
-import type { ChangeSignal } from '@/api/changeSignals';
+import { buildingSignalsApi } from '@/api/buildingSignals';
+import type { BuildingSignal } from '@/api/buildingSignals';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
 import { AsyncStateWrapper } from '@/components/AsyncStateWrapper';
@@ -21,11 +25,11 @@ export function PortfolioSignalsFeed() {
   const [severity, setSeverity] = useState<string | undefined>(undefined);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['portfolio', 'change-signals', severity],
-    queryFn: () => changeSignalsApi.listPortfolio(severity, 'active'),
+    queryKey: ['portfolio', 'building-signals', severity],
+    queryFn: () => buildingSignalsApi.listPortfolio(severity, 'active'),
   });
 
-  const signals = data?.items ?? [];
+  const signals = data ?? [];
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
@@ -70,7 +74,7 @@ export function PortfolioSignalsFeed() {
         errorMessage={t('app.loading_error') || 'Unable to load signals right now.'}
       >
         <ul className="space-y-3">
-          {signals.slice(0, 10).map((signal: ChangeSignal) => (
+          {signals.slice(0, 10).map((signal: BuildingSignal) => (
             <li
               key={signal.id}
               className="flex items-start gap-3 text-sm p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50"

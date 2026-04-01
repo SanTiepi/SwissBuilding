@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under Transfer workspace.
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authorityPacksApi } from '@/api/authorityPacks';
@@ -46,13 +52,19 @@ const STATUS_CONFIG: Record<string, { icon: typeof Clock; color: string; bgColor
 
 const ALL_SECTIONS = [
   'building_identity',
+  'passport_summary',
+  'completeness_report',
+  'readiness_verdict',
   'diagnostic_summary',
   'sample_results',
+  'pollutant_inventory',
   'compliance_status',
   'action_plan',
   'risk_assessment',
   'intervention_history',
   'document_inventory',
+  'contradictions',
+  'caveats',
 ] as const;
 
 const LANGUAGES = ['fr', 'de', 'it', 'en'] as const;

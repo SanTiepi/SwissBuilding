@@ -424,11 +424,13 @@ async def _run_generators(
         logger.exception("Failed to generate unknowns")
         summary["unknowns_generated"] = 0
 
-    # 6. Generate change signals
+    # 6. Generate change signals — migrated to canonical detect_signals (2026-03-28, Rail 1)
+    # Uses change_tracker_service.detect_signals() which bridges: populates both
+    # ChangeSignal (legacy) and BuildingSignal (canonical) tables.
     try:
-        from app.services.change_signal_generator import generate_signals_for_building
+        from app.services.change_tracker_service import detect_signals
 
-        signals = await generate_signals_for_building(db, building_id)
+        signals = await detect_signals(db, building_id)
         summary["signals_generated"] = len(signals)
     except Exception:
         logger.exception("Failed to generate change signals")

@@ -369,7 +369,7 @@ _skip_no_router = pytest.mark.skipif(not _is_router_wired(), reason="Router not 
 @pytest.mark.asyncio
 async def test_extract_quote_api(client: AsyncClient, auth_headers: dict):
     resp = await client.post(
-        "/api/marketplace/extractions/quote",
+        "/api/v1/marketplace/extractions/quote",
         json={"text": "Quote for asbestos removal", "source_filename": "quote.pdf"},
         headers=auth_headers,
     )
@@ -383,7 +383,7 @@ async def test_extract_quote_api(client: AsyncClient, auth_headers: dict):
 @pytest.mark.asyncio
 async def test_extract_completion_api(client: AsyncClient, auth_headers: dict):
     resp = await client.post(
-        "/api/marketplace/extractions/completion",
+        "/api/v1/marketplace/extractions/completion",
         json={"text": "Completion report"},
         headers=auth_headers,
     )
@@ -396,7 +396,7 @@ async def test_extract_completion_api(client: AsyncClient, auth_headers: dict):
 async def test_confirm_extraction_api(client: AsyncClient, auth_headers: dict):
     # Create extraction first
     resp = await client.post(
-        "/api/marketplace/extractions/quote",
+        "/api/v1/marketplace/extractions/quote",
         json={"text": "confirm api test"},
         headers=auth_headers,
     )
@@ -404,7 +404,7 @@ async def test_confirm_extraction_api(client: AsyncClient, auth_headers: dict):
 
     # Confirm it
     resp2 = await client.post(
-        f"/api/marketplace/extractions/{log_id}/confirm",
+        f"/api/v1/marketplace/extractions/{log_id}/confirm",
         headers=auth_headers,
     )
     assert resp2.status_code == 200
@@ -415,14 +415,14 @@ async def test_confirm_extraction_api(client: AsyncClient, auth_headers: dict):
 @pytest.mark.asyncio
 async def test_correct_extraction_api(client: AsyncClient, auth_headers: dict):
     resp = await client.post(
-        "/api/marketplace/extractions/quote",
+        "/api/v1/marketplace/extractions/quote",
         json={"text": "correct api test"},
         headers=auth_headers,
     )
     log_id = resp.json()["id"]
 
     resp2 = await client.post(
-        f"/api/marketplace/extractions/{log_id}/correct",
+        f"/api/v1/marketplace/extractions/{log_id}/correct",
         json={"corrected_data": {"amount_chf": 55000}, "notes": "Fixed amount"},
         headers=auth_headers,
     )
@@ -434,14 +434,14 @@ async def test_correct_extraction_api(client: AsyncClient, auth_headers: dict):
 @pytest.mark.asyncio
 async def test_reject_extraction_api(client: AsyncClient, auth_headers: dict):
     resp = await client.post(
-        "/api/marketplace/extractions/quote",
+        "/api/v1/marketplace/extractions/quote",
         json={"text": "reject api test"},
         headers=auth_headers,
     )
     log_id = resp.json()["id"]
 
     resp2 = await client.post(
-        f"/api/marketplace/extractions/{log_id}/reject",
+        f"/api/v1/marketplace/extractions/{log_id}/reject",
         json={"reason": "Invalid document"},
         headers=auth_headers,
     )
@@ -453,7 +453,7 @@ async def test_reject_extraction_api(client: AsyncClient, auth_headers: dict):
 @pytest.mark.asyncio
 async def test_operator_queue_api(client: AsyncClient, auth_headers: dict):
     resp = await client.get(
-        "/api/marketplace/operator/queue",
+        "/api/v1/marketplace/operator/queue",
         headers=auth_headers,
     )
     assert resp.status_code == 200
@@ -467,7 +467,7 @@ async def test_operator_queue_api(client: AsyncClient, auth_headers: dict):
 async def test_comparison_matrix_api(client: AsyncClient, auth_headers: dict):
     fake_id = str(uuid.uuid4())
     resp = await client.get(
-        f"/api/marketplace/requests/{fake_id}/comparison-matrix",
+        f"/api/v1/marketplace/requests/{fake_id}/comparison-matrix",
         headers=auth_headers,
     )
     assert resp.status_code == 200
@@ -478,7 +478,7 @@ async def test_comparison_matrix_api(client: AsyncClient, auth_headers: dict):
 @pytest.mark.asyncio
 async def test_flywheel_metrics_api(client: AsyncClient, auth_headers: dict):
     resp = await client.get(
-        "/api/admin/remediation/flywheel-metrics",
+        "/api/v1/admin/remediation/flywheel-metrics",
         headers=auth_headers,
     )
     assert resp.status_code == 200
@@ -491,7 +491,7 @@ async def test_flywheel_metrics_api(client: AsyncClient, auth_headers: dict):
 @pytest.mark.asyncio
 async def test_flywheel_metrics_unauthorized(client: AsyncClient, diag_headers: dict):
     resp = await client.get(
-        "/api/admin/remediation/flywheel-metrics",
+        "/api/v1/admin/remediation/flywheel-metrics",
         headers=diag_headers,
     )
     # diagnostician doesn't have audit_logs read permission
@@ -503,7 +503,7 @@ async def test_flywheel_metrics_unauthorized(client: AsyncClient, diag_headers: 
 async def test_company_workspace_not_found_api(client: AsyncClient, auth_headers: dict):
     fake_id = str(uuid.uuid4())
     resp = await client.get(
-        f"/api/marketplace/companies/{fake_id}/workspace",
+        f"/api/v1/marketplace/companies/{fake_id}/workspace",
         headers=auth_headers,
     )
     assert resp.status_code == 404
@@ -514,7 +514,7 @@ async def test_company_workspace_not_found_api(client: AsyncClient, auth_headers
 async def test_completion_closure_not_found_api(client: AsyncClient, auth_headers: dict):
     fake_id = str(uuid.uuid4())
     resp = await client.get(
-        f"/api/marketplace/completions/{fake_id}/closure-summary",
+        f"/api/v1/marketplace/completions/{fake_id}/closure-summary",
         headers=auth_headers,
     )
     assert resp.status_code == 404

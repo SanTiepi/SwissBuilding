@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO Today
+ * This page will be absorbed into the Today master workspace.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

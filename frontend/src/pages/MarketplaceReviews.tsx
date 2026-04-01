@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under Marketplace (admin).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { marketplaceRfqApi } from '@/api/marketplaceRfq';
 import type { ReviewData } from '@/api/marketplaceRfq';

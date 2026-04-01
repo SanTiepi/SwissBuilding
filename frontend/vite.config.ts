@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
-const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || 'http://localhost:8000';
+const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || 'https://swissbuilding.batiscan.ch';
 
 export default defineConfig({
   plugins: [

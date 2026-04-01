@@ -202,13 +202,11 @@ test.describe('Demo workspace real-backend workflow', () => {
     await assertNoErrorBoundary(page);
     await ensureTextVisible(page, SEEDED_BUILDING_ADDRESS);
 
-    await page.getByTestId('building-tab-ownership').click();
+    await page.getByTestId('building-tab-truth').click();
     await ensureTextVisible(page, SEEDED_OWNER_NAME);
 
-    await page.getByTestId('building-tab-leases').click();
+    await page.getByTestId('building-tab-cases').click();
     await ensureTextVisible(page, SEEDED_LEASE_TENANT);
-
-    await page.getByTestId('building-tab-contracts').click();
     await ensureTextVisible(page, SEEDED_CONTRACT_COUNTERPARTY);
   });
 
@@ -279,7 +277,7 @@ test.describe('Demo workspace real-backend workflow', () => {
     await assertNoErrorBoundary(page);
     await ensureTextVisible(page, buildingAddress);
 
-    await page.getByTestId('building-tab-diagnostics').click();
+    await page.getByTestId('building-tab-truth').click();
     await page.getByTestId('building-diagnostic-create-button').click();
     await expect(page.getByTestId('building-diagnostic-modal')).toBeVisible();
     await page.getByTestId('building-diagnostic-type').selectOption('asbestos');
@@ -308,7 +306,7 @@ test.describe('Demo workspace real-backend workflow', () => {
       )
       .toBeGreaterThanOrEqual(1);
 
-    await page.getByTestId('building-tab-documents').click();
+    // Documents are now in the truth tab (already selected above)
     const uploadedFileName = path.basename(UPLOAD_FIXTURE_PATH);
     const documentsBefore = await apiGet<NamedRecord[]>(page, `/api/v1/buildings/${buildingId}/documents`);
     const uploadResponsePromise = page
@@ -342,7 +340,7 @@ test.describe('Demo workspace real-backend workflow', () => {
       console.warn(`Document persistence not asserted because storage is unavailable or slow: ${uploadStatus}`);
     }
 
-    await page.getByTestId('building-tab-ownership').click();
+    await page.getByTestId('building-tab-truth').click();
     await page.getByTestId('ownership-create-button').click();
     await expect(page.getByTestId('ownership-form-modal')).toBeVisible();
     await selectContactViaLookup(page, {
@@ -377,7 +375,7 @@ test.describe('Demo workspace real-backend workflow', () => {
     );
     expect(ownershipPayload.items.some((item) => item.owner_display_name === SEEDED_OWNER_NAME)).toBeTruthy();
 
-    await page.getByTestId('building-tab-leases').click();
+    await page.getByTestId('building-tab-cases').click();
     await page.getByTestId('leases-create-button').click();
     await expect(page.getByTestId('lease-form-modal')).toBeVisible();
     await page.getByTestId('lease-form-type').selectOption('residential');
@@ -424,7 +422,7 @@ test.describe('Demo workspace real-backend workflow', () => {
       throw new Error(`Unable to resolve seeded contract counterparty: ${SEEDED_CONTRACT_COUNTERPARTY}`);
     }
 
-    await page.getByTestId('building-tab-contracts').click();
+    // Contracts are in the cases tab (already selected above)
     await page.getByTestId('contracts-create-button').click();
     await expect(page.getByTestId('contract-form-modal')).toBeVisible();
     await page.getByTestId('contract-form-type').selectOption('heating');

@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PortfolioSignalsFeed } from '../PortfolioSignalsFeed';
-import { changeSignalsApi } from '@/api/changeSignals';
+import { buildingSignalsApi } from '@/api/buildingSignals';
 
-vi.mock('@/api/changeSignals', () => ({
-  changeSignalsApi: {
+vi.mock('@/api/buildingSignals', () => ({
+  buildingSignalsApi: {
     listPortfolio: vi.fn(),
   },
 }));
@@ -26,7 +26,7 @@ describe('PortfolioSignalsFeed', () => {
   });
 
   it('renders explicit error state when signal loading fails', async () => {
-    vi.mocked(changeSignalsApi.listPortfolio).mockRejectedValueOnce(new Error('boom'));
+    vi.mocked(buildingSignalsApi.listPortfolio).mockRejectedValueOnce(new Error('boom'));
 
     render(<PortfolioSignalsFeed />, { wrapper: createWrapper() });
 
@@ -35,13 +35,7 @@ describe('PortfolioSignalsFeed', () => {
   });
 
   it('renders empty state when there are no signals', async () => {
-    vi.mocked(changeSignalsApi.listPortfolio).mockResolvedValueOnce({
-      items: [],
-      total: 0,
-      page: 1,
-      size: 20,
-      pages: 1,
-    });
+    vi.mocked(buildingSignalsApi.listPortfolio).mockResolvedValueOnce([]);
 
     render(<PortfolioSignalsFeed />, { wrapper: createWrapper() });
 

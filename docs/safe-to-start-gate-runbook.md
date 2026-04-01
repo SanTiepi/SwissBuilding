@@ -58,9 +58,14 @@ Run commands from repo root in this order.
 
 1. Infrastructure up
 
-```powershell
-cd infrastructure
-docker compose up -d
+Infrastructure runs on VPS via Docker Compose (not local Docker Desktop).
+Ensure the VPS backend is reachable before proceeding.
+
+```bash
+# On VPS (via SSH):
+cd infrastructure && docker compose up -d
+# Or verify VPS is already running:
+curl -s https://<vps-domain>/api/v1/health
 ```
 
 2. Backend seed for realistic Vaud scenario
@@ -141,8 +146,8 @@ Reject gate acceptance if any condition is true:
 
 If preflight fails, use this recovery order:
 
-1. Ensure infra is running (`docker compose up -d`).
-2. Re-seed with full scenario data:
+1. Ensure VPS infra is running: `ssh ubuntu@83.228.221.188 "cd /opt/swissbuilding/infrastructure && docker compose ps"`
+2. Re-seed via SSH:
    - `python -m app.seeds.seed_data` (ensures scenario buildings exist)
    - `python -m app.seeds.seed_demo --commune Lausanne --limit 150`
 3. Re-verify:

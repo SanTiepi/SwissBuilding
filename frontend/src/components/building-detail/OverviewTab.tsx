@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
@@ -19,23 +19,40 @@ import { TimeMachinePanel } from '@/components/TimeMachinePanel';
 import { PassportCard } from '@/components/PassportCard';
 import { SharedLinksPanel } from '@/components/SharedLinksPanel';
 import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTriggerCard';
+import { PredictiveAlertsBuilding } from '@/components/PredictiveAlerts';
 import InstantCardView from '@/components/building-detail/InstantCardView';
+import { DossierJourney } from '@/components/building-detail/DossierJourney';
+import { ActionQueue } from '@/components/building-detail/ActionQueue';
+import { PilotScorecardPanel } from '@/components/building-detail/PilotScorecardPanel';
+import { EvidenceScoreWidget } from '@/components/EvidenceScoreWidget';
+import { NudgePanel } from '@/components/NudgePanel';
+
+const LazyRegistryEnrichment = lazy(() => import('@/components/RegistryEnrichment'));
 
 // Below-the-fold intelligence views — lazy-loaded to reduce OverviewTab chunk
+const LazyFormsWorkspace = lazy(() => import('@/components/building-detail/FormsWorkspace'));
 const EvidenceByRoleView = lazy(() => import('@/components/building-detail/EvidenceByRoleView'));
 const IndispensabilityView = lazy(() => import('@/components/building-detail/IndispensabilityView'));
-const EcosystemEngagementsView = lazy(
-  () => import('@/components/building-detail/EcosystemEngagementsView'),
-);
-const OperationalGatesView = lazy(
-  () => import('@/components/building-detail/OperationalGatesView'),
-);
+const EcosystemEngagementsView = lazy(() => import('@/components/building-detail/EcosystemEngagementsView'));
+const OperationalGatesView = lazy(() => import('@/components/building-detail/OperationalGatesView'));
 const MemoryTransferView = lazy(() => import('@/components/building-detail/MemoryTransferView'));
+const AuthorityPackPanel = lazy(() => import('@/components/building-detail/AuthorityPackPanel'));
+const RenovationReadinessPanel = lazy(() => import('@/components/building-detail/RenovationReadinessPanel'));
+const PackBuilderPanel = lazy(() => import('@/components/building-detail/PackBuilderPanel'));
+const ProjectWizard = lazy(() => import('@/components/building-detail/ProjectWizard'));
+const DossierWorkflowPanel = lazy(() => import('@/components/building-detail/DossierWorkflowPanel'));
+const TransactionReadinessPanel = lazy(() => import('@/components/building-detail/TransactionReadinessPanel'));
+const InsuranceReadinessPanel = lazy(() => import('@/components/building-detail/InsuranceReadinessPanel'));
+const FinanceReadinessPanel = lazy(() => import('@/components/building-detail/FinanceReadinessPanel'));
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
 import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHistory';
 import SwissRulesWatchPanel from '@/components/building-detail/SwissRulesWatchPanel';
+
+const LazyGeoContextPanel = lazy(() => import('@/components/building-detail/GeoContextPanel'));
+const LazySpatialEnrichmentCard = lazy(() => import('@/components/building-detail/SpatialEnrichmentCard'));
+const LazyIdentityChainPanel = lazy(() => import('@/components/building-detail/IdentityChainPanel'));
 import ExchangeHistoryPanel from '@/components/building-detail/ExchangeHistoryPanel';
 import { PackagePresetPreview } from '@/components/building-detail/PackagePresetPreview';
 import { PublicOwnerModePanel } from '@/components/building-detail/PublicOwnerModePanel';
@@ -60,6 +77,12 @@ import {
   Clock,
   ShieldCheck,
   Beaker,
+  ChevronRight,
+  X,
+  Stethoscope,
+  FileUp,
+  Gauge,
+  Hammer,
 } from 'lucide-react';
 import { formatDate } from '@/utils/formatters';
 
@@ -77,6 +100,7 @@ interface OverviewTabProps {
   completenessCount: number;
   completenessTotal: number;
   completenessPct: number;
+  onNavigateTab?: (tab: string) => void;
 }
 
 export function OverviewTab({
@@ -93,9 +117,35 @@ export function OverviewTab({
   completenessCount,
   completenessTotal,
   completenessPct,
+  onNavigateTab,
 }: OverviewTabProps) {
   const { t } = useTranslation();
   const currentUser = useAuthStore((s) => s.user);
+  const [projectWizardOpen, setProjectWizardOpen] = useState(false);
+
+  // --- Onboarding banner logic ---
+  const dismissKey = `baticonnect-onboarding-dismissed-${buildingId}`;
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(dismissKey) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  const noDiagnostics = diagnostics.length === 0;
+  const noDocuments = dashboard ? dashboard.activity.total_documents === 0 : false;
+  const lowCompleteness = completenessPct < 20;
+  const showOnboarding = !bannerDismissed && (noDiagnostics || noDocuments || lowCompleteness);
+
+  const dismissOnboarding = () => {
+    setBannerDismissed(true);
+    try {
+      localStorage.setItem(dismissKey, '1');
+    } catch {
+      // silent
+    }
+  };
 
   const { data: instantCard } = useQuery({
     queryKey: ['instant-card', buildingId],
@@ -104,8 +154,83 @@ export function OverviewTab({
     staleTime: 5 * 60 * 1000,
   });
 
+  /** Map action source_type to the most relevant building detail tab */
+  const actionSourceToTab = (sourceType: string): string | null => {
+    if (sourceType === 'diagnostic' || sourceType === 'risk') return 'diagnostics';
+    if (sourceType === 'document') return 'documents';
+    if (sourceType === 'compliance') return 'procedures';
+    return null;
+  };
+
   return (
     <div className="space-y-6">
+      {/* Onboarding Banner — shown when building has little data */}
+      {showOnboarding && (
+        <div className="relative bg-white dark:bg-slate-800 rounded-xl border border-blue-200 dark:border-blue-700 p-5">
+          <button
+            onClick={dismissOnboarding}
+            className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 rounded transition-colors"
+            aria-label="Fermer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+            Bienvenue dans le dossier de ce batiment
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">
+            Trois etapes pour demarrer l&apos;evaluation de votre batiment.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Step 1 */}
+            <button
+              onClick={() => onNavigateTab?.('diagnostics')}
+              className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left"
+            >
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                <Stethoscope className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-900 dark:text-white">1. Importez vos diagnostics</p>
+                <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+                  Amiante, PCB, plomb, HAP, radon, PFAS
+                </p>
+              </div>
+            </button>
+            {/* Step 2 */}
+            <button
+              onClick={() => onNavigateTab?.('documents')}
+              className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left"
+            >
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                <FileUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-900 dark:text-white">2. Ajoutez vos documents</p>
+                <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">Plans, rapports, photos, permis</p>
+              </div>
+            </button>
+            {/* Step 3 */}
+            <button
+              onClick={() => onNavigateTab?.('overview')}
+              className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left"
+            >
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                <Gauge className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-900 dark:text-white">3. Evaluez la readiness</p>
+                <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+                  Score de completude et pret-a-demarrer
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Evidence Score — the headline score the owner sees */}
+      <EvidenceScoreWidget buildingId={buildingId} />
+
       {/* Instant Card — full intelligence overview */}
       {instantCard && <InstantCardView data={instantCard} />}
 
@@ -130,17 +255,182 @@ export function OverviewTab({
         <MemoryTransferView buildingId={buildingId} />
       </Suspense>
 
-      {/* Dashboard Summary (aggregate endpoint) */}
-      {dashboard && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {/* Passport Grade */}
-          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              {t('passport.grade') || 'Passport'}
-            </p>
-            <p
+      {/* === HERO: Readiness verdict (DossierStatusPanel) === */}
+      <div
+        className={cn(
+          'rounded-xl border-2 p-6',
+          dashboard?.readiness.overall_status === 'ready'
+            ? 'border-green-400 bg-green-50 dark:border-green-600 dark:bg-green-900/20'
+            : dashboard?.readiness.overall_status === 'partially_ready'
+              ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-900/20'
+              : dashboard?.readiness.overall_status === 'not_ready'
+                ? 'border-red-400 bg-red-50 dark:border-red-600 dark:bg-red-900/20'
+                : 'border-gray-200 bg-gray-50 dark:border-slate-600 dark:bg-slate-700/50',
+        )}
+      >
+        {dashboard && (
+          <div className="flex items-center gap-3 mb-4">
+            <ShieldCheck
               className={cn(
-                'text-2xl font-bold',
+                'w-7 h-7',
+                dashboard.readiness.overall_status === 'ready'
+                  ? 'text-green-600 dark:text-green-400'
+                  : dashboard.readiness.overall_status === 'partially_ready'
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : dashboard.readiness.overall_status === 'not_ready'
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-400 dark:text-slate-500',
+              )}
+            />
+            <div>
+              <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                {t('readiness.title') || 'Readiness'}
+              </p>
+              <p
+                className={cn(
+                  'text-xl font-bold',
+                  dashboard.readiness.overall_status === 'ready'
+                    ? 'text-green-700 dark:text-green-300'
+                    : dashboard.readiness.overall_status === 'partially_ready'
+                      ? 'text-amber-700 dark:text-amber-300'
+                      : dashboard.readiness.overall_status === 'not_ready'
+                        ? 'text-red-700 dark:text-red-300'
+                        : 'text-gray-500 dark:text-slate-400',
+                )}
+              >
+                {dashboard.readiness.overall_status === 'ready'
+                  ? t('readiness.status.ready') || 'Ready'
+                  : dashboard.readiness.overall_status === 'partially_ready'
+                    ? t('readiness.status.conditionally_ready') || 'Partiellement prêt'
+                    : dashboard.readiness.overall_status === 'not_ready'
+                      ? t('readiness.status.not_ready') || 'Non prêt'
+                      : '\u2014'}
+              </p>
+            </div>
+            {dashboard.readiness.blocked_count > 0 && (
+              <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/30 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">
+                <AlertTriangle className="w-3 h-3" />
+                {dashboard.readiness.blocked_count} {t('readiness.blocked') || 'blockers'}
+              </span>
+            )}
+          </div>
+        )}
+        <DossierStatusPanel buildingId={buildingId} onNavigateTab={onNavigateTab} />
+      </div>
+
+      {/* === DOSSIER WORKFLOW: Full pre-works dossier lifecycle === */}
+      <Suspense fallback={null}>
+        <DossierWorkflowPanel buildingId={buildingId} onNavigateTab={onNavigateTab} />
+      </Suspense>
+
+      {/* === TRANSACTION READINESS: Prepare building for sale/transaction === */}
+      <Suspense fallback={null}>
+        <TransactionReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === INSURANCE READINESS: Assess building for insurance === */}
+      <Suspense fallback={null}>
+        <InsuranceReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === FINANCE READINESS: Assess building for lending/finance === */}
+      <Suspense fallback={null}>
+        <FinanceReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === AUTHORITY PACK: Generate authority-ready dossier === */}
+      <Suspense fallback={null}>
+        <AuthorityPackPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === RENOVATION READINESS: Assess and prepare renovation === */}
+      <Suspense fallback={null}>
+        <RenovationReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === PACK BUILDER: Multi-audience pack generation === */}
+      <Suspense fallback={null}>
+        <PackBuilderPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === PROJECT WIZARD: Launch a work project === */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+              <Hammer className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Lancer un projet de travaux</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">
+                Creez un projet pre-rempli a partir du dossier existant
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setProjectWizardOpen(true)}
+            className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5"
+          >
+            <Hammer className="w-4 h-4" />
+            Demarrer
+          </button>
+        </div>
+      </div>
+      <Suspense fallback={null}>
+        <ProjectWizard
+          open={projectWizardOpen}
+          onClose={() => setProjectWizardOpen(false)}
+          buildingId={buildingId}
+          buildingName={building?.address}
+        />
+      </Suspense>
+
+      {/* === SECONDARY: Completeness + Trust === */}
+      {dashboard && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Completeness */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 p-5">
+            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              {t('building.completeness') || 'Completeness'}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {dashboard.completeness.overall_score != null
+                  ? `${Math.round(dashboard.completeness.overall_score * 100)}%`
+                  : '\u2014'}
+              </p>
+              {dashboard.completeness.missing_count > 0 && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  {dashboard.completeness.missing_count} {t('common.missing') || 'manquants'}
+                </p>
+              )}
+            </div>
+          </div>
+          {/* Trust */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 p-5">
+            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              {t('trust.title') || 'Trust'}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {dashboard.trust.score != null ? `${Math.round(dashboard.trust.score * 100)}%` : '\u2014'}
+              </p>
+              {dashboard.trust.trend && (
+                <p className="text-sm text-gray-500 dark:text-slate-400">{dashboard.trust.trend}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* === TERTIARY: Passport grade, Diagnostics, Alerts === */}
+      {dashboard && (
+        <div className="grid grid-cols-3 gap-3">
+          {/* Passport Grade */}
+          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+            <span
+              className={cn(
+                'text-lg font-bold',
                 dashboard.passport_grade === 'A'
                   ? 'text-green-600'
                   : dashboard.passport_grade === 'B'
@@ -155,77 +445,21 @@ export function OverviewTab({
               )}
             >
               {dashboard.passport_grade || '\u2014'}
-            </p>
+            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('passport.grade') || 'Passport'}</span>
           </div>
-          {/* Trust */}
-          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">{t('trust.title') || 'Trust'}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {dashboard.trust.score != null ? `${Math.round(dashboard.trust.score * 100)}%` : '\u2014'}
-            </p>
-            {dashboard.trust.trend && (
-              <p className="text-xs text-gray-500 dark:text-slate-400">{dashboard.trust.trend}</p>
-            )}
-          </div>
-          {/* Completeness */}
-          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              {t('building.completeness') || 'Completeness'}
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {dashboard.completeness.overall_score != null
-                ? `${Math.round(dashboard.completeness.overall_score * 100)}%`
-                : '\u2014'}
-            </p>
-            {dashboard.completeness.missing_count > 0 && (
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                {dashboard.completeness.missing_count} {t('common.missing') || 'missing'}
-              </p>
-            )}
-          </div>
-          {/* Readiness */}
-          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              {t('readiness.title') || 'Readiness'}
-            </p>
-            <p
-              className={cn(
-                'text-sm font-semibold',
-                dashboard.readiness.overall_status === 'ready'
-                  ? 'text-green-600'
-                  : dashboard.readiness.overall_status === 'partially_ready'
-                    ? 'text-yellow-600'
-                    : dashboard.readiness.overall_status === 'not_ready'
-                      ? 'text-red-600'
-                      : 'text-gray-500 dark:text-slate-400',
-              )}
-            >
-              {dashboard.readiness.overall_status || '\u2014'}
-            </p>
-            {dashboard.readiness.blocked_count > 0 && (
-              <p className="text-xs text-red-600 dark:text-red-400">
-                {dashboard.readiness.blocked_count} {t('readiness.blocked') || 'blocked'}
-              </p>
-            )}
-          </div>
-          {/* Activity */}
-          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-              {t('diagnostic.title') || 'Diagnostics'}
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          {/* Diagnostics */}
+          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
               {dashboard.activity.completed_diagnostics}/{dashboard.activity.total_diagnostics}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-slate-400">
-              {dashboard.activity.open_actions} {t('action.open') || 'open actions'}
-            </p>
+            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('diagnostic.title') || 'Diagnostics'}</span>
           </div>
           {/* Alerts */}
-          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">{t('alert.title') || 'Alerts'}</p>
-            <p
+          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+            <span
               className={cn(
-                'text-2xl font-bold',
+                'text-lg font-bold',
                 dashboard.alerts.constraint_blockers > 0 || dashboard.alerts.quality_issues > 0
                   ? 'text-amber-600'
                   : 'text-green-600',
@@ -235,15 +469,34 @@ export function OverviewTab({
                 dashboard.alerts.constraint_blockers +
                 dashboard.alerts.quality_issues +
                 dashboard.alerts.open_unknowns}
-            </p>
+            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('alert.title') || 'Alertes'}</span>
             {dashboard.alerts.constraint_blockers > 0 && (
-              <p className="text-xs text-red-600 dark:text-red-400">
-                {dashboard.alerts.constraint_blockers} {t('alert.blockers') || 'blockers'}
-              </p>
+              <span className="text-[10px] text-red-600 dark:text-red-400">
+                ({dashboard.alerts.constraint_blockers} {t('alert.blockers') || 'blockers'})
+              </span>
             )}
           </div>
         </div>
       )}
+
+      {/* Dossier Journey — unified narrative flow */}
+      <DossierJourney
+        buildingId={buildingId}
+        building={building}
+        dashboard={dashboard}
+        completenessItems={completenessItems}
+        completenessPct={completenessPct}
+        openActions={openActions}
+        diagnostics={diagnostics}
+        onNavigateTab={onNavigateTab}
+      />
+
+      {/* Action Queue — operator daily driver */}
+      <ActionQueue buildingId={buildingId} onNavigateTab={onNavigateTab} />
+
+      {/* Pilot Scorecard — per-building conversion metrics */}
+      <PilotScorecardPanel buildingId={buildingId} />
 
       {/* Risk Overview */}
       <div>
@@ -381,23 +634,36 @@ export function OverviewTab({
             <p className="text-sm text-red-600 dark:text-red-400 mt-2">{t('app.error')}</p>
           ) : openActions.length > 0 ? (
             <ul className="space-y-2 mt-3">
-              {openActions.slice(0, 3).map((action: ActionItem) => (
-                <li key={action.id} className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
-                  <span
-                    className={cn(
-                      'w-2 h-2 rounded-full flex-shrink-0',
-                      action.priority === 'critical'
-                        ? 'bg-red-500'
-                        : action.priority === 'high'
-                          ? 'bg-orange-500'
-                          : action.priority === 'medium'
-                            ? 'bg-yellow-500'
-                            : 'bg-green-500',
+              {openActions.slice(0, 3).map((action: ActionItem) => {
+                const targetTab = actionSourceToTab(action.source_type);
+                const isUrgent = action.priority === 'critical' || action.priority === 'high';
+                return (
+                  <li key={action.id} className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
+                    <span
+                      className={cn(
+                        'w-2 h-2 rounded-full flex-shrink-0',
+                        action.priority === 'critical'
+                          ? 'bg-red-500'
+                          : action.priority === 'high'
+                            ? 'bg-orange-500'
+                            : action.priority === 'medium'
+                              ? 'bg-yellow-500'
+                              : 'bg-green-500',
+                      )}
+                    />
+                    <span className="truncate flex-1">{action.title}</span>
+                    {onNavigateTab && targetTab && isUrgent && (
+                      <button
+                        onClick={() => onNavigateTab(targetTab)}
+                        className="flex-shrink-0 inline-flex items-center gap-0.5 text-[10px] font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                      >
+                        {t('action.resolve') || 'Résoudre'}
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
                     )}
-                  />
-                  <span className="truncate">{action.title}</span>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
               {openActions.length > 3 && (
                 <li className="text-xs text-gray-500 dark:text-slate-400">
                   +{openActions.length - 3} {t('common.more') || 'more'}
@@ -413,9 +679,6 @@ export function OverviewTab({
       {/* Data Quality Score */}
       <DataQualityScore buildingId={buildingId} />
 
-      {/* Dossier Status (unified safe-to-start journey) */}
-      <DossierStatusPanel buildingId={buildingId} />
-
       {/* Passport Summary */}
       <PassportCard buildingId={buildingId} />
 
@@ -428,14 +691,37 @@ export function OverviewTab({
       {/* Prework Diagnostic Triggers */}
       <PreworkDiagnosticTriggerCard buildingId={buildingId} />
 
+      {/* Predictive Readiness Alerts */}
+      <PredictiveAlertsBuilding buildingId={buildingId} />
+
       {/* Intelligence Surfaces */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ReadinessSummary buildingId={buildingId} />
+        <ReadinessSummary buildingId={buildingId} onNavigateTab={onNavigateTab} />
         <TrustScoreCard buildingId={buildingId} />
         <UnknownIssuesList buildingId={buildingId} />
         <ChangeSignalsFeed buildingId={buildingId} />
         <ContradictionCard buildingId={buildingId} />
       </div>
+
+      {/* Geo Context Overlays (geo.admin) */}
+      <Suspense fallback={<div className="h-24 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />}>
+        <LazyGeoContextPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* swissBUILDINGS3D Spatial Enrichment */}
+      <Suspense fallback={<div className="h-24 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />}>
+        <LazySpatialEnrichmentCard buildingId={buildingId} />
+      </Suspense>
+
+      {/* Identity Chain: Address -> EGID -> EGRID -> RDPPF */}
+      <Suspense fallback={<div className="h-24 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />}>
+        <LazyIdentityChainPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* Regulatory Forms Workspace */}
+      <Suspense fallback={<div className="h-24 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />}>
+        <LazyFormsWorkspace buildingId={buildingId} />
+      </Suspense>
 
       {/* Post-Works Before/After */}
       <PostWorksDiffCard buildingId={buildingId} />
@@ -567,6 +853,14 @@ export function OverviewTab({
       {currentUser?.organization_id && <PublicOwnerModePanel orgId={currentUser.organization_id} />}
       <ReviewPackCard buildingId={buildingId} />
       <CommitteePackCard buildingId={buildingId} />
+
+      {/* Registry Enrichment — auto-fill from public registries */}
+      <Suspense fallback={null}>
+        <LazyRegistryEnrichment buildingId={buildingId} />
+      </Suspense>
+
+      {/* Nudge Panel — contextual nudges for the owner */}
+      <NudgePanel buildingId={buildingId} />
 
       {/* Dossier Export (handled by DossierStatusPanel above) */}
     </div>

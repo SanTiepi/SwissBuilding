@@ -1,3 +1,7 @@
+# COMPATIBILITY SURFACE — ChangeSignal is frozen per ADR-004.
+# Canonical change objects are in building_change.py (BuildingSignal).
+# No new semantics should be added here.
+
 import uuid
 
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, String, Text

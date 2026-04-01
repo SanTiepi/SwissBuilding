@@ -6,6 +6,7 @@ export interface GenerateAuthorityPackParams {
   include_sections?: string[];
   include_photos?: boolean;
   language?: string;
+  redact_financials?: boolean;
 }
 
 export const authorityPacksApi = {

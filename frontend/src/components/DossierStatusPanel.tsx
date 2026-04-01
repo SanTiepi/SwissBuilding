@@ -16,12 +16,26 @@ import {
   FileText,
   ClipboardCheck,
   ArrowRight,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
 interface DossierStatusPanelProps {
   buildingId: string;
   stage?: 'avt' | 'apt';
+  onNavigateTab?: (tab: string) => void;
+}
+
+/** Map blocker/action category keywords to building detail tab keys */
+function categoryToTab(category: string): string | null {
+  const lower = category.toLowerCase();
+  if (lower.includes('diagnostic') || lower.includes('sample') || lower.includes('pollutant')) return 'diagnostics';
+  if (lower.includes('document') || lower.includes('evidence') || lower.includes('report')) return 'documents';
+  if (lower.includes('ownership') || lower.includes('owner')) return 'ownership';
+  if (lower.includes('lease') || lower.includes('tenant')) return 'leases';
+  if (lower.includes('contract')) return 'contracts';
+  if (lower.includes('procedure') || lower.includes('compliance') || lower.includes('regulatory')) return 'procedures';
+  return null;
 }
 
 type StepStatus = 'done' | 'partial' | 'pending';
@@ -167,7 +181,7 @@ const PRIORITY_COLORS: Record<string, string> = {
   low: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
 };
 
-export function DossierStatusPanel({ buildingId, stage = 'avt' }: DossierStatusPanelProps) {
+export function DossierStatusPanel({ buildingId, stage = 'avt', onNavigateTab }: DossierStatusPanelProps) {
   const { t } = useTranslation();
 
   const completenessQuery = useQuery({
@@ -307,17 +321,29 @@ export function DossierStatusPanel({ buildingId, stage = 'avt' }: DossierStatusP
               {t('dossier.blockers')}
             </p>
             <ul className="space-y-1.5">
-              {(report.top_blockers || []).slice(0, 5).map((blocker, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <StepIndicator status="partial" />
-                  <div className="min-w-0 flex-1">
-                    <span className={cn('text-xs font-medium', SEVERITY_COLORS[blocker.severity] || 'text-gray-600')}>
-                      [{blocker.category}]
-                    </span>{' '}
-                    <span className="text-gray-700 dark:text-slate-300 text-xs">{blocker.description}</span>
-                  </div>
-                </li>
-              ))}
+              {(report.top_blockers || []).slice(0, 5).map((blocker, i) => {
+                const targetTab = categoryToTab(blocker.category);
+                return (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <StepIndicator status="partial" />
+                    <div className="min-w-0 flex-1">
+                      <span className={cn('text-xs font-medium', SEVERITY_COLORS[blocker.severity] || 'text-gray-600')}>
+                        [{blocker.category}]
+                      </span>{' '}
+                      <span className="text-gray-700 dark:text-slate-300 text-xs">{blocker.description}</span>
+                    </div>
+                    {onNavigateTab && targetTab && (
+                      <button
+                        onClick={() => onNavigateTab(targetTab)}
+                        className="flex-shrink-0 inline-flex items-center gap-0.5 text-[10px] font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                      >
+                        {t('form.view') || 'Voir'}
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
@@ -329,22 +355,34 @@ export function DossierStatusPanel({ buildingId, stage = 'avt' }: DossierStatusP
               {t('dossier.recommended_actions')}
             </p>
             <ul className="space-y-1.5">
-              {(report.recommended_actions || []).slice(0, 3).map((action, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <ArrowRight className="w-4 h-4 text-gray-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <span className="text-gray-700 dark:text-slate-300 text-xs">{action.action}</span>
-                    <span
-                      className={cn(
-                        'ml-2 inline-block text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-                        PRIORITY_COLORS[action.priority] || PRIORITY_COLORS.low,
-                      )}
-                    >
-                      {action.priority}
-                    </span>
-                  </div>
-                </li>
-              ))}
+              {(report.recommended_actions || []).slice(0, 3).map((action, i) => {
+                const targetTab = categoryToTab(action.category);
+                return (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <ArrowRight className="w-4 h-4 text-gray-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-gray-700 dark:text-slate-300 text-xs">{action.action}</span>
+                      <span
+                        className={cn(
+                          'ml-2 inline-block text-[10px] px-1.5 py-0.5 rounded-full font-medium',
+                          PRIORITY_COLORS[action.priority] || PRIORITY_COLORS.low,
+                        )}
+                      >
+                        {action.priority}
+                      </span>
+                    </div>
+                    {onNavigateTab && targetTab && (
+                      <button
+                        onClick={() => onNavigateTab(targetTab)}
+                        className="flex-shrink-0 inline-flex items-center gap-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                      >
+                        {t('form.view') || 'Voir'}
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

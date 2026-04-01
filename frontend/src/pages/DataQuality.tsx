@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: DEPRECATE
+ * This page is scheduled for removal. Do not add new features.
+ * Its functionality is covered by BuildingDetail trust/quality panels.
+ * Not routed in App.tsx — orphaned page file.
+ */
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -5,8 +11,8 @@ import { useTranslation } from '@/i18n';
 import { buildingsApi } from '@/api/buildings';
 import { dataQualityApi } from '@/api/dataQuality';
 import type { DataQualityIssue } from '@/api/dataQuality';
-import { changeSignalsApi } from '@/api/changeSignals';
-import type { ChangeSignal } from '@/api/changeSignals';
+import { buildingSignalsApi } from '@/api/buildingSignals';
+import type { BuildingSignal } from '@/api/buildingSignals';
 import { portfolioApi } from '@/api/portfolio';
 import { cn } from '@/utils/formatters';
 import { AsyncStateWrapper } from '@/components/AsyncStateWrapper';
@@ -136,16 +142,16 @@ export default function DataQuality() {
   });
   const issues = useMemo(() => issueQueries.data ?? [], [issueQueries.data]);
 
-  // -- Change signals (portfolio-level) --
+  // -- Building signals (portfolio-level, canonical API) --
   const {
     data: signalsData,
     isLoading: signalsLoading,
     isError: signalsError,
   } = useQuery({
-    queryKey: ['portfolio', 'change-signals', 'dq-page'],
-    queryFn: () => changeSignalsApi.listPortfolio(),
+    queryKey: ['portfolio', 'building-signals', 'dq-page'],
+    queryFn: () => buildingSignalsApi.listPortfolio(),
   });
-  const signals = useMemo(() => signalsData?.items ?? [], [signalsData]);
+  const signals = useMemo(() => signalsData ?? [], [signalsData]);
 
   // -- Portfolio health score --
   const { data: healthScore } = useQuery({
@@ -415,7 +421,7 @@ export default function DataQuality() {
               emptyMessage={t('data_quality.no_signals')}
             >
               <ul className="divide-y divide-gray-100 dark:divide-slate-700">
-                {signals.slice(0, 30).map((signal: ChangeSignal) => (
+                {signals.slice(0, 30).map((signal: BuildingSignal) => (
                   <li key={signal.id} className="px-6 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50">
                     <div className="flex items-start gap-3">
                       <span

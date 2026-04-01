@@ -11,9 +11,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.building import Building
+from app.models.building_change import BuildingSignal
 from app.models.building_risk_score import BuildingRiskScore
 from app.models.building_snapshot import BuildingSnapshot
-from app.models.change_signal import ChangeSignal
 from app.schemas.portfolio_trends import (
     BuildingRiskTrajectory,
     PortfolioRiskReport,
@@ -354,9 +354,9 @@ async def get_risk_hotspots(
         # Count change signals for this building
         sig_q = (
             select(func.count())
-            .select_from(ChangeSignal)
+            .select_from(BuildingSignal)
             .where(
-                ChangeSignal.building_id == building_id,
+                BuildingSignal.building_id == building_id,
             )
         )
         sig_result = await db.execute(sig_q)

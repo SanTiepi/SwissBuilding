@@ -1,4 +1,9 @@
-"""BatiConnect — Partner trust signal and evaluation service."""
+"""BatiConnect — Partner trust signal and evaluation service.
+
+V3 doctrine integration: trust signals are building-rooted via BuildingCase.
+Signals are OBSERVATIONS, not rankings. No ranking influenced by payment (invariant #6).
+Partner trust informs panel selection guidance, not automatic filtering.
+"""
 
 from datetime import UTC, datetime
 from uuid import UUID
@@ -6,7 +11,9 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.building_case import BuildingCase
 from app.models.partner_trust import PartnerTrustProfile, PartnerTrustSignal
+from app.models.rfq import TenderInvitation, TenderQuote
 
 
 async def record_signal(db: AsyncSession, data: dict) -> PartnerTrustSignal:
@@ -129,3 +136,177 @@ async def get_routing_hint(db: AsyncSession, partner_org_id: UUID, workflow_type
         "overall_trust_level": level,
         "signal_count": profile.signal_count,
     }
+
+
+# ---------------------------------------------------------------------------
+# V3 doctrine integration: BuildingCase + ritual linkage
+# ---------------------------------------------------------------------------
+
+
+async def record_signal_from_case(
+    db: AsyncSession,
+    partner_org_id: UUID,
+    case_id: UUID,
+    signal_type: str,
+    value: float | None = None,
+    notes: str | None = None,
+) -> PartnerTrustSignal:
+    """Record a trust signal from a BuildingCase interaction.
+
+    Called when: tender response received, quote quality assessed,
+    work completed, complement triggered by partner submission.
+    """
+    signal = PartnerTrustSignal(
+        partner_org_id=partner_org_id,
+        signal_type=signal_type,
+        source_entity_type="building_case",
+        source_entity_id=case_id,
+        value=value,
+        notes=notes,
+    )
+    db.add(signal)
+    await db.flush()
+    await db.refresh(signal)
+    # Auto-evaluate after recording
+    await evaluate_partner(db, partner_org_id)
+    return signal
+
+
+async def record_signal_from_ritual(
+    db: AsyncSession,
+    partner_org_id: UUID,
+    ritual_id: UUID,
+    signal_type: str,
+) -> PartnerTrustSignal:
+    """Record trust signal from a ritual event.
+
+    Called when: partner acknowledges a transfer, delivers on time,
+    evidence is clean vs needs rework.
+    """
+    signal = PartnerTrustSignal(
+        partner_org_id=partner_org_id,
+        signal_type=signal_type,
+        source_entity_type="truth_ritual",
+        source_entity_id=ritual_id,
+    )
+    db.add(signal)
+    await db.flush()
+    await db.refresh(signal)
+    await evaluate_partner(db, partner_org_id)
+    return signal
+
+
+async def get_partner_trust_for_case(
+    db: AsyncSession,
+    case_id: UUID,
+) -> list[dict]:
+    """Get trust profiles for all partners involved in a case.
+
+    Looks up the case's linked tender to find contractor org IDs,
+    then returns their trust profiles.
+    """
+    # Find the case
+    case_result = await db.execute(select(BuildingCase).where(BuildingCase.id == case_id))
+    case = case_result.scalar_one_or_none()
+    if case is None:
+        return []
+
+    partner_org_ids: set[UUID] = set()
+
+    # If case has a linked tender, get all invited/quoting contractors
+    if case.tender_id is not None:
+        inv_result = await db.execute(
+            select(TenderInvitation.contractor_org_id).where(TenderInvitation.tender_id == case.tender_id)
+        )
+        for row in inv_result.all():
+            partner_org_ids.add(row[0])
+
+        quote_result = await db.execute(
+            select(TenderQuote.contractor_org_id).where(TenderQuote.tender_id == case.tender_id)
+        )
+        for row in quote_result.all():
+            partner_org_ids.add(row[0])
+
+    # Also find partners who have signals linked to this case
+    signal_result = await db.execute(
+        select(PartnerTrustSignal.partner_org_id).where(
+            PartnerTrustSignal.source_entity_type == "building_case",
+            PartnerTrustSignal.source_entity_id == case_id,
+        )
+    )
+    for row in signal_result.all():
+        partner_org_ids.add(row[0])
+
+    if not partner_org_ids:
+        return []
+
+    # Fetch profiles for each partner
+    entries = []
+    for org_id in partner_org_ids:
+        profile = await get_profile(db, org_id)
+        signals_for_case = (
+            await db.execute(
+                select(func.count())
+                .select_from(PartnerTrustSignal)
+                .where(
+                    PartnerTrustSignal.partner_org_id == org_id,
+                    PartnerTrustSignal.source_entity_type == "building_case",
+                    PartnerTrustSignal.source_entity_id == case_id,
+                )
+            )
+        ).scalar() or 0
+
+        entries.append(
+            {
+                "partner_org_id": str(org_id),
+                "case_id": str(case_id),
+                "overall_trust_level": profile.overall_trust_level if profile else "unknown",
+                "delivery_reliability_score": profile.delivery_reliability_score if profile else None,
+                "evidence_quality_score": profile.evidence_quality_score if profile else None,
+                "responsiveness_score": profile.responsiveness_score if profile else None,
+                "total_signal_count": profile.signal_count if profile else 0,
+                "case_signal_count": signals_for_case,
+            }
+        )
+
+    return entries
+
+
+async def get_trusted_partners_for_work_family(
+    db: AsyncSession,
+    org_id: UUID,
+    work_family: str,
+) -> list[dict]:
+    """Get partners with adequate+ trust for a specific work family.
+
+    For RFQ panel selection guidance (not ranking -- just qualification).
+    Returns partners that have trust level 'strong' or 'adequate'.
+    work_family is used as context info; all adequate+ partners are returned
+    since trust profiles are org-level, not work-family-specific.
+    """
+    result = await db.execute(
+        select(PartnerTrustProfile).where(
+            PartnerTrustProfile.overall_trust_level.in_(("strong", "adequate")),
+        )
+    )
+    profiles = list(result.scalars().all())
+
+    entries = []
+    for p in profiles:
+        # Skip the requesting org itself
+        if p.partner_org_id == org_id:
+            continue
+        entries.append(
+            {
+                "partner_org_id": str(p.partner_org_id),
+                "overall_trust_level": p.overall_trust_level,
+                "delivery_reliability_score": p.delivery_reliability_score,
+                "evidence_quality_score": p.evidence_quality_score,
+                "responsiveness_score": p.responsiveness_score,
+                "signal_count": p.signal_count,
+                "work_family": work_family,
+                "guidance": "qualified",  # adequate+ = qualified for panel
+            }
+        )
+
+    return entries

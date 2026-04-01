@@ -38,10 +38,47 @@ def _should_include(section: str, include_sections: list[str] | None) -> bool:
     return section in include_sections
 
 
+_REDACTED_PLACEHOLDER = "[confidentiel]"
+_REDACTED_COST_MESSAGE = "[Montants masques a la demande du proprietaire]"
+
+_FINANCIAL_KEYS = frozenset(
+    {
+        "total_amount_chf",
+        "cost",
+        "amount",
+        "price",
+        "amount_chf",
+        "total_expenses_chf",
+        "total_income_chf",
+        "claimed_amount_chf",
+        "approved_amount_chf",
+        "paid_amount_chf",
+        "insured_value_chf",
+        "premium_annual_chf",
+    }
+)
+
+
+def _redact_dict(data: dict) -> dict:
+    """Recursively redact financial fields in a dict."""
+    redacted = {}
+    for key, value in data.items():
+        if key in _FINANCIAL_KEYS:
+            redacted[key] = _REDACTED_PLACEHOLDER
+        elif isinstance(value, dict):
+            redacted[key] = _redact_dict(value)
+        elif isinstance(value, list):
+            redacted[key] = [_redact_dict(v) if isinstance(v, dict) else v for v in value]
+        else:
+            redacted[key] = value
+    return redacted
+
+
 async def generate_transfer_package(
     db: AsyncSession,
     building_id: UUID,
     include_sections: list[str] | None = None,
+    redact_financials: bool = False,
 ) -> TransferPackageResponse | None:
     """Generate a transfer package for a building.
 
@@ -328,7 +365,21 @@ async def generate_transfer_package(
         "generator_version": TRANSFER_PACKAGE_VERSION,
         "generation_time_utc": generated_at.isoformat(),
         "sections_included": included,
+        "financials_redacted": redact_financials,
     }
+
+    # ── Apply financial redaction if requested ────────────────────
+    if redact_financials:
+        if interventions_summary and isinstance(interventions_summary, dict):
+            interventions_summary = _redact_dict(interventions_summary)
+        if actions_summary and isinstance(actions_summary, dict):
+            actions_summary = _redact_dict(actions_summary)
+        if eco_clauses and isinstance(eco_clauses, dict):
+            eco_clauses = _redact_dict(eco_clauses)
+        if snapshots:
+            snapshots = [_redact_dict(s) if isinstance(s, dict) else s for s in snapshots]
+        if diagnostic_publications:
+            diagnostic_publications = [_redact_dict(p) if isinstance(p, dict) else p for p in diagnostic_publications]
 
     return TransferPackageResponse(
         package_id=package_id,
@@ -349,5 +400,6 @@ async def generate_transfer_package(
         readiness=readiness,
         eco_clauses=eco_clauses,
         diagnostic_publications=diagnostic_publications,
+        financials_redacted=redact_financials,
         metadata=metadata,
     )

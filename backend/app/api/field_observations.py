@@ -1,4 +1,4 @@
-"""Field observations API — capture site visit findings and evidence from the field."""
+"""Field observations API — capture site visit findings, collective memory, and pattern insights."""
 
 from uuid import UUID
 
@@ -15,6 +15,17 @@ from app.schemas.field_observation import (
     FieldObservationSummary,
     FieldObservationUpdate,
     FieldObservationVerify,
+    PatternInsightRead,
+)
+from app.services.field_memory_service import (
+    get_pattern_insights,
+    search_observations,
+)
+from app.services.field_memory_service import (
+    upvote_observation as memory_upvote,
+)
+from app.services.field_memory_service import (
+    verify_observation as memory_verify,
 )
 from app.services.field_observation_service import (
     create_observation,
@@ -61,6 +72,35 @@ async def create_observation_endpoint(
     return _enrich_observation(obs, f"{current_user.first_name} {current_user.last_name}")
 
 
+@router.post(
+    "/observations",
+    response_model=FieldObservationRead,
+    status_code=201,
+)
+async def create_general_observation_endpoint(
+    data: FieldObservationCreate,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a general field observation (not tied to a specific building)."""
+    from app.services.field_memory_service import record_observation
+
+    obs = await record_observation(
+        db,
+        building_id=data.building_id,
+        observer_id=current_user.id,
+        observer_role=data.observer_role or current_user.role,
+        observation_type=data.observation_type,
+        title=data.title,
+        description=data.description,
+        tags=data.tags,
+        context=data.context_json,
+        confidence=data.confidence,
+        photo_ref=data.photo_reference,
+    )
+    return _enrich_observation(obs, f"{current_user.first_name} {current_user.last_name}")
+
+
 @router.get(
     "/buildings/{building_id}/field-observations",
     response_model=PaginatedResponse[FieldObservationRead],
@@ -98,6 +138,98 @@ async def list_observations_endpoint(
         enriched.append(_enrich_observation(obs, name))
 
     return {"items": enriched, "total": total, "page": page, "size": size, "pages": pages}
+
+
+@router.get(
+    "/observations/search",
+    response_model=PaginatedResponse[FieldObservationRead],
+)
+async def search_observations_endpoint(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    tags: str | None = Query(None, description="Comma-separated tags"),
+    canton: str | None = None,
+    construction_year_min: int | None = None,
+    construction_year_max: int | None = None,
+    pollutant: str | None = None,
+    material: str | None = None,
+    observation_type: str | None = None,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Search observations across all buildings with tag and context filters."""
+    tag_list = [t.strip() for t in tags.split(",")] if tags else None
+
+    items, total = await search_observations(
+        db,
+        tags=tag_list,
+        canton=canton,
+        construction_year_min=construction_year_min,
+        construction_year_max=construction_year_max,
+        pollutant=pollutant,
+        material=material,
+        observation_type=observation_type,
+        page=page,
+        size=size,
+    )
+    pages = (total + size - 1) // size if total > 0 else 0
+
+    enriched = []
+    for obs in items:
+        observer = await db.get(User, obs.observer_id)
+        name = f"{observer.first_name} {observer.last_name}" if observer else None
+        enriched.append(_enrich_observation(obs, name))
+
+    return {"items": enriched, "total": total, "page": page, "size": size, "pages": pages}
+
+
+@router.get(
+    "/observations/patterns",
+    response_model=list[PatternInsightRead],
+)
+async def pattern_insights_endpoint(
+    building_id: UUID | None = None,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get pattern insights from collective field observations."""
+    return await get_pattern_insights(db, building_id=building_id)
+
+
+@router.post(
+    "/observations/{observation_id}/upvote",
+    response_model=FieldObservationRead,
+)
+async def upvote_observation_endpoint(
+    observation_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upvote a field observation (other technicians confirm the finding)."""
+    obs = await memory_upvote(db, observation_id, current_user.id)
+    if obs is None:
+        raise HTTPException(status_code=404, detail="Field observation not found")
+    observer = await db.get(User, obs.observer_id)
+    name = f"{observer.first_name} {observer.last_name}" if observer else None
+    return _enrich_observation(obs, name)
+
+
+@router.post(
+    "/observations/{observation_id}/verify",
+    response_model=FieldObservationRead,
+)
+async def verify_observation_admin_endpoint(
+    observation_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin-verify a field observation."""
+    obs = await memory_verify(db, observation_id, current_user.id)
+    if obs is None:
+        raise HTTPException(status_code=404, detail="Field observation not found")
+    observer = await db.get(User, obs.observer_id)
+    name = f"{observer.first_name} {observer.last_name}" if observer else None
+    return _enrich_observation(obs, name)
 
 
 @router.get(

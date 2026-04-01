@@ -14,8 +14,8 @@ from uuid import UUID
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.building_change import BuildingSignal
 from app.models.building_snapshot import BuildingSnapshot
-from app.models.change_signal import ChangeSignal
 from app.models.diagnostic import Diagnostic
 from app.models.intervention import Intervention
 from app.schemas.requalification import (
@@ -44,7 +44,9 @@ async def get_requalification_timeline(
     """
     # ── 1. Fetch change signals ───────────────────────────────────
     sig_result = await db.execute(
-        select(ChangeSignal).where(ChangeSignal.building_id == building_id).order_by(ChangeSignal.detected_at.desc())
+        select(BuildingSignal)
+        .where(BuildingSignal.building_id == building_id)
+        .order_by(BuildingSignal.detected_at.desc())
     )
     signals = list(sig_result.scalars().all())
 
@@ -79,7 +81,11 @@ async def get_requalification_timeline(
                 description=sig.description,
                 severity=sig.severity,
                 signal_type=sig.signal_type,
-                metadata=sig.metadata_json,
+                metadata={
+                    "confidence": sig.confidence,
+                    "based_on_type": sig.based_on_type,
+                    "status": sig.status,
+                },
             )
         )
 
@@ -174,7 +180,9 @@ async def get_state_change_summary(
 ) -> dict:
     """Return a compact summary of state-change activity for a building."""
     sig_result = await db.execute(
-        select(ChangeSignal).where(ChangeSignal.building_id == building_id).order_by(ChangeSignal.detected_at.desc())
+        select(BuildingSignal)
+        .where(BuildingSignal.building_id == building_id)
+        .order_by(BuildingSignal.detected_at.desc())
     )
     signals = list(sig_result.scalars().all())
 
@@ -237,7 +245,9 @@ async def detect_requalification_triggers(
     snapshots = list(snap_result.scalars().all())
 
     sig_result = await db.execute(
-        select(ChangeSignal).where(ChangeSignal.building_id == building_id).order_by(ChangeSignal.detected_at.desc())
+        select(BuildingSignal)
+        .where(BuildingSignal.building_id == building_id)
+        .order_by(BuildingSignal.detected_at.desc())
     )
     signals = list(sig_result.scalars().all())
 

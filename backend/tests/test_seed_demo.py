@@ -7,6 +7,28 @@ import pytest
 from app.seeds import seed_demo
 
 
+@pytest.fixture(autouse=True)
+def _patch_v3_seeds(monkeypatch):
+    """Patch V3 seeds that require real DB tables not available in this test's SQLite."""
+
+    async def _noop_form(db):
+        return 0
+
+    async def _noop_source(db):
+        return 0
+
+    async def _noop_proc(db):
+        return 0
+
+    async def _noop_prospect(db):
+        return {"total": 0}
+
+    monkeypatch.setattr(seed_demo, "seed_form_templates", _noop_form)
+    monkeypatch.setattr(seed_demo, "seed_source_registry", _noop_source)
+    monkeypatch.setattr(seed_demo, "seed_procedure_templates", _noop_proc)
+    monkeypatch.setattr(seed_demo, "seed_prospect_demo", _noop_prospect)
+
+
 def test_has_vd_filter() -> None:
     assert seed_demo._has_vd_filter(Namespace(commune="Lausanne", municipality_ofs=None, postal_code=None))
     assert seed_demo._has_vd_filter(Namespace(commune=None, municipality_ofs=5586, postal_code=None))
