@@ -1,10 +1,13 @@
 """Tests for DefectShield — construction defect deadline calculator.
 
 Art. 367 al. 1bis CO: 60 calendar days from discovery (since 01.01.2026).
+Includes: weekend/holiday skip logic, transition validation.
 """
 
 import uuid
 from datetime import date, timedelta
+
+import pytest
 
 from app.models.building import Building
 from app.models.diagnostic import Diagnostic
@@ -13,7 +16,10 @@ from app.services.defect_timeline_service import (
     HIDDEN_DEFECT_PRESCRIPTION_DAYS,
     MANIFEST_DEFECT_PRESCRIPTION_DAYS,
     NEW_BUILD_GUARANTEE_DAYS,
-    NOTIFICATION_DAYS,
+    _is_business_day,
+    _next_business_day,
+    _swiss_holidays,
+    calc_notification_deadline,
     check_new_build_guarantee,
     classify_urgency,
     compute_deadline,
@@ -23,6 +29,7 @@ from app.services.defect_timeline_service import (
     get_active_alerts,
     get_timeline,
     list_building_timelines,
+    update_defect_status,
     update_timeline_status,
 )
 
@@ -75,11 +82,11 @@ async def _make_diagnostic(db, building_id, **kwargs):
 
 class TestComputeDeadline:
     def test_compute_deadline_standard(self):
-        """Art. 367 al. 1bis CO: 60 days from discovery."""
+        """Art. 367 al. 1bis CO: 60 days from discovery, weekday landing."""
         discovery = date(2026, 3, 1)
         deadline = compute_deadline(discovery)
+        # 2026-04-30 is Thursday — no extension needed
         assert deadline == date(2026, 4, 30)
-        assert (deadline - discovery).days == NOTIFICATION_DAYS
 
     def test_compute_deadline_edge_day59(self):
         """Day 59 is still before the deadline."""
@@ -92,13 +99,297 @@ class TestComputeDeadline:
         """Deadline calculation works across Feb 29."""
         discovery = date(2028, 1, 15)  # 2028 is a leap year
         deadline = compute_deadline(discovery)
+        # 2028-03-15 is Wednesday — no extension
         assert deadline == date(2028, 3, 15)
 
     def test_compute_deadline_year_boundary(self):
         """Deadline crosses year boundary."""
         discovery = date(2026, 12, 15)
         deadline = compute_deadline(discovery)
-        assert deadline == date(2027, 2, 13)
+        # 2027-02-13 is Saturday → extends to Monday 2027-02-15
+        assert deadline == date(2027, 2, 15)  # Monday
+
+    def test_compute_deadline_lands_on_saturday(self):
+        """60th day on Saturday → extends to Monday."""
+        # 2026-06-01 + 60 = 2026-07-31 (Friday) — no extension
+        # 2026-06-02 + 60 = 2026-08-01 (Saturday) → Monday 2026-08-03
+        discovery = date(2026, 6, 2)
+        deadline = compute_deadline(discovery)
+        assert deadline == date(2026, 8, 3)  # Monday
+        assert deadline.weekday() == 0
+
+    def test_compute_deadline_lands_on_sunday(self):
+        """60th day on Sunday → extends to Monday."""
+        # 2026-06-03 + 60 = 2026-08-02 (Sunday) → Monday 2026-08-03
+        discovery = date(2026, 6, 3)
+        deadline = compute_deadline(discovery)
+        assert deadline == date(2026, 8, 3)  # Monday
+        assert deadline.weekday() == 0
+
+    def test_compute_deadline_lands_on_christmas(self):
+        """60th day on Dec 25 (Christmas) → extends to next business day."""
+        # 2026-10-26 + 60 = 2026-12-25 (Friday, Christmas)
+        discovery = date(2026, 10, 26)
+        deadline = compute_deadline(discovery)
+        # Dec 25 (Fri, Christmas) → Dec 26 (Sat, St Stephen) → Dec 28 (Mon)
+        assert deadline == date(2026, 12, 28)
+
+    def test_compute_deadline_lands_on_national_day(self):
+        """60th day on Aug 1 (Swiss National Day) → extends."""
+        # 2026-06-02 + 60 = 2026-08-01 (Saturday + National Day)
+        discovery = date(2026, 6, 2)
+        deadline = compute_deadline(discovery)
+        assert deadline == date(2026, 8, 3)  # Monday
+
+    def test_compute_deadline_lands_on_new_year(self):
+        """60th day on Jan 1 → extends past Jan 2 (Berchtoldstag) to Jan 3 or later."""
+        # 2026-11-02 + 60 = 2027-01-01 (Friday, New Year)
+        discovery = date(2026, 11, 2)
+        deadline = compute_deadline(discovery)
+        # Jan 1 (Fri, New Year) → Jan 2 (Sat, also Berchtoldstag) → Jan 4 (Mon)
+        assert deadline == date(2027, 1, 4)
+
+
+# ---------------------------------------------------------------------------
+# Swiss holidays tests
+# ---------------------------------------------------------------------------
+
+
+class TestSwissHolidays:
+    def test_known_2026_holidays(self):
+        holidays = _swiss_holidays(2026)
+        assert date(2026, 1, 1) in holidays  # New Year
+        assert date(2026, 1, 2) in holidays  # Berchtoldstag
+        assert date(2026, 8, 1) in holidays  # National Day
+        assert date(2026, 12, 25) in holidays  # Christmas
+        assert date(2026, 12, 26) in holidays  # St Stephen
+
+    def test_easter_2026(self):
+        """Easter 2026 is April 5."""
+        holidays = _swiss_holidays(2026)
+        assert date(2026, 4, 3) in holidays  # Good Friday
+        assert date(2026, 4, 6) in holidays  # Easter Monday
+
+    def test_easter_2027(self):
+        """Easter 2027 is March 28."""
+        holidays = _swiss_holidays(2027)
+        assert date(2027, 3, 26) in holidays  # Good Friday
+        assert date(2027, 3, 29) in holidays  # Easter Monday
+
+    def test_ascension_whit_monday_2026(self):
+        holidays = _swiss_holidays(2026)
+        # Easter 2026 = April 5
+        assert date(2026, 5, 14) in holidays  # Ascension (Easter + 39)
+        assert date(2026, 5, 25) in holidays  # Whit Monday (Easter + 50)
+
+    def test_is_business_day_weekday(self):
+        assert _is_business_day(date(2026, 4, 1)) is True  # Wednesday
+
+    def test_is_business_day_saturday(self):
+        assert _is_business_day(date(2026, 4, 4)) is False  # Saturday
+
+    def test_is_business_day_sunday(self):
+        assert _is_business_day(date(2026, 4, 5)) is False  # Sunday (Easter)
+
+    def test_is_business_day_holiday(self):
+        assert _is_business_day(date(2026, 12, 25)) is False  # Christmas
+
+    def test_next_business_day_already_business_day(self):
+        assert _next_business_day(date(2026, 4, 1)) == date(2026, 4, 1)
+
+    def test_next_business_day_weekend(self):
+        assert _next_business_day(date(2026, 4, 4)) == date(2026, 4, 7)  # Sat → Mon
+
+    def test_next_business_day_holiday_chain(self):
+        """Christmas (Fri) + St Stephen (Sat) + Sun → Monday."""
+        assert _next_business_day(date(2026, 12, 25)) == date(2026, 12, 28)
+
+
+# ---------------------------------------------------------------------------
+# calc_notification_deadline tests
+# ---------------------------------------------------------------------------
+
+
+class TestCalcNotificationDeadline:
+    def test_basic_result_structure(self):
+        result = calc_notification_deadline(date(2026, 3, 1), reference_date=date(2026, 3, 1))
+        assert hasattr(result, "deadline")
+        assert hasattr(result, "days_remaining")
+        assert hasattr(result, "extended")
+
+    def test_no_extension_needed(self):
+        """Deadline on a normal weekday: extended=False."""
+        # 2026-03-01 + 60 = 2026-04-30 (Thursday)
+        result = calc_notification_deadline(date(2026, 3, 1), reference_date=date(2026, 3, 1))
+        assert result.deadline == date(2026, 4, 30)
+        assert result.days_remaining == 60
+        assert result.extended is False
+
+    def test_extension_on_weekend(self):
+        """Deadline on Saturday → extends, extended=True."""
+        # 2026-06-02 + 60 = 2026-08-01 (Sat) → 2026-08-03 (Mon)
+        result = calc_notification_deadline(date(2026, 6, 2), reference_date=date(2026, 6, 2))
+        assert result.deadline == date(2026, 8, 3)
+        assert result.days_remaining == 62
+        assert result.extended is True
+
+    def test_extension_on_holiday(self):
+        """Deadline on Christmas → extends, extended=True."""
+        # 2026-10-26 + 60 = 2026-12-25 (Fri, Christmas) → Mon Dec 28
+        result = calc_notification_deadline(date(2026, 10, 26), reference_date=date(2026, 10, 26))
+        assert result.deadline == date(2026, 12, 28)
+        assert result.extended is True
+
+    def test_days_remaining_negative_when_past(self):
+        """If reference_date is after deadline, days_remaining is negative."""
+        result = calc_notification_deadline(date(2026, 1, 1), reference_date=date(2026, 6, 1))
+        assert result.days_remaining < 0
+
+    def test_days_remaining_zero_on_deadline_day(self):
+        """If reference_date equals deadline, days_remaining=0."""
+        result = calc_notification_deadline(date(2026, 3, 1), reference_date=date(2026, 4, 30))
+        assert result.days_remaining == 0
+
+    def test_defaults_to_today(self):
+        """Without reference_date, uses today."""
+        result = calc_notification_deadline(date.today())
+        assert result.days_remaining == (result.deadline - date.today()).days
+
+    def test_good_friday_extension(self):
+        """Deadline landing on Good Friday 2026 (April 3) → extends past Easter Monday."""
+        # 2026-02-02 + 60 = 2026-04-03 (Good Friday)
+        result = calc_notification_deadline(date(2026, 2, 2), reference_date=date(2026, 2, 2))
+        # Good Friday (Fri) → Sat → Sun → Easter Monday (holiday) → Tue April 7
+        assert result.deadline == date(2026, 4, 7)
+        assert result.extended is True
+
+
+# ---------------------------------------------------------------------------
+# update_defect_status tests
+# ---------------------------------------------------------------------------
+
+
+class TestUpdateDefectStatus:
+    async def test_active_to_notified(self, db_session, admin_user):
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        updated = await update_defect_status(db_session, timeline.id, "notified")
+        assert updated.status == "notified"
+
+    async def test_active_to_expired(self, db_session, admin_user):
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        updated = await update_defect_status(db_session, timeline.id, "expired")
+        assert updated.status == "expired"
+
+    async def test_active_to_resolved(self, db_session, admin_user):
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        updated = await update_defect_status(db_session, timeline.id, "resolved")
+        assert updated.status == "resolved"
+
+    async def test_notified_to_resolved(self, db_session, admin_user):
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        await update_defect_status(db_session, timeline.id, "notified")
+        updated = await update_defect_status(db_session, timeline.id, "resolved")
+        assert updated.status == "resolved"
+
+    async def test_expired_to_resolved(self, db_session, admin_user):
+        """Late notification is still allowed."""
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        await update_defect_status(db_session, timeline.id, "expired")
+        updated = await update_defect_status(db_session, timeline.id, "resolved")
+        assert updated.status == "resolved"
+
+    async def test_resolved_is_terminal(self, db_session, admin_user):
+        """Cannot transition out of resolved."""
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        await update_defect_status(db_session, timeline.id, "resolved")
+        with pytest.raises(ValueError, match="terminal state"):
+            await update_defect_status(db_session, timeline.id, "active")
+
+    async def test_invalid_transition_notified_to_active(self, db_session, admin_user):
+        """Cannot go back from notified to active."""
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        await update_defect_status(db_session, timeline.id, "notified")
+        with pytest.raises(ValueError, match="Invalid transition"):
+            await update_defect_status(db_session, timeline.id, "active")
+
+    async def test_not_found_raises(self, db_session):
+        with pytest.raises(ValueError, match="not found"):
+            await update_defect_status(db_session, uuid.uuid4(), "notified")
+
+    async def test_kwargs_forwarded(self, db_session, admin_user):
+        """Extra kwargs (e.g. notified_at) are set on the model."""
+        from datetime import datetime
+
+        building = await _make_building(db_session, admin_user.id)
+        timeline = await create_timeline(
+            db_session,
+            DefectTimelineCreate(
+                building_id=building.id,
+                defect_type="construction",
+                discovery_date=date(2026, 3, 1),
+            ),
+        )
+        now = datetime(2026, 4, 15, 10, 0, 0)
+        updated = await update_defect_status(
+            db_session, timeline.id, "notified", notified_at=now
+        )
+        assert updated.notified_at == now
 
 
 class TestNewBuildGuarantee:
@@ -298,7 +589,8 @@ class TestAlerts:
         # With threshold 65 days — should appear
         alerts = await get_active_alerts(db_session, days_threshold=65)
         assert len(alerts) == 1
-        assert alerts[0].days_remaining == 60
+        # days_remaining >= 60 because deadline may extend past weekends/holidays
+        assert alerts[0].days_remaining >= 60
 
     async def test_alerts_no_active(self, db_session, admin_user):
         """No active defects: empty alerts."""
