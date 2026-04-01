@@ -29,15 +29,42 @@ export interface DefectCreatePayload {
   purchase_date: string;
 }
 
+export interface DefectUpdatePayload {
+  status?: string;
+  description?: string;
+  notified_at?: string;
+  notification_pdf_url?: string;
+}
+
 export const defectTimelineApi = {
   list: async (buildingId: string): Promise<DefectTimeline[]> => {
-    const response = await apiClient.get<DefectTimeline[]>(`/buildings/${buildingId}/defects/timeline`);
+    const response = await apiClient.get<DefectTimeline[]>(`/defects/timeline/${buildingId}`);
     return response.data;
   },
 
   create: async (buildingId: string, data: DefectCreatePayload): Promise<DefectTimeline> => {
-    const response = await apiClient.post<DefectTimeline>(`/buildings/${buildingId}/defects/timeline`, data);
+    const response = await apiClient.post<DefectTimeline>('/defects/timeline', {
+      ...data,
+      building_id: buildingId,
+    });
     return response.data;
+  },
+
+  update: async (timelineId: string, data: DefectUpdatePayload): Promise<DefectTimeline> => {
+    const response = await apiClient.patch<DefectTimeline>(`/defects/timelines/${timelineId}`, data);
+    return response.data;
+  },
+
+  delete: async (timelineId: string): Promise<void> => {
+    await apiClient.delete(`/defects/timelines/${timelineId}`);
+  },
+
+  generateLetter: async (timelineId: string, lang: string = 'fr'): Promise<Blob> => {
+    const response = await apiClient.post(`/defects/${timelineId}/generate-letter`, null, {
+      params: { lang },
+      responseType: 'blob',
+    });
+    return response.data as Blob;
   },
 
   alerts: async (): Promise<DefectAlert[]> => {

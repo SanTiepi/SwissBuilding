@@ -2,9 +2,14 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import { defectTimelineApi, type DefectTimeline, type DefectCreatePayload } from '@/api/defectTimeline';
+import {
+  defectTimelineApi,
+  type DefectTimeline,
+  type DefectCreatePayload,
+  type DefectUpdatePayload,
+} from '@/api/defectTimeline';
 import { toast } from '@/store/toastStore';
-import { Plus, X, Loader2, ShieldAlert, Clock, AlertTriangle } from 'lucide-react';
+import { Plus, X, Loader2, ShieldAlert, Clock, AlertTriangle, FileText, Trash2 } from 'lucide-react';
 
 const DEFECT_TYPES = ['construction', 'pollutant', 'structural', 'installation', 'other'] as const;
 
@@ -13,6 +18,12 @@ const STATUS_COLORS: Record<string, string> = {
   notified: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   expired: 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400',
   resolved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+};
+
+const STATUS_TRANSITIONS: Record<string, string[]> = {
+  active: ['notified', 'expired', 'resolved'],
+  notified: ['resolved'],
+  expired: ['resolved'],
 };
 
 function urgencyColor(daysRemaining: number | undefined): string {
@@ -78,6 +89,7 @@ export default function DefectTimelineWidget({ buildingId }: Props) {
   const [formDescription, setFormDescription] = useState('');
   const [formDiscoveryDate, setFormDiscoveryDate] = useState('');
   const [formPurchaseDate, setFormPurchaseDate] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const {
     data: defects = [],
@@ -90,15 +102,57 @@ export default function DefectTimelineWidget({ buildingId }: Props) {
     retry: false,
   });
 
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['defect-timeline', buildingId] });
+
   const createMutation = useMutation({
     mutationFn: (data: DefectCreatePayload) => defectTimelineApi.create(buildingId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['defect-timeline', buildingId] });
+      invalidate();
       toast(t('defect.add') || 'Defect reported', 'success');
       resetForm();
     },
     onError: () => {
       toast(t('app.error') || 'An error occurred', 'error');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: DefectUpdatePayload }) => defectTimelineApi.update(id, data),
+    onSuccess: () => {
+      invalidate();
+      toast(t('defect.updated') || 'Status updated', 'success');
+    },
+    onError: () => {
+      toast(t('app.error') || 'An error occurred', 'error');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => defectTimelineApi.delete(id),
+    onSuccess: () => {
+      invalidate();
+      setConfirmDeleteId(null);
+      toast(t('defect.deleted') || 'Defect deleted', 'success');
+    },
+    onError: () => {
+      toast(t('app.error') || 'An error occurred', 'error');
+    },
+  });
+
+  const letterMutation = useMutation({
+    mutationFn: (id: string) => defectTimelineApi.generateLetter(id),
+    onSuccess: (blob, id) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `defect-notification-${id}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      invalidate();
+      toast(t('defect.letter_generated') || 'PDF generated', 'success');
+    },
+    onError: () => {
+      toast(t('app.error') || 'PDF generation failed', 'error');
     },
   });
 
@@ -130,42 +184,119 @@ export default function DefectTimelineWidget({ buildingId }: Props) {
     (d: DefectTimeline) => d.days_remaining !== undefined && d.days_remaining < 30,
   ).length;
 
-  const renderDefect = (item: DefectTimeline) => (
-    <div
-      key={item.id}
-      className="p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
-      data-testid="defect-item"
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className={cn('w-2 h-2 rounded-full flex-shrink-0', urgencyDot(item.days_remaining))}
-              title={item.days_remaining !== undefined ? `${item.days_remaining}j` : ''}
-            />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {t(`defect.type_${item.defect_type}`) || item.defect_type}
-            </span>
-            <StatusBadge status={item.status} />
-            <CountdownBadge daysRemaining={item.days_remaining} />
+  const renderDefect = (item: DefectTimeline) => {
+    const transitions = STATUS_TRANSITIONS[item.status] || [];
+    return (
+      <div
+        key={item.id}
+        className="p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
+        data-testid="defect-item"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={cn('w-2 h-2 rounded-full flex-shrink-0', urgencyDot(item.days_remaining))}
+                title={item.days_remaining !== undefined ? `${item.days_remaining}j` : ''}
+              />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {t(`defect.type_${item.defect_type}`) || item.defect_type}
+              </span>
+              <StatusBadge status={item.status} />
+              <CountdownBadge daysRemaining={item.days_remaining} />
+            </div>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-2">{item.description}</p>
+            <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-slate-500">
+              {item.notification_deadline && (
+                <span>
+                  {t('defect.deadline') || 'Echeance'}: {new Date(item.notification_deadline).toLocaleDateString('fr-CH')}
+                </span>
+              )}
+              {item.guarantee_type === 'new_build_rectification' && (
+                <span className="text-blue-500 dark:text-blue-400">
+                  {t('defect.guarantee_new_build') || 'Garantie bien neuf'}
+                </span>
+              )}
+            </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-2">{item.description}</p>
-          <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-slate-500">
-            {item.notification_deadline && (
-              <span>
-                {t('defect.deadline') || 'Echeance'}: {new Date(item.notification_deadline).toLocaleDateString('fr-CH')}
-              </span>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Status transition dropdown */}
+            {transitions.length > 0 && (
+              <select
+                className="text-xs rounded border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 px-2 py-1 focus:ring-1 focus:ring-blue-500"
+                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    updateMutation.mutate({ id: item.id, data: { status: e.target.value } });
+                    e.target.value = '';
+                  }
+                }}
+                data-testid="defect-status-select"
+              >
+                <option value="" disabled>
+                  {t('defect.change_status') || 'Changer...'}
+                </option>
+                {transitions.map((s) => (
+                  <option key={s} value={s}>
+                    {t(`defect.status_${s}`) || s}
+                  </option>
+                ))}
+              </select>
             )}
-            {item.guarantee_type === 'new_build_rectification' && (
-              <span className="text-blue-500 dark:text-blue-400">
-                {t('defect.guarantee_new_build') || 'Garantie bien neuf'}
-              </span>
+
+            {/* Generate letter (only for active) */}
+            {item.status === 'active' && (
+              <button
+                onClick={() => letterMutation.mutate(item.id)}
+                disabled={letterMutation.isPending}
+                className="p-1.5 rounded text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
+                title={t('defect.generate_letter') || 'Generer la lettre PDF'}
+                data-testid="defect-letter-btn"
+              >
+                {letterMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileText className="w-4 h-4" />
+                )}
+              </button>
+            )}
+
+            {/* Delete */}
+            {confirmDeleteId === item.id ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => deleteMutation.mutate(item.id)}
+                  disabled={deleteMutation.isPending}
+                  className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                  data-testid="defect-confirm-delete-btn"
+                >
+                  {deleteMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : t('common.confirm') || 'Confirmer'}
+                </button>
+                <button
+                  onClick={() => setConfirmDeleteId(null)}
+                  className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  data-testid="defect-cancel-delete-btn"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDeleteId(item.id)}
+                className="p-1.5 rounded text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                title={t('common.delete') || 'Supprimer'}
+                data-testid="defect-delete-btn"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             )}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 sm:p-6" data-testid="defect-timeline-widget">

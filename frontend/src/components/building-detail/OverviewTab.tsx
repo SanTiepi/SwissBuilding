@@ -47,6 +47,7 @@ const FinanceReadinessPanel = lazy(() => import('@/components/building-detail/Fi
 import WorkspaceMembersCard from '@/components/building-detail/WorkspaceMembersCard';
 import DocumentInboxCard from '@/components/building-detail/DocumentInboxCard';
 import ObligationsCard from '@/components/building-detail/ObligationsCard';
+import DefectTimelineWidget from '@/components/building-detail/DefectTimelineWidget';
 import ProofDeliveryHistory from '@/components/building-detail/ProofDeliveryHistory';
 import SwissRulesWatchPanel from '@/components/building-detail/SwissRulesWatchPanel';
 
@@ -735,6 +736,7 @@ export function OverviewTab({
         <DocumentInboxCard buildingId={buildingId} />
       </div>
       <ObligationsCard buildingId={buildingId} />
+      <DefectTimelineWidget buildingId={buildingId} />
 
       {/* Quick Access Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
