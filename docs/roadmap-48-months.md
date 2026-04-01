@@ -118,93 +118,96 @@ Les gates se chevauchent intentionnellement — Gate 2 commence avant que Gate 1
 
 Cross-reference of all strategic programme files (`docs/projects/*-program.md`) mapped to roadmap gates.
 
-### Gate 1 — Wedge Dominance (M0-M12)
+> Status: `done` = programme objectives met | `partial` = foundational models/services exist | `not started` = no implementation yet
 
-| Programme File | Gate | Roadmap Programme | Domain |
-|---------------|------|-------------------|--------|
-| trust-readiness-postworks-program.md | G1 | A, I | Evidence, readiness & post-works truth |
-| ecobau-inspired-readiness-and-eco-specs-program.md | G1 | A, N | Safe-to-start wedge & eco specs |
-| killer-demo-and-wow-surfaces-program.md | G1 | K | Demo surfaces & wow factor |
-| demo-and-sales-enablement-program.md | G1 | K | Sales enablement & demo flow |
-| full-chain-integration-and-demo-truth-program.md | G1 | K, L | End-to-end integration & demo truth |
-| dataset-scenario-factory-and-seed-strategy-program.md | G1 | L | Seed data & demo scenarios |
-| spatial-truth-and-field-operations-program.md | G1 | G, A | Spatial proof & field operations |
-| occupant-safety-and-communication-program.md | G1 | D, N | Occupant safety & communication |
-| autonomous-dossier-completion-and-verification-program.md | G1 | I, M | Agentic dossier completion |
-| execution-quality-and-hazardous-works-operations-program.md | G1 | N | Hazardous works quality control |
-| legal-grade-proof-and-chain-of-custody-program.md | G1 | I, AD | Legal-grade proof & chain of custody |
-| weak-signal-watchtower-program.md | G1 | I, N | Weak signal detection & drift prevention |
+### Gate 1 — Wedge Dominance (M0-M12) — 12 programmes
 
-### Gate 2 — Building Operating System (M6-M18)
+| Name | Gate | Prog | Status | File |
+|------|------|------|--------|------|
+| Trust, Readiness, and Post-Works | G1 | A, I | partial | [trust-readiness-postworks-program.md](projects/trust-readiness-postworks-program.md) |
+| ecobau-Inspired Readiness and Eco Specs | G1 | A, N | partial | [ecobau-inspired-readiness-and-eco-specs-program.md](projects/ecobau-inspired-readiness-and-eco-specs-program.md) |
+| Killer Demo and Wow Surfaces | G1 | K | partial | [killer-demo-and-wow-surfaces-program.md](projects/killer-demo-and-wow-surfaces-program.md) |
+| Demo and Sales Enablement | G1 | K | partial | [demo-and-sales-enablement-program.md](projects/demo-and-sales-enablement-program.md) |
+| Full-Chain Integration and Demo Truth | G1 | K, L | partial | [full-chain-integration-and-demo-truth-program.md](projects/full-chain-integration-and-demo-truth-program.md) |
+| Dataset Scenario Factory and Seed Strategy | G1 | L | partial | [dataset-scenario-factory-and-seed-strategy-program.md](projects/dataset-scenario-factory-and-seed-strategy-program.md) |
+| Spatial Truth and Field Operations | G1 | G, A | partial | [spatial-truth-and-field-operations-program.md](projects/spatial-truth-and-field-operations-program.md) |
+| Occupant Safety and Communication | G1 | D, N | not started | [occupant-safety-and-communication-program.md](projects/occupant-safety-and-communication-program.md) |
+| Autonomous Dossier Completion and Verification | G1 | I, M | partial | [autonomous-dossier-completion-and-verification-program.md](projects/autonomous-dossier-completion-and-verification-program.md) |
+| Execution Quality and Hazardous Works Operations | G1 | N | partial | [execution-quality-and-hazardous-works-operations-program.md](projects/execution-quality-and-hazardous-works-operations-program.md) |
+| Legal-Grade Proof and Chain of Custody | G1 | I, AD | partial | [legal-grade-proof-and-chain-of-custody-program.md](projects/legal-grade-proof-and-chain-of-custody-program.md) |
+| Weak-Signal Watchtower | G1 | I, N | partial | [weak-signal-watchtower-program.md](projects/weak-signal-watchtower-program.md) |
 
-| Programme File | Gate | Roadmap Programme | Domain |
-|---------------|------|-------------------|--------|
-| contradiction-passport-and-transfer-program.md | G2 | I, AD | Contradiction detection, passport & transfer |
-| building-passport-standard-and-exchange-program.md | G2 | AD | Passport standard & exchange format |
-| decision-replay-and-operator-memory-program.md | G2 | I, AC | Decision replay & building memory |
-| expert-review-disagreement-and-override-governance-program.md | G2 | I | Expert review & override governance |
-| constraint-graph-and-dependency-intelligence-program.md | G2 | I | Constraint graph & dependency reasoning |
-| cross-modal-change-detection-and-reconstruction-program.md | G2 | I, X | Cross-modal change detection |
-| multimodal-building-understanding-and-grounded-query-program.md | G2 | I, L | Multimodal extraction & grounded query |
-| energy-carbon-and-live-performance-program.md | G2 | B, E | Energy, carbon & live performance |
-| lease-tenancy-and-occupancy-economics-program.md | G2 | — | Lease, tenancy & occupancy economics |
-| warranty-defects-and-service-obligations-program.md | G2 | D | Warranty, defects & service obligations |
-| incident-emergency-and-continuity-program.md | G2 | D | Incident, emergency & continuity |
-| utilities-and-recurring-services-program.md | G2 | — | Utilities & recurring services |
-| permit-procedure-and-public-funding-program.md | G2 | F, H | Permits, procedures & public funding |
-| tax-incentive-and-fiscal-readiness-program.md | G2 | F | Tax, incentives & fiscal readiness |
-| coownership-governance-and-resident-operations-program.md | G2 | — | Co-ownership & resident operations |
-| semantic-building-operations-and-systems-program.md | G2 | C, J | Building systems & equipment semantics |
-| climate-resilience-and-environmental-context-program.md | G2 | B, S | Climate resilience & environmental context |
-| sensor-fusion-and-live-building-state-program.md | G2 | J | Sensor fusion & live building state |
-| agent-governance-and-knowledge-workbench-program.md | G2 | I | Agent governance & knowledge workbench |
-| bim-3d-and-geometry-native-intelligence-program.md | G2 | G, X | BIM, 3D & geometry-native intelligence |
-| circularity-and-material-afterlife-program.md | G2 | C | Circularity & material afterlife |
-| offline-field-sync-and-resilient-capture-program.md | G2 | G | Offline field sync & resilient capture |
+### Gate 2 — Building Operating System (M6-M18) — 22 programmes
 
-### Gate 3 — Portfolio & Capital (M12-M30)
+| Name | Gate | Prog | Status | File |
+|------|------|------|--------|------|
+| Contradiction, Passport, and Transfer | G2 | I, AD | partial | [contradiction-passport-and-transfer-program.md](projects/contradiction-passport-and-transfer-program.md) |
+| Building Passport Standard and Exchange | G2 | AD | partial | [building-passport-standard-and-exchange-program.md](projects/building-passport-standard-and-exchange-program.md) |
+| Decision Replay and Operator Memory | G2 | I, AC | not started | [decision-replay-and-operator-memory-program.md](projects/decision-replay-and-operator-memory-program.md) |
+| Expert Review, Disagreement, and Override Governance | G2 | I | not started | [expert-review-disagreement-and-override-governance-program.md](projects/expert-review-disagreement-and-override-governance-program.md) |
+| Constraint Graph and Dependency Intelligence | G2 | I | not started | [constraint-graph-and-dependency-intelligence-program.md](projects/constraint-graph-and-dependency-intelligence-program.md) |
+| Cross-Modal Change Detection and Reconstruction | G2 | I, X | not started | [cross-modal-change-detection-and-reconstruction-program.md](projects/cross-modal-change-detection-and-reconstruction-program.md) |
+| Multimodal Building Understanding and Grounded Query | G2 | I, L | not started | [multimodal-building-understanding-and-grounded-query-program.md](projects/multimodal-building-understanding-and-grounded-query-program.md) |
+| Energy, Carbon, and Live Performance | G2 | B, E | partial | [energy-carbon-and-live-performance-program.md](projects/energy-carbon-and-live-performance-program.md) |
+| Lease, Tenancy, and Occupancy Economics | G2 | — | partial | [lease-tenancy-and-occupancy-economics-program.md](projects/lease-tenancy-and-occupancy-economics-program.md) |
+| Warranty, Defects, and Service Obligations | G2 | D | partial | [warranty-defects-and-service-obligations-program.md](projects/warranty-defects-and-service-obligations-program.md) |
+| Incident, Emergency, and Continuity | G2 | D | partial | [incident-emergency-and-continuity-program.md](projects/incident-emergency-and-continuity-program.md) |
+| Utilities and Recurring Services | G2 | — | not started | [utilities-and-recurring-services-program.md](projects/utilities-and-recurring-services-program.md) |
+| Permit Procedure and Public Funding | G2 | F, H | partial | [permit-procedure-and-public-funding-program.md](projects/permit-procedure-and-public-funding-program.md) |
+| Tax, Incentive, and Fiscal Readiness | G2 | F | not started | [tax-incentive-and-fiscal-readiness-program.md](projects/tax-incentive-and-fiscal-readiness-program.md) |
+| Co-Ownership Governance and Resident Operations | G2 | — | not started | [coownership-governance-and-resident-operations-program.md](projects/coownership-governance-and-resident-operations-program.md) |
+| Semantic Building Operations and Systems | G2 | C, J | partial | [semantic-building-operations-and-systems-program.md](projects/semantic-building-operations-and-systems-program.md) |
+| Climate Resilience and Environmental Context | G2 | B, S | partial | [climate-resilience-and-environmental-context-program.md](projects/climate-resilience-and-environmental-context-program.md) |
+| Sensor Fusion and Live Building State | G2 | J | not started | [sensor-fusion-and-live-building-state-program.md](projects/sensor-fusion-and-live-building-state-program.md) |
+| Agent Governance and Knowledge Workbench | G2 | I | partial | [agent-governance-and-knowledge-workbench-program.md](projects/agent-governance-and-knowledge-workbench-program.md) |
+| BIM, 3D, and Geometry-Native Intelligence | G2 | G, X | partial | [bim-3d-and-geometry-native-intelligence-program.md](projects/bim-3d-and-geometry-native-intelligence-program.md) |
+| Circularity and Material Afterlife | G2 | C | partial | [circularity-and-material-afterlife-program.md](projects/circularity-and-material-afterlife-program.md) |
+| Offline Field Sync and Resilient Capture | G2 | G | partial | [offline-field-sync-and-resilient-capture-program.md](projects/offline-field-sync-and-resilient-capture-program.md) |
 
-| Programme File | Gate | Roadmap Programme | Domain |
-|---------------|------|-------------------|--------|
-| portfolio-execution-and-packs-program.md | G3 | I, M | Portfolio execution & authority packs |
-| portfolio-intelligence-command-center-program.md | G3 | I | Portfolio intelligence command center |
-| transaction-insurance-finance-readiness-program.md | G3 | AA, F, R | Transaction, insurance & finance readiness |
-| benchmarking-learning-and-market-intelligence-program.md | G3 | I, R | Benchmarking & market intelligence |
-| counterfactual-stress-testing-and-shock-planning-program.md | G3 | I | Stress testing & scenario planning |
-| training-certification-and-operating-enablement-program.md | G3 | — | Training, certification & enablement |
-| procurement-vendor-and-sla-program.md | G3 | — | Procurement, vendor & SLA management |
-| partner-network-and-contributor-reputation-program.md | G3 | — | Partner network & contributor reputation |
+### Gate 3 — Portfolio & Capital (M12-M30) — 8 programmes
 
-### Gate 4 — Infrastructure & Standard (M24-M48)
+| Name | Gate | Prog | Status | File |
+|------|------|------|--------|------|
+| Portfolio Execution and Packs | G3 | I, M | partial | [portfolio-execution-and-packs-program.md](projects/portfolio-execution-and-packs-program.md) |
+| Portfolio Intelligence Command Center | G3 | I | partial | [portfolio-intelligence-command-center-program.md](projects/portfolio-intelligence-command-center-program.md) |
+| Transaction, Insurance, and Finance Readiness | G3 | AA, F, R | not started | [transaction-insurance-finance-readiness-program.md](projects/transaction-insurance-finance-readiness-program.md) |
+| Benchmarking, Learning, and Market Intelligence | G3 | I, R | not started | [benchmarking-learning-and-market-intelligence-program.md](projects/benchmarking-learning-and-market-intelligence-program.md) |
+| Counterfactual Stress Testing and Shock Planning | G3 | I | not started | [counterfactual-stress-testing-and-shock-planning-program.md](projects/counterfactual-stress-testing-and-shock-planning-program.md) |
+| Training, Certification, and Operating Enablement | G3 | — | not started | [training-certification-and-operating-enablement-program.md](projects/training-certification-and-operating-enablement-program.md) |
+| Procurement, Vendor, and SLA | G3 | — | not started | [procurement-vendor-and-sla-program.md](projects/procurement-vendor-and-sla-program.md) |
+| Partner Network and Contributor Reputation | G3 | — | not started | [partner-network-and-contributor-reputation-program.md](projects/partner-network-and-contributor-reputation-program.md) |
 
-| Programme File | Gate | Roadmap Programme | Domain |
-|---------------|------|-------------------|--------|
-| rules-pack-studio-and-europe-expansion-program.md | G4 | N | Rules pack studio & Europe expansion |
-| ecosystem-network-and-market-infrastructure-program.md | G4 | — | Ecosystem network & market infrastructure |
-| openbim-digital-logbook-and-passport-convergence-program.md | G4 | AD | openBIM & digital logbook convergence |
-| distribution-and-embedded-channels-program.md | G4 | — | Distribution & embedded channels |
-| enterprise-identity-and-tenant-governance-program.md | G4 | — | Enterprise identity & tenant governance |
-| territory-public-systems-and-utility-coordination-program.md | G4 | — | Territory & public systems coordination |
-| market-reference-schema-and-meta-os-governance-program.md | G4 | AD | Market reference schema & meta-OS governance |
-| privacy-security-and-data-governance-program.md | G4 | — | Privacy, security & data governance |
+### Gate 4 — Infrastructure & Standard (M24-M48) — 8 programmes
 
-### Cross-Cutting (M0-M48)
+| Name | Gate | Prog | Status | File |
+|------|------|------|--------|------|
+| Rules Pack Studio and Europe Expansion | G4 | N | not started | [rules-pack-studio-and-europe-expansion-program.md](projects/rules-pack-studio-and-europe-expansion-program.md) |
+| Ecosystem Network and Market Infrastructure | G4 | — | not started | [ecosystem-network-and-market-infrastructure-program.md](projects/ecosystem-network-and-market-infrastructure-program.md) |
+| openBIM, Digital Logbook, and Passport Convergence | G4 | AD | not started | [openbim-digital-logbook-and-passport-convergence-program.md](projects/openbim-digital-logbook-and-passport-convergence-program.md) |
+| Distribution and Embedded Channels | G4 | — | not started | [distribution-and-embedded-channels-program.md](projects/distribution-and-embedded-channels-program.md) |
+| Enterprise Identity and Tenant Governance | G4 | — | not started | [enterprise-identity-and-tenant-governance-program.md](projects/enterprise-identity-and-tenant-governance-program.md) |
+| Territory, Public Systems, and Utility Coordination | G4 | — | not started | [territory-public-systems-and-utility-coordination-program.md](projects/territory-public-systems-and-utility-coordination-program.md) |
+| Market Reference Schema and Meta-OS Governance | G4 | AD | not started | [market-reference-schema-and-meta-os-governance-program.md](projects/market-reference-schema-and-meta-os-governance-program.md) |
+| Privacy, Security, and Data Governance | G4 | — | not started | [privacy-security-and-data-governance-program.md](projects/privacy-security-and-data-governance-program.md) |
 
-| Programme File | Gate | Roadmap Programme | Domain |
-|---------------|------|-------------------|--------|
-| reliability-observability-and-recovery-program.md | Cross | Platform & DevOps | Reliability, observability & recovery |
-| continuous-review-and-modernization-program.md | Cross | Platform & DevOps | Continuous review & modernization |
-| frontend-async-state-standardization-program.md | Cross | Platform & DevOps | Frontend async state standardization |
-| frontend-performance-and-bundle-hardening-program.md | Cross | Platform & DevOps | Frontend performance & bundle hardening |
-| domain-facades-and-service-consolidation-program.md | Cross | Platform & DevOps | Domain facades & service consolidation |
-| service-consumer-mapping-and-dead-code-pruning-program.md | Cross | Platform & DevOps | Service mapping & dead-code pruning |
-| test-right-sizing-and-integration-confidence-program.md | Cross | Platform & DevOps | Test right-sizing & integration confidence |
-| read-models-query-topology-and-aggregate-apis-program.md | Cross | Platform & DevOps | Read models & aggregate APIs |
-| api-contracts-and-generated-clients-program.md | Cross | Platform & DevOps | API contracts & generated clients |
-| async-jobs-projections-and-background-orchestration-program.md | Cross | Platform & DevOps | Async jobs & background orchestration |
-| baticonnect-product-blueprint-program.md | Cross | — | Product blueprint & canonical architecture |
+### Cross-Cutting (M0-M48) — 11 programmes
+
+| Name | Gate | Prog | Status | File |
+|------|------|------|--------|------|
+| Reliability, Observability, and Recovery | Cross | Platform & DevOps | partial | [reliability-observability-and-recovery-program.md](projects/reliability-observability-and-recovery-program.md) |
+| Continuous Review and Modernization | Cross | Platform & DevOps | not started | [continuous-review-and-modernization-program.md](projects/continuous-review-and-modernization-program.md) |
+| Frontend Async State Standardization | Cross | Platform & DevOps | not started | [frontend-async-state-standardization-program.md](projects/frontend-async-state-standardization-program.md) |
+| Frontend Performance and Bundle Hardening | Cross | Platform & DevOps | partial | [frontend-performance-and-bundle-hardening-program.md](projects/frontend-performance-and-bundle-hardening-program.md) |
+| Domain Facades and Service Consolidation | Cross | Platform & DevOps | not started | [domain-facades-and-service-consolidation-program.md](projects/domain-facades-and-service-consolidation-program.md) |
+| Service Consumer Mapping and Dead-Code Pruning | Cross | Platform & DevOps | not started | [service-consumer-mapping-and-dead-code-pruning-program.md](projects/service-consumer-mapping-and-dead-code-pruning-program.md) |
+| Test Right-Sizing and Integration Confidence | Cross | Platform & DevOps | not started | [test-right-sizing-and-integration-confidence-program.md](projects/test-right-sizing-and-integration-confidence-program.md) |
+| Read Models, Query Topology, and Aggregate APIs | Cross | Platform & DevOps | not started | [read-models-query-topology-and-aggregate-apis-program.md](projects/read-models-query-topology-and-aggregate-apis-program.md) |
+| API Contracts and Generated Clients | Cross | Platform & DevOps | not started | [api-contracts-and-generated-clients-program.md](projects/api-contracts-and-generated-clients-program.md) |
+| Async Jobs, Projections, and Background Orchestration | Cross | Platform & DevOps | partial | [async-jobs-projections-and-background-orchestration-program.md](projects/async-jobs-projections-and-background-orchestration-program.md) |
+| BatiConnect Product Blueprint | Cross | — | done | [baticonnect-product-blueprint-program.md](projects/baticonnect-product-blueprint-program.md) |
 
 **Total: 61 programmes | G1: 12 | G2: 22 | G3: 8 | G4: 8 | Cross-cutting: 11**
+**Status: 1 done | 28 partial | 32 not started**
 
 ---
 
