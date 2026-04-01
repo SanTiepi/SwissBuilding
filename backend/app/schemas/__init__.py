@@ -49,6 +49,12 @@ from app.schemas.cross_layer_intelligence import (
     IntelligenceSummaryRead,
     PortfolioInsightRead,
 )
+from app.schemas.defect_timeline import (
+    DefectAlertResponse,
+    DefectTimelineCreate,
+    DefectTimelineResponse,
+    DefectTimelineUpdate,
+)
 from app.schemas.diagnostic import DiagnosticCreate, DiagnosticRead, DiagnosticUpdate
 from app.schemas.document import DocumentRead
 from app.schemas.document_checklist import ChecklistItemRead, DocumentChecklistRead
@@ -216,6 +222,10 @@ __all__ = [
     "CostEstimate",
     "CostOfInaction",
     "CrossLayerInsightRead",
+    "DefectAlertResponse",
+    "DefectTimelineCreate",
+    "DefectTimelineResponse",
+    "DefectTimelineUpdate",
     "DiagnosticCreate",
     "DiagnosticRead",
     "DiagnosticUpdate",
