@@ -3,9 +3,11 @@
 Art. 367 al. 1bis CO: 60-day notification window since 01.01.2026.
 """
 
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -71,28 +73,55 @@ async def list_defect_alerts(
     return await get_active_alerts(db, days_threshold=days_threshold, building_id=building_id)
 
 
-@router.post("/defects/notification/{timeline_id}", response_model=DefectTimelineResponse)
-async def generate_notification(
+@router.post("/defects/{timeline_id}/generate-letter")
+async def generate_defect_letter(
     timeline_id: UUID,
+    lang: Literal["fr", "de", "it"] = Query("fr"),
     current_user: User = Depends(require_permission("buildings", "update")),
     db: AsyncSession = Depends(get_db),
 ):
-    """Generate notification letter for a defect (stub: marks as notified, returns JSON).
+    """Generate a PDF notification letter for a defect via Gotenberg.
 
-    Future: will generate PDF via Gotenberg and store in MinIO.
+    Art. 367 al. 1bis CO: formal defect notification letter with
+    building address, EGID, defect description, discovery date,
+    notification deadline, legal reference, and signature blocks.
+
+    Also marks the defect as notified and stores the PDF URL.
     """
+    import logging
     from datetime import UTC, datetime
+
+    from app.services.defect_letter_service import generate_letter_pdf
+
+    logger = logging.getLogger(__name__)
 
     timeline = await get_timeline(db, timeline_id)
     if not timeline:
         raise HTTPException(status_code=404, detail="Defect timeline not found")
     if timeline.status != "active":
-        raise HTTPException(status_code=400, detail=f"Cannot notify a defect with status '{timeline.status}'")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot generate letter for a defect with status '{timeline.status}'",
+        )
 
-    updated = await update_timeline_status(
+    try:
+        pdf_bytes = await generate_letter_pdf(db, timeline_id, lang=lang)
+    except Exception as exc:
+        logger.exception("Failed to generate defect letter PDF: %s", exc)
+        raise HTTPException(status_code=502, detail="PDF generation failed") from exc
+
+    # Mark as notified
+    filename = f"defect-notification-{timeline_id}-{lang}.pdf"
+    await update_timeline_status(
         db,
         timeline_id,
         status="notified",
         notified_at=datetime.now(UTC),
+        notification_pdf_url=filename,
     )
-    return updated
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
