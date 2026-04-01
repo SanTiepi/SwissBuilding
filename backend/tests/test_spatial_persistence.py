@@ -59,6 +59,10 @@ def _make_mock_building(building_id: uuid.UUID | None = None):
     bld.floors_below = None
     bld.surface_area_m2 = None
     bld.volume_m3 = None
+    bld.footprint_wkt = None
+    bld.building_height = None
+    bld.roof_type = None
+    bld.floor_count_3d = None
     bld.dwellings = None
     bld.has_elevator = False
     bld.source_metadata_json = {}
@@ -372,6 +376,133 @@ class TestSpatialPersistenceInEnrichmentMeta:
         assert meta["roof_type"] is None
         assert meta["footprint_area_m2"] is None
         assert result.spatial_fetched is True
+
+
+class TestSpatialColumnPersistence:
+    """Verify swissBUILDINGS3D data is persisted to first-class Building columns."""
+
+    @pytest.mark.asyncio
+    async def test_building_columns_set_after_successful_fetch(self):
+        """footprint_wkt, building_height, roof_type, floor_count_3d are set on the building."""
+        building = _make_mock_building()
+        db = _mock_db_session(building)
+        spatial_data = _full_spatial_response()
+
+        extra = {
+            f"{_O}.SpatialEnrichmentService.fetch_building_footprint": AsyncMock(return_value=spatial_data),
+        }
+
+        with _apply_patches(extra):
+            from app.services.enrichment.orchestrator import enrich_building
+
+            await enrich_building(
+                db,
+                building.id,
+                skip_geocode=True,
+                skip_regbl=True,
+                skip_ai=True,
+                skip_cadastre=True,
+                skip_image=True,
+            )
+
+        assert building.building_height == 12.5
+        assert building.roof_type == "Flachdach"
+        assert building.floor_count_3d == 4
+        assert building.footprint_wkt is not None
+        assert building.footprint_wkt.startswith("POLYGON")
+
+    @pytest.mark.asyncio
+    async def test_building_columns_not_overwritten_if_already_set(self):
+        """Existing first-class column values are preserved (not overwritten)."""
+        building = _make_mock_building()
+        building.building_height = 10.0
+        building.roof_type = "Walmdach"
+        building.floor_count_3d = 3
+        building.footprint_wkt = "POLYGON((0 0, 1 0, 1 1, 0 0))"
+        db = _mock_db_session(building)
+
+        extra = {
+            f"{_O}.SpatialEnrichmentService.fetch_building_footprint": AsyncMock(return_value=_full_spatial_response()),
+        }
+
+        with _apply_patches(extra):
+            from app.services.enrichment.orchestrator import enrich_building
+
+            await enrich_building(
+                db,
+                building.id,
+                skip_geocode=True,
+                skip_regbl=True,
+                skip_ai=True,
+                skip_cadastre=True,
+                skip_image=True,
+            )
+
+        # Original values preserved
+        assert building.building_height == 10.0
+        assert building.roof_type == "Walmdach"
+        assert building.floor_count_3d == 3
+        assert building.footprint_wkt == "POLYGON((0 0, 1 0, 1 1, 0 0))"
+
+    @pytest.mark.asyncio
+    async def test_partial_spatial_sets_only_available_columns(self):
+        """Partial spatial data only sets columns that have values."""
+        building = _make_mock_building()
+        db = _mock_db_session(building)
+
+        extra = {
+            f"{_O}.SpatialEnrichmentService.fetch_building_footprint": AsyncMock(
+                return_value=_partial_spatial_response()
+            ),
+        }
+
+        with _apply_patches(extra):
+            from app.services.enrichment.orchestrator import enrich_building
+
+            await enrich_building(
+                db,
+                building.id,
+                skip_geocode=True,
+                skip_regbl=True,
+                skip_ai=True,
+                skip_cadastre=True,
+                skip_image=True,
+            )
+
+        assert building.building_height == 9.8
+        assert building.roof_type is None
+        assert building.floor_count_3d is None
+        assert building.footprint_wkt is None
+
+    @pytest.mark.asyncio
+    async def test_no_columns_set_on_error_response(self):
+        """When swissBUILDINGS3D returns error, no building columns are modified."""
+        building = _make_mock_building()
+        db = _mock_db_session(building)
+
+        extra = {
+            f"{_O}.SpatialEnrichmentService.fetch_building_footprint": AsyncMock(
+                return_value=_empty_spatial_response()
+            ),
+        }
+
+        with _apply_patches(extra):
+            from app.services.enrichment.orchestrator import enrich_building
+
+            await enrich_building(
+                db,
+                building.id,
+                skip_geocode=True,
+                skip_regbl=True,
+                skip_ai=True,
+                skip_cadastre=True,
+                skip_image=True,
+            )
+
+        assert building.building_height is None
+        assert building.roof_type is None
+        assert building.floor_count_3d is None
+        assert building.footprint_wkt is None
 
 
 class TestSpatialParseResponse:
