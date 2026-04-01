@@ -59,6 +59,13 @@ class Settings(BaseSettings):
     OCRMYPDF_ENABLED: bool = True
     OCRMYPDF_LANGUAGE: str = "fra+deu+ita+eng"  # Swiss multilingual
 
+    # Anthropic Claude API (Vision, AI enrichment)
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-sonnet-4-20250514"
+
+    # Mapbox (Isochrone API)
+    MAPBOX_API_KEY: str | None = None
+
     # Batiscan Bridge (Consumer Bridge v1)
     BATISCAN_API_URL: str | None = None
     BATISCAN_API_KEY: str | None = None

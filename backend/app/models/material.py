@@ -1,7 +1,7 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -26,6 +26,13 @@ class Material(Base):
     notes = Column(Text, nullable=True)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=func.now())
+
+    # AI recognition metadata
+    identified_by_ai = Column(Boolean, default=False)
+    ai_confidence = Column(Float, nullable=True)
+    year_estimated = Column(Integer, nullable=True)
+    ai_pollutants = Column(JSON, nullable=True)
+    ai_recommendations = Column(JSON, nullable=True)
 
     element = relationship("BuildingElement", back_populates="materials")
     sample = relationship("Sample")

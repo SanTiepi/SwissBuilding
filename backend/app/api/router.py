@@ -27,6 +27,7 @@ from app.api import (
     building_elements,
     building_genealogy,
     building_health_index,
+    building_isochrone,
     building_life,
     building_lifecycle,
     building_quality,
@@ -138,6 +139,7 @@ from app.api import (
     marketplace_rfq,
     marketplace_trust,
     material_inventory,
+    material_recognition,
     material_recommendations,
     materials,
     memory_transfers,
@@ -288,6 +290,7 @@ api_router.include_router(zone_classification.router, prefix="", tags=["Zone Cla
 api_router.include_router(building_elements.router, prefix="", tags=["Building Elements"])
 api_router.include_router(materials.router, prefix="", tags=["Materials"])
 api_router.include_router(material_inventory.router, prefix="", tags=["Material Inventory"])
+api_router.include_router(material_recognition.router, prefix="", tags=["Material Recognition"])
 api_router.include_router(material_recommendations.router, prefix="", tags=["Material Recommendations"])
 api_router.include_router(intake.router, prefix="", tags=["Intake"])
 api_router.include_router(intents.router, prefix="", tags=["Building Intents"])
@@ -308,6 +311,7 @@ api_router.include_router(execution_quality.router, prefix="", tags=["Execution 
 api_router.include_router(dossier.router, prefix="", tags=["Dossier"])
 api_router.include_router(building_lifecycle.router, prefix="", tags=["Building Lifecycle"])
 api_router.include_router(building_health_index.router, prefix="", tags=["Building Health Index"])
+api_router.include_router(building_isochrone.router, prefix="", tags=["Isochrone"])
 api_router.include_router(building_quality.router, prefix="", tags=["Building Quality"])
 api_router.include_router(completeness.router, prefix="", tags=["Completeness"])
 api_router.include_router(jurisdictions.router, prefix="", tags=["Jurisdictions"])

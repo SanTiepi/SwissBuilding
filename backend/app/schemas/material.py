@@ -16,6 +16,11 @@ class MaterialCreate(BaseModel):
     sample_id: uuid.UUID | None = None
     source: str | None = None
     notes: str | None = None
+    identified_by_ai: bool = False
+    ai_confidence: float | None = None
+    year_estimated: int | None = None
+    ai_pollutants: dict | None = None
+    ai_recommendations: list[str] | None = None
 
 
 class MaterialRead(BaseModel):
@@ -34,5 +39,10 @@ class MaterialRead(BaseModel):
     notes: str | None
     created_by: uuid.UUID | None
     created_at: datetime
+    identified_by_ai: bool
+    ai_confidence: float | None
+    year_estimated: int | None
+    ai_pollutants: dict | None
+    ai_recommendations: list | None
 
     model_config = ConfigDict(from_attributes=True)
