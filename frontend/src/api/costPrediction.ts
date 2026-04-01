@@ -43,5 +43,10 @@ export interface CostPredictionResponse {
 
 export const costPredictionApi = {
   predict: (data: CostPredictionRequest): Promise<CostPredictionResponse> =>
-    apiClient.post('/predict/cost', data),
+    apiClient.post('/predict/cost', data).then((r) => r.data),
+
+  exportPdf: (data: CostPredictionRequest): Promise<Blob> =>
+    apiClient
+      .post('/predict/cost/pdf', data, { responseType: 'blob' })
+      .then((r) => r.data),
 };

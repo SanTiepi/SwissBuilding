@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
-import { costPredictionApi } from '@/api/costPrediction';
-import type { CostPredictionRequest, CostPredictionResponse } from '@/api/costPrediction';
+import type { CostPredictionResponse } from '@/api/costPrediction';
+import { useCostPrediction, useCostPredictionPdf } from '@/hooks/useCostPrediction';
 import { formatCHF } from '@/utils/formatters';
-import { toast } from '@/store/toastStore';
-import { X, Loader2, Calculator, Clock, Gauge, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Loader2, Calculator, Clock, Gauge, AlertTriangle, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { cn } from '@/utils/formatters';
 
 // ---------------------------------------------------------------------------
@@ -206,26 +204,24 @@ export function CostEstimationModal({
   // Result
   const [result, setResult] = useState<CostPredictionResponse | null>(null);
 
-  const mutation = useMutation({
-    mutationFn: (data: CostPredictionRequest) => costPredictionApi.predict(data),
-    onSuccess: (data) => {
-      setResult(data);
-    },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || t('app.error') || 'An error occurred';
-      toast(msg, 'error');
-    },
-  });
+  const mutation = useCostPrediction();
+  const pdfMutation = useCostPredictionPdf();
+
+  const currentRequest = {
+    pollutant_type: pollutantType,
+    material_type: materialType,
+    condition,
+    surface_m2: surfaceM2,
+    canton,
+    accessibility,
+  };
 
   const handleEstimate = () => {
-    mutation.mutate({
-      pollutant_type: pollutantType,
-      material_type: materialType,
-      condition,
-      surface_m2: surfaceM2,
-      canton,
-      accessibility,
-    });
+    mutation.mutate(currentRequest, { onSuccess: (data) => setResult(data) });
+  };
+
+  const handleExportPdf = () => {
+    pdfMutation.mutate(currentRequest);
   };
 
   // Label helpers
@@ -421,6 +417,25 @@ export function CostEstimationModal({
                     'Estimation indicative basee sur des donnees statistiques. Ne constitue pas un devis.'}
                 </p>
               </div>
+
+              {/* PDF Export */}
+              <button
+                onClick={handleExportPdf}
+                disabled={pdfMutation.isPending}
+                className={cn(
+                  'w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium border transition-colors',
+                  pdfMutation.isPending
+                    ? 'border-gray-300 text-gray-400 cursor-not-allowed dark:border-slate-600 dark:text-slate-500'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700',
+                )}
+              >
+                {pdfMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {t('cost_prediction.export_pdf') || 'Telecharger PDF'}
+              </button>
             </div>
           )}
         </div>

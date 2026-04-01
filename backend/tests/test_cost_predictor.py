@@ -69,76 +69,30 @@ async def _seed_reference(db, **kwargs):
 async def _seed_all_references(db):
     """Seed the full set of cost references for integration-style tests."""
     refs = [
-        {
-            "pollutant_type": "asbestos",
-            "material_type": "flocage",
-            "cost_per_m2_min": 150,
-            "cost_per_m2_median": 250,
-            "cost_per_m2_max": 350,
-            "complexity": "complexe",
-            "duration_days_estimate": 30,
-        },
-        {
-            "pollutant_type": "asbestos",
-            "material_type": "dalle_vinyle",
-            "cost_per_m2_min": 50,
-            "cost_per_m2_median": 85,
-            "cost_per_m2_max": 120,
-            "complexity": "moyenne",
-            "duration_days_estimate": 10,
-        },
-        {
-            "pollutant_type": "pcb",
-            "material_type": "joint",
-            "cost_per_m2_min": 100,
-            "cost_per_m2_median": 175,
-            "cost_per_m2_max": 250,
-            "complexity": "moyenne",
-            "duration_days_estimate": 15,
-        },
-        {
-            "pollutant_type": "lead",
-            "material_type": "peinture",
-            "method": "decapage",
-            "cost_per_m2_min": 60,
-            "cost_per_m2_median": 105,
-            "cost_per_m2_max": 150,
-            "complexity": "simple",
-            "duration_days_estimate": 7,
-        },
-        {
-            "pollutant_type": "hap",
-            "material_type": "revetement",
-            "cost_per_m2_min": 80,
-            "cost_per_m2_median": 140,
-            "cost_per_m2_max": 200,
-            "complexity": "moyenne",
-            "duration_days_estimate": 15,
-        },
-        {
-            "pollutant_type": "radon",
-            "material_type": "other",
-            "condition": "bon",
-            "method": "ventilation",
-            "cost_per_m2_min": None,
-            "cost_per_m2_median": None,
-            "cost_per_m2_max": None,
-            "is_forfait": True,
-            "forfait_min": 5000,
-            "forfait_median": 10000,
-            "forfait_max": 15000,
-            "complexity": "simple",
-            "duration_days_estimate": 5,
-        },
-        {
-            "pollutant_type": "pfas",
-            "material_type": "other",
-            "cost_per_m2_min": 100,
-            "cost_per_m2_median": 200,
-            "cost_per_m2_max": 300,
-            "complexity": "complexe",
-            "duration_days_estimate": 22,
-        },
+        # Asbestos (10 materials)
+        {"pollutant_type": "asbestos", "material_type": "flocage", "cost_per_m2_min": 150, "cost_per_m2_median": 250, "cost_per_m2_max": 350, "complexity": "complexe", "duration_days_estimate": 30},
+        {"pollutant_type": "asbestos", "material_type": "dalle_vinyle", "cost_per_m2_min": 50, "cost_per_m2_median": 85, "cost_per_m2_max": 120, "complexity": "moyenne", "duration_days_estimate": 10},
+        {"pollutant_type": "asbestos", "material_type": "joint", "cost_per_m2_min": 80, "cost_per_m2_median": 140, "cost_per_m2_max": 200, "complexity": "moyenne", "duration_days_estimate": 7},
+        {"pollutant_type": "asbestos", "material_type": "colle", "cost_per_m2_min": 60, "cost_per_m2_median": 100, "cost_per_m2_max": 150, "complexity": "moyenne", "duration_days_estimate": 10},
+        {"pollutant_type": "asbestos", "material_type": "isolation", "cost_per_m2_min": 100, "cost_per_m2_median": 175, "cost_per_m2_max": 250, "complexity": "complexe", "duration_days_estimate": 22},
+        {"pollutant_type": "asbestos", "material_type": "other", "cost_per_m2_min": 80, "cost_per_m2_median": 150, "cost_per_m2_max": 220, "complexity": "moyenne", "duration_days_estimate": 15},
+        # PCB (5 materials)
+        {"pollutant_type": "pcb", "material_type": "joint", "cost_per_m2_min": 100, "cost_per_m2_median": 175, "cost_per_m2_max": 250, "complexity": "moyenne", "duration_days_estimate": 15},
+        {"pollutant_type": "pcb", "material_type": "peinture", "method": "decapage", "cost_per_m2_min": 80, "cost_per_m2_median": 130, "cost_per_m2_max": 180, "complexity": "moyenne", "duration_days_estimate": 12},
+        {"pollutant_type": "pcb", "material_type": "other", "cost_per_m2_min": 95, "cost_per_m2_median": 160, "cost_per_m2_max": 225, "complexity": "moyenne", "duration_days_estimate": 13},
+        # Lead (4 materials)
+        {"pollutant_type": "lead", "material_type": "peinture", "method": "decapage", "cost_per_m2_min": 60, "cost_per_m2_median": 105, "cost_per_m2_max": 150, "complexity": "simple", "duration_days_estimate": 7},
+        {"pollutant_type": "lead", "material_type": "enduit", "cost_per_m2_min": 70, "cost_per_m2_median": 120, "cost_per_m2_max": 170, "complexity": "moyenne", "duration_days_estimate": 12},
+        {"pollutant_type": "lead", "material_type": "other", "method": "decapage", "cost_per_m2_min": 65, "cost_per_m2_median": 110, "cost_per_m2_max": 160, "complexity": "simple", "duration_days_estimate": 8},
+        # HAP (5 materials)
+        {"pollutant_type": "hap", "material_type": "revetement", "cost_per_m2_min": 80, "cost_per_m2_median": 140, "cost_per_m2_max": 200, "complexity": "moyenne", "duration_days_estimate": 15},
+        {"pollutant_type": "hap", "material_type": "toiture", "cost_per_m2_min": 60, "cost_per_m2_median": 110, "cost_per_m2_max": 160, "complexity": "moyenne", "duration_days_estimate": 12},
+        {"pollutant_type": "hap", "material_type": "other", "cost_per_m2_min": 70, "cost_per_m2_median": 125, "cost_per_m2_max": 180, "complexity": "moyenne", "duration_days_estimate": 13},
+        # Radon (2 forfait)
+        {"pollutant_type": "radon", "material_type": "other", "condition": "bon", "method": "ventilation", "cost_per_m2_min": None, "cost_per_m2_median": None, "cost_per_m2_max": None, "is_forfait": True, "forfait_min": 5000, "forfait_median": 10000, "forfait_max": 15000, "complexity": "simple", "duration_days_estimate": 5},
+        # PFAS (3 materials)
+        {"pollutant_type": "pfas", "material_type": "other", "cost_per_m2_min": 100, "cost_per_m2_median": 200, "cost_per_m2_max": 300, "complexity": "complexe", "duration_days_estimate": 22},
+        {"pollutant_type": "pfas", "material_type": "revetement", "cost_per_m2_min": 120, "cost_per_m2_median": 220, "cost_per_m2_max": 320, "complexity": "complexe", "duration_days_estimate": 20},
     ]
     for r in refs:
         await _seed_reference(db, **r)
@@ -594,3 +548,149 @@ def test_breakdown_template_sums_to_one():
     """Breakdown template percentages must sum to 1.0."""
     total = sum(pct for _, pct in BREAKDOWN_TEMPLATE)
     assert abs(total - 1.0) < 0.001
+
+
+# ── HAP and PFAS specific tests ────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_predict_hap_revetement(db_session):
+    """HAP revetement 120m²."""
+    await _seed_reference(
+        db_session,
+        pollutant_type="hap",
+        material_type="revetement",
+        cost_per_m2_min=80,
+        cost_per_m2_median=140,
+        cost_per_m2_max=200,
+        complexity="moyenne",
+        duration_days_estimate=15,
+    )
+    req = CostPredictionRequest(
+        pollutant_type="hap",
+        material_type="revetement",
+        surface_m2=120,
+    )
+    resp = await predict_cost(db_session, req)
+    assert resp.cost_min == 9600.0  # 80*120
+    assert resp.cost_median == 16800.0  # 140*120
+    assert resp.cost_max == 24000.0  # 200*120
+
+
+@pytest.mark.asyncio
+async def test_predict_pfas_revetement(db_session):
+    """PFAS revetement 60m²."""
+    await _seed_reference(
+        db_session,
+        pollutant_type="pfas",
+        material_type="revetement",
+        cost_per_m2_min=120,
+        cost_per_m2_median=220,
+        cost_per_m2_max=320,
+        complexity="complexe",
+        duration_days_estimate=20,
+    )
+    req = CostPredictionRequest(
+        pollutant_type="pfas",
+        material_type="revetement",
+        surface_m2=60,
+    )
+    resp = await predict_cost(db_session, req)
+    assert resp.cost_min == 7200.0  # 120*60
+    assert resp.cost_median == 13200.0  # 220*60
+    assert resp.cost_max == 19200.0  # 320*60
+    assert resp.complexity == "complexe"
+
+
+@pytest.mark.asyncio
+async def test_predict_invalid_condition_raises_error(db_session):
+    """Invalid condition should raise validation error."""
+    req = CostPredictionRequest(
+        pollutant_type="asbestos",
+        material_type="flocage",
+        condition="destroyed",
+        surface_m2=100,
+    )
+    with pytest.raises(CostPredictionError, match="Unknown condition"):
+        await predict_cost(db_session, req)
+
+
+@pytest.mark.asyncio
+async def test_predict_invalid_accessibility_raises_error(db_session):
+    """Invalid accessibility should raise validation error."""
+    req = CostPredictionRequest(
+        pollutant_type="asbestos",
+        material_type="flocage",
+        accessibility="impossible",
+        surface_m2=100,
+    )
+    with pytest.raises(CostPredictionError, match="Unknown accessibility"):
+        await predict_cost(db_session, req)
+
+
+@pytest.mark.asyncio
+async def test_predict_negative_surface_rejected(db_session):
+    """Negative surface_m2 should be rejected by Pydantic validation."""
+    with pytest.raises(ValueError):
+        CostPredictionRequest(
+            pollutant_type="asbestos",
+            material_type="flocage",
+            surface_m2=-10,
+        )
+
+
+# ── PDF HTML builder tests ─────────────────────────────────────
+
+
+def test_pdf_html_builder():
+    """Verify the PDF HTML builder produces valid output."""
+    from app.api.cost_prediction import _build_cost_pdf_html
+    from app.schemas.cost_prediction import CostBreakdownItem, CostPredictionResponse
+
+    result = CostPredictionResponse(
+        pollutant_type="asbestos",
+        material_type="flocage",
+        surface_m2=100,
+        cost_min=15000,
+        cost_median=25000,
+        cost_max=35000,
+        duration_days=30,
+        complexity="complexe",
+        method="depose",
+        canton_coefficient=1.0,
+        accessibility_coefficient=1.0,
+        breakdown=[
+            CostBreakdownItem(label="Dépose", percentage=45.0, amount_min=6750, amount_median=11250, amount_max=15750),
+        ],
+    )
+    request = CostPredictionRequest(
+        pollutant_type="asbestos",
+        material_type="flocage",
+        surface_m2=100,
+        canton="VD",
+        accessibility="normal",
+    )
+    html = _build_cost_pdf_html(result, request)
+    assert "asbestos" in html
+    assert "flocage" in html
+    assert "100" in html
+    assert "VD" in html
+    assert "Dépose" in html
+    assert "BatiConnect" in html
+
+
+def test_format_chf():
+    """CHF formatter should use Swiss thousands separator."""
+    from app.api.cost_prediction import _format_chf
+
+    assert _format_chf(1234.56) == "CHF 1'234.56"
+    assert _format_chf(0) == "CHF 0.00"
+    assert _format_chf(100000) == "CHF 100'000.00"
+
+
+@pytest.mark.asyncio
+async def test_seed_data_count_at_least_30(db_session):
+    """Seed data should contain at least 30 reference entries."""
+    from app.seeds.seed_cost_references import COST_REFERENCES
+
+    assert len(COST_REFERENCES) >= 30
