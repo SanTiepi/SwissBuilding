@@ -43,6 +43,7 @@ const LazyPassportDiffView = lazy(() => import('@/components/building-detail/Pas
 const LazyBuildingExplorerEmbed = lazy(() => import('@/pages/BuildingExplorer'));
 const LazyBuildingPlansEmbed = lazy(() => import('@/pages/BuildingPlans'));
 const LazyBuildingInterventionsEmbed = lazy(() => import('@/pages/BuildingInterventions'));
+const LazyIsochroneMapPanel = lazy(() => import('@/pages/Building/IsochroneMapPanel'));
 const LazyIntelligencePanel = lazy(() =>
   import('@/components/IntelligencePanel').then((m) => ({ default: m.IntelligencePanel })),
 );
@@ -593,7 +594,7 @@ export default function BuildingDetail() {
               </Suspense>
             )}
 
-            {/* Spatial — zone/element explorer + plans */}
+            {/* Spatial — zone/element explorer + plans + isochrones */}
             {activeTab === 'spatial' && (
               <Suspense fallback={TabFallback}>
                 <div className="space-y-8">
@@ -601,6 +602,15 @@ export default function BuildingDetail() {
                   <div className="border-t border-gray-200 dark:border-slate-700 pt-6">
                     <LazyBuildingPlansEmbed />
                   </div>
+                  {building.latitude && building.longitude && (
+                    <div className="border-t border-gray-200 dark:border-slate-700 pt-6">
+                      <LazyIsochroneMapPanel
+                        buildingId={id!}
+                        latitude={building.latitude}
+                        longitude={building.longitude}
+                      />
+                    </div>
+                  )}
                 </div>
               </Suspense>
             )}
