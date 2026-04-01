@@ -60,7 +60,7 @@ Checkpoint rule:
 Frontend (`cd frontend`):
 ```
 npm run validate          # tsc + eslint + prettier (fast gate)
-npm test                  # vitest unit (~980 tests)
+npm test                  # vitest unit (~996 tests)
 npm run test:e2e          # playwright mock (no backend)
 npm run test:e2e:real     # playwright real (needs backend:8000)
 npm run build             # prod build + PWA
@@ -71,7 +71,7 @@ Backend (`cd backend`):
 ```
 ruff check app/ tests/              # lint (must be 0 errors)
 ruff format --check app/ tests/     # format (must be 0 errors)
-python -m pytest tests/ -q          # ~6950 tests
+python -m pytest tests/ -q          # ~7150 tests
 ruff check --fix app/ tests/ && ruff format app/ tests/  # auto-fix
 ```
 
@@ -254,3 +254,7 @@ New service must unlock an active gate or remove structural debt.
 - risk scoring: reuse existing services, don't duplicate
 - validate on real source data before claiming success
 - no importer change without matching tests
+
+## Lessons Learned
+
+- Consolidate ideas in a single roadmap document. Do not scatter brainstorms across separate files — they get lost.

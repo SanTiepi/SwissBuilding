@@ -105,6 +105,7 @@ BatiConnect carries:
 
 See `docs/vision-100x-master-brief.md` for the full ecosystem map.
 See `AGENTS.md` (section "Ecosystem Invariants") for the 6 hard rules.
+See `docs/roadmap-48-months.md` for the 48-month roadmap (29 programmes, 304+ features M0-M12).
 
 ## Hard Rules
 

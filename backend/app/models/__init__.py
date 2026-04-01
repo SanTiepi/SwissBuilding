@@ -65,6 +65,7 @@ from app.models.customer_success import CustomerSuccessMilestone
 from app.models.data_quality_issue import DataQualityIssue
 from app.models.decision_record import DecisionRecord
 from app.models.decision_replay import DecisionReplay
+from app.models.defect_timeline import DefectTimeline
 from app.models.delegated_access import (
     DelegatedAccessGrant,
     PrivilegedAccessEvent,
@@ -142,6 +143,7 @@ from app.models.readiness_assessment import ReadinessAssessment
 from app.models.recurring_service import RecurringService, WarrantyRecord
 from app.models.redaction_profile import DecisionCaveatProfile, ExternalAudienceRedactionProfile
 from app.models.regulatory_pack import RegulatoryPack
+from app.models.remediation_cost_reference import RemediationCostReference
 from app.models.request_document import RequestDocument
 from app.models.request_invitation import RequestInvitation
 from app.models.review import Review
@@ -239,6 +241,7 @@ __all__ = [
     "DecisionContext",
     "DecisionRecord",
     "DecisionReplay",
+    "DefectTimeline",
     "DelegatedAccessGrant",
     "DemoRunbookStep",
     "DemoScenario",
@@ -325,6 +328,7 @@ __all__ = [
     "ReadinessAssessment",
     "RecurringService",
     "RegulatoryPack",
+    "RemediationCostReference",
     "RequestDocument",
     "RequestInvitation",
     "RequirementProfile",

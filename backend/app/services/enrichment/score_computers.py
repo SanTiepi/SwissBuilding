@@ -812,3 +812,289 @@ def compute_component_lifecycle(building_data: dict[str, Any]) -> dict[str, Any]
         "urgent_count": urgent_count,
         "total_overdue_years": total_overdue_years,
     }
+
+
+# ---------------------------------------------------------------------------
+# Composite geospatial risk score
+# ---------------------------------------------------------------------------
+
+_GEO_RISK_GRADES = [
+    (15, "A"),
+    (30, "B"),
+    (50, "C"),
+    (70, "D"),
+    (85, "E"),
+]
+
+
+def _geo_grade(score: float) -> str:
+    """Return letter grade A-F from a 0-100 risk score."""
+    for threshold, grade in _GEO_RISK_GRADES:
+        if score <= threshold:
+            return grade
+    return "F"
+
+
+def _risk_level(raw: float) -> str:
+    """Classify a 0-100 dimension score into a human-readable level."""
+    if raw <= 15:
+        return "low"
+    if raw <= 40:
+        return "moderate"
+    if raw <= 65:
+        return "elevated"
+    return "high"
+
+
+def _flood_risk_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from natural_hazards.flood_risk + flood_zones.flood_danger_level.
+
+    Takes the *worse* of the two sources.
+    """
+    scores: list[float] = []
+
+    # From natural_hazards
+    hazards = enrichment_meta.get("natural_hazards", {})
+    if hazards:
+        level = str(hazards.get("flood_risk", "")).lower()
+        _map = {"high": 90.0, "medium": 50.0, "low": 15.0, "none": 0.0, "keine": 0.0}
+        for key, val in _map.items():
+            if key in level:
+                scores.append(val)
+                break
+
+    # From flood_zones
+    flood = enrichment_meta.get("flood_zones", {})
+    if flood:
+        level = str(flood.get("flood_danger_level", "")).lower()
+        if "hoch" in level or "erheblich" in level or "high" in level:
+            scores.append(90.0)
+        elif "mittel" in level or "medium" in level:
+            scores.append(50.0)
+        elif "gering" in level or "low" in level:
+            scores.append(15.0)
+        elif level:
+            scores.append(30.0)  # unknown non-empty = moderate
+
+    return max(scores) if scores else None
+
+
+def _seismic_risk_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from seismic zone."""
+    seismic = enrichment_meta.get("seismic", {})
+    if not seismic:
+        return None
+    zone = str(seismic.get("seismic_zone", "")).lower()
+    _map = {"3b": 95.0, "3a": 80.0, "2": 50.0, "1": 20.0}
+    return _map.get(zone)
+
+
+def _contamination_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from contaminated_sites."""
+    contam = enrichment_meta.get("contaminated_sites", {})
+    if not contam:
+        return None
+    if contam.get("is_contaminated"):
+        return 90.0
+    return 5.0
+
+
+def _radon_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from radon level."""
+    radon = enrichment_meta.get("radon", {})
+    if not radon:
+        return None
+    level = radon.get("radon_level", "")
+    _map = {"high": 80.0, "medium": 40.0, "low": 10.0}
+    return _map.get(level)
+
+
+def _noise_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from the loudest noise source (road, rail, aircraft)."""
+    noise = enrichment_meta.get("noise", {})
+    rail = enrichment_meta.get("railway_noise", {})
+    aircraft = enrichment_meta.get("aircraft_noise", {})
+
+    values: list[float] = []
+    road_db = noise.get("road_noise_day_db")
+    if road_db is not None:
+        values.append(float(road_db))
+    rail_db = rail.get("railway_noise_day_db")
+    if rail_db is not None:
+        values.append(float(rail_db))
+    air_db = aircraft.get("aircraft_noise_db")
+    if air_db is not None:
+        values.append(float(air_db))
+
+    if not values:
+        return None
+
+    max_db = max(values)
+    # Map dB to 0-100: <40→5, 40-50→20, 50-60→40, 60-70→65, >70→85
+    if max_db < 40:
+        return 5.0
+    if max_db < 50:
+        return 20.0
+    if max_db < 55:
+        return 35.0
+    if max_db < 60:
+        return 50.0
+    if max_db < 65:
+        return 65.0
+    if max_db < 70:
+        return 75.0
+    return 85.0
+
+
+def _landslide_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from natural_hazards.landslide_risk."""
+    hazards = enrichment_meta.get("natural_hazards", {})
+    if not hazards:
+        return None
+    level = str(hazards.get("landslide_risk", "")).lower()
+    _map = {"high": 90.0, "medium": 50.0, "low": 15.0, "none": 0.0, "keine": 0.0}
+    for key, val in _map.items():
+        if key in level:
+            return val
+    return None
+
+
+def _rockfall_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from natural_hazards.rockfall_risk."""
+    hazards = enrichment_meta.get("natural_hazards", {})
+    if not hazards:
+        return None
+    level = str(hazards.get("rockfall_risk", "")).lower()
+    _map = {"high": 90.0, "medium": 50.0, "low": 15.0, "none": 0.0, "keine": 0.0}
+    for key, val in _map.items():
+        if key in level:
+            return val
+    return None
+
+
+def _groundwater_restriction_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from groundwater protection zone."""
+    gw = enrichment_meta.get("groundwater_zones", {})
+    if not gw:
+        return None
+    zone = str(gw.get("protection_zone", "")).lower()
+    if "s1" in zone:
+        return 90.0
+    if "s2" in zone:
+        return 60.0
+    if "s3" in zone:
+        return 30.0
+    # Has data but unknown zone
+    return 15.0
+
+
+def _seveso_proximity_score(enrichment_meta: dict[str, Any]) -> float | None:
+    """Score 0-100 from proximity to a Seveso / major accident site."""
+    seveso = enrichment_meta.get("accident_sites", {})
+    if not seveso:
+        return None
+    if not seveso.get("near_seveso_site"):
+        return 5.0
+    # Near a Seveso site — distance modulates severity
+    dist = seveso.get("distance_m")
+    if dist is not None:
+        if dist < 200:
+            return 95.0
+        if dist < 500:
+            return 75.0
+        if dist < 1000:
+            return 50.0
+        return 30.0
+    # Near but no distance info
+    return 80.0
+
+
+def compute_geo_risk_score(enrichment_meta: dict[str, Any]) -> dict[str, Any] | None:
+    """Composite geospatial risk score 0-100 (lower = safer).
+
+    Grade: A (0-15), B (16-30), C (31-50), D (51-70), E (71-85), F (86-100).
+
+    Dimensions weighted:
+    - flood_risk (weight 3.0): from natural_hazards + flood_zones
+    - seismic_risk (weight 2.5): from seismic zone
+    - contamination (weight 3.0): from contaminated_sites
+    - radon (weight 2.0): from radon zone (high=80, medium=40, low=10)
+    - noise (weight 1.5): from road+rail+aircraft noise dB
+    - landslide (weight 2.0): from natural_hazards
+    - rockfall (weight 2.0): from natural_hazards
+    - groundwater_restriction (weight 1.0): from groundwater zones
+    - seveso_proximity (weight 2.5): from accident_sites
+
+    Returns dict with geo_risk_score, geo_risk_grade, breakdown, top_risks,
+    data_completeness.  Returns ``None`` when *no* dimension has data.
+
+    Pure function -- no API calls.
+    """
+    dimensions: dict[str, tuple[float, float]] = {
+        # name -> (weight, ...)
+        "flood_risk": (3.0,),
+        "seismic_risk": (2.5,),
+        "contamination": (3.0,),
+        "radon": (2.0,),
+        "noise": (1.5,),
+        "landslide": (2.0,),
+        "rockfall": (2.0,),
+        "groundwater_restriction": (1.0,),
+        "seveso_proximity": (2.5,),
+    }
+
+    _scorers: dict[str, Any] = {
+        "flood_risk": _flood_risk_score,
+        "seismic_risk": _seismic_risk_score,
+        "contamination": _contamination_score,
+        "radon": _radon_score,
+        "noise": _noise_score,
+        "landslide": _landslide_score,
+        "rockfall": _rockfall_score,
+        "groundwater_restriction": _groundwater_restriction_score,
+        "seveso_proximity": _seveso_proximity_score,
+    }
+
+    total_dimensions = len(dimensions)
+    breakdown: dict[str, dict[str, Any]] = {}
+    available_count = 0
+
+    for dim, (weight,) in dimensions.items():
+        raw = _scorers[dim](enrichment_meta)
+        if raw is not None:
+            available_count += 1
+            breakdown[dim] = {
+                "score": round(raw, 1),
+                "weight": weight,
+                "level": _risk_level(raw),
+            }
+
+    # No data at all → cannot compute
+    if available_count == 0:
+        return None
+
+    data_completeness = round(available_count / total_dimensions, 2)
+
+    # Weighted average of available dimensions only
+    weighted_sum = sum(breakdown[d]["score"] * breakdown[d]["weight"] for d in breakdown)
+    total_weight = sum(breakdown[d]["weight"] for d in breakdown)
+    score = round(weighted_sum / total_weight, 1)
+    score = max(0.0, min(100.0, score))
+
+    grade = _geo_grade(score)
+
+    # Top risks: sorted by weighted contribution descending
+    ranked = sorted(
+        breakdown.items(),
+        key=lambda kv: kv[1]["score"] * kv[1]["weight"],
+        reverse=True,
+    )
+    top_risks = [name for name, _ in ranked[:3]]
+
+    return {
+        "geo_risk_score": score,
+        "geo_risk_grade": grade,
+        "breakdown": breakdown,
+        "top_risks": top_risks,
+        "data_completeness": data_completeness,
+    }

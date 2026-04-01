@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -19,6 +20,7 @@ from app.services.building_service import (
 )
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=PaginatedResponse[BuildingListRead])
@@ -68,7 +70,7 @@ async def create_building_endpoint(
 
         index_building(building)
     except Exception:
-        pass
+        logger.warning("Search index operation failed", exc_info=True)
     return building
 
 
@@ -102,7 +104,7 @@ async def update_building_endpoint(
 
         index_building(building)
     except Exception:
-        pass
+        logger.warning("Search index operation failed", exc_info=True)
     return building
 
 
@@ -122,7 +124,7 @@ async def delete_building_endpoint(
 
         search_delete_building(str(building_id))
     except Exception:
-        pass
+        logger.warning("Search index operation failed", exc_info=True)
 
 
 @router.get("/{building_id}/activity", response_model=list[ActivityItemRead])

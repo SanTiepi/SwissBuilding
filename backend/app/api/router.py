@@ -59,6 +59,7 @@ from app.api import (
     contracts,
     control_tower_v2,
     cost_benefit_analysis,
+    cost_prediction,
     counterfactual_analysis,
     cross_building_pattern,
     cross_layer_intelligence,
@@ -66,6 +67,7 @@ from app.api import (
     data_quality,
     decision_replay,
     decision_view,
+    defect_timeline,
     demo_path,
     demo_pilot,
     diagnostic_integration,
@@ -148,6 +150,7 @@ from app.api import (
     occupant_safety,
     onboarding,
     operational_gates,
+    opportunity_windows,
     organizations,
     owner_ops,
     ownership,
@@ -508,3 +511,6 @@ api_router.include_router(spatial_enrichment.router, prefix="", tags=["Spatial E
 api_router.include_router(building_activities.router, prefix="", tags=["Building Activities"])
 api_router.include_router(proactive_alerts.router, prefix="", tags=["Proactive Alerts"])
 api_router.include_router(flywheel.router, prefix="", tags=["Flywheel Learning"])
+api_router.include_router(defect_timeline.router, prefix="", tags=["Defect Timeline"])
+api_router.include_router(cost_prediction.router, prefix="", tags=["Cost Prediction"])
+api_router.include_router(opportunity_windows.router, prefix="", tags=["Opportunity Windows"])

@@ -9,9 +9,7 @@ import httpx
 import pytest
 
 from app.services.registry_connector_service import (
-    CACHE_TTL_SECONDS,
     _cache,
-    _cache_set,
     _parse_regbl_attrs,
     _safe_float,
     _safe_int,
@@ -20,7 +18,6 @@ from app.services.registry_connector_service import (
     lookup_by_address,
     lookup_by_egid,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

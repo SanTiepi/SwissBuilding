@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -12,6 +13,7 @@ from app.services.audit_service import log_action
 from app.services.document_service import get_download_url, list_documents, upload_document
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/buildings/{building_id}/documents", response_model=DocumentRead, status_code=201)
@@ -52,7 +54,7 @@ async def upload_document_endpoint(
 
         index_document(document)
     except Exception:
-        pass
+        logger.warning("Search index operation failed", exc_info=True)
     return document
 
 

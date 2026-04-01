@@ -63,6 +63,7 @@ from app.services.enrichment.score_computers import (
     compute_component_lifecycle,
     compute_connectivity_score,
     compute_environmental_risk_score,
+    compute_geo_risk_score,
     compute_livability_score,
     compute_neighborhood_score,
     compute_overall_building_intelligence_score,
@@ -74,6 +75,7 @@ from app.services.enrichment.source_provenance import (
     _source_entry,
     compute_enrichment_quality,
 )
+from app.services.spatial_enrichment_service import SpatialEnrichmentService
 
 logger = logging.getLogger(__name__)
 
@@ -500,6 +502,210 @@ async def _call_openai(api_key: str, prompt: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# 5b. Populate ClimateExposureProfile from enrichment_meta
+# ---------------------------------------------------------------------------
+
+
+def _compute_moisture_stress(precipitation_mm: float | None) -> str:
+    """Derive moisture stress from annual precipitation."""
+    if precipitation_mm is None:
+        return "unknown"
+    if precipitation_mm > 1500:
+        return "high"
+    if precipitation_mm > 1000:
+        return "moderate"
+    return "low"
+
+
+def _compute_thermal_stress(freeze_thaw_cycles: int | None) -> str:
+    """Derive thermal stress from freeze-thaw cycle count."""
+    if freeze_thaw_cycles is None:
+        return "unknown"
+    if freeze_thaw_cycles > 100:
+        return "high"
+    if freeze_thaw_cycles > 60:
+        return "moderate"
+    return "low"
+
+
+def _compute_uv_exposure(altitude_m: float | None) -> str:
+    """Derive UV exposure from altitude."""
+    if altitude_m is None:
+        return "unknown"
+    if altitude_m > 1500:
+        return "high"
+    if altitude_m > 800:
+        return "moderate"
+    return "low"
+
+
+def _build_natural_hazard_zones(hazards: dict[str, Any]) -> list[dict[str, str]] | None:
+    """Convert natural_hazards dict to list-of-dicts for JSON column."""
+    if not hazards:
+        return None
+    zones: list[dict[str, str]] = []
+    for hazard_type in ("flood", "landslide", "rockfall"):
+        level = hazards.get(f"{hazard_type}_risk")
+        if level and level != "unknown":
+            zones.append({"type": hazard_type, "level": str(level)})
+    return zones or None
+
+
+async def populate_climate_exposure_profile(
+    db: AsyncSession,
+    building_id: UUID,
+    enrichment_meta: dict[str, Any],
+) -> None:
+    """Create or update a ClimateExposureProfile from enrichment pipeline data.
+
+    Maps enrichment_meta keys (climate, radon, noise, natural_hazards, solar,
+    heritage, water_protection, contaminated_sites) to structured model fields
+    and computes stress indicators.
+
+    This function is idempotent — safe to call multiple times for the same building.
+    """
+    from app.models.climate_exposure import ClimateExposureProfile
+
+    climate = enrichment_meta.get("climate") or {}
+    radon = enrichment_meta.get("radon") or {}
+    noise = enrichment_meta.get("noise") or {}
+    hazards = enrichment_meta.get("natural_hazards") or {}
+    solar = enrichment_meta.get("solar") or {}
+    heritage = enrichment_meta.get("heritage") or {}
+    water = enrichment_meta.get("water_protection") or {}
+    contam = enrichment_meta.get("contaminated_sites") or {}
+    rail_noise = enrichment_meta.get("railway_noise") or {}
+
+    # --- Extract values with graceful None handling ---
+    altitude_m: float | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_alt = climate.get("estimated_altitude_m")
+        if raw_alt is not None:
+            altitude_m = float(raw_alt)
+
+    heating_degree_days: float | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_hdd = climate.get("heating_degree_days")
+        if raw_hdd is not None:
+            heating_degree_days = float(raw_hdd)
+
+    precipitation_mm: float | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_precip = climate.get("precipitation_mm")
+        if raw_precip is not None:
+            precipitation_mm = float(raw_precip)
+
+    freeze_thaw: int | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_frost = climate.get("frost_days")
+        if raw_frost is not None:
+            freeze_thaw = int(raw_frost)
+
+    noise_day_db: float | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_noise = noise.get("road_noise_day_db")
+        if raw_noise is not None:
+            noise_day_db = float(raw_noise)
+
+    # Night noise: enrichment pipeline only fetches day road noise.
+    # Use railway noise as supplementary night indicator if available.
+    noise_night_db: float | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_rail = rail_noise.get("railway_noise_day_db")
+        if raw_rail is not None:
+            noise_night_db = float(raw_rail)
+
+    solar_kwh: float | None = None
+    with contextlib.suppress(ValueError, TypeError):
+        raw_solar = solar.get("solar_potential_kwh")
+        if raw_solar is not None:
+            solar_kwh = float(raw_solar)
+
+    radon_zone = radon.get("radon_zone")
+    if radon_zone is not None:
+        radon_zone = str(radon_zone)
+
+    hazard_zones = _build_natural_hazard_zones(hazards)
+
+    groundwater_zone: str | None = None
+    zone_val = water.get("protection_zone") or water.get("zone_type")
+    if zone_val is not None:
+        groundwater_zone = str(zone_val)
+
+    contaminated: bool | None = contam.get("is_contaminated") if contam else None
+
+    heritage_status: str | None = None
+    if heritage.get("isos_protected"):
+        heritage_status = heritage.get("isos_category") or heritage.get("site_name") or "protected"
+
+    wind_exposure: str | None = None
+    if altitude_m is not None:
+        if altitude_m > 1500:
+            wind_exposure = "exposed"
+        elif altitude_m > 800:
+            wind_exposure = "moderate"
+        else:
+            wind_exposure = "sheltered"
+
+    # --- Stress indicators ---
+    moisture_stress = _compute_moisture_stress(precipitation_mm)
+    thermal_stress = _compute_thermal_stress(freeze_thaw)
+    uv_exposure = _compute_uv_exposure(altitude_m)
+
+    # --- Data sources ---
+    now = datetime.now(UTC)
+    data_sources: list[dict[str, str]] = []
+    if climate:
+        data_sources.append({"source": "enrichment/climate", "fetched_at": now.isoformat()})
+    if radon:
+        data_sources.append({"source": "geo.admin/radon", "fetched_at": now.isoformat()})
+    if noise:
+        data_sources.append({"source": "geo.admin/noise", "fetched_at": now.isoformat()})
+    if hazards:
+        data_sources.append({"source": "geo.admin/natural_hazards", "fetched_at": now.isoformat()})
+    if solar:
+        data_sources.append({"source": "geo.admin/solar", "fetched_at": now.isoformat()})
+    if heritage:
+        data_sources.append({"source": "geo.admin/heritage", "fetched_at": now.isoformat()})
+    if water:
+        data_sources.append({"source": "geo.admin/water_protection", "fetched_at": now.isoformat()})
+    if contam:
+        data_sources.append({"source": "geo.admin/contaminated_sites", "fetched_at": now.isoformat()})
+
+    # --- Upsert profile ---
+    existing = await db.execute(select(ClimateExposureProfile).where(ClimateExposureProfile.building_id == building_id))
+    profile = existing.scalar_one_or_none()
+
+    if profile is None:
+        profile = ClimateExposureProfile(building_id=building_id)
+        db.add(profile)
+
+    profile.radon_zone = radon_zone
+    profile.noise_exposure_day_db = noise_day_db
+    profile.noise_exposure_night_db = noise_night_db
+    profile.solar_potential_kwh = solar_kwh
+    profile.natural_hazard_zones = hazard_zones
+    profile.groundwater_zone = groundwater_zone
+    profile.contaminated_site = contaminated
+    profile.heritage_status = heritage_status
+
+    profile.heating_degree_days = heating_degree_days
+    profile.avg_annual_precipitation_mm = precipitation_mm
+    profile.freeze_thaw_cycles_per_year = freeze_thaw
+    profile.wind_exposure = wind_exposure
+    profile.altitude_m = altitude_m
+
+    profile.moisture_stress = moisture_stress
+    profile.thermal_stress = thermal_stress
+    profile.uv_exposure = uv_exposure
+
+    profile.data_sources = data_sources
+    profile.last_updated = now
+
+    await db.flush()
+
+
+# ---------------------------------------------------------------------------
 # 6. Main orchestrator -- enrich single building
 # ---------------------------------------------------------------------------
 
@@ -691,71 +897,128 @@ async def enrich_building(
 
     has_coords = building.latitude is not None and building.longitude is not None
 
+    # --- Step 5b: swissBUILDINGS3D spatial data ---
+    if has_coords:
+        try:
+            spatial = await SpatialEnrichmentService.fetch_building_footprint(building.longitude, building.latitude)
+            if spatial and "error" not in spatial:
+                enrichment_meta["building_height_m"] = spatial.get("height_m")
+                enrichment_meta["building_volume_m3"] = spatial.get("volume_m3")
+                enrichment_meta["floor_count_3d"] = spatial.get("floors")
+                enrichment_meta["roof_type"] = spatial.get("roof_type")
+                enrichment_meta["footprint_area_m2"] = spatial.get("surface_m2")
+                enrichment_meta["spatial_source"] = spatial.get("source")
+                enrichment_meta["spatial_fetched_at"] = spatial.get("fetched_at")
+                result.spatial_fetched = True
+                fields_updated.append("spatial_3d")
+        except Exception as exc:
+            logger.warning("swissBUILDINGS3D fetch failed for building %s: %s", building_id, exc)
+
     # --- Step 6: Radon risk ---
     if has_coords:
-        radon = await _resolve("fetch_radon_risk", fetch_radon_risk)(building.latitude, building.longitude)
-        if radon:
-            enrichment_meta["radon"] = radon
-            result.radon_fetched = True
-            fields_updated.append("radon")
+        try:
+            radon = await _resolve("fetch_radon_risk", fetch_radon_risk)(building.latitude, building.longitude)
+            if radon:
+                enrichment_meta["radon"] = radon
+                result.radon_fetched = True
+                fields_updated.append("radon")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_radon_risk failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_radon_risk failed: {exc}")
 
     # --- Step 7: Natural hazards ---
     if has_coords:
-        hazards = await _resolve("fetch_natural_hazards", fetch_natural_hazards)(building.latitude, building.longitude)
-        if hazards:
-            enrichment_meta["natural_hazards"] = hazards
-            result.natural_hazards_fetched = True
-            fields_updated.append("natural_hazards")
+        try:
+            hazards = await _resolve("fetch_natural_hazards", fetch_natural_hazards)(
+                building.latitude, building.longitude
+            )
+            if hazards:
+                enrichment_meta["natural_hazards"] = hazards
+                result.natural_hazards_fetched = True
+                fields_updated.append("natural_hazards")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_natural_hazards failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_natural_hazards failed: {exc}")
 
     # --- Step 8: Noise ---
     if has_coords:
-        noise = await _resolve("fetch_noise_data", fetch_noise_data)(building.latitude, building.longitude)
-        if noise:
-            enrichment_meta["noise"] = noise
-            result.noise_fetched = True
-            fields_updated.append("noise")
+        try:
+            noise = await _resolve("fetch_noise_data", fetch_noise_data)(building.latitude, building.longitude)
+            if noise:
+                enrichment_meta["noise"] = noise
+                result.noise_fetched = True
+                fields_updated.append("noise")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_noise_data failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_noise_data failed: {exc}")
 
     # --- Step 9: Solar potential ---
     if has_coords:
-        solar = await _resolve("fetch_solar_potential", fetch_solar_potential)(building.latitude, building.longitude)
-        if solar:
-            enrichment_meta["solar"] = solar
-            result.solar_fetched = True
-            fields_updated.append("solar")
+        try:
+            solar = await _resolve("fetch_solar_potential", fetch_solar_potential)(
+                building.latitude, building.longitude
+            )
+            if solar:
+                enrichment_meta["solar"] = solar
+                result.solar_fetched = True
+                fields_updated.append("solar")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_solar_potential failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_solar_potential failed: {exc}")
 
     # --- Step 10: Heritage / ISOS ---
     if has_coords:
-        heritage = await _resolve("fetch_heritage_status", fetch_heritage_status)(building.latitude, building.longitude)
-        if heritage:
-            enrichment_meta["heritage"] = heritage
-            result.heritage_fetched = True
-            fields_updated.append("heritage")
+        try:
+            heritage = await _resolve("fetch_heritage_status", fetch_heritage_status)(
+                building.latitude, building.longitude
+            )
+            if heritage:
+                enrichment_meta["heritage"] = heritage
+                result.heritage_fetched = True
+                fields_updated.append("heritage")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_heritage_status failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_heritage_status failed: {exc}")
 
     # --- Step 11: Transport quality ---
     if has_coords:
-        transport = await _resolve("fetch_transport_quality", fetch_transport_quality)(
-            building.latitude, building.longitude
-        )
-        if transport:
-            enrichment_meta["transport"] = transport
-            result.transport_fetched = True
-            fields_updated.append("transport")
+        try:
+            transport = await _resolve("fetch_transport_quality", fetch_transport_quality)(
+                building.latitude, building.longitude
+            )
+            if transport:
+                enrichment_meta["transport"] = transport
+                result.transport_fetched = True
+                fields_updated.append("transport")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_transport_quality failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_transport_quality failed: {exc}")
 
     # --- Step 12: Seismic zone ---
     if has_coords:
-        seismic = await _resolve("fetch_seismic_zone", fetch_seismic_zone)(building.latitude, building.longitude)
-        if seismic:
-            enrichment_meta["seismic"] = seismic
-            result.seismic_fetched = True
-            fields_updated.append("seismic")
+        try:
+            seismic = await _resolve("fetch_seismic_zone", fetch_seismic_zone)(building.latitude, building.longitude)
+            if seismic:
+                enrichment_meta["seismic"] = seismic
+                result.seismic_fetched = True
+                fields_updated.append("seismic")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_seismic_zone failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_seismic_zone failed: {exc}")
 
     # --- Step 13: Water protection ---
     if has_coords:
-        water = await _resolve("fetch_water_protection", fetch_water_protection)(building.latitude, building.longitude)
-        if water:
-            enrichment_meta["water_protection"] = water
-            result.water_protection_fetched = True
-            fields_updated.append("water_protection")
+        try:
+            water = await _resolve("fetch_water_protection", fetch_water_protection)(
+                building.latitude, building.longitude
+            )
+            if water:
+                enrichment_meta["water_protection"] = water
+                result.water_protection_fetched = True
+                fields_updated.append("water_protection")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_water_protection failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_water_protection failed: {exc}")
 
     # --- Step 14: Neighborhood score (pure computation) ---
     n_score = compute_neighborhood_score(enrichment_meta)
@@ -805,131 +1068,203 @@ async def enrich_building(
 
     # --- Step 18: Railway noise ---
     if has_coords:
-        rail_noise = await _resolve("fetch_railway_noise", fetch_railway_noise)(building.latitude, building.longitude)
-        if rail_noise:
-            enrichment_meta["railway_noise"] = rail_noise
-            result.railway_noise_fetched = True
-            fields_updated.append("railway_noise")
+        try:
+            rail_noise = await _resolve("fetch_railway_noise", fetch_railway_noise)(
+                building.latitude, building.longitude
+            )
+            if rail_noise:
+                enrichment_meta["railway_noise"] = rail_noise
+                result.railway_noise_fetched = True
+                fields_updated.append("railway_noise")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_railway_noise failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_railway_noise failed: {exc}")
 
     # --- Step 19: Aircraft noise ---
     if has_coords:
-        air_noise = await _resolve("fetch_aircraft_noise", fetch_aircraft_noise)(building.latitude, building.longitude)
-        if air_noise:
-            enrichment_meta["aircraft_noise"] = air_noise
-            result.aircraft_noise_fetched = True
-            fields_updated.append("aircraft_noise")
+        try:
+            air_noise = await _resolve("fetch_aircraft_noise", fetch_aircraft_noise)(
+                building.latitude, building.longitude
+            )
+            if air_noise:
+                enrichment_meta["aircraft_noise"] = air_noise
+                result.aircraft_noise_fetched = True
+                fields_updated.append("aircraft_noise")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_aircraft_noise failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_aircraft_noise failed: {exc}")
 
     # --- Step 20: Building zones ---
     if has_coords:
-        zones = await _resolve("fetch_building_zones", fetch_building_zones)(building.latitude, building.longitude)
-        if zones:
-            enrichment_meta["building_zones"] = zones
-            result.building_zones_fetched = True
-            fields_updated.append("building_zones")
+        try:
+            zones = await _resolve("fetch_building_zones", fetch_building_zones)(building.latitude, building.longitude)
+            if zones:
+                enrichment_meta["building_zones"] = zones
+                result.building_zones_fetched = True
+                fields_updated.append("building_zones")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_building_zones failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_building_zones failed: {exc}")
 
     # --- Step 21: Contaminated sites ---
     if has_coords:
-        contam = await _resolve("fetch_contaminated_sites", fetch_contaminated_sites)(
-            building.latitude, building.longitude
-        )
-        if contam:
-            enrichment_meta["contaminated_sites"] = contam
-            result.contaminated_sites_fetched = True
-            fields_updated.append("contaminated_sites")
+        try:
+            contam = await _resolve("fetch_contaminated_sites", fetch_contaminated_sites)(
+                building.latitude, building.longitude
+            )
+            if contam:
+                enrichment_meta["contaminated_sites"] = contam
+                result.contaminated_sites_fetched = True
+                fields_updated.append("contaminated_sites")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_contaminated_sites failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_contaminated_sites failed: {exc}")
 
     # --- Step 22: Groundwater zones ---
     if has_coords:
-        gw = await _resolve("fetch_groundwater_zones", fetch_groundwater_zones)(building.latitude, building.longitude)
-        if gw:
-            enrichment_meta["groundwater_zones"] = gw
-            result.groundwater_zones_fetched = True
-            fields_updated.append("groundwater_zones")
+        try:
+            gw = await _resolve("fetch_groundwater_zones", fetch_groundwater_zones)(
+                building.latitude, building.longitude
+            )
+            if gw:
+                enrichment_meta["groundwater_zones"] = gw
+                result.groundwater_zones_fetched = True
+                fields_updated.append("groundwater_zones")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_groundwater_zones failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_groundwater_zones failed: {exc}")
 
     # --- Step 23: Flood zones ---
     if has_coords:
-        flood = await _resolve("fetch_flood_zones", fetch_flood_zones)(building.latitude, building.longitude)
-        if flood:
-            enrichment_meta["flood_zones"] = flood
-            result.flood_zones_fetched = True
-            fields_updated.append("flood_zones")
+        try:
+            flood = await _resolve("fetch_flood_zones", fetch_flood_zones)(building.latitude, building.longitude)
+            if flood:
+                enrichment_meta["flood_zones"] = flood
+                result.flood_zones_fetched = True
+                fields_updated.append("flood_zones")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_flood_zones failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_flood_zones failed: {exc}")
 
     # --- Step 24: Mobile coverage ---
     if has_coords:
-        mobile = await _resolve("fetch_mobile_coverage", fetch_mobile_coverage)(building.latitude, building.longitude)
-        if mobile:
-            enrichment_meta["mobile_coverage"] = mobile
-            result.mobile_coverage_fetched = True
-            fields_updated.append("mobile_coverage")
+        try:
+            mobile = await _resolve("fetch_mobile_coverage", fetch_mobile_coverage)(
+                building.latitude, building.longitude
+            )
+            if mobile:
+                enrichment_meta["mobile_coverage"] = mobile
+                result.mobile_coverage_fetched = True
+                fields_updated.append("mobile_coverage")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_mobile_coverage failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_mobile_coverage failed: {exc}")
 
     # --- Step 25: Broadband ---
     if has_coords:
-        bb = await _resolve("fetch_broadband", fetch_broadband)(building.latitude, building.longitude)
-        if bb:
-            enrichment_meta["broadband"] = bb
-            result.broadband_fetched = True
-            fields_updated.append("broadband")
+        try:
+            bb = await _resolve("fetch_broadband", fetch_broadband)(building.latitude, building.longitude)
+            if bb:
+                enrichment_meta["broadband"] = bb
+                result.broadband_fetched = True
+                fields_updated.append("broadband")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_broadband failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_broadband failed: {exc}")
 
     # --- Step 26: EV charging ---
     if has_coords:
-        ev = await _resolve("fetch_ev_charging", fetch_ev_charging)(building.latitude, building.longitude)
-        if ev:
-            enrichment_meta["ev_charging"] = ev
-            result.ev_charging_fetched = True
-            fields_updated.append("ev_charging")
+        try:
+            ev = await _resolve("fetch_ev_charging", fetch_ev_charging)(building.latitude, building.longitude)
+            if ev:
+                enrichment_meta["ev_charging"] = ev
+                result.ev_charging_fetched = True
+                fields_updated.append("ev_charging")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_ev_charging failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_ev_charging failed: {exc}")
 
     # --- Step 27: Thermal networks ---
     if has_coords:
-        thermal = await _resolve("fetch_thermal_networks", fetch_thermal_networks)(
-            building.latitude, building.longitude
-        )
-        if thermal:
-            enrichment_meta["thermal_networks"] = thermal
-            result.thermal_networks_fetched = True
-            fields_updated.append("thermal_networks")
+        try:
+            thermal = await _resolve("fetch_thermal_networks", fetch_thermal_networks)(
+                building.latitude, building.longitude
+            )
+            if thermal:
+                enrichment_meta["thermal_networks"] = thermal
+                result.thermal_networks_fetched = True
+                fields_updated.append("thermal_networks")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_thermal_networks failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_thermal_networks failed: {exc}")
 
     # --- Step 28: Protected monuments ---
     if has_coords:
-        monuments = await _resolve("fetch_protected_monuments", fetch_protected_monuments)(
-            building.latitude, building.longitude
-        )
-        if monuments:
-            enrichment_meta["protected_monuments"] = monuments
-            result.protected_monuments_fetched = True
-            fields_updated.append("protected_monuments")
+        try:
+            monuments = await _resolve("fetch_protected_monuments", fetch_protected_monuments)(
+                building.latitude, building.longitude
+            )
+            if monuments:
+                enrichment_meta["protected_monuments"] = monuments
+                result.protected_monuments_fetched = True
+                fields_updated.append("protected_monuments")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_protected_monuments failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_protected_monuments failed: {exc}")
 
     # --- Step 29: Agricultural zones ---
     if has_coords:
-        agri = await _resolve("fetch_agricultural_zones", fetch_agricultural_zones)(
-            building.latitude, building.longitude
-        )
-        if agri:
-            enrichment_meta["agricultural_zones"] = agri
-            result.agricultural_zones_fetched = True
-            fields_updated.append("agricultural_zones")
+        try:
+            agri = await _resolve("fetch_agricultural_zones", fetch_agricultural_zones)(
+                building.latitude, building.longitude
+            )
+            if agri:
+                enrichment_meta["agricultural_zones"] = agri
+                result.agricultural_zones_fetched = True
+                fields_updated.append("agricultural_zones")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_agricultural_zones failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_agricultural_zones failed: {exc}")
 
     # --- Step 30: Forest reserves ---
     if has_coords:
-        forest = await _resolve("fetch_forest_reserves", fetch_forest_reserves)(building.latitude, building.longitude)
-        if forest:
-            enrichment_meta["forest_reserves"] = forest
-            result.forest_reserves_fetched = True
-            fields_updated.append("forest_reserves")
+        try:
+            forest = await _resolve("fetch_forest_reserves", fetch_forest_reserves)(
+                building.latitude, building.longitude
+            )
+            if forest:
+                enrichment_meta["forest_reserves"] = forest
+                result.forest_reserves_fetched = True
+                fields_updated.append("forest_reserves")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_forest_reserves failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_forest_reserves failed: {exc}")
 
     # --- Step 31: Military zones ---
     if has_coords:
-        military = await _resolve("fetch_military_zones", fetch_military_zones)(building.latitude, building.longitude)
-        if military:
-            enrichment_meta["military_zones"] = military
-            result.military_zones_fetched = True
-            fields_updated.append("military_zones")
+        try:
+            military = await _resolve("fetch_military_zones", fetch_military_zones)(
+                building.latitude, building.longitude
+            )
+            if military:
+                enrichment_meta["military_zones"] = military
+                result.military_zones_fetched = True
+                fields_updated.append("military_zones")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_military_zones failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_military_zones failed: {exc}")
 
     # --- Step 32: Accident (Seveso) sites ---
     if has_coords:
-        seveso = await _resolve("fetch_accident_sites", fetch_accident_sites)(building.latitude, building.longitude)
-        if seveso:
-            enrichment_meta["accident_sites"] = seveso
-            result.accident_sites_fetched = True
-            fields_updated.append("accident_sites")
+        try:
+            seveso = await _resolve("fetch_accident_sites", fetch_accident_sites)(building.latitude, building.longitude)
+            if seveso:
+                enrichment_meta["accident_sites"] = seveso
+                result.accident_sites_fetched = True
+                fields_updated.append("accident_sites")
+        except Exception as exc:
+            logger.warning("Fetcher fetch_accident_sites failed for building %s: %s", building_id, exc)
+            result.errors.append(f"fetch_accident_sites failed: {exc}")
 
     # --- Step 33: OSM amenities ---
     if has_coords:
@@ -976,6 +1311,13 @@ async def enrich_building(
     enrichment_meta["environmental_risk_score"] = env_score
     result.environmental_risk_score = env_score
     fields_updated.append("environmental_risk_score")
+
+    # --- Step 38b: Geo risk score (pure) ---
+    geo_risk = compute_geo_risk_score(enrichment_meta)
+    if geo_risk is not None:
+        enrichment_meta["geo_risk_score"] = geo_risk
+        result.geo_risk_score_computed = True
+        fields_updated.append("geo_risk_score")
 
     # --- Step 39: Livability score (pure) ---
     liv_score = compute_livability_score(enrichment_meta)
@@ -1108,6 +1450,10 @@ async def enrich_building(
     )
     enrichment_meta["enrichment_quality"] = quality
     enrichment_meta["source_entries"] = source_entries
+
+    # --- Step 49: Populate ClimateExposureProfile ---
+    await populate_climate_exposure_profile(db, building_id, enrichment_meta)
+    fields_updated.append("climate_exposure_profile")
 
     # --- Step 42: Persist ---
     if fields_updated or result.image_url:
