@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { spatialEnrichmentApi } from '@/api/spatialEnrichment';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
-import { RefreshCw, AlertTriangle, Building2, Ruler, Box, Layers, Home, Loader2 } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Building2, Ruler, Box, Layers, Home, Loader2, LayoutList } from 'lucide-react';
 
 interface SpatialEnrichmentCardProps {
   buildingId: string;
@@ -107,7 +107,7 @@ export default function SpatialEnrichmentCard({ buildingId }: SpatialEnrichmentC
       })
     : null;
 
-  const hasData = data?.height_m != null || data?.volume_m3 != null || data?.surface_m2 != null;
+  const hasData = data?.height_m != null || data?.volume_m3 != null || data?.surface_m2 != null || data?.floors != null;
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
@@ -172,6 +172,13 @@ export default function SpatialEnrichmentCard({ buildingId }: SpatialEnrichmentC
             value={data?.roof_type || '--'}
             colorClass="text-amber-600"
             darkColorClass="dark:text-amber-400"
+          />
+          <MetricTile
+            icon={LayoutList}
+            label={t('spatial_enrichment.floors') || 'Etages (3D)'}
+            value={data?.floors != null ? String(data.floors) : '--'}
+            colorClass="text-teal-600"
+            darkColorClass="dark:text-teal-400"
           />
         </div>
       ) : (

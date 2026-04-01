@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "description": "Task queue for autonomous dev via OpenClaw → Claude Code CLI",
+  "branch": "building-life-os",
+  "rules": {
+    "max_tasks_per_session": 2,
+    "require_tests_green": true,
+    "commit_after_each_task": true,
+    "push_after_each_task": false,
+    "create_pr_after_epic": true
+  },
+  "queue": [
+    {
+      "id": "wave-next-001",
+      "epic": "wave-next",
+      "task": "001",
+      "name": "Archive 55 obsolete docs",
+      "spec": ".claude/epics/wave-next/001.md",
+      "effort": "S",
+      "status": "done",
+      "depends_on": [],
+      "completed_at": "2026-04-01T20:20:00Z",
+      "commit": "c6323ba"
+    },
+    {
+      "id": "wave-next-004",
+      "epic": "wave-next",
+      "task": "004",
+      "name": "Fix ruff errors + silent exceptions",
+      "spec": ".claude/epics/wave-next/004.md",
+      "effort": "S",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "wave-next-002",
+      "epic": "wave-next",
+      "task": "002",
+      "name": "Integrate NFT + vision into roadmap",
+      "spec": ".claude/epics/wave-next/002.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "wave-next-003",
+      "epic": "wave-next",
+      "task": "003",
+      "name": "Index 61 programmes in roadmap",
+      "spec": ".claude/epics/wave-next/003.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "wave-next-010",
+      "epic": "wave-next",
+      "task": "010",
+      "name": "Update CLAUDE.md + AGENTS.md",
+      "spec": ".claude/epics/wave-next/010.md",
+      "effort": "S",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "wave-next-005",
+      "epic": "wave-next",
+      "task": "005",
+      "name": "Activate 24 geo.admin layers",
+      "spec": ".claude/epics/wave-next/005.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["wave-next-004"]
+    },
+    {
+      "id": "wave-next-006",
+      "epic": "wave-next",
+      "task": "006",
+      "name": "Persist swissBUILDINGS3D fields",
+      "spec": ".claude/epics/wave-next/006.md",
+      "effort": "S",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "wave-next-007",
+      "epic": "wave-next",
+      "task": "007",
+      "name": "Composite geo risk score",
+      "spec": ".claude/epics/wave-next/007.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["wave-next-005"]
+    },
+    {
+      "id": "wave-next-008",
+      "epic": "wave-next",
+      "task": "008",
+      "name": "Populate ClimateExposureProfile",
+      "spec": ".claude/epics/wave-next/008.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "wave-next-009",
+      "epic": "wave-next",
+      "task": "009",
+      "name": "OpportunityWindow detection service",
+      "spec": ".claude/epics/wave-next/009.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["wave-next-008"]
+    },
+    {
+      "id": "defect-shield-001",
+      "epic": "defect-shield",
+      "task": "001",
+      "name": "DefectShield: Model + Schema + Migration",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "S",
+      "status": "pending",
+      "depends_on": []
+    },
+    {
+      "id": "defect-shield-002",
+      "epic": "defect-shield",
+      "task": "002",
+      "name": "DefectShield: Service calcul timeline",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["defect-shield-001"]
+    },
+    {
+      "id": "defect-shield-003",
+      "epic": "defect-shield",
+      "task": "003",
+      "name": "DefectShield: Alertes + notifications",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["defect-shield-002"]
+    },
+    {
+      "id": "defect-shield-004",
+      "epic": "defect-shield",
+      "task": "004",
+      "name": "DefectShield: API endpoints",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "S",
+      "status": "pending",
+      "depends_on": ["defect-shield-002"]
+    },
+    {
+      "id": "defect-shield-005",
+      "epic": "defect-shield",
+      "task": "005",
+      "name": "DefectShield: Lettre PDF Gotenberg",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["defect-shield-004"]
+    },
+    {
+      "id": "defect-shield-006",
+      "epic": "defect-shield",
+      "task": "006",
+      "name": "DefectShield: Frontend widget + badge",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["defect-shield-004"]
+    },
+    {
+      "id": "defect-shield-007",
+      "epic": "defect-shield",
+      "task": "007",
+      "name": "DefectShield: Tests exhaustifs edge cases",
+      "spec": ".claude/epics/defect-shield/epic.md",
+      "effort": "M",
+      "status": "pending",
+      "depends_on": ["defect-shield-006"]
+    },
+    {
+      "id": "reno-predict-all",
+      "epic": "reno-predict",
+      "task": "all",
+      "name": "RenoPredict: estimation couts remediation (full module)",
+      "spec": ".claude/epics/reno-predict/epic.md",
+      "effort": "L",
+      "status": "pending",
+      "depends_on": []
+    }
+  ]
+}

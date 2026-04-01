@@ -199,6 +199,14 @@ class SpatialEnrichmentService:
                 building.volume_m3 = spatial_data["volume_m3"]
             if spatial_data.get("surface_m2") and not building.surface_area_m2:
                 building.surface_area_m2 = spatial_data["surface_m2"]
+            if spatial_data.get("footprint_wkt") and not building.footprint_wkt:
+                building.footprint_wkt = spatial_data["footprint_wkt"]
+            if spatial_data.get("height_m") and not building.building_height:
+                building.building_height = spatial_data["height_m"]
+            if spatial_data.get("roof_type") and not building.roof_type:
+                building.roof_type = spatial_data["roof_type"]
+            if spatial_data.get("floors") and not building.floor_count_3d:
+                building.floor_count_3d = spatial_data["floors"]
 
         # Store in BuildingGeoContext (upsert, merge with existing context_data)
         existing = await db.execute(select(BuildingGeoContext).where(BuildingGeoContext.building_id == building_id))

@@ -1,7 +1,7 @@
 import uuid
 
 from geoalchemy2 import Geometry
-from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -32,6 +32,10 @@ class Building(Base):
     floors_below = Column(Integer, nullable=True)
     surface_area_m2 = Column(Float, nullable=True)
     volume_m3 = Column(Float, nullable=True)
+    footprint_wkt = Column(Text, nullable=True)
+    building_height = Column(Float, nullable=True)
+    roof_type = Column(String(100), nullable=True)
+    floor_count_3d = Column(Integer, nullable=True)
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     status = Column(String(20), default="active")

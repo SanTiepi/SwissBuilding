@@ -909,6 +909,15 @@ async def enrich_building(
                 enrichment_meta["footprint_area_m2"] = spatial.get("surface_m2")
                 enrichment_meta["spatial_source"] = spatial.get("source")
                 enrichment_meta["spatial_fetched_at"] = spatial.get("fetched_at")
+                # Persist to first-class Building columns
+                if spatial.get("footprint_wkt") and not building.footprint_wkt:
+                    building.footprint_wkt = spatial["footprint_wkt"]
+                if spatial.get("height_m") and not building.building_height:
+                    building.building_height = spatial["height_m"]
+                if spatial.get("roof_type") and not building.roof_type:
+                    building.roof_type = spatial["roof_type"]
+                if spatial.get("floors") and not building.floor_count_3d:
+                    building.floor_count_3d = spatial["floors"]
                 result.spatial_fetched = True
                 fields_updated.append("spatial_3d")
         except Exception as exc:
