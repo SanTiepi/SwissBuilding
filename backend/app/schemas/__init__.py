@@ -65,6 +65,7 @@ from app.schemas.document_classifier import (
     DocumentTypeInfo,
 )
 from app.schemas.document_extraction import ExtractionField, ExtractionResult
+from app.schemas.equipment import EquipmentTimelineItem, EquipmentTimelineResponse
 from app.schemas.event import EventCreate, EventRead
 from app.schemas.evidence_link import EvidenceLinkCreate, EvidenceLinkRead
 from app.schemas.evidence_score import EvidenceScoreRead
@@ -162,6 +163,7 @@ from app.schemas.risk import (
     RenovationSimulationRequest,
     RenovationSimulationResponse,
     RiskScoreRead,
+    SinistraliteScoreRead,
 )
 from app.schemas.sample import SampleCreate, SampleRead, SampleUpdate
 from app.schemas.sampling_quality import (
@@ -303,6 +305,7 @@ __all__ = [
     "RenovationSimulationResponse",
     "RiskDistributionRead",
     "RiskScoreRead",
+    "SinistraliteScoreRead",
     "SampleCreate",
     "SampleRead",
     "SampleUpdate",
