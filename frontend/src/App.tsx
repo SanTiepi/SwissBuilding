@@ -60,6 +60,7 @@ const RemediationIntelligence = lazy(() => import('@/pages/RemediationIntelligen
 const AddressPreview = lazy(() => import('@/pages/AddressPreview'));
 const AdminImportReview = lazy(() => import('@/pages/AdminImportReview'));
 const AdminContributorGateway = lazy(() => import('@/pages/AdminContributorGateway'));
+const AdminAIMetricsBoard = lazy(() => import('@/pages/AdminAIMetricsBoard'));
 const BuildingDecisionView = lazy(() => import('@/pages/BuildingDecisionView'));
 const DemoPath = lazy(() => import('@/pages/DemoPath'));
 const PilotScorecard = lazy(() => import('@/pages/PilotScorecard'));
@@ -647,6 +648,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Contributor Gateway">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminContributorGateway />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/ai-metrics"
+              element={
+                <PageErrorBoundary pageName="AI Metrics">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminAIMetricsBoard />
                   </Suspense>
                 </PageErrorBoundary>
               }
