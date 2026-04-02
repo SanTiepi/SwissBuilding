@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { geoContextApi } from '@/api/geoContext';
 import type { GeoLayerResult } from '@/api/geoContext';
@@ -288,7 +288,7 @@ function MissingLayerCard({ layerKey }: { layerKey: string }) {
 }
 
 // --- Main panel ---
-export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
+export default memo(function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -301,7 +301,7 @@ export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
     retry: false,
   });
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
       await geoContextApi.refresh(buildingId);
@@ -311,7 +311,7 @@ export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [buildingId, queryClient]);
 
   if (isLoading) {
     return (
@@ -419,4 +419,4 @@ export default function GeoContextPanel({ buildingId }: GeoContextPanelProps) {
       )}
     </div>
   );
-}
+});

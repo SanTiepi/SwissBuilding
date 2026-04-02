@@ -10,6 +10,12 @@ vi.mock('@/i18n', () => ({
   }),
 }));
 
+vi.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  RadialBarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="radial-chart">{children}</div>,
+  RadialBar: () => <div />,
+}));
+
 const mockGet = vi.fn();
 const mockRefresh = vi.fn();
 
@@ -76,7 +82,7 @@ describe('GeoContextPanel', () => {
     expect(screen.getByText('geo_context.cat_geology')).toBeInTheDocument();
   });
 
-  it('renders risk score when present', async () => {
+  it('renders risk score gauge and interpretation when present', async () => {
     mockGet.mockResolvedValue({
       context: {
         radon: { source: 'ch.bag.radonkarte', label: 'Radon', raw_attributes: {}, zone: 'hoch' },
@@ -90,7 +96,55 @@ describe('GeoContextPanel', () => {
     render(<GeoContextPanel buildingId="test-id" />, { wrapper });
 
     await waitFor(() => {
-      expect(screen.getByText('42/100')).toBeInTheDocument();
+      // Score number displayed in gauge
+      expect(screen.getByText('42')).toBeInTheDocument();
+    });
+
+    // Radial chart rendered
+    expect(screen.getByTestId('radial-chart')).toBeInTheDocument();
+
+    // Interpretation text (moderate risk for score 42)
+    expect(screen.getByText('geo_context.interpretation_moderate_risk')).toBeInTheDocument();
+
+    // Sub-dimension bars
+    expect(screen.getByText('geo_context.risk_inondation')).toBeInTheDocument();
+    expect(screen.getByText('geo_context.risk_seismic')).toBeInTheDocument();
+    expect(screen.getByText('geo_context.risk_radon')).toBeInTheDocument();
+  });
+
+  it('renders low risk interpretation for score < 30', async () => {
+    mockGet.mockResolvedValue({
+      context: {
+        radon: { source: 'ch.bag.radonkarte', label: 'Radon', raw_attributes: {}, zone: 'low' },
+      },
+      fetched_at: '2026-04-01T10:00:00Z',
+      source_version: 'geo.admin-v1',
+      cached: false,
+      risk_score: { score: 15, inondation: 2, seismic: 1, grele: 0, contamination: 0, radon: 1 },
+    });
+
+    render(<GeoContextPanel buildingId="test-id" />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByText('geo_context.interpretation_low_risk')).toBeInTheDocument();
+    });
+  });
+
+  it('renders high risk interpretation for score >= 60', async () => {
+    mockGet.mockResolvedValue({
+      context: {
+        radon: { source: 'ch.bag.radonkarte', label: 'Radon', raw_attributes: {}, zone: 'hoch' },
+      },
+      fetched_at: '2026-04-01T10:00:00Z',
+      source_version: 'geo.admin-v1',
+      cached: false,
+      risk_score: { score: 75, inondation: 9, seismic: 8, grele: 5, contamination: 7, radon: 9 },
+    });
+
+    render(<GeoContextPanel buildingId="test-id" />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByText('geo_context.interpretation_high_risk')).toBeInTheDocument();
     });
   });
 

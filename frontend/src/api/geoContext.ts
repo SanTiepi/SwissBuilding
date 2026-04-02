@@ -47,4 +47,9 @@ export const geoContextApi = {
     const response = await apiClient.post<GeoContextResponse>(`/buildings/${buildingId}/geo-context/refresh`);
     return response.data;
   },
+
+  getRiskScore: async (buildingId: string): Promise<GeoRiskScore> => {
+    const response = await apiClient.get<GeoRiskScore>(`/buildings/${buildingId}/geo-risk-score`);
+    return response.data;
+  },
 };
