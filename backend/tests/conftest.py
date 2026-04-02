@@ -155,6 +155,8 @@ from app.models.permit_procedure import PermitProcedure as _PP  # noqa: E402, F4
 from app.models.permit_step import PermitStep as _PS  # noqa: E402, F401
 from app.models.pilot_scorecard import PilotScorecard as _PSc  # noqa: E402, F401
 from app.models.portfolio import Portfolio as _Portfolio  # noqa: E402, F401
+from app.models.post_work_item import PostWorkItem as _PWI  # noqa: E402, F401
+from app.models.post_work_item import WorksCompletionCertificate as _WCC  # noqa: E402, F401
 from app.models.post_works_link import PostWorksLink as _PWL  # noqa: E402, F401
 from app.models.procedure import ProcedureInstance as _ProcI  # noqa: E402, F401
 from app.models.procedure import ProcedureTemplate as _ProcT  # noqa: E402, F401
