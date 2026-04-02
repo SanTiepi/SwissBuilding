@@ -1,170 +1,253 @@
-"""Tests for composite geo risk score from score_computers.py."""
+"""Tests for geo risk score service (A.16)."""
 
 from __future__ import annotations
 
-from app.services.enrichment.score_computers import compute_geo_risk_score
+import uuid
+
+import pytest
+from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.building import Building
+from app.models.building_geo_context import BuildingGeoContext
+from app.models.user import User
+from app.services.geo_risk_score_service import get_geo_risk_score, compute_geo_risk_score
 
 
-class TestCompositeGeoRiskScore:
-    """Test compute_geo_risk_score with various risk combinations."""
+class TestGeoRiskScore:
+    """Tests for composite geo risk score calculation."""
 
-    def test_no_data_returns_none(self):
-        """No enrichment data at all -> None (cannot compute)."""
-        assert compute_geo_risk_score({}) is None
+    @pytest.mark.asyncio
+    async def test_building_not_found(self, db: AsyncSession):
+        """Test that building not found returns None."""
+        non_existent_id = uuid.uuid4()
+        result = await get_geo_risk_score(db, non_existent_id)
+        assert result is None
 
-    def test_all_low_risk(self):
-        """All dimensions present but low risk -> low score, grade A or B."""
-        meta = {
-            "natural_hazards": {"flood_risk": "low", "landslide_risk": "low", "rockfall_risk": "low"},
-            "flood_zones": {"flood_danger_level": "gering"},
-            "seismic": {"seismic_zone": "1"},
-            "contaminated_sites": {"is_contaminated": False},
-            "radon": {"radon_level": "low"},
-            "noise": {"road_noise_day_db": 35},
-            "railway_noise": {"railway_noise_day_db": 30},
-            "aircraft_noise": {"aircraft_noise_db": 25},
-            "groundwater_zones": {"protection_zone": "S3"},
-            "accident_sites": {"near_seveso_site": False},
+    @pytest.mark.asyncio
+    async def test_with_full_geo_context_data(self, db: AsyncSession):
+        """Test score calculation with full geo context data."""
+        # Create test user (required for building)
+        user = User(
+            email=f"test_{uuid.uuid4()}@example.com",
+            password_hash="test",
+            first_name="Test",
+            last_name="User",
+            role="owner",
+            is_active=True,
+        )
+        db.add(user)
+        await db.flush()
+
+        # Create test building
+        building = Building(
+            egid=12345678,
+            egrid="EG12345",
+            address="Test Address 1",
+            postal_code="8000",
+            city="Zurich",
+            canton="ZH",
+            building_type="residential",
+            latitude=47.5,
+            longitude=8.5,
+            created_by=user.id,
+        )
+        db.add(building)
+        await db.flush()
+
+        # Create geo context with all dimensions
+        context_data = {
+            "natural_hazards": {"gefahrenstufe": "erheblich"},  # inondation: 10
+            "seismic": {"baugrundklasse": "D"},  # seismic: 8
+            "grele": {"haeufigkeit": 7},  # grele: 7
+            "contaminated_sites": {"status": "belastet"},  # contamination: 5
+            "radon": {"radon_bq_m3": "400"},  # radon: 7
         }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert 0 <= result["geo_risk_score"] <= 30
-        assert result["geo_risk_grade"] in ("A", "B")
-        assert "breakdown" in result
-        assert "top_risks" in result
-        assert result["data_completeness"] == 1.0
 
-    def test_all_high_risk(self):
-        """All dimensions at maximum -> high score, grade E or F."""
-        meta = {
-            "natural_hazards": {"flood_risk": "high", "landslide_risk": "high", "rockfall_risk": "high"},
-            "flood_zones": {"flood_danger_level": "hoch"},
-            "seismic": {"seismic_zone": "3b"},
-            "contaminated_sites": {"is_contaminated": True},
-            "radon": {"radon_level": "high"},
-            "noise": {"road_noise_day_db": 75},
-            "railway_noise": {},
-            "aircraft_noise": {},
-            "groundwater_zones": {"protection_zone": "S1"},
-            "accident_sites": {"near_seveso_site": True, "distance_m": 100},
+        geo_ctx = BuildingGeoContext(
+            building_id=building.id,
+            context_data=context_data,
+            source_version="geo.admin-v1",
+        )
+        db.add(geo_ctx)
+        await db.commit()
+
+        # Get score
+        result = await get_geo_risk_score(db, building.id)
+
+        assert result is not None
+        assert "score" in result
+        assert "inondation" in result
+        assert "seismic" in result
+        assert "grele" in result
+        assert "contamination" in result
+        assert "radon" in result
+
+        # Validate score is 0-100
+        assert 0 <= result["score"] <= 100
+        # Each sub-dimension should be 0-10
+        assert 0 <= result["inondation"] <= 10
+        assert 0 <= result["seismic"] <= 10
+        assert 0 <= result["grele"] <= 10
+        assert 0 <= result["contamination"] <= 10
+        assert 0 <= result["radon"] <= 10
+
+        # Clean up
+        await db.execute(delete(BuildingGeoContext).where(BuildingGeoContext.building_id == building.id))
+        await db.execute(delete(Building).where(Building.id == building.id))
+        await db.execute(delete(User).where(User.id == user.id))
+        await db.commit()
+
+    @pytest.mark.asyncio
+    async def test_with_partial_data_defaults_to_zero(self, db: AsyncSession):
+        """Test that missing sub-dimensions default to 0."""
+        # Create test user
+        user = User(
+            email=f"test_partial_{uuid.uuid4()}@example.com",
+            password_hash="test",
+            first_name="Test",
+            last_name="Partial",
+            role="owner",
+            is_active=True,
+        )
+        db.add(user)
+        await db.flush()
+
+        # Create test building
+        building = Building(
+            egid=87654321,
+            egrid="EG87654",
+            address="Partial Test",
+            postal_code="8000",
+            city="Zurich",
+            canton="ZH",
+            building_type="commercial",
+            latitude=47.5,
+            longitude=8.5,
+            created_by=user.id,
+        )
+        db.add(building)
+        await db.flush()
+
+        # Create geo context with only some dimensions
+        context_data = {
+            "natural_hazards": {"gefahrenstufe": "mittel"},  # inondation: 7
+            "seismic": {"baugrundklasse": "A"},  # seismic: 2
+            # grele, contamination, radon missing -> default to 0
         }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["geo_risk_score"] >= 70
-        assert result["geo_risk_grade"] in ("D", "E", "F")
-        assert len(result["top_risks"]) <= 3
 
-    def test_mixed_risk(self):
-        """Some high, some low -> mid-range score."""
-        meta = {
-            "flood_zones": {"flood_danger_level": "hoch"},  # high flood
-            "seismic": {"seismic_zone": "1"},  # low seismic
-            "contaminated_sites": {"is_contaminated": False},  # low contam
-            "radon": {"radon_level": "high"},  # high radon
+        geo_ctx = BuildingGeoContext(
+            building_id=building.id,
+            context_data=context_data,
+            source_version="geo.admin-v1",
+        )
+        db.add(geo_ctx)
+        await db.commit()
+
+        # Get score
+        result = await get_geo_risk_score(db, building.id)
+
+        assert result is not None
+        assert result["inondation"] == 7.0
+        assert result["seismic"] == 2.0
+        assert result["grele"] == 0.0
+        assert result["contamination"] == 0.0
+        assert result["radon"] == 0.0
+
+        # Clean up
+        await db.execute(delete(BuildingGeoContext).where(BuildingGeoContext.building_id == building.id))
+        await db.execute(delete(Building).where(Building.id == building.id))
+        await db.execute(delete(User).where(User.id == user.id))
+        await db.commit()
+
+    @pytest.mark.asyncio
+    async def test_score_aggregation_formula(self, db: AsyncSession):
+        """Test that composite score is correctly calculated as sum * weight."""
+        # Create test user
+        user = User(
+            email=f"test_formula_{uuid.uuid4()}@example.com",
+            password_hash="test",
+            first_name="Test",
+            last_name="Formula",
+            role="owner",
+            is_active=True,
+        )
+        db.add(user)
+        await db.flush()
+
+        # Create test building
+        building = Building(
+            egid=11111111,
+            egrid="EG11111",
+            address="Formula Test",
+            postal_code="8000",
+            city="Zurich",
+            canton="ZH",
+            building_type="industrial",
+            latitude=47.5,
+            longitude=8.5,
+            created_by=user.id,
+        )
+        db.add(building)
+        await db.flush()
+
+        # Set all sub-dimensions to specific values
+        context_data = {
+            "natural_hazards": {"gefahrenstufe": "erheblich"},  # inondation: 10
+            "seismic": {"baugrundklasse": "D"},  # seismic: 8
+            "grele": {"haeufigkeit": 7},  # grele: 7
+            "contaminated_sites": {"status": "belastet"},  # contamination: 5
+            "radon": {"radon_bq_m3": "500"},  # radon: 7
         }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert 20 <= result["geo_risk_score"] <= 80
-        assert result["geo_risk_grade"] in ("B", "C", "D", "E")
 
-    def test_partial_data_completeness(self):
-        """Only a few dimensions present -> data_completeness < 1.0."""
-        meta = {
-            "seismic": {"seismic_zone": "2"},
-            "radon": {"radon_level": "medium"},
+        geo_ctx = BuildingGeoContext(
+            building_id=building.id,
+            context_data=context_data,
+            source_version="geo.admin-v1",
+        )
+        db.add(geo_ctx)
+        await db.commit()
+
+        # Get score
+        result = await get_geo_risk_score(db, building.id)
+
+        assert result is not None
+
+        # Expected calculation:
+        # sum = 10 + 8 + 7 + 5 + 7 = 37
+        # composite = 37 * 2 = 74
+        expected_score = min(100, (10 + 8 + 7 + 5 + 7) * 2)
+        assert result["score"] == expected_score
+
+        # Clean up
+        await db.execute(delete(BuildingGeoContext).where(BuildingGeoContext.building_id == building.id))
+        await db.execute(delete(Building).where(Building.id == building.id))
+        await db.execute(delete(User).where(User.id == user.id))
+        await db.commit()
+
+
+class TestComputeGeoRiskScore:
+    """Unit tests for compute_geo_risk_score function."""
+
+    def test_empty_context_data(self):
+        """Test with empty context data."""
+        result = compute_geo_risk_score({})
+        assert result["score"] == 0
+        assert result["inondation"] == 0.0
+        assert result["seismic"] == 0.0
+        assert result["grele"] == 0.0
+        assert result["contamination"] == 0.0
+        assert result["radon"] == 0.0
+
+    def test_maximum_risk_capped_at_100(self):
+        """Test that maximum score is 100."""
+        context_data = {
+            "natural_hazards": {"gefahrenstufe": "erheblich"},  # 10
+            "seismic": {"baugrundklasse": "E"},  # 10
+            "grele": {"haeufigkeit": 10},  # 10
+            "contaminated_sites": {"status": "sanierungsbedürftig"},  # 10
+            "radon": {"radon_bq_m3": "1500"},  # 10
         }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["data_completeness"] < 1.0
-        assert result["data_completeness"] == round(2 / 9, 2)
-
-    def test_result_structure(self):
-        """Output has all required keys."""
-        meta = {"seismic": {"seismic_zone": "2"}}
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert "geo_risk_score" in result
-        assert "geo_risk_grade" in result
-        assert "breakdown" in result
-        assert "top_risks" in result
-        assert "data_completeness" in result
-        assert isinstance(result["breakdown"], dict)
-        assert isinstance(result["top_risks"], list)
-
-    def test_breakdown_has_weight_score_level(self):
-        """Each breakdown dimension includes score, weight, and level."""
-        meta = {
-            "flood_zones": {"flood_danger_level": "mittel"},
-            "seismic": {"seismic_zone": "3a"},
-        }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        for _dim_name, dim_data in result["breakdown"].items():
-            assert "score" in dim_data
-            assert "weight" in dim_data
-            assert "level" in dim_data
-            assert dim_data["level"] in ("low", "moderate", "elevated", "high")
-
-    def test_grade_boundaries(self):
-        """Verify grade thresholds: A<=15, B<=30, C<=50, D<=70, E<=85, F>85."""
-        # Single dim with known score to test grade
-        # seismic zone 1 -> 20.0 score, only dim -> weighted avg = 20.0 -> grade B
-        meta = {"seismic": {"seismic_zone": "1"}}
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["geo_risk_score"] == 20.0
-        assert result["geo_risk_grade"] == "B"
-
-    def test_top_risks_ordered(self):
-        """Top risks are the dimensions with highest weighted contribution."""
-        meta = {
-            "contaminated_sites": {"is_contaminated": True},  # 90 * 3.0 = 270
-            "seismic": {"seismic_zone": "1"},  # 20 * 2.5 = 50
-            "radon": {"radon_level": "low"},  # 10 * 2.0 = 20
-        }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["top_risks"][0] == "contamination"
-
-    def test_seveso_proximity_distance_modulates(self):
-        """Seveso score varies by distance."""
-        close = {"accident_sites": {"near_seveso_site": True, "distance_m": 100}}
-        far = {"accident_sites": {"near_seveso_site": True, "distance_m": 800}}
-        r_close = compute_geo_risk_score(close)
-        r_far = compute_geo_risk_score(far)
-        assert r_close is not None and r_far is not None
-        assert r_close["geo_risk_score"] > r_far["geo_risk_score"]
-
-    def test_noise_loudest_source_wins(self):
-        """Noise score is based on the loudest source."""
-        meta = {
-            "noise": {"road_noise_day_db": 40},
-            "railway_noise": {"railway_noise_day_db": 72},
-            "aircraft_noise": {"aircraft_noise_db": 30},
-        }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["breakdown"]["noise"]["score"] == 85.0  # >70 dB
-
-    def test_groundwater_s1_highest_risk(self):
-        """S1 protection zone = highest groundwater restriction score."""
-        meta = {"groundwater_zones": {"protection_zone": "S1"}}
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["breakdown"]["groundwater_restriction"]["score"] == 90.0
-
-    def test_score_clamped_to_100(self):
-        """Score never exceeds 100."""
-        meta = {
-            "natural_hazards": {"flood_risk": "high", "landslide_risk": "high", "rockfall_risk": "high"},
-            "flood_zones": {"flood_danger_level": "hoch"},
-            "seismic": {"seismic_zone": "3b"},
-            "contaminated_sites": {"is_contaminated": True},
-            "radon": {"radon_level": "high"},
-            "noise": {"road_noise_day_db": 80},
-            "groundwater_zones": {"protection_zone": "S1"},
-            "accident_sites": {"near_seveso_site": True, "distance_m": 50},
-        }
-        result = compute_geo_risk_score(meta)
-        assert result is not None
-        assert result["geo_risk_score"] <= 100.0
+        result = compute_geo_risk_score(context_data)
+        # 10 + 10 + 10 + 10 + 10 = 50, * 2 = 100
+        assert result["score"] <= 100

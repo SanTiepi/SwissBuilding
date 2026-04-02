@@ -76,3 +76,16 @@ class CompareRequest(BaseModel):
     """Request body for building energy comparison."""
 
     building_ids: list[UUID] = Field(..., max_length=10)
+
+
+class EnergyCertificateRead(BaseModel):
+    """Unified energy certificate response (real CECB or estimated)."""
+
+    building_id: UUID
+    energy_class: str = Field(..., pattern=r"^[A-G]$")
+    kwh_per_m2_year: float
+    co2_kg_per_m2_year: float
+    source: str = Field(default="estimated", description="'cecb' or 'estimated'")
+    last_updated: datetime
+
+    model_config = ConfigDict(from_attributes=True)

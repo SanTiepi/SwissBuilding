@@ -87,9 +87,9 @@ def _age_stress_factor(age_years: int, material_type: str) -> float:
     """
     if age_years < 0:
         return 0.0
-    
+
     expected_years = MATERIAL_DEGRADATION_YEARS.get(material_type.lower(), 50)
-    
+
     if age_years < expected_years * 0.5:
         # Early life: minimal stress
         return age_years / expected_years * 2.0
@@ -121,7 +121,7 @@ def _climate_stress_factor(
     """
     score = 0.0
     data_points = 0
-    
+
     # Freeze/thaw cycles: major factor for facades
     if freeze_thaw_cycles is not None:
         data_points += 1
@@ -133,7 +133,7 @@ def _climate_stress_factor(
             score += 7.5
         else:
             score += 9.0
-    
+
     # Precipitation: moisture damage risk
     if precipitation_mm is not None:
         data_points += 1
@@ -145,7 +145,7 @@ def _climate_stress_factor(
             score += 5.0
         else:
             score += 7.0
-    
+
     # Thermal stress (heating degree days proxy for hot/cold extremes)
     if heating_degree_days is not None:
         data_points += 1
@@ -157,7 +157,7 @@ def _climate_stress_factor(
             score += 5.0
         else:
             score += 7.0
-    
+
     # UV exposure
     if uv_exposure and uv_exposure.lower() in ["high", "exposed"]:
         data_points += 1
@@ -165,7 +165,7 @@ def _climate_stress_factor(
     elif uv_exposure and uv_exposure.lower() in ["moderate"]:
         data_points += 0.5
         score += 1.5
-    
+
     # Moisture stress indicator
     if moisture_stress:
         data_points += 0.5
@@ -173,11 +173,11 @@ def _climate_stress_factor(
             score += 3.0
         elif moisture_stress.lower() == "moderate":
             score += 1.5
-    
+
     # Average the contributions
     if data_points == 0:
         return 5.0  # Unknown: neutral/conservative
-    
+
     return min(10.0, score / data_points * 1.3)  # Normalize to 0-10 with slight boost for multiple factors
 
 
@@ -193,12 +193,12 @@ def _environmental_factor(building: Building) -> float:
     """
     canton = building.canton.upper() if building.canton else "ZH"
     base_multiplier = CANTON_STRESS_MULTIPLIER.get(canton, 1.0)
-    
+
     # Coastal proximity premium (simplified: assume sea-adjacent cantons)
     coastal = canton in ["GE", "VD", "NE", "FR", "TI"]
     if coastal:
         base_multiplier *= 1.15  # Salt air corrosion
-    
+
     return base_multiplier
 
 
@@ -209,14 +209,14 @@ def _confidence_from_data_availability(
 ) -> int:
     """Estimate confidence (0-100) based on data availability."""
     score = 50  # Base confidence
-    
+
     if has_installation_year:
         score += 25
     if has_climate_data:
         score += 15
     if has_moisture_stress:
         score += 10
-    
+
     return min(100, score)
 
 
@@ -274,7 +274,7 @@ async def analyze_material_stress(
     material = result.scalar_one_or_none()
     if not material:
         raise ValueError(f"Material {material_id} not found")
-    
+
     # Fetch building
     result = await db.execute(
         select(Building).where(Building.id == building_id)
@@ -282,7 +282,7 @@ async def analyze_material_stress(
     building = result.scalar_one_or_none()
     if not building:
         raise ValueError(f"Building {building_id} not found")
-    
+
     # Fetch climate profile
     result = await db.execute(
         select(ClimateExposureProfile).where(
@@ -290,7 +290,7 @@ async def analyze_material_stress(
         )
     )
     climate = result.scalar_one_or_none()
-    
+
     # Calculate age
     current_year = datetime.now().year
     age_years = (
@@ -298,10 +298,10 @@ async def analyze_material_stress(
         if material.installation_year
         else None
     )
-    
+
     # Calculate stress factors
     age_factor = _age_stress_factor(age_years or 0, material.material_type)
-    
+
     climate_factor = _climate_stress_factor(
         heating_degree_days=climate.heating_degree_days if climate else None,
         freeze_thaw_cycles=climate.freeze_thaw_cycles_per_year if climate else None,
@@ -309,13 +309,13 @@ async def analyze_material_stress(
         moisture_stress=climate.moisture_stress if climate else None,
         uv_exposure=climate.uv_exposure if climate else None,
     )
-    
+
     material_type_factor = MATERIAL_TYPE_MULTIPLIER.get(
         material.material_type.lower(), 1.0
     )
-    
+
     environment_factor = _environmental_factor(building)
-    
+
     # Composite stress score
     # Weight: age 40%, climate 35%, material 15%, environment 10%
     composite_stress = (
@@ -325,16 +325,16 @@ async def analyze_material_stress(
         + (environment_factor - 1.0) * 10.0 * 0.10
     )
     composite_stress = max(0.0, min(10.0, composite_stress))
-    
+
     grade = _grade_from_stress(composite_stress)
-    
+
     # Confidence calculation
     confidence = _confidence_from_data_availability(
         has_installation_year=material.installation_year is not None,
         has_climate_data=climate is not None,
         has_moisture_stress=climate and climate.moisture_stress != "unknown",
     )
-    
+
     # Prognosis text
     age_text = f"Age {age_years}y" if age_years is not None else "Age unknown"
     climate_text = (
@@ -343,7 +343,7 @@ async def analyze_material_stress(
         else "climate data incomplete"
     )
     prognosis = f"{age_text} + {climate_text} → {grade} degradation"
-    
+
     # Data quality assessment
     if confidence >= 80:
         data_quality = "high"
@@ -351,7 +351,7 @@ async def analyze_material_stress(
         data_quality = "moderate"
     else:
         data_quality = "low"
-    
+
     return {
         "material_id": str(material_id),
         "grade": grade,
