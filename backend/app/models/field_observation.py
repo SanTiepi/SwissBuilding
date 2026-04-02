@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -40,6 +40,18 @@ class FieldObservation(Base):
 
     metadata_json = Column(Text, nullable=True)
     status = Column(String(20), nullable=False, default="active")
+
+    # Mobile field observation fields (Q3.03)
+    condition_assessment = Column(String(20), nullable=True)  # good/fair/poor/critical
+    risk_flags = Column(Text, nullable=True)  # JSON array: water_stain, crack, mold, rust, deformation
+    photos = Column(Text, nullable=True)  # JSON array: [{uri, element_part, timestamp}]
+    gps_lat = Column(Float, nullable=True)
+    gps_lon = Column(Float, nullable=True)
+    compass_direction = Column(String(10), nullable=True)  # north/south/east/west
+    inspection_duration_minutes = Column(Integer, nullable=True)
+    ai_observation_summary = Column(Text, nullable=True)
+    ai_generated = Column(Boolean, default=False, nullable=False)
+    observer_name = Column(String(255), nullable=True)
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

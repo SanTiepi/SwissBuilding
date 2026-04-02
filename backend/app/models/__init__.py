@@ -231,6 +231,8 @@ __all__ = [
     "CompanyProfile",
     "CompanySubscription",
     "CompanyVerification",
+    "CompletenessReport",
+    "CompletenessScore",
     "CompletionConfirmation",
     "ComplianceArtefact",
     "ConformanceCheck",

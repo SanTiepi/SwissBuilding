@@ -28,6 +28,8 @@ class Diagnostic(Base):
     suva_notification_required = Column(Boolean, default=False)
     suva_notification_date = Column(Date, nullable=True)
     canton_notification_date = Column(Date, nullable=True)
+    ai_generated = Column(Boolean, default=False)
+    ai_version = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

@@ -3,6 +3,7 @@ import type {
   FieldObservation,
   FieldObservationCreate,
   FieldObservationSummary,
+  ObservationRiskScore,
   PaginatedResponse,
   PatternInsight,
 } from '@/types';
@@ -86,6 +87,20 @@ export const fieldObservationsApi = {
 
   verifyAdmin: async (observationId: string): Promise<FieldObservation> => {
     const response = await apiClient.post<FieldObservation>(`/observations/${observationId}/verify`);
+    return response.data;
+  },
+
+  getRiskScore: async (observationId: string): Promise<ObservationRiskScore> => {
+    const response = await apiClient.get<ObservationRiskScore>(
+      `/field-observations/${observationId}/risk-score`,
+    );
+    return response.data;
+  },
+
+  computeRiskScore: async (observationId: string): Promise<ObservationRiskScore> => {
+    const response = await apiClient.post<ObservationRiskScore>(
+      `/field-observations/${observationId}/risk-score`,
+    );
     return response.data;
   },
 };

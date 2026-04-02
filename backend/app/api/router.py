@@ -4,6 +4,7 @@ from app.api import (
     access_control,
     action_queue,
     actions,
+    ai_feedback,
     anomaly_detection,
     artifact_custody,
     assignments,
@@ -184,6 +185,7 @@ from app.api import (
     portfolio_summary,
     portfolio_trends,
     portfolio_triage,
+    post_work_tracker,
     post_works,
     predictive_readiness,
     priority_matrix,
@@ -203,7 +205,6 @@ from app.api import (
     regulatory_watch,
     remediation_costs,
     remediation_intelligence,
-    reports,
     remediation_post_works,
     remediation_summary,
     remediation_tracking,
@@ -211,6 +212,7 @@ from app.api import (
     renovation_readiness,
     renovation_sequencer,
     reporting_metrics,
+    reports,
     requalification,
     review_queue,
     rfq,
@@ -379,6 +381,7 @@ api_router.include_router(evidence_summary.router, prefix="", tags=["Evidence Su
 api_router.include_router(remediation_summary.router, prefix="", tags=["Remediation Summary"])
 api_router.include_router(compliance_summary.router, prefix="", tags=["Compliance Summary"])
 api_router.include_router(passport_export.router, prefix="", tags=["Passport Export"])
+api_router.include_router(post_work_tracker.router, prefix="", tags=["Post Work Tracker"])
 api_router.include_router(post_works.router, prefix="", tags=["Post Works"])
 api_router.include_router(building_snapshots.router, prefix="", tags=["Building Snapshots"])
 api_router.include_router(transfer.router, prefix="", tags=["Transfer Package"])
@@ -530,3 +533,4 @@ api_router.include_router(compliance_scanner.router, prefix="", tags=["Complianc
 api_router.include_router(incident_workflow.router, prefix="", tags=["Incident Workflow"])
 api_router.include_router(building_reports.router, prefix="", tags=["Building Reports"])
 api_router.include_router(reports.router, prefix="", tags=["Authority Reports"])
+api_router.include_router(ai_feedback.router, prefix="", tags=["AI Feedback Loop"])

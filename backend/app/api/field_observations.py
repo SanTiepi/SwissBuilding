@@ -15,6 +15,7 @@ from app.schemas.field_observation import (
     FieldObservationSummary,
     FieldObservationUpdate,
     FieldObservationVerify,
+    ObservationRiskScoreRead,
     PatternInsightRead,
 )
 from app.services.field_memory_service import (
@@ -35,6 +36,7 @@ from app.services.field_observation_service import (
     update_observation,
     verify_observation,
 )
+from app.services.observation_risk_scorer import get_risk_score, score_observation
 
 router = APIRouter()
 
@@ -69,6 +71,9 @@ async def create_observation_endpoint(
     """Create a new field observation for a building."""
     await _get_building_or_404(db, building_id)
     obs = await create_observation(db, building_id, current_user.id, data)
+    # Auto-score if mobile condition data present
+    if data.condition_assessment:
+        await score_observation(db, obs.id)
     return _enrich_observation(obs, f"{current_user.first_name} {current_user.last_name}")
 
 
@@ -300,3 +305,37 @@ async def verify_observation_endpoint(
     observer = await db.get(User, obs.observer_id)
     name = f"{observer.first_name} {observer.last_name}" if observer else None
     return _enrich_observation(obs, name)
+
+
+@router.get(
+    "/field-observations/{observation_id}/risk-score",
+    response_model=ObservationRiskScoreRead,
+)
+async def get_risk_score_endpoint(
+    observation_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get risk score for a field observation."""
+    risk = await get_risk_score(db, observation_id)
+    if risk is None:
+        raise HTTPException(status_code=404, detail="Risk score not found for this observation")
+    return risk
+
+
+@router.post(
+    "/field-observations/{observation_id}/risk-score",
+    response_model=ObservationRiskScoreRead,
+    status_code=201,
+)
+async def compute_risk_score_endpoint(
+    observation_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Compute or recompute risk score for a field observation."""
+    try:
+        risk = await score_observation(db, observation_id)
+    except ValueError as err:
+        raise HTTPException(status_code=404, detail="Field observation not found") from err
+    return risk

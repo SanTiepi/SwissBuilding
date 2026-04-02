@@ -30,6 +30,7 @@ class Material(Base):
     # AI recognition metadata
     identified_by_ai = Column(Boolean, default=False)
     ai_confidence = Column(Float, nullable=True)
+    ai_version = Column(String(50), nullable=True)
     year_estimated = Column(Integer, nullable=True)
     ai_pollutants = Column(JSON, nullable=True)
     ai_recommendations = Column(JSON, nullable=True)

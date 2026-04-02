@@ -1,5 +1,6 @@
 from app.schemas.action_item import ActionItemCreate, ActionItemRead, ActionItemUpdate
 from app.schemas.activity import ActivityItemRead
+from app.schemas.ai_feedback import AIFeedbackCreate, AIFeedbackRead, AIMetricsRead, AIMetricsSummary
 from app.schemas.assignment import AssignmentCreate, AssignmentRead
 from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse
 from app.schemas.building import (
@@ -43,6 +44,14 @@ from app.schemas.climate_exposure import (
     OpportunityWindowsResponse,
 )
 from app.schemas.common import PaginatedResponse
+from app.schemas.completeness_dashboard import (
+    CompletenessDashboardRead,
+    DimensionScore,
+    MissingItemDetail,
+    MissingItemsResponse,
+    RecommendedAction,
+    RecommendedActionsResponse,
+)
 from app.schemas.cross_layer_intelligence import (
     CrossLayerInsightRead,
     InsightEvidence,
@@ -74,6 +83,7 @@ from app.schemas.field_observation import (
     FieldObservationCreate,
     FieldObservationListRead,
     FieldObservationRead,
+    ObservationRiskScoreRead,
     PatternInsightRead,
 )
 from app.schemas.flywheel import (
@@ -117,6 +127,14 @@ from app.schemas.portfolio_risk import (
     BuildingRiskPointRead,
     PortfolioRiskOverviewRead,
     RiskDistributionRead,
+)
+from app.schemas.post_work_item import (
+    CompletionStatusRead,
+    PostWorkItemComplete,
+    PostWorkItemCreate,
+    PostWorkItemRead,
+    PostWorkItemUpdate,
+    WorksCompletionCertificateRead,
 )
 from app.schemas.proactive_alert import AlertRead, AlertSummaryRead, PortfolioAlertSummaryRead
 from app.schemas.procedure import (
@@ -178,6 +196,10 @@ from app.schemas.zone import ZoneCreate, ZoneRead, ZoneUpdate
 
 __all__ = [
     "AccuracyMetrics",
+    "AIFeedbackCreate",
+    "AIFeedbackRead",
+    "AIMetricsRead",
+    "AIMetricsSummary",
     "ActionItemCreate",
     "ActionItemRead",
     "ActionItemUpdate",
@@ -223,7 +245,9 @@ __all__ = [
     "ComplianceRequirementDetail",
     "CostEstimate",
     "CostOfInaction",
+    "CompletenessDashboardRead",
     "CrossLayerInsightRead",
+    "DimensionScore",
     "DefectAlertResponse",
     "DefectTimelineCreate",
     "DefectTimelineResponse",
@@ -268,6 +292,8 @@ __all__ = [
     "LoginRequest",
     "MaterialCreate",
     "MaterialRead",
+    "MissingItemDetail",
+    "MissingItemsResponse",
     "NaturalHazardsResult",
     "NotificationPreferenceRead",
     "NotificationPreferenceUpdate",
@@ -285,6 +311,12 @@ __all__ = [
     "PollutantRiskDetail",
     "PortfolioAlertSummaryRead",
     "PortfolioInsightRead",
+    "PostWorkItemComplete",
+    "PostWorkItemCreate",
+    "PostWorkItemRead",
+    "PostWorkItemUpdate",
+    "CompletionStatusRead",
+    "WorksCompletionCertificateRead",
     "PortfolioRiskOverviewRead",
     "ProcedureAdvanceStep",
     "ProcedureBlockerRead",
@@ -299,18 +331,20 @@ __all__ = [
     "ProofOfStateSummaryRead",
     "RecommendationListRead",
     "RecommendationRead",
+    "RecommendedAction",
+    "RecommendedActionsResponse",
     "RegisterRequest",
     "RegistryLookupResult",
     "RenovationSimulationRequest",
     "RenovationSimulationResponse",
     "RiskDistributionRead",
     "RiskScoreRead",
-    "SinistraliteScoreRead",
     "SampleCreate",
     "SampleRead",
     "SampleUpdate",
     "SamplingCriterionRead",
     "SamplingQualityRead",
+    "SinistraliteScoreRead",
     "SpatialEnrichmentRefreshResponse",
     "SpatialEnrichmentResponse",
     "TechnicalPlanCreate",

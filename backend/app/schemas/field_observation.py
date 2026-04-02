@@ -20,6 +20,15 @@ class FieldObservationCreate(BaseModel):
     tags: list[str] | None = None
     context_json: dict | None = None
     confidence: str = "likely"
+    # Mobile fields
+    condition_assessment: str | None = None
+    risk_flags: list[str] | None = None
+    photos: list[dict] | None = None
+    gps_lat: float | None = None
+    gps_lon: float | None = None
+    compass_direction: str | None = None
+    inspection_duration_minutes: int | None = None
+    observer_name: str | None = None
 
 
 class FieldObservationUpdate(BaseModel):
@@ -66,6 +75,29 @@ class FieldObservationRead(BaseModel):
     created_at: datetime | None
     updated_at: datetime | None
     observer_name: str | None = None
+    # Mobile fields
+    condition_assessment: str | None = None
+    risk_flags: str | None = None
+    photos: str | None = None
+    gps_lat: float | None = None
+    gps_lon: float | None = None
+    compass_direction: str | None = None
+    inspection_duration_minutes: int | None = None
+    ai_observation_summary: str | None = None
+    ai_generated: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ObservationRiskScoreRead(BaseModel):
+    id: uuid.UUID
+    field_observation_id: uuid.UUID
+    building_id: uuid.UUID | None
+    risk_score: float
+    recommended_action: str
+    urgency_level: str
+    created_at: datetime | None
+    updated_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
 

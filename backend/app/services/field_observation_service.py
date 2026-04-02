@@ -39,6 +39,15 @@ async def create_observation(
         tags=json.dumps(data.tags) if data.tags else None,
         context_json=json.dumps(data.context_json) if data.context_json else None,
         confidence=data.confidence,
+        # Mobile fields
+        condition_assessment=data.condition_assessment,
+        risk_flags=json.dumps(data.risk_flags) if data.risk_flags else None,
+        photos=json.dumps(data.photos) if data.photos else None,
+        gps_lat=data.gps_lat,
+        gps_lon=data.gps_lon,
+        compass_direction=data.compass_direction,
+        inspection_duration_minutes=data.inspection_duration_minutes,
+        observer_name=data.observer_name,
     )
     db.add(obs)
     await db.commit()
