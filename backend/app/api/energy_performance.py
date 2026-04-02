@@ -18,6 +18,7 @@ from app.schemas.energy_performance import (
     RenovationEnergyImpact,
     RenovationImpactRequest,
 )
+from app.services.cecb_import_service import fetch_cecb_by_egid, upsert_cecb_record
 from app.services.energy_performance_service import (
     compare_buildings_energy,
     estimate_energy_class,
@@ -76,3 +77,35 @@ async def compare_energy(
         return await compare_buildings_energy(db, body.building_ids)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/buildings/{building_id}/cecb-refresh")
+async def refresh_cecb(
+    building_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "write")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Fetch fresh CECB data for a building from the registre."""
+    from sqlalchemy import select
+
+    from app.models.building import Building
+
+    stmt = select(Building).where(Building.id == building_id)
+    result = await db.execute(stmt)
+    building = result.scalar_one_or_none()
+    if not building:
+        raise HTTPException(status_code=404, detail="Building not found")
+    if not building.egid:
+        raise HTTPException(status_code=400, detail="Building has no EGID — cannot lookup CECB")
+
+    record = await fetch_cecb_by_egid(building.egid)
+    if not record:
+        return {"status": "not_found", "message": f"No CECB data found for EGID {building.egid}"}
+
+    await upsert_cecb_record(db, record)
+    await db.commit()
+    return {
+        "status": "updated",
+        "cecb_class": record.energy_class,
+        "cecb_source": record.source,
+    }

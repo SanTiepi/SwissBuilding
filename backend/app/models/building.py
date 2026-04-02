@@ -42,6 +42,15 @@ class Building(Base):
     source_dataset = Column(String(50), nullable=True)
     source_imported_at = Column(DateTime(timezone=True), nullable=True)
     source_metadata_json = Column(JSON, nullable=True)
+    # CECB real energy data (from registre CECB)
+    cecb_class = Column(String(1), nullable=True)  # A-G
+    cecb_heating_demand = Column(Float, nullable=True)  # kWh/m²/an
+    cecb_cooling_demand = Column(Float, nullable=True)  # kWh/m²/an
+    cecb_dhw_demand = Column(Float, nullable=True)  # eau chaude sanitaire kWh/m²/an
+    cecb_certificate_date = Column(DateTime(timezone=True), nullable=True)
+    cecb_fetch_date = Column(DateTime(timezone=True), nullable=True)
+    cecb_source = Column(String(100), nullable=True)  # e.g. "CECB VD 2024"
+
     jurisdiction_id = Column(UUID(as_uuid=True), ForeignKey("jurisdictions.id"), nullable=True)
     organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
     created_at = Column(DateTime, default=func.now())

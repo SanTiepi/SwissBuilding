@@ -6,6 +6,7 @@ DEMO_ADMIN_PASSWORD = "noob42"
 
 # Source dataset identifiers (used in importers, seeds, and tests)
 SOURCE_DATASET_VAUD_PUBLIC = "vd-public-rcb"
+SOURCE_DATASET_CECB = "cecb-registre"
 
 # Canonical sample units stored in the database and returned by the API.
 SAMPLE_UNIT_PERCENT_WEIGHT = "percent_weight"
