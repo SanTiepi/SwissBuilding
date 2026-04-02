@@ -189,6 +189,41 @@
       "file": ".openclaw/tasks/Q3-01-building-passport-v1.md",
       "date_prepared": "2026-04-02T00:01Z",
       "date_executed": "2026-04-02T03:50Z"
+    },
+    {
+      "id": "015",
+      "programme": "P.1",
+      "title": "Post-works verification tracker with photo evidence",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/Q3-02-post-works-truth-tracker.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:53Z"
+    },
+    {
+      "id": "016",
+      "programme": "A.16",
+      "title": "Geo risk score composite service",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/A-16-geo-risk-score.md",
+      "date_prepared": "2026-04-02T00:18Z",
+      "date_executed": "2026-04-02T05:11Z",
+      "commit": "7e82259"
+    },
+    {
+      "id": "017",
+      "programme": "C.1",
+      "title": "Inventory CRUD complete (14 types + warranty alerts)",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/C-1-inventory-crud.md",
+      "date_prepared": "2026-04-02T00:19Z",
+      "date_executed": "2026-04-02T05:11Z",
+      "commit": "d653eb5"
     }
   ],
   "failed": [],
