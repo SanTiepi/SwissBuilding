@@ -5,12 +5,29 @@
   "source_of_truth": "docs/roadmap-48-months.md",
   "completed": [
     {"epic": "wave-next", "tasks": "001-010", "status": "done", "date": "2026-04-01"},
-    {"epic": "defect-shield", "tasks": "001-007", "status": "done", "date": "2026-04-01"},
+    {"epic": "defect-shield", "tasks": "001-007 + edge cases", "status": "done", "date": "2026-04-02", "commits": ["b4800b4", "2b2eec3"]},
     {"epic": "reno-predict", "tasks": "all", "status": "done", "date": "2026-04-01"},
-    {"epic": "programme-a", "tasks": "A.1 geo layers, A.2 swissBUILDINGS3D, A.15 geo risk score service, A.16 geo risk score", "status": "done", "date": "2026-04-02"},
-    {"epic": "programme-b", "tasks": "B.1 ClimateExposureProfile, B.4 OpportunityWindow", "status": "done", "date": "2026-04-01"}
+    {"epic": "programme-a", "tasks": "A.1 geo layers, A.2 swissBUILDINGS3D, A.15 geo context panel, A.16 geo risk score", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-b", "tasks": "B.1 ClimateExposureProfile, B.4 OpportunityWindow, B.3 Material Stress", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-c", "tasks": "C.1 Inventory CRUD, C.2 Equipment Timeline, C.6 Material Recognition", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-e", "tasks": "E.1 CECB Import, E.3 CECB Integration", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-n", "tasks": "N.1 Compliance Scan", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-f", "tasks": "F.2 Fiscal Deductions", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-d", "tasks": "D.3 Sinistralite Score", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-i", "tasks": "I.1 Cross-building Correlation", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-s", "tasks": "S.10 Meteo Correlation + Alerts", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-m", "tasks": "M.1 Authority Report PDF", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-o", "tasks": "O.10 Isochrone Map", "status": "done", "date": "2026-04-02"}
   ],
-  "in_progress": []
+  "in_progress": [],
+  "session_2_notes": {
+    "session_id": "dev-runner-swissbuilding-wave-7",
+    "date_started": "2026-04-02T03:09Z",
+    "briefs_executed": 17,
+    "briefs_already_done": 13,
+    "new_commits": 2,
+    "date_completed": "2026-04-02T04:15Z"
+  }
   "pending_briefs": [
     {
       "id": "001",
@@ -128,6 +145,50 @@
       "file": ".openclaw/tasks/D-03_building_sinistralite_score.md",
       "date_prepared": "2026-04-02T00:01Z",
       "date_executed": "2026-04-02T02:46Z"
+    },
+    {
+      "id": "011",
+      "programme": "C.2",
+      "title": "Equipment replacement timeline service",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/C-02_equipment_replacement_timeline.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:04Z"
+    },
+    {
+      "id": "012",
+      "programme": "I.1",
+      "title": "Cross-building correlation engine",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/I-01_cross_building_correlation.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:04Z"
+    },
+    {
+      "id": "013",
+      "programme": "Q.2",
+      "title": "Quote extraction from diagnostic PDFs",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/Q2-01-quote-extraction-pipeline.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:50Z"
+    },
+    {
+      "id": "014",
+      "programme": "G.1",
+      "title": "Building Passport v1 — A-F grades",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/Q3-01-building-passport-v1.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:50Z"
     }
   ],
   "failed": [],
