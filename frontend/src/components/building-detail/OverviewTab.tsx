@@ -9,7 +9,7 @@ import { NextAction } from '@/components/NextAction';
 import { DataQualityScore } from '@/components/DataQualityScore';
 import { DossierStatusPanel } from '@/components/DossierStatusPanel';
 import { ReadinessSummary } from '@/components/ReadinessSummary';
-import { TrustScoreCard } from '@/components/TrustScoreCard';
+import { TrustScorePanel } from '@/components/buildings/TrustScorePanel';
 import { UnknownIssuesList } from '@/components/UnknownIssuesList';
 import { ChangeSignalsFeed } from '@/components/ChangeSignalsFeed';
 import { ContradictionCard } from '@/components/ContradictionCard';
@@ -708,7 +708,7 @@ export function OverviewTab({
       {/* Intelligence Surfaces */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ReadinessSummary buildingId={buildingId} onNavigateTab={onNavigateTab} />
-        <TrustScoreCard buildingId={buildingId} />
+        <TrustScorePanel buildingId={buildingId} />
         <UnknownIssuesList buildingId={buildingId} />
         <ChangeSignalsFeed buildingId={buildingId} />
         <ContradictionCard buildingId={buildingId} />

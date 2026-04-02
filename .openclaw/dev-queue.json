@@ -228,13 +228,14 @@
   ],
   "failed": [],
   "session_notes": {
-    "session_id": "dev-runner-swissbuilding-wave-6",
-    "date_started": "2026-04-02T00:51Z",
-    "phase_1_status": "✅ Roadmap lue, état analysé, queue updated",
-    "phase_2_status": "✅ 8 tâches top-priority identifiées (S-M effort)",
-    "phase_3_status": "✅ 7 briefs chirurgicaux préparés dans .openclaw/tasks/",
-    "phase_4_status": "PENDING — Claude Code execution phase",
-    "phase_5_status": "PENDING — Update queue + final report",
-    "notes": "Tous les briefs sont autonomes, sans dépendances. Infrastructure existante complète. Effort total: 4-5 sprints pour wave complète."
+    "session_id": "dev-runner-swissbuilding-wave-8",
+    "date_started": "2026-04-02T03:17Z",
+    "wave_8_status": "✅ All wave-7 briefs already executed (21 briefs with commits)",
+    "phase_1_status": "✅ Wave-7 validation: all 21 tasks completed + committed",
+    "phase_2_status": "✅ Wave-8 briefs prepared: 5 new tasks (G.1-G.3, H.1, I.2)",
+    "phase_3_status": "✅ Briefs written in .openclaw/tasks/: G-1-trust-score, G-2-unknown-issues, G-3-contradiction, H-1-permit, I-2-expert-review",
+    "phase_4_status": "READY — 5 briefs queued for next wave execution",
+    "notes": "Wave-7 execution was autonomous & complete. 21 commits merged. Wave-8 focuses on trust/governance (Programme G, H, I). Next: Claude Code execute these 5 briefs."
   }
+}
 }

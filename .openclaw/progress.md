@@ -1,3 +1,86 @@
+# Dev-Runner Wave 8 Progress — 2026-04-02 05:17 UTC
+
+## Session Summary
+- **Start:** 2026-04-02 03:17 UTC (Zurich)
+- **Status:** Wave-7 validation + Wave-8 brief preparation
+- **Previous Wave (Wave-7):** 21 briefs executed autonomously (all committed)
+- **Current Wave (Wave-8):** 5 new briefs prepared for next Claude Code execution
+
+## Wave-7 Validation Results
+✅ **All 21 briefs executed and committed:**
+- A-15: GeoContextPanel enriched (6281f32)
+- A-16: Geo risk score service (7e82259)
+- B-01: ClimateExposureProfile population (c32d783)
+- C-1: Inventory CRUD complete (d653eb5)
+- C-2: Equipment replacement timeline (already committed)
+- C-6: Material recognition via Claude vision (already committed)
+- D-3: Building sinistralité score (already committed)
+- E-1/E-3: CECB integration (8e41dd9)
+- E-03: CECB integration (8e41dd9)
+- F-2: Fiscal deductions calculator (already committed)
+- I-1: Cross-building correlation (already committed)
+- M-1: Rapport autorité auto (656c061)
+- N-1: Compliance scan (already committed)
+- O-10: Isochrone map (already committed)
+- Q2-01: Quote extraction (already committed)
+- Q2-02: Meilisearch integration (df533ea)
+- Q2-03: Feedback loop v1 (0f47e2e)
+- Q3-01: Building passport v1 (already committed)
+- Q3-02: Post-works truth tracker (9bdce9d)
+- Q3-03: Field observation mobile (already committed)
+- Q3-04: Completeness dashboard (cc14fb6)
+
+**Result:** Wave-7 complete — all systems tested and passing.
+
+## Wave-8 Briefs Prepared
+
+5 new autonomous briefs written to `.openclaw/tasks/`:
+
+1. **G-1-trust-score-visibility.md** — Trust Score Explicit Display
+   - Add TrustScorePanel to BuildingHome
+   - Show score breakdown: source reliability, recency, contradictions, observations
+   - Sparkline history + color coding (red/amber/green)
+   - Effort: M | Impact: ⭐⭐⭐⭐⭐
+
+2. **G-2-unknown-issues-display.md** — Unknown Issues Explicit Display
+   - UnknownIssuesPanel in BuildingHome
+   - Detect missing diagnostics, field observations
+   - Prioritized list: CRITICAL (asbestos >30y, lead pre-1970), IMPORTANT, LOW
+   - Actionable next steps + cost estimates
+   - Effort: M | Impact: ⭐⭐⭐⭐
+
+3. **G-3-contradiction-detection.md** — Contradiction Detection Visible
+   - ContradictionPanel detecting conflicting diagnostics
+   - Source 1 vs Source 2 comparison
+   - Severity (high/medium/low) with resolution workflow
+   - Status tracking: pending → acknowledged → resolved
+   - Effort: M | Impact: ⭐⭐⭐⭐⭐
+
+4. **H-1-permit-workflow-integration.md** — Permit Workflow Integration
+   - Permit model (type, status, expiry, linked subsidies)
+   - PermitManagementPanel with deadline alerts
+   - API endpoints for CRUD + deadline tracking
+   - Notification triggers (30/14/7 days before expiry)
+   - Effort: M | Impact: ⭐⭐⭐⭐
+
+5. **I-2-expert-review-override-governance.md** — Expert Review & Override
+   - ExpertReview model for decision governance
+   - Flag high-severity decisions for expert approval
+   - ExpertReviewQueue admin page
+   - Immutable audit log for compliance
+   - Integrate with contradiction/risk score decisions
+   - Effort: M | Impact: ⭐⭐⭐⭐⭐
+
+## Next Steps
+Execute Wave-8 briefs with Claude Code:
+```bash
+for brief in G-1 G-2 G-3 H-1 I-2; do
+  claude --permission-mode bypassPermissions --print "Read .openclaw/tasks/$brief*.md — implement, test, commit."
+done
+```
+
+---
+
 # Dev-Runner Wave 6 Progress — 2026-04-02
 
 ## Session Summary

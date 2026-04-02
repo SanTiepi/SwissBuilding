@@ -13,17 +13,11 @@ class DefectTimeline(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     building_id = Column(UUID(as_uuid=True), ForeignKey("buildings.id"), nullable=False, index=True)
-    diagnostic_id = Column(UUID(as_uuid=True), ForeignKey("diagnostics.id"), nullable=True)
     defect_type = Column(String(100), nullable=False)
     discovery_date = Column(Date, nullable=False)
-    purchase_date = Column(Date, nullable=True)
     notification_deadline = Column(Date, nullable=False)
-    guarantee_type = Column(String(50), nullable=False, default="standard")
-    prescription_date = Column(Date, nullable=True)
-    notified_at = Column(DateTime, nullable=True)
-    notification_pdf_url = Column(String(500), nullable=True)
     notification_sent_at = Column(DateTime, nullable=True)
-    status = Column(String(20), nullable=False, default="active")
+    status = Column(String(20), nullable=False, default="open")
     description = Column(Text, nullable=True)
     severity = Column(String(20), nullable=False, default="medium")
     responsible_party = Column(String(200), nullable=True)
@@ -32,9 +26,10 @@ class DefectTimeline(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-    building = relationship("Building")
+    building = relationship("Building", back_populates="defect_timelines")
 
     __table_args__ = (
+        Index("idx_defect_timelines_building_id", "building_id"),
         Index("idx_defect_timelines_status", "status"),
-        Index("idx_defect_timelines_severity", "severity"),
+        Index("idx_defect_timelines_deadline", "notification_deadline"),
     )

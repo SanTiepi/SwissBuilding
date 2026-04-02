@@ -70,6 +70,7 @@ class Building(Base):
     technical_plans = relationship("TechnicalPlan", back_populates="building", cascade="all, delete-orphan")
     diagnostic_publications = relationship("DiagnosticReportPublication", back_populates="building")
     diagnostic_mission_orders = relationship("DiagnosticMissionOrder", back_populates="building")
+    defect_timelines = relationship("DefectTimeline", back_populates="building", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("idx_buildings_canton", "canton"),
