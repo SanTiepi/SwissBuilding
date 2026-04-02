@@ -50,6 +50,7 @@ from app.api import (
     compliance_artefacts,
     compliance_calendar,
     compliance_gap,
+    compliance_scan,
     compliance_scanner,
     compliance_summary,
     compliance_timeline,
@@ -118,6 +119,7 @@ from app.api import (
     geo_context,
     handoff_pack,
     identity_chain,
+    incident_alerts,
     incident_response,
     incident_workflow,
     incidents,
@@ -465,6 +467,7 @@ api_router.include_router(extractions.router, prefix="", tags=["Diagnostic Extra
 api_router.include_router(digital_vault.router, prefix="", tags=["Digital Vault"])
 api_router.include_router(budget_tracking.router, prefix="", tags=["Budget Tracking"])
 api_router.include_router(ventilation_assessment.router, prefix="", tags=["Ventilation Assessment"])
+api_router.include_router(incident_alerts.router, prefix="", tags=["Incident Alerts"])
 api_router.include_router(incident_response.router, prefix="", tags=["Incident Response"])
 api_router.include_router(incidents.router, prefix="", tags=["Incidents"])
 api_router.include_router(indispensability.router, prefix="", tags=["Indispensability"])
@@ -521,6 +524,7 @@ api_router.include_router(flywheel.router, prefix="", tags=["Flywheel Learning"]
 api_router.include_router(defect_timeline.router, prefix="", tags=["Defect Timeline"])
 api_router.include_router(cost_prediction.router, prefix="", tags=["Cost Prediction"])
 api_router.include_router(opportunity_windows.router, prefix="", tags=["Opportunity Windows"])
+api_router.include_router(compliance_scan.router, prefix="", tags=["Compliance Scan"])
 api_router.include_router(compliance_scanner.router, prefix="", tags=["Compliance Scanner"])
 api_router.include_router(incident_workflow.router, prefix="", tags=["Incident Workflow"])
 api_router.include_router(building_reports.router, prefix="", tags=["Building Reports"])
