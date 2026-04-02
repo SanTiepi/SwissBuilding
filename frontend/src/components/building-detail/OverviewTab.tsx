@@ -37,6 +37,7 @@ const EcosystemEngagementsView = lazy(() => import('@/components/building-detail
 const OperationalGatesView = lazy(() => import('@/components/building-detail/OperationalGatesView'));
 const MemoryTransferView = lazy(() => import('@/components/building-detail/MemoryTransferView'));
 const AuthorityPackPanel = lazy(() => import('@/components/building-detail/AuthorityPackPanel'));
+const ReportGenerationPanel = lazy(() => import('@/pages/Building/ReportGenerationPanel'));
 const RenovationReadinessPanel = lazy(() => import('@/components/building-detail/RenovationReadinessPanel'));
 const PackBuilderPanel = lazy(() => import('@/components/building-detail/PackBuilderPanel'));
 const ProjectWizard = lazy(() => import('@/components/building-detail/ProjectWizard'));
@@ -337,6 +338,11 @@ export function OverviewTab({
       {/* === FINANCE READINESS: Assess building for lending/finance === */}
       <Suspense fallback={null}>
         <FinanceReadinessPanel buildingId={buildingId} />
+      </Suspense>
+
+      {/* === AUTHORITY REPORT: Generate 20+ page authority PDF === */}
+      <Suspense fallback={null}>
+        <ReportGenerationPanel buildingId={buildingId} />
       </Suspense>
 
       {/* === AUTHORITY PACK: Generate authority-ready dossier === */}

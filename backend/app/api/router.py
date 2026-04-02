@@ -203,6 +203,7 @@ from app.api import (
     regulatory_watch,
     remediation_costs,
     remediation_intelligence,
+    reports,
     remediation_post_works,
     remediation_summary,
     remediation_tracking,
@@ -528,3 +529,4 @@ api_router.include_router(compliance_scan.router, prefix="", tags=["Compliance S
 api_router.include_router(compliance_scanner.router, prefix="", tags=["Compliance Scanner"])
 api_router.include_router(incident_workflow.router, prefix="", tags=["Incident Workflow"])
 api_router.include_router(building_reports.router, prefix="", tags=["Building Reports"])
+api_router.include_router(reports.router, prefix="", tags=["Authority Reports"])
