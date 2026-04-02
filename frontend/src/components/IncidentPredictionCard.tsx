@@ -43,28 +43,23 @@ const TYPE_LABELS: Record<string, string> = {
   structural: 'Structural',
 };
 
-const TRIGGER_ICONS: Record<string, typeof AlertTriangle> = {
-  heavy_rain: CloudRain,
-  high_wind: Wind,
-  freeze_thaw: Thermometer,
-};
-
-function getTriggerIcon(trigger: string) {
-  for (const [key, Icon] of Object.entries(TRIGGER_ICONS)) {
-    if (trigger.toLowerCase().includes(key)) return Icon;
-  }
-  return AlertTriangle;
+function renderTriggerIcon(trigger: string, className: string) {
+  const lower = trigger.toLowerCase();
+  if (lower.includes('heavy_rain')) return <CloudRain className={className} />;
+  if (lower.includes('high_wind')) return <Wind className={className} />;
+  if (lower.includes('freeze_thaw')) return <Thermometer className={className} />;
+  return <AlertTriangle className={className} />;
 }
 
 export default function IncidentPredictionCard({ prediction }: IncidentPredictionCardProps) {
   const style = RISK_STYLES[prediction.risk_level as keyof typeof RISK_STYLES] || RISK_STYLES.low;
-  const TriggerIcon = getTriggerIcon(prediction.trigger);
   const pct = Math.round(prediction.probability * 100);
+  const iconClass = `mt-0.5 h-5 w-5 flex-shrink-0 ${style.icon}`;
 
   return (
     <div className={`rounded-lg border p-4 ${style.border} ${style.bg}`} data-testid="prediction-card">
       <div className="flex items-start gap-3">
-        <TriggerIcon className={`mt-0.5 h-5 w-5 flex-shrink-0 ${style.icon}`} />
+        {renderTriggerIcon(prediction.trigger, iconClass)}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-medium text-gray-900 dark:text-gray-100">
