@@ -1,196 +1,144 @@
 {
-  "version": 1,
-  "description": "Task queue for autonomous dev via OpenClaw → Claude Code CLI",
+  "version": 3,
+  "description": "Dev queue — tracks what's done. The dev-runner reads the roadmap directly for what's next.",
   "branch": "building-life-os",
-  "rules": {
-    "max_tasks_per_session": 2,
-    "require_tests_green": true,
-    "commit_after_each_task": true,
-    "push_after_each_task": false,
-    "create_pr_after_epic": true
-  },
-  "queue": [
+  "source_of_truth": "docs/roadmap-48-months.md",
+  "completed": [
+    {"epic": "wave-next", "tasks": "001-010", "status": "done", "date": "2026-04-01"},
+    {"epic": "defect-shield", "tasks": "001-007", "status": "done", "date": "2026-04-01"},
+    {"epic": "reno-predict", "tasks": "all", "status": "done", "date": "2026-04-01"},
+    {"epic": "programme-a", "tasks": "A.1 geo layers, A.2 swissBUILDINGS3D, A.15 geo risk score service, A.16 geo risk score", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-b", "tasks": "B.1 ClimateExposureProfile, B.4 OpportunityWindow", "status": "done", "date": "2026-04-01"}
+  ],
+  "in_progress": []
+  "pending_briefs": [
     {
-      "id": "wave-next-001",
-      "epic": "wave-next",
-      "task": "001",
-      "name": "Archive 55 obsolete docs",
-      "spec": ".claude/epics/wave-next/001.md",
-      "effort": "S",
+      "id": "001",
+      "programme": "A.15",
+      "title": "GeoContextPanel enrichi — 24 layers geo.admin",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
       "status": "done",
-      "depends_on": [],
-      "completed_at": "2026-04-01T20:20:00Z",
-      "commit": "c6323ba"
+      "file": ".openclaw/tasks/001-programme-a15-geocontextpanel-24layers.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "b5b7f95",
+      "date_executed": "2026-04-02T01:20Z"
     },
     {
-      "id": "wave-next-004",
-      "epic": "wave-next",
-      "task": "004",
-      "name": "Fix ruff errors + silent exceptions",
-      "spec": ".claude/epics/wave-next/004.md",
-      "effort": "S",
-      "status": "pending",
-      "depends_on": []
-    },
-    {
-      "id": "wave-next-002",
-      "epic": "wave-next",
-      "task": "002",
-      "name": "Integrate NFT + vision into roadmap",
-      "spec": ".claude/epics/wave-next/002.md",
+      "id": "002",
+      "programme": "O.10",
+      "title": "Isochrone map — accessible en 5/10/15 minutes",
       "effort": "M",
-      "status": "pending",
-      "depends_on": []
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/002-programme-o10-isochrone-mapbox.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "c0ea671",
+      "date_executed": "2026-04-02T02:05Z"
     },
     {
-      "id": "wave-next-003",
-      "epic": "wave-next",
-      "task": "003",
-      "name": "Index 61 programmes in roadmap",
-      "spec": ".claude/epics/wave-next/003.md",
+      "id": "003",
+      "programme": "C.6",
+      "title": "Material recognition via Claude vision",
       "effort": "M",
-      "status": "pending",
-      "depends_on": []
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/003-programme-c6-material-recognition-llm.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "48e4bc9",
+      "date_executed": "2026-04-02T02:12Z"
     },
     {
-      "id": "wave-next-010",
-      "epic": "wave-next",
-      "task": "010",
-      "name": "Update CLAUDE.md + AGENTS.md",
-      "spec": ".claude/epics/wave-next/010.md",
-      "effort": "S",
-      "status": "pending",
-      "depends_on": []
-    },
-    {
-      "id": "wave-next-005",
-      "epic": "wave-next",
-      "task": "005",
-      "name": "Activate 24 geo.admin layers",
-      "spec": ".claude/epics/wave-next/005.md",
+      "id": "004",
+      "programme": "N.1",
+      "title": "Scan conformité automatique — 341+ checks",
       "effort": "M",
-      "status": "pending",
-      "depends_on": ["wave-next-004"]
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/004-programme-n1-auto-compliance-scan.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "f7e9acb",
+      "date_executed": "2026-04-02T02:27Z"
     },
     {
-      "id": "wave-next-006",
-      "epic": "wave-next",
-      "task": "006",
-      "name": "Persist swissBUILDINGS3D fields",
-      "spec": ".claude/epics/wave-next/006.md",
-      "effort": "S",
-      "status": "pending",
-      "depends_on": []
-    },
-    {
-      "id": "wave-next-007",
-      "epic": "wave-next",
-      "task": "007",
-      "name": "Composite geo risk score",
-      "spec": ".claude/epics/wave-next/007.md",
+      "id": "005",
+      "programme": "S.10",
+      "title": "Corrélation météo/incidents + alertes prédictives",
       "effort": "M",
-      "status": "pending",
-      "depends_on": ["wave-next-005"]
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/005-programme-s10-meteo-incident-correlation.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "e4e1cf7",
+      "date_executed": "2026-04-02T02:41Z"
     },
     {
-      "id": "wave-next-008",
-      "epic": "wave-next",
-      "task": "008",
-      "name": "Populate ClimateExposureProfile",
-      "spec": ".claude/epics/wave-next/008.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": []
-    },
-    {
-      "id": "wave-next-009",
-      "epic": "wave-next",
-      "task": "009",
-      "name": "OpportunityWindow detection service",
-      "spec": ".claude/epics/wave-next/009.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": ["wave-next-008"]
-    },
-    {
-      "id": "defect-shield-001",
-      "epic": "defect-shield",
-      "task": "001",
-      "name": "DefectShield: Model + Schema + Migration",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "S",
-      "status": "pending",
-      "depends_on": []
-    },
-    {
-      "id": "defect-shield-002",
-      "epic": "defect-shield",
-      "task": "002",
-      "name": "DefectShield: Service calcul timeline",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": ["defect-shield-001"]
-    },
-    {
-      "id": "defect-shield-003",
-      "epic": "defect-shield",
-      "task": "003",
-      "name": "DefectShield: Alertes + notifications",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": ["defect-shield-002"]
-    },
-    {
-      "id": "defect-shield-004",
-      "epic": "defect-shield",
-      "task": "004",
-      "name": "DefectShield: API endpoints",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "S",
-      "status": "pending",
-      "depends_on": ["defect-shield-002"]
-    },
-    {
-      "id": "defect-shield-005",
-      "epic": "defect-shield",
-      "task": "005",
-      "name": "DefectShield: Lettre PDF Gotenberg",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": ["defect-shield-004"]
-    },
-    {
-      "id": "defect-shield-006",
-      "epic": "defect-shield",
-      "task": "006",
-      "name": "DefectShield: Frontend widget + badge",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": ["defect-shield-004"]
-    },
-    {
-      "id": "defect-shield-007",
-      "epic": "defect-shield",
-      "task": "007",
-      "name": "DefectShield: Tests exhaustifs edge cases",
-      "spec": ".claude/epics/defect-shield/epic.md",
-      "effort": "M",
-      "status": "pending",
-      "depends_on": ["defect-shield-006"]
-    },
-    {
-      "id": "reno-predict-all",
-      "epic": "reno-predict",
-      "task": "all",
-      "name": "RenoPredict: estimation couts remediation (full module)",
-      "spec": ".claude/epics/reno-predict/epic.md",
+      "id": "006",
+      "programme": "E.1",
+      "title": "Import CECB réel par EGID",
       "effort": "L",
-      "status": "pending",
-      "depends_on": []
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/006-programme-e1-import-cecb-real.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "8e41dd9",
+      "date_executed": "2026-04-02T02:32Z"
+    },
+    {
+      "id": "007",
+      "programme": "M.1",
+      "title": "Rapport autorite 20+ pages auto via Gotenberg",
+      "effort": "L",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/007-programme-m1-rapport-autorite-auto.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "date_executed": "2026-04-02T02:42Z",
+      "commit": "656c061"
+    },
+    {
+      "id": "008",
+      "programme": "F.2",
+      "title": "Fiscal deductions calculator per canton",
+      "effort": "M",
+      "impact": "⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/F-02_fiscal_deduction_calculator.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "date_executed": "2026-04-02T02:46Z"
+    },
+    {
+      "id": "009",
+      "programme": "B.3",
+      "title": "Material stress prediction service",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/B-3-stress-materiau.md",
+      "date_prepared": "2026-04-02T00:19Z",
+      "date_executed": "2026-04-02T02:46Z"
+    },
+    {
+      "id": "010",
+      "programme": "D.3",
+      "title": "Building sinistralité score",
+      "effort": "S",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/D-03_building_sinistralite_score.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T02:46Z"
     }
-  ]
+  ],
+  "failed": [],
+  "session_notes": {
+    "session_id": "dev-runner-swissbuilding-wave-6",
+    "date_started": "2026-04-02T00:51Z",
+    "phase_1_status": "✅ Roadmap lue, état analysé, queue updated",
+    "phase_2_status": "✅ 8 tâches top-priority identifiées (S-M effort)",
+    "phase_3_status": "✅ 7 briefs chirurgicaux préparés dans .openclaw/tasks/",
+    "phase_4_status": "PENDING — Claude Code execution phase",
+    "phase_5_status": "PENDING — Update queue + final report",
+    "notes": "Tous les briefs sont autonomes, sans dépendances. Infrastructure existante complète. Effort total: 4-5 sprints pour wave complète."
+  }
 }
