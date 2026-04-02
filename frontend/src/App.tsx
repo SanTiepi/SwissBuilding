@@ -72,6 +72,8 @@ const Cases = lazy(() => import('@/pages/Cases'));
 const CaseRoom = lazy(() => import('@/pages/CaseRoom'));
 const Finance = lazy(() => import('@/pages/Finance'));
 const SearchResults = lazy(() => import('@/pages/SearchResults'));
+const CompletenessDetail = lazy(() => import('@/pages/Building/CompletenessDetail'));
+const CompletenessPortfolio = lazy(() => import('@/pages/Admin/CompletenessPortfolio'));
 
 const CertificateVerificationLazy = lazy(() =>
   import('@/components/CertificateVerification').then((m) => ({
@@ -280,6 +282,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Field Observations">
                   <Suspense fallback={<LoadingSpinner />}>
                     <FieldObservations />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/buildings/:buildingId/completeness"
+              element={
+                <PageErrorBoundary pageName="Completeness Detail">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <CompletenessDetail />
                   </Suspense>
                 </PageErrorBoundary>
               }
@@ -648,6 +660,16 @@ export default function App() {
                 <PageErrorBoundary pageName="Contributor Gateway">
                   <Suspense fallback={<LoadingSpinner />}>
                     <AdminContributorGateway />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/completeness"
+              element={
+                <PageErrorBoundary pageName="Completeness Portfolio">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <CompletenessPortfolio />
                   </Suspense>
                 </PageErrorBoundary>
               }

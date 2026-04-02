@@ -141,3 +141,42 @@ describe('MissingItemsChecklist', () => {
     expect(await screen.findByText('completeness.all_complete')).toBeTruthy();
   });
 });
+
+describe('CompletenessCard — edge cases', () => {
+  it('hides urgent badge when zero urgent actions', async () => {
+    mockDashboard.mockResolvedValue({ ...MOCK_DASHBOARD, urgent_actions: 0 });
+    render(<CompletenessCard buildingId="test-id" />, { wrapper });
+    await screen.findByText('75%');
+    expect(screen.queryByText('completeness.urgent_actions')).toBeNull();
+  });
+
+  it('applies green color for 90+ score', async () => {
+    mockDashboard.mockResolvedValue({ ...MOCK_DASHBOARD, overall_score: 95, overall_color: 'green' });
+    render(<CompletenessCard buildingId="test-id" />, { wrapper });
+    const scoreEl = await screen.findByText('95%');
+    expect(scoreEl.className).toContain('green');
+  });
+
+  it('applies red color for sub-50 score', async () => {
+    mockDashboard.mockResolvedValue({ ...MOCK_DASHBOARD, overall_score: 30, overall_color: 'red' });
+    render(<CompletenessCard buildingId="test-id" />, { wrapper });
+    const scoreEl = await screen.findByText('30%');
+    expect(scoreEl.className).toContain('red');
+  });
+
+  it('shows complete text when no missing items', async () => {
+    mockDashboard.mockResolvedValue({ ...MOCK_DASHBOARD, missing_items_count: 0 });
+    render(<CompletenessCard buildingId="test-id" />, { wrapper });
+    expect(await screen.findByText('completeness.complete')).toBeTruthy();
+  });
+
+  it('renders keyboard-accessible button', async () => {
+    mockDashboard.mockResolvedValue(MOCK_DASHBOARD);
+    const onClick = vi.fn();
+    render(<CompletenessCard buildingId="test-id" onClick={onClick} />, { wrapper });
+    await screen.findByText('75%');
+    const button = screen.getByRole('button');
+    fireEvent.keyDown(button, { key: 'Enter' });
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+});

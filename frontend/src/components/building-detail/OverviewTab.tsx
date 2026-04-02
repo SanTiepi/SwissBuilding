@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/utils/formatters';
@@ -123,6 +123,7 @@ export function OverviewTab({
   onNavigateTab,
 }: OverviewTabProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const currentUser = useAuthStore((s) => s.user);
   const [projectWizardOpen, setProjectWizardOpen] = useState(false);
 
@@ -688,7 +689,7 @@ export function OverviewTab({
       <DataQualityScore buildingId={buildingId} />
 
       {/* 16-Dimension Completeness Dashboard */}
-      <CompletenessCard buildingId={buildingId} />
+      <CompletenessCard buildingId={buildingId} onClick={() => navigate(`/buildings/${buildingId}/completeness`)} />
 
       {/* Passport Summary */}
       <PassportCard buildingId={buildingId} />
