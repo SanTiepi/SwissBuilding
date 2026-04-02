@@ -132,6 +132,7 @@ from app.api import (
     intents,
     interventions,
     invalidations,
+    inventory,
     invitations,
     jurisdictions,
     knowledge_gap,
@@ -299,6 +300,7 @@ api_router.include_router(material_recognition.router, prefix="", tags=["Materia
 api_router.include_router(material_recommendations.router, prefix="", tags=["Material Recommendations"])
 api_router.include_router(intake.router, prefix="", tags=["Intake"])
 api_router.include_router(intents.router, prefix="", tags=["Building Intents"])
+api_router.include_router(inventory.router, prefix="", tags=["Inventory Management"])
 api_router.include_router(interventions.router, prefix="", tags=["Interventions"])
 api_router.include_router(project_setup.router, prefix="", tags=["Project Setup"])
 api_router.include_router(leases.router, prefix="", tags=["Leases"])
