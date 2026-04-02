@@ -70,6 +70,7 @@ const PortfolioCommand = lazy(() => import('@/pages/PortfolioCommand'));
 const Cases = lazy(() => import('@/pages/Cases'));
 const CaseRoom = lazy(() => import('@/pages/CaseRoom'));
 const Finance = lazy(() => import('@/pages/Finance'));
+const SearchResults = lazy(() => import('@/pages/SearchResults'));
 
 const CertificateVerificationLazy = lazy(() =>
   import('@/components/CertificateVerification').then((m) => ({
@@ -152,6 +153,16 @@ export default function App() {
             <Route path="/dashboard" element={<Navigate to="/today" replace />} />
             {/* ABSORBED: /control-tower -> /today (was ControlTower.tsx) */}
             <Route path="/control-tower" element={<Navigate to="/today" replace />} />
+            <Route
+              path="/search"
+              element={
+                <PageErrorBoundary pageName="Search">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <SearchResults />
+                  </Suspense>
+                </PageErrorBoundary>
+              }
+            />
             <Route
               path="/buildings"
               element={

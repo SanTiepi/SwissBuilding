@@ -1,6 +1,7 @@
 from app.models.action_item import ActionItem
 from app.models.ai_extraction_log import AIExtractionLog
 from app.models.ai_feedback import AIFeedback
+from app.models.ai_metrics import AIMetrics
 from app.models.ai_rule_pattern import AIRulePattern
 from app.models.artifact_version import ArtifactVersion
 from app.models.assignment import Assignment
@@ -49,6 +50,8 @@ from app.models.commune_profile import CommuneProfile
 from app.models.company_profile import CompanyProfile
 from app.models.company_subscription import CompanySubscription
 from app.models.company_verification import CompanyVerification
+from app.models.completeness_report import CompletenessReport
+from app.models.completeness_score import CompletenessScore
 from app.models.completion_confirmation import CompletionConfirmation
 from app.models.compliance_artefact import ComplianceArtefact
 from app.models.conformance import ConformanceCheck, RequirementProfile
@@ -117,6 +120,7 @@ from app.models.memory_transfer import MemoryTransfer
 from app.models.municipality_review_pack import MunicipalityReviewPack
 from app.models.notification import Notification, NotificationPreference
 from app.models.obligation import Obligation
+from app.models.observation_risk_score import ObservationRiskScore
 from app.models.operational_gate import OperationalGate
 from app.models.organization import Organization
 from app.models.ownership_record import OwnershipRecord
@@ -133,6 +137,7 @@ from app.models.pilot_scorecard import PilotMetric, PilotScorecard
 from app.models.plan_annotation import PlanAnnotation
 from app.models.pollutant_rule import PollutantRule
 from app.models.portfolio import Portfolio
+from app.models.post_work_item import PostWorkItem, WorksCompletionCertificate
 from app.models.post_works_link import PostWorksLink
 from app.models.post_works_state import PostWorksState
 from app.models.prework_trigger import PreworkTrigger
@@ -176,6 +181,7 @@ from app.models.zone_safety import OccupantNotice, ZoneSafetyStatus
 __all__ = [
     "AIExtractionLog",
     "AIFeedback",
+    "AIMetrics",
     "AIRulePattern",
     "AccountExpansionTrigger",
     "ActionItem",
@@ -293,6 +299,7 @@ __all__ = [
     "Notification",
     "NotificationPreference",
     "Obligation",
+    "ObservationRiskScore",
     "OccupantNotice",
     "OperationalGate",
     "OpportunityWindow",
@@ -318,6 +325,7 @@ __all__ = [
     "PlanAnnotation",
     "PollutantRule",
     "Portfolio",
+    "PostWorkItem",
     "PostWorksLink",
     "PostWorksState",
     "PreworkTrigger",
@@ -364,6 +372,7 @@ __all__ = [
     "UnknownIssue",
     "User",
     "WarrantyRecord",
+    "WorksCompletionCertificate",
     "WorkspaceMembership",
     "Zone",
     "ZoneSafetyStatus",
