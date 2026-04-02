@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { GeoRiskScore } from '../GeoRiskScore';
 import type { GeoRiskScore as GeoRiskScoreType } from '@/api/geoContext';
 
 vi.mock('@/i18n', () => ({
@@ -10,6 +9,14 @@ vi.mock('@/i18n', () => ({
     setLocale: vi.fn(),
   }),
 }));
+
+vi.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  RadialBarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="radial-chart">{children}</div>,
+  RadialBar: () => <div />,
+}));
+
+import { GeoRiskScore } from '../GeoRiskScore';
 
 describe('GeoRiskScore', () => {
   const lowRisk: GeoRiskScoreType = {
@@ -32,7 +39,8 @@ describe('GeoRiskScore', () => {
 
   it('renders composite score', () => {
     render(<GeoRiskScore riskScore={lowRisk} />);
-    expect(screen.getByText('12/100')).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
+    expect(screen.getByText('/100')).toBeInTheDocument();
   });
 
   it('renders all 5 sub-dimensions', () => {
@@ -46,7 +54,7 @@ describe('GeoRiskScore', () => {
 
   it('renders high risk score', () => {
     render(<GeoRiskScore riskScore={highRisk} />);
-    expect(screen.getByText('78/100')).toBeInTheDocument();
+    expect(screen.getByText('78')).toBeInTheDocument();
   });
 
   it('displays sub-score values', () => {
@@ -65,6 +73,6 @@ describe('GeoRiskScore', () => {
       radon: 0,
     };
     render(<GeoRiskScore riskScore={zeroRisk} />);
-    expect(screen.getByText('0/100')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
   });
 });
