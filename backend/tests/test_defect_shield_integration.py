@@ -15,7 +15,6 @@ from app.models.building import Building
 from app.models.organization import Organization
 from app.models.user import User
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

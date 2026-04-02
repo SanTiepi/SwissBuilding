@@ -5,7 +5,7 @@ midnight UTC, multi-year spans, Dec→Jan transitions, all 5 defect types,
 far-future dates, same-day discovery, and business-day chain skips.
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, timedelta
 
 import pytest
 
@@ -23,7 +23,6 @@ from app.services.defect_timeline_service import (
     compute_deadline,
     compute_prescription,
 )
-
 
 # ---------------------------------------------------------------------------
 # Leap year edge cases
@@ -313,7 +312,7 @@ class TestPrescriptionEdge:
 
     def test_hidden_defect_types_constant(self):
         """Verify HIDDEN_DEFECT_TYPES contains exactly the expected types."""
-        assert HIDDEN_DEFECT_TYPES == {"pollutant", "structural"}
+        assert {"pollutant", "structural"} == HIDDEN_DEFECT_TYPES
 
     def test_prescription_leap_year_crossing(self):
         """Prescription that crosses a leap year boundary."""
@@ -392,3 +391,112 @@ class TestSwissHolidaysMultiYear:
         holidays = _swiss_holidays(2028)
         assert date(2028, 4, 14) in holidays  # Good Friday
         assert date(2028, 4, 17) in holidays  # Easter Monday
+
+    @pytest.mark.parametrize("year", [2026, 2027, 2028, 2029, 2030])
+    def test_new_year_and_berchtoldstag_always_present(self, year):
+        holidays = _swiss_holidays(year)
+        assert date(year, 1, 1) in holidays
+        assert date(year, 1, 2) in holidays
+
+
+# ---------------------------------------------------------------------------
+# Year 2030 specific tests (NOT a leap year)
+# ---------------------------------------------------------------------------
+
+
+class TestYear2030NotLeap:
+    """2030 is NOT a leap year — verify no Feb 29 assumption."""
+
+    def test_feb_28_2030_plus_60(self):
+        """Feb 28, 2030 + 60 = Apr 29, 2030 (no Feb 29)."""
+        deadline = compute_deadline(date(2030, 2, 28))
+        expected_raw = date(2030, 4, 29)
+        assert deadline == _next_business_day(expected_raw)
+
+    def test_dec_31_2029_plus_60_into_2030(self):
+        """Dec 31, 2029 + 60 = Mar 1, 2030 (skips Feb 29)."""
+        raw = date(2029, 12, 31) + timedelta(days=60)
+        assert raw == date(2030, 3, 1)
+        deadline = compute_deadline(date(2029, 12, 31))
+        assert deadline == _next_business_day(raw)
+
+    def test_jan_15_2030_plus_60(self):
+        """Jan 15, 2030 + 60 = Mar 16, 2030."""
+        raw = date(2030, 1, 15) + timedelta(days=60)
+        assert raw == date(2030, 3, 16)
+        deadline = compute_deadline(date(2030, 1, 15))
+        assert deadline == _next_business_day(raw)
+
+
+# ---------------------------------------------------------------------------
+# Midnight UTC / timezone-aware edge cases
+# ---------------------------------------------------------------------------
+
+
+class TestTimezoneEdgeCases:
+    """Verify deadline computation is date-based (no timezone drift).
+
+    Swiss legal deadlines are calendar-date based (not datetime-aware).
+    These tests confirm that feeding a date derived from midnight UTC or
+    CET/CEST boundaries produces correct results.
+    """
+
+    def test_midnight_utc_date(self):
+        """Date derived from midnight UTC: 2026-06-15T00:00:00Z → date(2026, 6, 15)."""
+        from datetime import datetime
+
+        dt = datetime(2026, 6, 15, 0, 0, 0, tzinfo=UTC)
+        discovery = dt.date()
+        assert discovery == date(2026, 6, 15)
+        deadline = compute_deadline(discovery)
+        expected_raw = date(2026, 8, 14)
+        assert deadline == _next_business_day(expected_raw)
+
+    def test_cet_midnight_vs_utc(self):
+        """CET midnight (UTC+1) = 23:00 UTC previous day. Date extraction matters."""
+        from datetime import datetime, timezone
+
+        cet = timezone(timedelta(hours=1))
+        # Midnight CET on June 15 = 23:00 UTC June 14
+        dt_cet = datetime(2026, 6, 15, 0, 0, 0, tzinfo=cet)
+        dt_utc = dt_cet.astimezone(UTC)
+        # UTC date is June 14, CET date is June 15
+        assert dt_utc.date() == date(2026, 6, 14)
+        assert dt_cet.date() == date(2026, 6, 15)
+        # Legal deadlines use local (Swiss) date, not UTC
+        deadline_cet = compute_deadline(dt_cet.date())
+        deadline_utc = compute_deadline(dt_utc.date())
+        # They differ by 1 day
+        # Deadlines differ because input dates differ (June 15 vs June 14)
+        assert _is_business_day(deadline_cet)
+        assert _is_business_day(deadline_utc)
+
+    def test_cest_summer_time(self):
+        """CEST (UTC+2) in summer: midnight CEST = 22:00 UTC previous day."""
+        from datetime import datetime, timezone
+
+        cest = timezone(timedelta(hours=2))
+        dt_cest = datetime(2026, 7, 1, 0, 0, 0, tzinfo=cest)
+        dt_utc = dt_cest.astimezone(UTC)
+        assert dt_utc.date() == date(2026, 6, 30)
+        assert dt_cest.date() == date(2026, 7, 1)
+        # Swiss law uses CET/CEST local date
+        deadline = compute_deadline(dt_cest.date())
+        assert _is_business_day(deadline)
+
+    def test_end_of_day_utc_does_not_shift(self):
+        """23:59:59 UTC on a given date → same date, same deadline."""
+        from datetime import datetime
+
+        dt = datetime(2026, 3, 1, 23, 59, 59, tzinfo=UTC)
+        discovery = dt.date()
+        assert discovery == date(2026, 3, 1)
+        deadline = compute_deadline(discovery)
+        assert deadline == date(2026, 4, 30)  # same as test_compute_deadline_standard
+
+    def test_date_only_no_tz_drift(self):
+        """Pure date objects have no timezone — deadline is deterministic."""
+        d = date(2026, 3, 1)
+        deadline1 = compute_deadline(d)
+        deadline2 = compute_deadline(d)
+        assert deadline1 == deadline2

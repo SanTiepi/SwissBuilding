@@ -78,9 +78,8 @@ class TestGotenbergConnectionFailures:
             "app.services.defect_letter_service.html_to_pdf",
             new_callable=AsyncMock,
             side_effect=httpx.ConnectError("Connection refused"),
-        ):
-            with pytest.raises(httpx.ConnectError):
-                await generate_letter_pdf(db_session, t.id, lang="fr")
+        ), pytest.raises(httpx.ConnectError):
+            await generate_letter_pdf(db_session, t.id, lang="fr")
 
     @pytest.mark.asyncio
     async def test_gotenberg_500_error(self, db_session, admin_user):
@@ -94,9 +93,8 @@ class TestGotenbergConnectionFailures:
             side_effect=httpx.HTTPStatusError(
                 "Server Error", request=mock_response.request, response=mock_response
             ),
-        ):
-            with pytest.raises(httpx.HTTPStatusError):
-                await generate_letter_pdf(db_session, t.id, lang="fr")
+        ), pytest.raises(httpx.HTTPStatusError):
+            await generate_letter_pdf(db_session, t.id, lang="fr")
 
     @pytest.mark.asyncio
     async def test_gotenberg_timeout(self, db_session, admin_user):
@@ -107,9 +105,8 @@ class TestGotenbergConnectionFailures:
             "app.services.defect_letter_service.html_to_pdf",
             new_callable=AsyncMock,
             side_effect=httpx.ReadTimeout("Timed out"),
-        ):
-            with pytest.raises(httpx.ReadTimeout):
-                await generate_letter_pdf(db_session, t.id, lang="fr")
+        ), pytest.raises(httpx.ReadTimeout):
+            await generate_letter_pdf(db_session, t.id, lang="fr")
 
     @pytest.mark.asyncio
     async def test_gotenberg_returns_empty_bytes(self, db_session, admin_user):
@@ -147,7 +144,7 @@ class TestMissingData:
         # Delete the building from DB
         await db_session.delete(b)
         await db_session.commit()
-        with pytest.raises(ValueError, match="Building.*not found"):
+        with pytest.raises(ValueError, match=r"Building.*not found"):
             await generate_letter_pdf(db_session, t.id, lang="fr")
 
 

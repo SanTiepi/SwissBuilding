@@ -6,7 +6,7 @@
  * no active section when all resolved, no urgent count when no urgency.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { defectTimelineApi, type DefectTimeline } from '@/api/defectTimeline';
 import DefectTimelineWidget from '@/components/building-detail/DefectTimelineWidget';
@@ -281,5 +281,72 @@ describe('DefectTimelineWidget — edge cases', () => {
       expect(screen.getByTestId('defect-letter-btn')).toBeInTheDocument();
       expect(screen.getByTestId('defect-delete-btn')).toBeInTheDocument();
     });
+  });
+
+  // -----------------------------------------------------------------------
+  // Dark mode CSS variants
+  // -----------------------------------------------------------------------
+
+  it('renders correctly with dark class on document', async () => {
+    document.documentElement.classList.add('dark');
+    vi.mocked(defectTimelineApi.list).mockResolvedValue([
+      makeDefect({ id: 'd-dark1', status: 'active', days_remaining: 5 }),
+    ]);
+    render(<DefectTimelineWidget buildingId="b-1" />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByTestId('defect-timeline-widget')).toBeInTheDocument();
+      expect(screen.getByTestId('defect-active-section')).toBeInTheDocument();
+    });
+    document.documentElement.classList.remove('dark');
+  });
+
+  it('renders empty state in dark mode without crash', async () => {
+    document.documentElement.classList.add('dark');
+    vi.mocked(defectTimelineApi.list).mockResolvedValue([]);
+    render(<DefectTimelineWidget buildingId="b-1" />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByTestId('defect-empty')).toBeInTheDocument();
+    });
+    document.documentElement.classList.remove('dark');
+  });
+
+  // -----------------------------------------------------------------------
+  // All defect types — verify they render
+  // -----------------------------------------------------------------------
+
+  it('renders all 5 defect types without errors', async () => {
+    const types = ['construction', 'pollutant', 'structural', 'installation', 'other'] as const;
+    vi.mocked(defectTimelineApi.list).mockResolvedValue(
+      types.map((t, i) =>
+        makeDefect({ id: `d-type-${i}`, defect_type: t, status: 'active', days_remaining: 20 + i }),
+      ),
+    );
+    render(<DefectTimelineWidget buildingId="b-1" />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getAllByTestId('defect-item')).toHaveLength(5);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Delete API failure — widget survives
+  // -----------------------------------------------------------------------
+
+  it('handles delete API failure gracefully', async () => {
+    vi.mocked(defectTimelineApi.list).mockResolvedValue([
+      makeDefect({ id: 'd-delfail', status: 'active', days_remaining: 20 }),
+    ]);
+    vi.mocked(defectTimelineApi.delete).mockRejectedValue(new Error('500'));
+
+    render(<DefectTimelineWidget buildingId="b-1" />, { wrapper: createWrapper() });
+    await waitFor(() => screen.getByTestId('defect-delete-btn'));
+
+    fireEvent.click(screen.getByTestId('defect-delete-btn'));
+    fireEvent.click(screen.getByTestId('defect-confirm-delete-btn'));
+
+    await waitFor(() => {
+      expect(defectTimelineApi.delete).toHaveBeenCalledWith('d-delfail');
+    });
+    // Widget should still be visible
+    expect(screen.getByTestId('defect-timeline-widget')).toBeInTheDocument();
   });
 });

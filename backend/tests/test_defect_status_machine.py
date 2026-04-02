@@ -19,7 +19,6 @@ from app.services.defect_timeline_service import (
     update_timeline_status,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -251,3 +250,113 @@ class TestRawVsValidatedUpdate:
         )
         assert updated.status == "notified"
         assert updated.notified_at is not None
+
+
+# ---------------------------------------------------------------------------
+# Idempotent updates
+# ---------------------------------------------------------------------------
+
+
+class TestIdempotentUpdates:
+    """Verify behavior when applying the same status twice."""
+
+    @pytest.mark.asyncio
+    async def test_active_to_active_raises(self, db_session, admin_user):
+        """active → active is not in VALID_STATUS_TRANSITIONS['active'], should raise."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        assert t.status == "active"
+        with pytest.raises(ValueError, match="Invalid transition"):
+            await update_defect_status(db_session, t.id, "active")
+
+    @pytest.mark.asyncio
+    async def test_notified_to_notified_raises(self, db_session, admin_user):
+        """notified → notified is not allowed."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        await update_defect_status(db_session, t.id, "notified")
+        with pytest.raises(ValueError, match="Invalid transition"):
+            await update_defect_status(db_session, t.id, "notified")
+
+    @pytest.mark.asyncio
+    async def test_expired_to_expired_raises(self, db_session, admin_user):
+        """expired → expired is not allowed."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        await update_defect_status(db_session, t.id, "expired")
+        with pytest.raises(ValueError, match="Invalid transition"):
+            await update_defect_status(db_session, t.id, "expired")
+
+    @pytest.mark.asyncio
+    async def test_resolved_to_resolved_raises(self, db_session, admin_user):
+        """resolved → resolved is terminal, raises."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        await update_defect_status(db_session, t.id, "resolved")
+        with pytest.raises(ValueError):
+            await update_defect_status(db_session, t.id, "resolved")
+
+
+# ---------------------------------------------------------------------------
+# Concurrent-style updates
+# ---------------------------------------------------------------------------
+
+
+class TestConcurrentUpdates:
+    """Simulate sequential race-condition scenarios (SQLite doesn't truly race)."""
+
+    @pytest.mark.asyncio
+    async def test_two_transitions_from_active_first_wins(self, db_session, admin_user):
+        """First update to 'notified' succeeds, second from 'notified' to 'expired' fails."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        # First "concurrent" call
+        await update_defect_status(db_session, t.id, "notified")
+        # Second "concurrent" call — now status is notified, not active
+        with pytest.raises(ValueError, match="Invalid transition"):
+            await update_defect_status(db_session, t.id, "expired")
+
+    @pytest.mark.asyncio
+    async def test_rapid_active_to_notified_to_resolved(self, db_session, admin_user):
+        """Rapid sequential transitions: active → notified → resolved succeeds."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        await update_defect_status(db_session, t.id, "notified")
+        result = await update_defect_status(db_session, t.id, "resolved")
+        assert result.status == "resolved"
+
+    @pytest.mark.asyncio
+    async def test_status_reflects_latest_after_multiple_updates(self, db_session, admin_user):
+        """After multiple valid transitions, get_timeline returns final status."""
+        b = await _make_building(db_session, admin_user.id)
+        t = await _make_timeline(db_session, b.id)
+        await update_defect_status(db_session, t.id, "expired")
+        await update_defect_status(db_session, t.id, "resolved")
+        fetched = await get_timeline(db_session, t.id)
+        assert fetched.status == "resolved"
+
+
+# ---------------------------------------------------------------------------
+# VALID_STATUS_TRANSITIONS completeness
+# ---------------------------------------------------------------------------
+
+
+class TestTransitionMapCompleteness:
+    """Verify the transition map covers all known statuses."""
+
+    def test_all_statuses_have_transition_entry(self):
+        """Every known status must be a key in VALID_STATUS_TRANSITIONS."""
+        known = {"active", "notified", "expired", "resolved"}
+        assert set(VALID_STATUS_TRANSITIONS.keys()) == known
+
+    def test_active_has_three_targets(self):
+        assert VALID_STATUS_TRANSITIONS["active"] == {"notified", "expired", "resolved"}
+
+    def test_notified_has_one_target(self):
+        assert VALID_STATUS_TRANSITIONS["notified"] == {"resolved"}
+
+    def test_expired_has_one_target(self):
+        assert VALID_STATUS_TRANSITIONS["expired"] == {"resolved"}
+
+    def test_resolved_is_terminal(self):
+        assert VALID_STATUS_TRANSITIONS["resolved"] == set()
