@@ -17,6 +17,7 @@ import { PostWorksDiffCard } from '@/components/PostWorksDiffCard';
 import { ROICard } from '@/components/building-detail/ROICard';
 import { TimeMachinePanel } from '@/components/TimeMachinePanel';
 import { PassportCard } from '@/components/PassportCard';
+import { CompletenessCard } from '@/components/buildings/CompletenessCard';
 import { SharedLinksPanel } from '@/components/SharedLinksPanel';
 import { PreworkDiagnosticTriggerCard } from '@/components/PreworkDiagnosticTriggerCard';
 import { PredictiveAlertsBuilding } from '@/components/PredictiveAlerts';
@@ -685,6 +686,9 @@ export function OverviewTab({
 
       {/* Data Quality Score */}
       <DataQualityScore buildingId={buildingId} />
+
+      {/* 16-Dimension Completeness Dashboard */}
+      <CompletenessCard buildingId={buildingId} />
 
       {/* Passport Summary */}
       <PassportCard buildingId={buildingId} />

@@ -184,23 +184,23 @@ async def get_similar_buildings_endpoint(
     if not building:
         raise HTTPException(status_code=404, detail="Building not found")
 
-    similar = await BuildingSimilarityService.find_similar_buildings(
-        db, building_id, max_results=max_results
-    )
+    similar = await BuildingSimilarityService.find_similar_buildings(db, building_id, max_results=max_results)
 
     similar_data = []
     for b in similar:
         score = await BuildingSimilarityService.similarity_score(db, building_id, b.id)
-        similar_data.append({
-            "id": str(b.id),
-            "address": b.address,
-            "city": b.city,
-            "postal_code": b.postal_code,
-            "canton": b.canton,
-            "construction_year": b.construction_year,
-            "building_type": b.building_type,
-            "similarity_score": score,
-        })
+        similar_data.append(
+            {
+                "id": str(b.id),
+                "address": b.address,
+                "city": b.city,
+                "postal_code": b.postal_code,
+                "canton": b.canton,
+                "construction_year": b.construction_year,
+                "building_type": b.building_type,
+                "similarity_score": score,
+            }
+        )
 
     return {
         "building_id": str(building_id),
@@ -224,8 +224,61 @@ async def get_pollutant_predictions_endpoint(
     if not building:
         raise HTTPException(status_code=404, detail="Building not found")
 
-    predictions = await PollutantPrevalenceService.get_building_pollutant_predictions(
-        db, building_id
-    )
+    predictions = await PollutantPrevalenceService.get_building_pollutant_predictions(db, building_id)
 
     return predictions
+
+
+# ---------------------------------------------------------------------------
+# Completeness Dashboard (16-dimension)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/{building_id}/completeness/dashboard")
+async def get_completeness_dashboard_endpoint(
+    building_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get 16-dimension completeness dashboard for a building."""
+    building = await get_building(db, building_id)
+    if not building:
+        raise HTTPException(status_code=404, detail="Building not found")
+
+    from app.services.completeness_scorer import calculate_completeness
+
+    return await calculate_completeness(db, building_id)
+
+
+@router.get("/{building_id}/completeness/missing-items")
+async def get_completeness_missing_items_endpoint(
+    building_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get detailed checklist of missing items across all 16 dimensions."""
+    building = await get_building(db, building_id)
+    if not building:
+        raise HTTPException(status_code=404, detail="Building not found")
+
+    from app.services.completeness_scorer import get_missing_items
+
+    items = await get_missing_items(db, building_id)
+    return {"building_id": str(building_id), "items": items, "total": len(items)}
+
+
+@router.get("/{building_id}/completeness/recommended-actions")
+async def get_completeness_actions_endpoint(
+    building_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get prioritized recommended actions to improve completeness."""
+    building = await get_building(db, building_id)
+    if not building:
+        raise HTTPException(status_code=404, detail="Building not found")
+
+    from app.services.completeness_scorer import get_recommended_actions
+
+    actions = await get_recommended_actions(db, building_id)
+    return {"building_id": str(building_id), "actions": actions, "total": len(actions)}
