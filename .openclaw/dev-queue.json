@@ -28,19 +28,7 @@
     "new_commits": 2,
     "date_completed": "2026-04-02T04:15Z"
   }
-  "pending_briefs": [
-    {
-      "id": "001",
-      "programme": "A.15",
-      "title": "GeoContextPanel enrichi — 24 layers geo.admin",
-      "effort": "M",
-      "impact": "⭐⭐⭐⭐⭐",
-      "status": "done",
-      "file": ".openclaw/tasks/001-programme-a15-geocontextpanel-24layers.md",
-      "date_prepared": "2026-04-02T00:51Z",
-      "commit": "b5b7f95",
-      "date_executed": "2026-04-02T01:20Z"
-    },
+  "pending_briefs": [],
     {
       "id": "002",
       "programme": "O.10",
@@ -228,14 +216,12 @@
   ],
   "failed": [],
   "session_notes": {
-    "session_id": "dev-runner-swissbuilding-wave-8",
-    "date_started": "2026-04-02T03:17Z",
-    "wave_8_status": "✅ All wave-7 briefs already executed (21 briefs with commits)",
-    "phase_1_status": "✅ Wave-7 validation: all 21 tasks completed + committed",
-    "phase_2_status": "✅ Wave-8 briefs prepared: 5 new tasks (G.1-G.3, H.1, I.2)",
-    "phase_3_status": "✅ Briefs written in .openclaw/tasks/: G-1-trust-score, G-2-unknown-issues, G-3-contradiction, H-1-permit, I-2-expert-review",
-    "phase_4_status": "READY — 5 briefs queued for next wave execution",
-    "notes": "Wave-7 execution was autonomous & complete. 21 commits merged. Wave-8 focuses on trust/governance (Programme G, H, I). Next: Claude Code execute these 5 briefs."
+    "session_id": "dev-runner-swissbuilding-wave-9",
+    "date_started": "2026-04-03T01:24Z",
+    "phase_1_status": "✅ Audit complete: G-1, G-2, G-3 already in codebase",
+    "phase_2_status": "IN_PROGRESS — H-1 (Permits) not found, I-2 frontend missing",
+    "next_actions": "Execute H-1 + I-2 frontend, re-launch Wave-10 with remaining briefs",
+    "rate_limit": "Claude Code at API cap — using direct implementation"
   }
 }
 }
