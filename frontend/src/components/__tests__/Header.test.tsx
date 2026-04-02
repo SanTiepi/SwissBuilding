@@ -15,6 +15,16 @@ vi.mock('@/i18n', () => ({
   }),
 }));
 
+vi.mock('@/api/search', () => ({
+  searchApi: {
+    search: vi.fn().mockResolvedValue({ query: '', results: [], total: 0 }),
+  },
+}));
+
+vi.mock('@/hooks/useDebouncedValue', () => ({
+  useDebouncedValue: (value: string) => value,
+}));
+
 vi.mock('@/store/authStore', () => ({
   useAuthStore: () => ({
     user: {
@@ -129,13 +139,13 @@ describe('Header', () => {
     expect(screen.queryByLabelText('Menu')).not.toBeInTheDocument();
   });
 
-  it('renders mobile search button when onSearchOpen is provided', () => {
+  it('renders SearchBar and mobile search button when onSearchOpen is provided', () => {
     const onSearchOpen = vi.fn();
     renderHeader({ onSearchOpen });
 
-    // Both desktop and mobile search buttons share the same aria-label
-    const searchButtons = screen.getAllByLabelText('nav.search');
-    expect(searchButtons.length).toBe(2);
+    // SearchBar input + mobile search button
+    const searchElements = screen.getAllByLabelText('nav.search');
+    expect(searchElements.length).toBe(2);
   });
 
   it('mobile search button calls onSearchOpen on click', async () => {
@@ -143,17 +153,21 @@ describe('Header', () => {
     const user = userEvent.setup();
     renderHeader({ onSearchOpen });
 
-    // The mobile button is the first one (sm:hidden), desktop is second (hidden sm:flex)
-    const searchButtons = screen.getAllByLabelText('nav.search');
-    await user.click(searchButtons[0]);
+    // SearchBar input is first, mobile button is second
+    const searchElements = screen.getAllByLabelText('nav.search');
+    // Click the mobile button (last one)
+    await user.click(searchElements[searchElements.length - 1]);
 
     expect(onSearchOpen).toHaveBeenCalledOnce();
   });
 
-  it('does not render search buttons when onSearchOpen is not provided', () => {
+  it('SearchBar always renders; mobile button only with onSearchOpen', () => {
     renderHeader();
 
-    expect(screen.queryByLabelText('nav.search')).not.toBeInTheDocument();
+    // SearchBar input is always present
+    const searchElements = screen.getAllByLabelText('nav.search');
+    expect(searchElements.length).toBe(1);
+    expect(searchElements[0].tagName).toBe('INPUT');
   });
 
   it('closes language dropdown on Escape key', async () => {
