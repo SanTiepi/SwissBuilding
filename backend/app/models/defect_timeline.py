@@ -13,17 +13,12 @@ class DefectTimeline(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     building_id = Column(UUID(as_uuid=True), ForeignKey("buildings.id"), nullable=False, index=True)
-    diagnostic_id = Column(UUID(as_uuid=True), ForeignKey("diagnostics.id"), nullable=True)
     defect_type = Column(String(100), nullable=False)
-    description = Column(Text, nullable=True)
     discovery_date = Column(Date, nullable=False)
-    purchase_date = Column(Date, nullable=True)
     notification_deadline = Column(Date, nullable=False)
-    guarantee_type = Column(String(50), nullable=False, default="standard")
-    prescription_date = Column(Date, nullable=True)
-    status = Column(String(20), nullable=False, default="active")
-    notified_at = Column(DateTime, nullable=True)
-    notification_pdf_url = Column(String(500), nullable=True)
+    notification_sent_at = Column(DateTime, nullable=True)
+    status = Column(String(20), nullable=False, default="open")
+    description = Column(Text, nullable=True)
     severity = Column(String(20), nullable=False, default="medium")
     responsible_party = Column(String(200), nullable=True)
     legal_reference = Column(String(100), nullable=False, default="art. 367 al. 1bis CO")
@@ -34,7 +29,6 @@ class DefectTimeline(Base):
     building = relationship("Building", back_populates="defect_timelines")
 
     __table_args__ = (
-        Index("idx_defect_timelines_building_id", "building_id"),
         Index("idx_defect_timelines_status", "status"),
         Index("idx_defect_timelines_deadline", "notification_deadline"),
     )

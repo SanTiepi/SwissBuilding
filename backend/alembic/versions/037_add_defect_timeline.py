@@ -35,10 +35,10 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now()),
     )
     op.create_index("idx_defect_timelines_status", "defect_timelines", ["status"])
-    op.create_index("idx_defect_timelines_severity", "defect_timelines", ["severity"])
+    op.create_index("idx_defect_timelines_deadline", "defect_timelines", ["notification_deadline"])
 
 
 def downgrade() -> None:
-    op.drop_index("idx_defect_timelines_severity", table_name="defect_timelines")
+    op.drop_index("idx_defect_timelines_deadline", table_name="defect_timelines")
     op.drop_index("idx_defect_timelines_status", table_name="defect_timelines")
     op.drop_table("defect_timelines")
