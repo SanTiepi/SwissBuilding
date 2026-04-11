@@ -14,8 +14,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.building import Building
+from app.models.building_change import BuildingSignal
 from app.models.building_snapshot import BuildingSnapshot
-from app.models.change_signal import ChangeSignal
 from app.models.diagnostic import Diagnostic
 from app.models.intervention import Intervention
 from app.models.unknown_issue import UnknownIssue
@@ -507,10 +507,10 @@ async def get_signal_history(
     building_id: UUID,
     days: int = 90,
 ) -> list[WeakSignal]:
-    """Return weak signals from ChangeSignals detected in the last N days that match weak signal patterns."""
+    """Return weak signals from BuildingSignals detected in the last N days that match weak signal patterns."""
     cutoff = datetime.now(UTC) - timedelta(days=days)
 
-    # Weak signal type patterns that map from ChangeSignal signal_types
+    # Weak signal type patterns that map from BuildingSignal signal_types
     weak_signal_types = {
         "trust_erosion",
         "completeness_decay",
@@ -526,21 +526,21 @@ async def get_signal_history(
     }
 
     result = await db.execute(
-        select(ChangeSignal).where(
-            ChangeSignal.building_id == building_id,
-            ChangeSignal.detected_at >= cutoff,
+        select(BuildingSignal).where(
+            BuildingSignal.building_id == building_id,
+            BuildingSignal.detected_at >= cutoff,
         )
     )
-    change_signals = result.scalars().all()
+    building_signals = result.scalars().all()
 
     signals: list[WeakSignal] = []
-    for cs in change_signals:
-        if cs.signal_type not in weak_signal_types:
+    for bs in building_signals:
+        if bs.signal_type not in weak_signal_types:
             continue
 
-        # Map ChangeSignal severity to weak signal severity
+        # Map BuildingSignal severity to weak signal severity
         severity_map = {"info": "watch", "low": "watch", "medium": "advisory", "high": "warning", "critical": "warning"}
-        mapped_severity = severity_map.get(cs.severity, "watch")
+        mapped_severity = severity_map.get(bs.severity, "watch")
 
         # Map broader signal types to weak signal types
         type_map = {
@@ -548,19 +548,22 @@ async def get_signal_history(
             "completeness_drop": "completeness_decay",
             "grade_change": "grade_risk",
         }
-        signal_type = type_map.get(cs.signal_type, cs.signal_type)
+        signal_type = type_map.get(bs.signal_type, bs.signal_type)
 
         signals.append(
             WeakSignal(
-                signal_id=f"ws-hist-{str(cs.id).replace('-', '')[:12]}",
+                signal_id=f"ws-hist-{str(bs.id).replace('-', '')[:12]}",
                 building_id=building_id,
                 signal_type=signal_type,
                 severity=mapped_severity,
-                title=cs.title,
-                description=cs.description or "",
-                detected_at=cs.detected_at,
-                confidence=0.7,
-                metadata=cs.metadata_json,
+                title=bs.title,
+                description=bs.description or "",
+                detected_at=bs.detected_at,
+                confidence=bs.confidence or 0.7,
+                metadata={
+                    "based_on_type": bs.based_on_type,
+                    "status": bs.status,
+                },
             )
         )
 

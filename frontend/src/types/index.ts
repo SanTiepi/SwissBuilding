@@ -1072,6 +1072,10 @@ export interface AuthorityPackResult {
   overall_completeness: number;
   generated_at: string;
   warnings: string[];
+  caveats_count: number;
+  pack_version: string;
+  sha256_hash: string | null;
+  financials_redacted?: boolean;
 }
 
 // Evidence Summary (facade)
@@ -1146,16 +1150,34 @@ export interface ComplianceSummary {
 }
 
 // Field Observation
-export type ObservationType = 'visual_inspection' | 'safety_hazard' | 'material_condition' | 'general_note';
+export type ObservationType =
+  | 'visual_inspection'
+  | 'safety_hazard'
+  | 'material_condition'
+  | 'general_note'
+  | 'anomaly'
+  | 'pattern'
+  | 'tip'
+  | 'warning'
+  | 'material_note'
+  | 'environmental_note'
+  | 'access_note'
+  | 'safety_note';
 export type ObservationSeverity = 'info' | 'minor' | 'moderate' | 'major' | 'critical';
+export type ObservationConfidence = 'certain' | 'likely' | 'possible' | 'speculation';
+
+export type ConditionAssessment = 'good' | 'fair' | 'poor' | 'critical';
+export type RiskFlag = 'water_stain' | 'crack' | 'mold' | 'rust' | 'deformation';
+export type CompassDirection = 'north' | 'south' | 'east' | 'west';
 
 export interface FieldObservation {
   id: string;
-  building_id: string;
+  building_id?: string;
   zone_id?: string;
   element_id?: string;
   observer_id: string;
   observer_name?: string;
+  observer_role?: string;
   observation_type: ObservationType;
   severity: ObservationSeverity;
   title: string;
@@ -1168,12 +1190,38 @@ export interface FieldObservation {
   verified_at?: string;
   status?: string;
   metadata_json?: string;
+  tags?: string;
+  context_json?: string;
+  confidence: string;
+  upvotes: number;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+  // Mobile fields
+  condition_assessment?: ConditionAssessment;
+  risk_flags?: string;
+  photos?: string;
+  gps_lat?: number;
+  gps_lon?: number;
+  compass_direction?: CompassDirection;
+  inspection_duration_minutes?: number;
+  ai_observation_summary?: string;
+  ai_generated?: boolean;
+}
+
+export interface ObservationRiskScore {
+  id: string;
+  field_observation_id: string;
+  building_id?: string;
+  risk_score: number;
+  recommended_action: string;
+  urgency_level: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface FieldObservationCreate {
-  building_id: string;
+  building_id?: string;
   observation_type: ObservationType;
   severity: ObservationSeverity;
   title: string;
@@ -1183,6 +1231,19 @@ export interface FieldObservationCreate {
   location_description?: string;
   observed_at?: string;
   photo_reference?: string;
+  observer_role?: string;
+  tags?: string[];
+  context_json?: Record<string, unknown>;
+  confidence?: ObservationConfidence;
+  // Mobile fields
+  condition_assessment?: ConditionAssessment;
+  risk_flags?: RiskFlag[];
+  photos?: { uri: string; element_part?: string; timestamp?: string }[];
+  gps_lat?: number;
+  gps_lon?: number;
+  compass_direction?: CompassDirection;
+  inspection_duration_minutes?: number;
+  observer_name?: string;
 }
 
 export interface FieldObservationSummary {
@@ -1191,6 +1252,15 @@ export interface FieldObservationSummary {
   by_severity: Record<string, number>;
   unverified_count: number;
   latest_observation_at?: string;
+}
+
+export interface PatternInsight {
+  pattern: string;
+  occurrences: number;
+  confidence: string;
+  buildings_count: number;
+  recommendation: string;
+  tags: string[];
 }
 
 // Compliance Artefact

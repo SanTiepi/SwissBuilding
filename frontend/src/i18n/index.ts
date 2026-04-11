@@ -8,7 +8,10 @@ export type TranslationMap = Record<string, string>;
 // to avoid bundling ~375 kB of unused translations into the index chunk.
 const translationCache: Partial<Record<Language, TranslationMap>> = { fr };
 
-const langLoaders: Record<Language, () => Promise<{ de?: TranslationMap; en?: TranslationMap; it?: TranslationMap; fr?: TranslationMap }>> = {
+const langLoaders: Record<
+  Language,
+  () => Promise<{ de?: TranslationMap; en?: TranslationMap; it?: TranslationMap; fr?: TranslationMap }>
+> = {
   fr: () => Promise.resolve({ fr }),
   de: () => import('./de'),
   en: () => import('./en'),

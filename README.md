@@ -214,9 +214,8 @@ python -m app.seeds.reset_demo_admin_password --password noob
 
 | Service | URL |
 |---|---|
-| Application | [http://localhost](http://localhost) |
-| Console MinIO | [http://localhost:9001](http://localhost:9001) |
-| Documentation API (Swagger) | [http://localhost:8000/docs](http://localhost:8000/docs) |
+| Application (staging) | [https://swissbuilding.batiscan.ch](https://swissbuilding.batiscan.ch) |
+| Documentation API (Swagger) | [https://swissbuilding.batiscan.ch/docs](https://swissbuilding.batiscan.ch/docs) |
 
 ---
 

@@ -85,61 +85,35 @@ Enforce these invariants across all waves and merge passes:
 
 ## Current Program
 
-- Program: `Mega-Program 1 — Living and Actionable Building Dossier` (finishing)
-- Overlap: `Mega-Program 2 — Multi-Actor Orchestration` (governance layer largely complete, search + agents remain)
-- Product intent:
-  - make the building navigable as a physical object
-  - make scores and recommendations provable
-  - make the dossier exportable and defensible
-  - orchestrate actions across buildings (campaigns)
-  - make building data searchable cross-entity
+- Program: `Wedge Verticals + Infrastructure` (post-moonshot)
+- Completed lots: G1, G2, M1, T1, P1, I1, F1, C1-C3, S1-S6, Rail 3 B1-B2
+- Doctrine: V3 (14 canonical root families, 5-hub shell, BuildingCase operating root)
 
-## Current Execution Doctrine
+## 4 Wedge Verticals (all closed, 2026-03-29)
 
-The product is now large enough that the default optimization is no longer "more surfaces".
-The default optimization is:
+| Wedge | Lot | Pack | PDF | Share | Tests |
+|---|---|---|---|---|---|
+| Safe-to-Start (pollutants) | G1+G2+M1 | Authority | Yes | Yes | 22+26+17 |
+| Transaction-Ready (sale) | T1 | Transfer | Yes | Yes | 15 |
+| Insurance-Ready | I1 | Insurer | Yes | Yes | 16 |
+| Finance-Ready (lender) | F1 | Lender | Yes | Yes | 15 |
 
-- better before broader
-- productization before primitive proliferation
-- composition before standalone calculators
-- full-chain truth before more isolated services
-- dataset depth before synthetic comfort
-- real validation before further speculative expansion
-- signal quality before raw test-count growth
+## Current State
 
-Practical rule:
+- Pre-commit: 5/5 fitness functions pass
+- Backend tests: ~7000+ (11 pre-existing fixed)
+- Frontend tests: ~996
+- Working tree: clean
+- ChangeSignal: fully migrated, API deprecated sunset 2026-09-30
+- Benchmark: B+ infrastructure-grade
 
-- do not add a new backend primitive unless it clearly:
-  - unlocks the active maturity gate,
-  - removes structural debt,
-  - or closes an integration gap that existing services cannot cover cleanly
-- prefer consolidating existing capabilities into:
-  - UI surfaces
-  - aggregate read models
-  - facades / bounded contexts
-  - richer datasets
-  - real end-to-end validation
+## Next Logical Lots
 
-## Current Maturity Gate
-
-- active gate: `Gate 2 — Building operating system`
-- preserve from Gate 1:
-  - evidence quality
-  - readiness clarity
-  - dossier and pack credibility
-- build toward Gate 3:
-  - portfolio execution
-  - scenario persistence
-  - trust comparability
-  - capital allocation logic
-
-Rule:
-- do not use calendar timing as the primary organizing principle
-- use maturity gates:
-  - wedge dominance
-  - building operating system
-  - portfolio and capital system
-  - infrastructure and market standard
+1. Backend-live full e2e with real seed (all 4 wedges)
+2. Frontend polish on Building Home (4 readiness panels coexist)
+3. Portfolio-level readiness summary across wedges
+4. Real pilot onboarding with prospect client
+5. Finish partner-submissions agent, report Wave 5 checkpoint
 
 ## International-Class Standard
 

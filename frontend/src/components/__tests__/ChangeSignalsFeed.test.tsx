@@ -1,3 +1,4 @@
+// MIGRATED to canonical BuildingSignal API (2026-03-28, Rail 1)
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -12,10 +13,10 @@ vi.mock('@/i18n', () => ({
   }),
 }));
 
-const mockList = vi.fn();
-vi.mock('@/api/changeSignals', () => ({
-  changeSignalsApi: {
-    list: (...args: unknown[]) => mockList(...args),
+const mockListActive = vi.fn();
+vi.mock('@/api/buildingSignals', () => ({
+  buildingSignalsApi: {
+    listActive: (...args: unknown[]) => mockListActive(...args),
   },
 }));
 
@@ -32,7 +33,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('ChangeSignalsFeed', () => {
   beforeEach(() => {
-    mockList.mockReset();
+    mockListActive.mockReset();
   });
 
   afterEach(() => {
@@ -40,7 +41,7 @@ describe('ChangeSignalsFeed', () => {
   });
 
   it('renders explicit error state when API fails', async () => {
-    mockList.mockRejectedValue(new Error('boom'));
+    mockListActive.mockRejectedValue(new Error('boom'));
     render(<ChangeSignalsFeed buildingId="b1" />, { wrapper });
 
     expect(await screen.findByText('change_signal.title')).toBeInTheDocument();
@@ -48,7 +49,8 @@ describe('ChangeSignalsFeed', () => {
   });
 
   it('renders empty state when there are no active signals', async () => {
-    mockList.mockResolvedValue({ items: [] });
+    // Canonical API returns array directly, not paginated
+    mockListActive.mockResolvedValue([]);
     render(<ChangeSignalsFeed buildingId="b1" />, { wrapper });
 
     expect(await screen.findByText('change_signal.none')).toBeInTheDocument();

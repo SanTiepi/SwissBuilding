@@ -7,7 +7,6 @@ from pathlib import Path
 
 from run_confidence_suite import DEFAULT_GROUPS, GROUPS
 
-
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = BACKEND_ROOT.parent
 TESTS_ROOT = BACKEND_ROOT / "tests"
@@ -152,9 +151,7 @@ def main(argv: list[str]) -> int:
 
     if args.mode == "confidence":
         tests = _group_tests(DEFAULT_GROUPS)
-    elif args.mode == "full":
-        tests = ["tests/"]
-    elif args.mode == "last-failed":
+    elif args.mode == "full" or args.mode == "last-failed":
         tests = ["tests/"]
     elif args.mode == "files":
         if not args.paths:

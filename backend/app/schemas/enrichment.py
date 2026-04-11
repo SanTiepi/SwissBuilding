@@ -27,6 +27,7 @@ class EnrichmentResult(BaseModel):
     egrid_found: bool = False
     image_url: str | None = None
     ai_enriched: bool = False
+    spatial_fetched: bool = False
     # New enrichment sources
     radon_fetched: bool = False
     natural_hazards_fetched: bool = False
@@ -63,6 +64,7 @@ class EnrichmentResult(BaseModel):
     # Computed scores
     connectivity_score: float | None = None
     environmental_risk_score: float | None = None
+    geo_risk_score_computed: bool = False
     livability_score: float | None = None
     renovation_potential_computed: bool = False
     overall_intelligence_computed: bool = False

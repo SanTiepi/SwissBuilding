@@ -5,7 +5,6 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BRIEF_KIT = REPO_ROOT / "docs" / "projects" / "claude-wave-brief-kit-2026-03-25.md"
 BRIEF_RE = re.compile(r"^## Brief (\d+) - (.+)$", re.MULTILINE)

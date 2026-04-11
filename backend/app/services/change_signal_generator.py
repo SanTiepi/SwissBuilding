@@ -1,3 +1,11 @@
+# COMPATIBILITY SURFACE — ChangeSignal is frozen per ADR-004.
+# Canonical change objects are in building_change.py (BuildingSignal).
+# No new semantics should be added here.
+#
+# This generator creates ChangeSignal records for legacy consumers.
+# The change_tracker_service.detect_signals() bridge also creates
+# BuildingSignal records from these for canonical consumers.
+
 """
 SwissBuildingOS - Change Signal Generator Service
 

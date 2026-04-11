@@ -5,8 +5,8 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from app.models.building_change import BuildingSignal
 from app.models.building_snapshot import BuildingSnapshot
-from app.models.change_signal import ChangeSignal
 from app.models.diagnostic import Diagnostic
 from app.models.intervention import Intervention
 from app.schemas.requalification import TriggerType, TriggerUrgency
@@ -31,15 +31,15 @@ def _make_signal(
     description=None,
     detected_at=None,
 ):
-    return ChangeSignal(
+    return BuildingSignal(
         id=uuid.uuid4(),
         building_id=building_id,
         signal_type=signal_type,
         severity=severity,
         status="active",
         title=title,
-        description=description,
-        source="test",
+        description=description or "",
+        based_on_type="event",
         detected_at=detected_at or datetime.now(UTC),
     )
 

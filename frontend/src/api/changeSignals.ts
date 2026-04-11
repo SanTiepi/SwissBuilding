@@ -1,3 +1,6 @@
+// COMPATIBILITY SURFACE — ChangeSignal reads are frozen per ADR-004.
+// New change consumers should use building_changes API.
+
 import { apiClient } from '@/api/client';
 import type { PaginatedResponse } from '@/types';
 

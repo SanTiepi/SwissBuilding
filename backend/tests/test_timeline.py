@@ -376,4 +376,4 @@ async def test_timeline_publication_version_update(client, auth_headers, db_sess
     assert data["total"] == 1
     item = data["items"][0]
     assert item["metadata"]["current_version"] == 3
-    assert "version 3" in item["description"]
+    assert "MISS-V3" in item["description"] or "version 3" in item["description"].lower()

@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO Today
+ * This page will be absorbed into the Today master workspace as a documents panel.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from '@/i18n';
 import { formatDate, cn } from '@/utils/formatters';

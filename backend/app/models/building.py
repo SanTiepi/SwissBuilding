@@ -1,7 +1,7 @@
 import uuid
 
 from geoalchemy2 import Geometry
-from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -32,12 +32,31 @@ class Building(Base):
     floors_below = Column(Integer, nullable=True)
     surface_area_m2 = Column(Float, nullable=True)
     volume_m3 = Column(Float, nullable=True)
+    footprint_wkt = Column(Text, nullable=True)
+    building_height = Column(Float, nullable=True)
+    roof_type = Column(String(100), nullable=True)
+    floor_count_3d = Column(Integer, nullable=True)
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     status = Column(String(20), default="active")
     source_dataset = Column(String(50), nullable=True)
     source_imported_at = Column(DateTime(timezone=True), nullable=True)
     source_metadata_json = Column(JSON, nullable=True)
+    # CECB real energy data (from registre CECB)
+    cecb_class = Column(String(1), nullable=True)  # A-G
+    cecb_heating_demand = Column(Float, nullable=True)  # kWh/m²/an
+    cecb_cooling_demand = Column(Float, nullable=True)  # kWh/m²/an
+    cecb_dhw_demand = Column(Float, nullable=True)  # eau chaude sanitaire kWh/m²/an
+    cecb_certificate_date = Column(DateTime(timezone=True), nullable=True)
+    cecb_fetch_date = Column(DateTime(timezone=True), nullable=True)
+    cecb_source = Column(String(100), nullable=True)  # e.g. "CECB VD 2024"
+    # GWR fields (Registre fédéral des bâtiments)
+    heat_source = Column(String(100), nullable=True)  # gaz, mazout, pompe à chaleur, bois, électrique, district, autre
+    construction_period = Column(String(50), nullable=True)  # e.g. "1900-1920", "1990-2010"
+    primary_use = Column(String(100), nullable=True)  # habitation, commerce, industrie, agriculture, etc.
+    hot_water_source = Column(String(100), nullable=True)  # centralisé, décentralisé, sans
+    num_households = Column(Integer, nullable=True)  # nombre de logements
+
     jurisdiction_id = Column(UUID(as_uuid=True), ForeignKey("jurisdictions.id"), nullable=True)
     organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
     created_at = Column(DateTime, default=func.now())
@@ -57,6 +76,8 @@ class Building(Base):
     technical_plans = relationship("TechnicalPlan", back_populates="building", cascade="all, delete-orphan")
     diagnostic_publications = relationship("DiagnosticReportPublication", back_populates="building")
     diagnostic_mission_orders = relationship("DiagnosticMissionOrder", back_populates="building")
+    defect_timelines = relationship("DefectTimeline", back_populates="building", cascade="all, delete-orphan")
+    permits = relationship("Permit", back_populates="building", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("idx_buildings_canton", "canton"),

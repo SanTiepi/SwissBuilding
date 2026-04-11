@@ -53,3 +53,29 @@ class RoutingHintRead(BaseModel):
     recommendation: str  # preferred | review | avoid
     overall_trust_level: str
     signal_count: int
+
+
+class CasePartnerTrustRead(BaseModel):
+    """Trust profile of a partner in the context of a specific case."""
+
+    partner_org_id: UUID
+    case_id: UUID
+    overall_trust_level: str
+    delivery_reliability_score: float | None
+    evidence_quality_score: float | None
+    responsiveness_score: float | None
+    total_signal_count: int
+    case_signal_count: int
+
+
+class TrustedPartnerRead(BaseModel):
+    """A partner qualified for panel selection (adequate+ trust)."""
+
+    partner_org_id: UUID
+    overall_trust_level: str
+    delivery_reliability_score: float | None
+    evidence_quality_score: float | None
+    responsiveness_score: float | None
+    signal_count: int
+    work_family: str
+    guidance: str  # qualified

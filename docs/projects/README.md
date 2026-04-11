@@ -50,7 +50,7 @@ If a brief does not yet carry this metadata inline, use this index as the curren
 
 ## 1. Pre-Work, Diagnostics, and Proof
 
-- `legislative-compliance-hardening.md`
+- `../archive/operating-packs/legislative-compliance-hardening.md` *(archived)*
   - `ring`: `ring_1`
   - `user_surface`: `pro / authority`
   - `go_to_market_relevance`: `direct_wedge`
@@ -396,7 +396,7 @@ If a brief does not yet carry this metadata inline, use this index as the curren
   - `go_to_market_relevance`: `later`
   - `moat_type`: `knowledge_ops`
   - `depends_on`: `agent runs + curation`
-- `testing-and-validation-modernization.md`
+- `../archive/operating-packs/testing-and-validation-modernization.md` *(archived)*
   - `ring`: `ring_4`
   - `user_surface`: `internal`
   - `go_to_market_relevance`: `supporting`
@@ -438,7 +438,7 @@ If a brief does not yet carry this metadata inline, use this index as the curren
   - `go_to_market_relevance`: `supporting`
   - `moat_type`: `signal_quality_and_integration_truth`
   - `depends_on`: `dataset strategy + testing modernization + integration truth`
-- `repo-quality-and-coherence-hardening.md`
+- `../archive/operating-packs/repo-quality-and-coherence-hardening.md` *(archived)*
   - `ring`: `ring_4`
   - `user_surface`: `internal`
   - `go_to_market_relevance`: `supporting`
@@ -456,7 +456,7 @@ If a brief does not yet carry this metadata inline, use this index as the curren
   - `go_to_market_relevance`: `category_story`
   - `moat_type`: `repeatable_demonstration`
   - `depends_on`: `stable wow surfaces`
-- `open-source-accelerators-2026-radar.md`
+- `../archive/operating-packs/open-source-accelerators-2026-radar.md` *(archived)*
   - `ring`: `ring_4`
   - `user_surface`: `internal`
   - `go_to_market_relevance`: `supporting`

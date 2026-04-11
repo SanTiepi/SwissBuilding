@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO PortfolioCommand
+ * This page will be absorbed into the PortfolioCommand master workspace.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -478,7 +484,10 @@ export default function PortfolioTriage() {
           <KpiCard
             label={t('portfolio_benchmark.avg_grade') || 'Note moyenne'}
             value={benchmarkData.avg_grade}
-            colorClass={cn('text-white', GRADE_COLORS[(benchmarkData.avg_grade || 'F').toUpperCase()] || GRADE_COLORS.F)}
+            colorClass={cn(
+              'text-white',
+              GRADE_COLORS[(benchmarkData.avg_grade || 'F').toUpperCase()] || GRADE_COLORS.F,
+            )}
           />
           <KpiCard
             label={t('portfolio_benchmark.avg_trust') || 'Confiance moy.'}

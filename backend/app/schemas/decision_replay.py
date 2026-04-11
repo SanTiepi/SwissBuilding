@@ -84,3 +84,67 @@ class DecisionImpactAnalysis(BaseModel):
     days_since_decision: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ── Decision Replay Layer (basis snapshot & staleness) ──
+
+
+class DecisionReplayRead(BaseModel):
+    """Lecture d'un replay de decision avec son instantane de base."""
+
+    id: UUID
+    building_id: UUID
+    decision_id: UUID
+    basis_snapshot: dict | None = None
+    trust_state_at_decision: dict | None = None
+    completeness_at_decision: float | None = None
+    readiness_at_decision: dict | None = None
+    changes_since: list[dict] | None = None
+    basis_still_valid: bool | None = None
+    invalidated_by: list[dict] | None = None
+    replay_status: str
+    replay_summary: str | None = None
+    replayed_at: datetime | None = None
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DecisionReplayListResponse(BaseModel):
+    """Liste des replays pour un batiment."""
+
+    building_id: UUID
+    replays: list[DecisionReplayRead]
+    total: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class StaleDecisionRead(BaseModel):
+    """Resume d'une decision dont la base a change."""
+
+    decision_id: UUID
+    decision_type: str
+    title: str
+    outcome: str
+    decided_at: datetime | None = None
+    replay_status: str
+    replay_summary: str | None = None
+    changes_count: int = 0
+    invalidation_reasons: list[str] | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BasisValidityCheck(BaseModel):
+    """Resultat de la verification de validite de la base."""
+
+    replay_id: UUID
+    decision_id: UUID
+    basis_still_valid: bool
+    replay_status: str
+    changes_detected: list[dict]
+    invalidation_reasons: list[str]
+    replay_summary: str
+
+    model_config = ConfigDict(from_attributes=True)

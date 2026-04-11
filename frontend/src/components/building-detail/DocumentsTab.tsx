@@ -2,6 +2,7 @@ import { useTranslation } from '@/i18n';
 import { FileUpload } from '@/components/FileUpload';
 import { formatDate } from '@/utils/formatters';
 import { documentsApi } from '@/api/documents';
+import { ExtractionTriggerButton } from '@/components/extractions/ExtractionTriggerButton';
 import { toast } from '@/store/toastStore';
 import type { Document as DocType } from '@/types';
 import { Loader2, FileText, Download, AlertTriangle } from 'lucide-react';
@@ -10,10 +11,11 @@ interface DocumentsTabProps {
   documents: DocType[];
   isLoadingDocs: boolean;
   documentsError: boolean;
+  buildingId: string;
   onUpload: (file: File) => void;
 }
 
-export function DocumentsTab({ documents, isLoadingDocs, documentsError, onUpload }: DocumentsTabProps) {
+export function DocumentsTab({ documents, isLoadingDocs, documentsError, buildingId, onUpload }: DocumentsTabProps) {
   const { t } = useTranslation();
 
   if (isLoadingDocs) {
@@ -46,19 +48,22 @@ export function DocumentsTab({ documents, isLoadingDocs, documentsError, onUploa
                   <p className="text-xs text-gray-500 dark:text-slate-400">{formatDate(doc.created_at)}</p>
                 </div>
               </div>
-              <button
-                onClick={async () => {
-                  try {
-                    const url = await documentsApi.getDownloadUrl(doc.id);
-                    if (url) window.open(url, '_blank');
-                  } catch (err: any) {
-                    toast(err?.response?.data?.detail || err?.message || 'Download failed');
-                  }
-                }}
-                className="p-2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
-              >
-                <Download className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <ExtractionTriggerButton documentId={doc.id} buildingId={buildingId} mimeType={doc.mime_type} />
+                <button
+                  onClick={async () => {
+                    try {
+                      const url = await documentsApi.getDownloadUrl(doc.id);
+                      if (url) window.open(url, '_blank');
+                    } catch (err: any) {
+                      toast(err?.response?.data?.detail || err?.message || 'Download failed');
+                    }
+                  }}
+                  className="p-2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

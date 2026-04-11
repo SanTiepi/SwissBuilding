@@ -56,7 +56,7 @@ async def observation(db_session, building, admin_user):
         title="Fissure mur est",
         description="Fissure visible sur le mur est du 2e étage",
         observed_at=datetime.now(UTC),
-        status="draft",
+        status="active",
     )
     db_session.add(obs)
     await db_session.commit()
@@ -83,7 +83,7 @@ async def test_create_observation(client, auth_headers, building):
     assert data["observation_type"] == "visual_inspection"
     assert data["severity"] == "minor"
     assert data["verified"] is False
-    assert data["status"] == "draft"
+    assert data["status"] == "active"
     assert data["observer_name"] is not None
 
 
@@ -261,7 +261,7 @@ async def test_filter_by_type(client, auth_headers, building, db_session, admin_
                 severity="info",
                 title=f"Obs {obs_type}",
                 observed_at=datetime.now(UTC),
-                status="draft",
+                status="active",
             )
         )
     await db_session.commit()
@@ -287,7 +287,7 @@ async def test_filter_by_severity(client, auth_headers, building, db_session, ad
                 severity=sev,
                 title=f"Obs {sev}",
                 observed_at=datetime.now(UTC),
-                status="draft",
+                status="active",
             )
         )
     await db_session.commit()
@@ -339,7 +339,7 @@ async def test_filter_by_zone(client, auth_headers, building, zone, db_session, 
             title="In zone",
             zone_id=zone.id,
             observed_at=datetime.now(UTC),
-            status="draft",
+            status="active",
         )
     )
     db_session.add(
@@ -351,7 +351,7 @@ async def test_filter_by_zone(client, auth_headers, building, zone, db_session, 
             severity="info",
             title="No zone",
             observed_at=datetime.now(UTC),
-            status="draft",
+            status="active",
         )
     )
     await db_session.commit()
@@ -381,7 +381,7 @@ async def test_pagination(client, auth_headers, building, db_session, admin_user
                 severity="info",
                 title=f"Obs {i}",
                 observed_at=datetime.now(UTC),
-                status="draft",
+                status="active",
             )
         )
     await db_session.commit()

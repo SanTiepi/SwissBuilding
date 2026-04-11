@@ -16,4 +16,11 @@ export const trustScoresApi = {
     );
     return response.data.items[0] ?? null;
   },
+  history: async (buildingId: string, count = 6): Promise<BuildingTrustScore[]> => {
+    const response = await apiClient.get<PaginatedResponse<BuildingTrustScore>>(
+      `/buildings/${buildingId}/trust-scores`,
+      { params: { size: count } },
+    );
+    return response.data.items.reverse();
+  },
 };

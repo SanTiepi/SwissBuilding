@@ -138,30 +138,39 @@ async def estimate_energy_class(
     db: AsyncSession,
     building_id: UUID,
 ) -> EnergyPerformanceEstimate:
-    """Estimate energy class (A-G), kWh/m²/year, CO2, and Minergie compatibility."""
+    """Return energy class — real CECB if available, else estimated from construction year."""
     building = await _get_building(db, building_id)
     intervention_types = await _get_completed_intervention_types(db, building_id)
 
-    base_idx = _base_class_index(building.construction_year)
-    improved_idx = _apply_improvements(base_idx, intervention_types)
-    energy_class = _class_from_index(improved_idx)
+    # Prefer real CECB data when available
+    if building.cecb_class:
+        energy_class = building.cecb_class
+        kwh = building.cecb_heating_demand or KWH_PER_CLASS.get(energy_class, 130.0)
+        source = "cecb"
+        factors = [f"source=CECB ({building.cecb_source or 'registre'})"]
+        if building.cecb_certificate_date:
+            factors.append(f"certificate_date={building.cecb_certificate_date.date()}")
+    else:
+        base_idx = _base_class_index(building.construction_year)
+        improved_idx = _apply_improvements(base_idx, intervention_types)
+        energy_class = _class_from_index(improved_idx)
+        kwh = KWH_PER_CLASS[energy_class]
+        source = "estimated"
+        factors = [f"construction_year={building.construction_year or 'unknown'}"]
+        for itype in intervention_types:
+            if itype in INTERVENTION_IMPROVEMENTS:
+                factors.append(f"intervention:{itype}")
 
-    kwh = KWH_PER_CLASS[energy_class]
     surface = _surface_area(building)
     co2_per_m2 = kwh * CO2_FACTOR
     total_co2 = co2_per_m2 * surface
 
     # Improvement potential: best possible class if all interventions were done
+    base_idx = _base_class_index(building.construction_year)
     all_types = list(INTERVENTION_IMPROVEMENTS.keys())
     best_idx = _apply_improvements(base_idx, all_types)
     best_class = _class_from_index(best_idx)
     improvement_potential = best_class if best_class != energy_class else None
-
-    # Factors that contributed to the assessment
-    factors = [f"construction_year={building.construction_year or 'unknown'}"]
-    for itype in intervention_types:
-        if itype in INTERVENTION_IMPROVEMENTS:
-            factors.append(f"intervention:{itype}")
 
     return EnergyPerformanceEstimate(
         building_id=building.id,
@@ -172,6 +181,10 @@ async def estimate_energy_class(
         improvement_potential_class=improvement_potential,
         minergie_compatible=energy_class in ("A", "B"),
         factors=factors,
+        source=source,
+        cecb_heating_demand=building.cecb_heating_demand,
+        cecb_cooling_demand=building.cecb_cooling_demand,
+        cecb_dhw_demand=building.cecb_dhw_demand,
         estimated_at=datetime.now(UTC),
     )
 

@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a standalone specialist view (cross-cutting utility).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { exportsApi } from '@/api/exports';

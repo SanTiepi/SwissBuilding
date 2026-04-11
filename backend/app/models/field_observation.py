@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -12,16 +12,24 @@ class FieldObservation(Base):
     __tablename__ = "field_observations"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    building_id = Column(UUID(as_uuid=True), ForeignKey("buildings.id"), nullable=False, index=True)
+    building_id = Column(UUID(as_uuid=True), ForeignKey("buildings.id"), nullable=True, index=True)
     zone_id = Column(UUID(as_uuid=True), ForeignKey("zones.id"), nullable=True)
     element_id = Column(UUID(as_uuid=True), ForeignKey("building_elements.id"), nullable=True)
     observer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    observer_role = Column(String(50), nullable=True)
 
     observation_type = Column(String(30), nullable=False)
     severity = Column(String(20), nullable=False, default="info")
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     location_description = Column(String(500), nullable=True)
+
+    # Collective memory fields
+    tags = Column(Text, nullable=True)  # JSON array of strings
+    context_json = Column(Text, nullable=True)  # structured context: canton, year range, pollutant, material, etc.
+    confidence = Column(String(20), nullable=False, default="likely")  # certain, likely, possible, speculation
+    upvotes = Column(Integer, nullable=False, default=0)
+    is_verified = Column(Boolean, default=False, nullable=False)
 
     observed_at = Column(DateTime, nullable=False, default=func.now())
     photo_reference = Column(String(500), nullable=True)
@@ -31,7 +39,19 @@ class FieldObservation(Base):
     verified_at = Column(DateTime, nullable=True)
 
     metadata_json = Column(Text, nullable=True)
-    status = Column(String(20), nullable=False, default="draft")
+    status = Column(String(20), nullable=False, default="active")
+
+    # Mobile field observation fields (Q3.03)
+    condition_assessment = Column(String(20), nullable=True)  # good/fair/poor/critical
+    risk_flags = Column(Text, nullable=True)  # JSON array: water_stain, crack, mold, rust, deformation
+    photos = Column(Text, nullable=True)  # JSON array: [{uri, element_part, timestamp}]
+    gps_lat = Column(Float, nullable=True)
+    gps_lon = Column(Float, nullable=True)
+    compass_direction = Column(String(10), nullable=True)  # north/south/east/west
+    inspection_duration_minutes = Column(Integer, nullable=True)
+    ai_observation_summary = Column(Text, nullable=True)
+    ai_generated = Column(Boolean, default=False, nullable=False)
+    observer_name = Column(String(255), nullable=True)
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -47,4 +67,6 @@ class FieldObservation(Base):
         Index("idx_field_observations_building_type", "building_id", "observation_type"),
         Index("idx_field_observations_building_severity", "building_id", "severity"),
         Index("idx_field_observations_building_status", "building_id", "status"),
+        Index("idx_field_observations_confidence", "confidence"),
+        Index("idx_field_observations_is_verified", "is_verified"),
     )

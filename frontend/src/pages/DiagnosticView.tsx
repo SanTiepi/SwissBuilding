@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under BuildingDetail (Building Home).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -18,6 +24,7 @@ import { POLLUTANT_COLORS, RISK_COLORS } from '@/utils/constants';
 import { diagnosticsApi } from '@/api/diagnostics';
 import { toast } from '@/store/toastStore';
 import { DiagnosticViewSkeleton } from '@/components/Skeleton';
+import { CostEstimationModal } from '@/components/CostEstimationModal';
 import { DataTable } from '@/components/DataTable';
 import { PollutantBadge } from '@/components/PollutantBadge';
 import { FileUpload } from '@/components/FileUpload';
@@ -53,6 +60,7 @@ import {
   BookOpen,
   MapPin,
   AlertCircle,
+  Calculator,
 } from 'lucide-react';
 
 const sampleSchema = z.object({
@@ -118,6 +126,7 @@ export default function DiagnosticView() {
   const [isApplying, setIsApplying] = useState(false);
   const [editedSamples, setEditedSamples] = useState<ParsedSampleData[]>([]);
   const [expandedSamples, setExpandedSamples] = useState<Set<string>>(new Set());
+  const [showCostModal, setShowCostModal] = useState(false);
 
   const {
     register,
@@ -480,6 +489,13 @@ export default function DiagnosticView() {
                 </button>
               )}
             </RoleGate>
+            <button
+              onClick={() => setShowCostModal(true)}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50"
+            >
+              <Calculator className="w-4 h-4" />
+              {t('cost_prediction.title') || 'Estimation des couts'}
+            </button>
             <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600">
               <Download className="w-4 h-4" />
               {t('diagnostic.exportReport')}
@@ -1290,6 +1306,13 @@ export default function DiagnosticView() {
           </div>
         </div>
       )}
+
+      {/* Cost Estimation Modal */}
+      <CostEstimationModal
+        open={showCostModal}
+        onClose={() => setShowCostModal(false)}
+        defaultPollutant={d.diagnostic_type !== 'full' ? d.diagnostic_type : undefined}
+      />
     </div>
   );
 }

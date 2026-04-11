@@ -9,12 +9,14 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.user import User
 from app.schemas.authority_pack import (
+    AuthorityPackArtifactResult,
     AuthorityPackConfig,
     AuthorityPackListItem,
     AuthorityPackResult,
 )
 from app.services.authority_pack_service import (
     generate_authority_pack,
+    generate_pack_artifact,
     get_authority_pack,
     list_authority_packs,
 )
@@ -37,6 +39,26 @@ async def generate_authority_pack_endpoint(
     config.building_id = building_id
     try:
         result = await generate_authority_pack(db, building_id, config, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    return result
+
+
+@router.post(
+    "/buildings/{building_id}/authority-pack/artifact",
+    response_model=AuthorityPackArtifactResult,
+    status_code=201,
+)
+async def generate_pack_artifact_endpoint(
+    building_id: UUID,
+    config: AuthorityPackConfig,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generate an authority pack and write it as a downloadable JSON artifact file."""
+    config.building_id = building_id
+    try:
+        result = await generate_pack_artifact(db, building_id, config, current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     return result

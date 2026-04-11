@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view (regulatory rules studio).
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';

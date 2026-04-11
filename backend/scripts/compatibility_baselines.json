@@ -1,0 +1,15 @@
+{
+  "_description": "Line counts of compatibility-tier files. Growth beyond these baselines indicates drift (compatibility files should shrink, not grow).",
+  "_generated": "2026-03-28",
+  "_updated": "2026-03-28 (deprecation headers added to API)",
+  "models": {
+    "change_signal.py": 39
+  },
+  "services": {
+    "change_signal_generator.py": 433
+  },
+  "api": {
+    "change_signals.py": 236
+  },
+  "total_lines": 708
+}

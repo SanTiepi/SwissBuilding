@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -48,7 +49,8 @@ async def enrich_single_building(
             skip_image=skip_image,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Enrichment failed: {e}") from e
+        logging.getLogger(__name__).exception("Enrichment failed for building %s", building_id)
+        raise HTTPException(status_code=500, detail="Enrichment failed") from e
 
     if result.errors and not result.fields_updated:
         raise HTTPException(status_code=404, detail=result.errors[0])
@@ -90,6 +92,35 @@ async def enrich_all_buildings_endpoint(
         error_count=error_count,
         results=results,
     )
+
+
+@router.post("/buildings/{building_id}/enrich/climate")
+async def enrich_climate(
+    building_id: UUID,
+    current_user: User = Depends(require_permission("buildings", "update")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Trigger climate exposure profile population for a single building."""
+    from app.services.climate_exposure_population_service import populate_climate_profile
+
+    try:
+        profile = await populate_climate_profile(db, building_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        logging.getLogger(__name__).exception("Climate enrichment failed for %s", building_id)
+        raise HTTPException(status_code=500, detail="Climate enrichment failed") from e
+
+    await db.commit()
+    return {
+        "building_id": str(building_id),
+        "heating_degree_days": profile.heating_degree_days,
+        "freeze_thaw_cycles_per_year": profile.freeze_thaw_cycles_per_year,
+        "moisture_stress": profile.moisture_stress,
+        "thermal_stress": profile.thermal_stress,
+        "uv_exposure": profile.uv_exposure,
+        "data_sources_count": len(profile.data_sources or []),
+    }
 
 
 @router.get("/buildings/{building_id}/enrichment-status", response_model=EnrichmentStatus)

@@ -1,3 +1,10 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view (notification center).
+ * Not currently routed in App.tsx but used as component reference.
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';

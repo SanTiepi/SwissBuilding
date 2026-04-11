@@ -62,3 +62,16 @@ class ComplianceRequirementDetail(BaseModel):
 
 
 RenovationSimulationResponse.model_rebuild()
+
+
+class SinistraliteScoreRead(BaseModel):
+    """Read schema for sinistralite (claims/loss) score."""
+
+    building_id: UUID
+    score: float
+    risk_level: str
+    incident_count: int
+    weighted_severity: float
+    computed_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

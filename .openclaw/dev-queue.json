@@ -1,0 +1,234 @@
+{
+  "version": 3,
+  "description": "Dev queue — tracks what's done. The dev-runner reads the roadmap directly for what's next.",
+  "branch": "building-life-os",
+  "source_of_truth": "docs/roadmap-48-months.md",
+  "completed": [
+    {"epic": "wave-next", "tasks": "001-010", "status": "done", "date": "2026-04-01"},
+    {"epic": "defect-shield", "tasks": "001-007 + edge cases", "status": "done", "date": "2026-04-02", "commits": ["b4800b4", "2b2eec3"]},
+    {"epic": "reno-predict", "tasks": "all", "status": "done", "date": "2026-04-01"},
+    {"epic": "programme-a", "tasks": "A.1 geo layers, A.2 swissBUILDINGS3D, A.15 geo context panel, A.16 geo risk score", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-b", "tasks": "B.1 ClimateExposureProfile, B.4 OpportunityWindow, B.3 Material Stress", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-c", "tasks": "C.1 Inventory CRUD, C.2 Equipment Timeline, C.6 Material Recognition", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-e", "tasks": "E.1 CECB Import, E.3 CECB Integration", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-n", "tasks": "N.1 Compliance Scan", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-f", "tasks": "F.2 Fiscal Deductions", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-d", "tasks": "D.3 Sinistralite Score", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-i", "tasks": "I.1 Cross-building Correlation", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-s", "tasks": "S.10 Meteo Correlation + Alerts", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-m", "tasks": "M.1 Authority Report PDF", "status": "done", "date": "2026-04-02"},
+    {"epic": "programme-o", "tasks": "O.10 Isochrone Map", "status": "done", "date": "2026-04-02"}
+  ],
+  "in_progress": [],
+  "session_2_notes": {
+    "session_id": "dev-runner-swissbuilding-wave-7",
+    "date_started": "2026-04-02T03:09Z",
+    "briefs_executed": 17,
+    "briefs_already_done": 13,
+    "new_commits": 2,
+    "date_completed": "2026-04-02T04:15Z"
+  }
+  "pending_briefs": [],
+    {
+      "id": "002",
+      "programme": "O.10",
+      "title": "Isochrone map — accessible en 5/10/15 minutes",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/002-programme-o10-isochrone-mapbox.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "c0ea671",
+      "date_executed": "2026-04-02T02:05Z"
+    },
+    {
+      "id": "003",
+      "programme": "C.6",
+      "title": "Material recognition via Claude vision",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/003-programme-c6-material-recognition-llm.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "48e4bc9",
+      "date_executed": "2026-04-02T02:12Z"
+    },
+    {
+      "id": "004",
+      "programme": "N.1",
+      "title": "Scan conformité automatique — 341+ checks",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/004-programme-n1-auto-compliance-scan.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "f7e9acb",
+      "date_executed": "2026-04-02T02:27Z"
+    },
+    {
+      "id": "005",
+      "programme": "S.10",
+      "title": "Corrélation météo/incidents + alertes prédictives",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/005-programme-s10-meteo-incident-correlation.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "e4e1cf7",
+      "date_executed": "2026-04-02T02:41Z"
+    },
+    {
+      "id": "006",
+      "programme": "E.1",
+      "title": "Import CECB réel par EGID",
+      "effort": "L",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/006-programme-e1-import-cecb-real.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "commit": "8e41dd9",
+      "date_executed": "2026-04-02T02:32Z"
+    },
+    {
+      "id": "007",
+      "programme": "M.1",
+      "title": "Rapport autorite 20+ pages auto via Gotenberg",
+      "effort": "L",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/007-programme-m1-rapport-autorite-auto.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "date_executed": "2026-04-02T02:42Z",
+      "commit": "656c061"
+    },
+    {
+      "id": "008",
+      "programme": "F.2",
+      "title": "Fiscal deductions calculator per canton",
+      "effort": "M",
+      "impact": "⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/F-02_fiscal_deduction_calculator.md",
+      "date_prepared": "2026-04-02T00:51Z",
+      "date_executed": "2026-04-02T02:46Z"
+    },
+    {
+      "id": "009",
+      "programme": "B.3",
+      "title": "Material stress prediction service",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/B-3-stress-materiau.md",
+      "date_prepared": "2026-04-02T00:19Z",
+      "date_executed": "2026-04-02T02:46Z"
+    },
+    {
+      "id": "010",
+      "programme": "D.3",
+      "title": "Building sinistralité score",
+      "effort": "S",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/D-03_building_sinistralite_score.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T02:46Z"
+    },
+    {
+      "id": "011",
+      "programme": "C.2",
+      "title": "Equipment replacement timeline service",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/C-02_equipment_replacement_timeline.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:04Z"
+    },
+    {
+      "id": "012",
+      "programme": "I.1",
+      "title": "Cross-building correlation engine",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/I-01_cross_building_correlation.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:04Z"
+    },
+    {
+      "id": "013",
+      "programme": "Q.2",
+      "title": "Quote extraction from diagnostic PDFs",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/Q2-01-quote-extraction-pipeline.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:50Z"
+    },
+    {
+      "id": "014",
+      "programme": "G.1",
+      "title": "Building Passport v1 — A-F grades",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/Q3-01-building-passport-v1.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:50Z"
+    },
+    {
+      "id": "015",
+      "programme": "P.1",
+      "title": "Post-works verification tracker with photo evidence",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/Q3-02-post-works-truth-tracker.md",
+      "date_prepared": "2026-04-02T00:01Z",
+      "date_executed": "2026-04-02T03:53Z"
+    },
+    {
+      "id": "016",
+      "programme": "A.16",
+      "title": "Geo risk score composite service",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/A-16-geo-risk-score.md",
+      "date_prepared": "2026-04-02T00:18Z",
+      "date_executed": "2026-04-02T05:11Z",
+      "commit": "7e82259"
+    },
+    {
+      "id": "017",
+      "programme": "C.1",
+      "title": "Inventory CRUD complete (14 types + warranty alerts)",
+      "effort": "M",
+      "impact": "⭐⭐⭐⭐",
+      "status": "done",
+      "file": ".openclaw/tasks/C-1-inventory-crud.md",
+      "date_prepared": "2026-04-02T00:19Z",
+      "date_executed": "2026-04-02T05:11Z",
+      "commit": "d653eb5"
+    }
+  ],
+  "failed": [],
+  "session_notes": {
+    "session_id": "dev-runner-swissbuilding-wave-10",
+    "date_started": "2026-04-03T01:12Z",
+    "phase_1_status": "✅ Scan complete: H-1 fully implemented (permit model + API + frontend all present)",
+    "phase_2_status": "✅ I-2 Backend present (model + API). Frontend MISSING (priority: ExpertReviewQueue + ExpertDecisionCard)",
+    "api_status": "🔴 Claude Code at API cap — reset 19:00 Europe/Zurich (April 3)",
+    "next_actions": "Resume at 19:00 — I-2 frontend (200 lines React), wave-10 integration, defect-shield 001-007, reno-predict",
+    "briefs_found": 25,
+    "briefs_ready_to_execute": [
+      "I-2-expert-review-override-governance.md (frontend phase)",
+      "wave-10-permits-and-expert-review-frontend.md",
+      "defect-shield-001 through 007",
+      "reno-predict-all.md"
+    ]
+  }
+}
+}

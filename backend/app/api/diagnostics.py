@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
@@ -28,6 +29,7 @@ from app.services.diagnostic_service import (
 from app.services.risk_engine import update_risk_score
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/buildings/{building_id}/diagnostics", response_model=list[DiagnosticRead])
@@ -64,7 +66,7 @@ async def create_diagnostic_endpoint(
 
         index_diagnostic(diagnostic)
     except Exception:
-        pass
+        logger.warning("Search index operation failed", exc_info=True)
     return diagnostic
 
 
@@ -110,7 +112,7 @@ async def update_diagnostic_endpoint(
 
         index_diagnostic(diagnostic)
     except Exception:
-        pass
+        logger.warning("Search index operation failed", exc_info=True)
     return diagnostic
 
 

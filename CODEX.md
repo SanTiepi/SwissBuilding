@@ -79,7 +79,7 @@ Real-e2e preflight/env overrides when needed:
 ```bash
 set E2E_REAL_ADMIN_EMAIL=...
 set E2E_REAL_ADMIN_PASSWORD=...
-set E2E_REAL_API_BASE=http://localhost:8000
+set E2E_REAL_API_BASE=https://swissbuilding.batiscan.ch
 ```
 
 Backend (from `backend/`):

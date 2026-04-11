@@ -79,8 +79,8 @@ function renderWithProviders() {
 
 async function openCreateModal() {
   const user = userEvent.setup();
-  // The add button text is a t() key
-  const addBtn = screen.getByText('building.add');
+  // Use the specific testid for the legacy create form button (not the wizard button)
+  const addBtn = screen.getByTestId('buildings-create-button');
   await user.click(addBtn);
 }
 

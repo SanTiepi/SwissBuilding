@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO PortfolioCommand
+ * This page will be absorbed into the PortfolioCommand master workspace.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { lazy, Suspense, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';

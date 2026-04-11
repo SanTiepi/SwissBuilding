@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: DEPRECATE
+ * This page is scheduled for removal. Do not add new features.
+ * Its functionality is covered by BuildingDetail diagnostics tab.
+ * Not routed in App.tsx — orphaned page file.
+ */
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';

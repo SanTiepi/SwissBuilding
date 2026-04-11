@@ -7,6 +7,7 @@ import { useTranslation } from '@/i18n';
 import { SUPPORTED_LANGUAGES } from '@/utils/constants';
 import { cn } from '@/utils/formatters';
 import { NotificationBell } from '@/components/NotificationBell';
+import { SearchBar } from '@/components/SearchBar';
 import type { Language } from '@/types';
 
 const routeTitles: Record<string, string> = {
@@ -92,20 +93,8 @@ export function Header({ onMenuToggle, onSearchOpen }: HeaderProps) {
         <h1 className="text-base sm:text-xl font-semibold text-slate-900 dark:text-white truncate">{pageTitle}</h1>
       </div>
 
-      {/* Search trigger */}
-      {onSearchOpen && (
-        <button
-          onClick={onSearchOpen}
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
-          aria-label={t('nav.search')}
-        >
-          <Search className="w-4 h-4" />
-          <span>{t('nav.search')}</span>
-          <kbd className="ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded">
-            ⌘K
-          </kbd>
-        </button>
-      )}
+      {/* Inline search bar — visible on desktop */}
+      <SearchBar className="hidden sm:block w-64 lg:w-80" onOpenFullSearch={onSearchOpen} />
 
       {/* Right side controls */}
       <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">

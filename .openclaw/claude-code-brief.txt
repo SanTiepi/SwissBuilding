@@ -1,0 +1,61 @@
+# Task: Post-Works Verification Tracker Implementation
+
+## Context
+You are implementing Q3.02 — a post-works verification system where contractors report completion of work items, capture photos with timestamps, and generate completion certificates. Read the full brief at `.openclaw/tasks/Q3-02-post-works-truth-tracker.md` in your workspace.
+
+## Mission
+Implement the complete post-works tracking pipeline: database models, validation service, API endpoints, mobile-first contractor form, and certificate PDF generation. All tests pass, dark mode included, one atomic commit.
+
+## What this is / What this is NOT
+- **IS:** end-to-end feature implementation spanning models→service→API→frontend pages
+- **IS:** mobile-first contractor workflow (check items, upload photos, generate cert)
+- **IS NOT:** a refactoring or cleanup task — this is new functionality
+
+## Concrete Deliverables
+1. **Backend models:** PostWorkItem + WorksCompletionCertificate + migration
+2. **Backend service:** post_works_tracker_service.py with validation + completion % logic
+3. **Backend service:** completion_certificate_generator.py using Gotenberg PDF
+4. **Backend API:** POST /buildings/{id}/post-work-items/{id}/complete, GET endpoints
+5. **Frontend page:** PostWorksTracker.tsx (mobile-responsive, touch-friendly)
+6. **Frontend component:** PostWorkItemCard.tsx (before photo, checkbox, upload, notes)
+7. **Frontend integration:** Building Home shows completion widget
+8. **Tests:** 12+ backend unit tests + 8+ frontend component tests
+9. **All existing tests must pass** (no regressions)
+
+## Hard Rules
+1. Copy existing patterns: models from `backend/app/models/diagnostic.py`, PDF from `backend/app/services/authority_report_generator.py`, photo upload from `frontend/src/pages/Contractor/MaterialPhotoCapture.tsx`
+2. Mobile-first: touch-friendly inputs, large buttons, responsive layout (Tailwind + dark: classes)
+3. Dark mode required: use `dark:` Tailwind classes throughout
+4. Completion % = verified_items / total_items (show as progress bar in UI + endpoint)
+5. Certificate PDF only appears at 100% completion
+6. No type errors, no linting warnings after `npm run validate` and `ruff check/format`
+7. Use existing auth/session patterns — contractor_id from JWT token
+8. Before/after photo pairing stored in JSON: `[{before_id, after_id}]`
+9. Verification score ≥80% confidence to auto-verify (else flag for manual review)
+10. All new models must be added to `backend/app/models/__init__.py` exports
+
+## Closure Order
+1. Create backend models + migration (alembic)
+2. Create services (validation + PDF generation)
+3. Create API endpoints in router
+4. Add schema definitions
+5. Create frontend page + component
+6. Integrate into Building Home
+7. Write backend + frontend tests
+8. Validate all tests pass
+9. Commit with exact message: "feat(programme-p): Post-works verification tracker with photo evidence + completion certificates"
+
+## Validation
+- Backend: `cd backend && python -m pytest tests/services/test_post_works_tracker.py -v` (12+ tests)
+- Backend: `cd backend && ruff check app/ tests/ && ruff format --check app/ tests/`
+- Frontend: `cd frontend && npm run validate` (tsc, eslint, prettier)
+- Frontend: `cd frontend && npm run test:e2e` (mobile upload flow)
+- All existing tests must pass: `cd backend && pytest -q` and `cd frontend && npm test`
+
+## Return Format
+When done:
+1. **Status:** ✅ COMPLETE or ❌ FAILED
+2. **Commit hash:** (git rev-parse HEAD)
+3. **Summary:** what was built, any notes
+
+Do not return until all validation passes.

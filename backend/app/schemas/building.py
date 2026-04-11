@@ -70,6 +70,10 @@ class BuildingRead(BaseModel):
     floors_below: int | None
     surface_area_m2: float | None
     volume_m3: float | None
+    footprint_wkt: str | None = None
+    building_height: float | None = None
+    roof_type: str | None = None
+    floor_count_3d: int | None = None
     owner_id: UUID | None
     created_by: UUID
     status: str

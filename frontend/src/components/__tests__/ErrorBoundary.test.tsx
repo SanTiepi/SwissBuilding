@@ -82,7 +82,7 @@ describe('ErrorBoundary', () => {
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 
-  it('renders a Go to Dashboard link', () => {
+  it('renders a Go to Home link', () => {
     render(
       <ErrorBoundary>
         <BadChild />
@@ -91,8 +91,8 @@ describe('ErrorBoundary', () => {
 
     const link = screen.getByTestId('error-boundary-home');
     expect(link).toBeInTheDocument();
-    expect(link).toHaveTextContent('Dashboard');
-    expect(link).toHaveAttribute('href', '/dashboard');
+    expect(link).toHaveTextContent('Accueil');
+    expect(link).toHaveAttribute('href', '/today');
   });
 
   it('renders a Copy error button', () => {

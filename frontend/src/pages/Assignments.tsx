@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: DEPRECATE
+ * This page is scheduled for removal. Do not add new features.
+ * Its functionality is covered by BuildingDetail assignments tab.
+ * Not routed in App.tsx — orphaned page file.
+ */
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';

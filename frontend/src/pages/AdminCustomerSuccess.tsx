@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: KEEP BOUNDED
+ * This page remains as a specialist view under Admin.
+ * It must not own canonical truth — it is a projection.
+ * Per ADR-006.
+ */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/i18n';
@@ -50,7 +56,9 @@ const customerSuccessApi = {
     return response.data;
   },
   listOrgs: async (): Promise<OrgOption[]> => {
-    const response = await apiClient.get<OrgOption[] | { items: OrgOption[] }>('/organizations', { params: { limit: 100 } });
+    const response = await apiClient.get<OrgOption[] | { items: OrgOption[] }>('/organizations', {
+      params: { limit: 100 },
+    });
     const data = response.data;
     return Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
   },

@@ -6,6 +6,8 @@ DEMO_ADMIN_PASSWORD = "noob42"
 
 # Source dataset identifiers (used in importers, seeds, and tests)
 SOURCE_DATASET_VAUD_PUBLIC = "vd-public-rcb"
+SOURCE_DATASET_CECB = "cecb-registre"
+SOURCE_DATASET_GWR = "gwr-regbl"
 
 # Canonical sample units stored in the database and returned by the API.
 SAMPLE_UNIT_PERCENT_WEIGHT = "percent_weight"
@@ -399,6 +401,59 @@ ERA_RANGES: list[tuple[str, int | None, int | None]] = [
 ]
 
 # ---------------------------------------------------------------------------
+# Source registry — families, classes, statuses
+# ---------------------------------------------------------------------------
+SOURCE_FAMILIES = [
+    "identity",
+    "spatial",
+    "constraint",
+    "procedure",
+    "standard",
+    "commercial",
+    "partner",
+    "live",
+    "document",
+]
+
+SOURCE_CLASSES = ["official", "observed", "commercial", "partner_fed", "derived"]
+
+SOURCE_ACCESS_MODES = ["api", "bulk", "file", "portal", "partner", "watch_only"]
+
+SOURCE_FRESHNESS_POLICIES = [
+    "real_time",
+    "daily",
+    "weekly",
+    "monthly",
+    "quarterly",
+    "event_driven",
+    "on_demand",
+]
+
+SOURCE_TRUST_POSTURES = [
+    "canonical_identity",
+    "canonical_constraint",
+    "observed_context",
+    "supporting_evidence",
+    "commercial_hint",
+    "derived_only",
+]
+
+SOURCE_STATUSES = ["active", "degraded", "unavailable", "deprecated", "planned"]
+
+SOURCE_PRIORITIES = ["now", "next", "later", "partner_gated"]
+
+SOURCE_HEALTH_EVENT_TYPES = [
+    "healthy",
+    "degraded",
+    "unavailable",
+    "schema_drift",
+    "timeout",
+    "error",
+    "recovered",
+    "fallback_used",
+]
+
+# ---------------------------------------------------------------------------
 # Diagnostic validity years (per pollutant)
 # ---------------------------------------------------------------------------
 DIAGNOSTIC_VALIDITY_YEARS: dict[str, int] = {
@@ -457,3 +512,457 @@ def normalize_sample_unit(unit: str | None, *, strict: bool = False) -> str | No
         raise ValueError(f"Unsupported sample unit '{unit}'. Supported units: {supported}")
 
     return _sample_unit_key(unit)
+
+
+# ---------------------------------------------------------------------------
+# Work Families — corps de metier → procedure / authority / proof / contractor matrix
+# ---------------------------------------------------------------------------
+
+WORK_FAMILIES: dict[str, dict] = {
+    "asbestos_removal": {
+        "label_fr": "Desamiantage",
+        "pollutant": "asbestos",
+        "procedures": ["notification", "declaration", "declaration"],
+        "procedure_names": [
+            "Annonce SUVA",
+            "Declaration cantonale polluants",
+            "Plan d'elimination des dechets",
+        ],
+        "authorities": ["SUVA", "canton_environment", "commune"],
+        "proof_required": [
+            "diagnostic_amiante",
+            "plan_travaux_protection",
+            "notification_suva",
+            "plan_elimination_dechets",
+            "certification_entreprise",
+        ],
+        "contractor_categories": ["asbestos_specialist", "hazmat_supervisor"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_demolish"],
+        "cfst_category": "major",
+        "regulatory_basis": "OTConst Art. 60a, Directive CFST 6503, OLED",
+    },
+    "pcb_removal": {
+        "label_fr": "Elimination PCB",
+        "pollutant": "pcb",
+        "procedures": ["notification", "declaration", "declaration"],
+        "procedure_names": [
+            "Annonce SUVA",
+            "Declaration cantonale polluants",
+            "Plan d'elimination des dechets",
+        ],
+        "authorities": ["SUVA", "canton_environment"],
+        "proof_required": [
+            "diagnostic_pcb",
+            "analyse_joints_peintures",
+            "notification_suva",
+            "plan_elimination_dechets",
+            "bordereau_suivi_dechets",
+        ],
+        "contractor_categories": ["pcb_specialist", "hazmat_supervisor"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_renovate"],
+        "cfst_category": "major",
+        "regulatory_basis": "ORRChim Annexe 2.15 (PCB > 50 mg/kg), OTConst Art. 60a, OLED",
+    },
+    "lead_removal": {
+        "label_fr": "Elimination plomb",
+        "pollutant": "lead",
+        "procedures": ["notification", "declaration"],
+        "procedure_names": [
+            "Annonce SUVA",
+            "Declaration cantonale polluants",
+        ],
+        "authorities": ["SUVA", "canton_environment"],
+        "proof_required": [
+            "diagnostic_plomb",
+            "mesures_protection_ouvriers",
+            "notification_suva",
+            "analyse_peintures",
+        ],
+        "contractor_categories": ["lead_specialist", "hazmat_supervisor"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_renovate"],
+        "cfst_category": "medium",
+        "regulatory_basis": "ORRChim Annexe 2.18 (plomb > 5000 mg/kg), OTConst Art. 60a",
+    },
+    "hap_removal": {
+        "label_fr": "Elimination HAP",
+        "pollutant": "hap",
+        "procedures": ["notification", "declaration", "declaration"],
+        "procedure_names": [
+            "Annonce SUVA",
+            "Declaration cantonale polluants",
+            "Plan d'elimination des dechets",
+        ],
+        "authorities": ["SUVA", "canton_environment"],
+        "proof_required": [
+            "diagnostic_hap",
+            "analyse_enrobes_etancheite",
+            "notification_suva",
+            "plan_elimination_dechets",
+        ],
+        "contractor_categories": ["hap_specialist", "hazmat_supervisor"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender"],
+        "cfst_category": "medium",
+        "regulatory_basis": "OLED, OTConst Art. 60a, ORRChim",
+    },
+    "radon_mitigation": {
+        "label_fr": "Assainissement radon",
+        "pollutant": "radon",
+        "procedures": ["declaration"],
+        "procedure_names": [
+            "Declaration cantonale radon",
+        ],
+        "authorities": ["canton_health", "ofsp"],
+        "proof_required": [
+            "mesure_radon_long_terme",
+            "rapport_assainissement",
+            "mesure_controle_post_travaux",
+        ],
+        "contractor_categories": ["radon_specialist"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_sell", "safe_to_insure"],
+        "cfst_category": None,
+        "regulatory_basis": "ORaP Art. 110 (300/1000 Bq/m3), Directive OFSP radon",
+    },
+    "pfas_remediation": {
+        "label_fr": "Remediation PFAS",
+        "pollutant": "pfas",
+        "procedures": ["declaration", "declaration"],
+        "procedure_names": [
+            "Declaration cantonale polluants",
+            "Plan d'elimination des dechets",
+        ],
+        "authorities": ["canton_environment", "ofev"],
+        "proof_required": [
+            "diagnostic_pfas",
+            "analyse_eau_sol",
+            "plan_remediation",
+            "suivi_post_remediation",
+        ],
+        "contractor_categories": ["pfas_specialist", "environmental_engineer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_sell", "safe_to_finance"],
+        "cfst_category": None,
+        "regulatory_basis": "OSol, OEaux, Directive OFEV PFAS 2024",
+    },
+    "demolition": {
+        "label_fr": "Demolition",
+        "pollutant": None,
+        "procedures": ["permit", "declaration", "notification", "declaration"],
+        "procedure_names": [
+            "Permis de demolir",
+            "Declaration cantonale polluants",
+            "Annonce SUVA",
+            "Plan d'elimination des dechets",
+        ],
+        "authorities": ["commune", "canton_environment", "SUVA", "monuments_historiques"],
+        "proof_required": [
+            "permis_demolir",
+            "diagnostic_polluants_complet",
+            "plan_elimination_dechets",
+            "notification_suva",
+            "preavis_monuments",
+            "enquete_publique",
+        ],
+        "contractor_categories": ["demolition_contractor", "asbestos_specialist", "waste_manager"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_demolish"],
+        "cfst_category": "major",
+        "regulatory_basis": "LATC, OLED, OTConst Art. 60a, Directive cantonale polluants",
+    },
+    "renovation": {
+        "label_fr": "Renovation generale",
+        "pollutant": None,
+        "procedures": ["permit", "declaration", "authorization"],
+        "procedure_names": [
+            "Permis de construire",
+            "Declaration cantonale polluants",
+            "Preavis monuments historiques",
+        ],
+        "authorities": ["commune", "canton_construction", "monuments_historiques"],
+        "proof_required": [
+            "permis_construire",
+            "plans_architecte",
+            "diagnostic_polluants",
+            "descriptif_projet",
+        ],
+        "contractor_categories": ["general_contractor", "architect"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_renovate"],
+        "cfst_category": None,
+        "regulatory_basis": "LATC, LAT, Normes SIA 118/180",
+    },
+    "roof_facade": {
+        "label_fr": "Toiture et facades",
+        "pollutant": None,
+        "procedures": ["permit", "declaration"],
+        "procedure_names": [
+            "Permis de construire",
+            "Declaration cantonale polluants",
+        ],
+        "authorities": ["commune", "canton_construction", "monuments_historiques"],
+        "proof_required": [
+            "permis_construire",
+            "plans_facade_toiture",
+            "diagnostic_polluants",
+            "rapport_energetique",
+        ],
+        "contractor_categories": ["roofer", "facade_specialist", "scaffolding_contractor"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender"],
+        "cfst_category": None,
+        "regulatory_basis": "LATC, Normes SIA 232/233, MoPEC (enveloppe)",
+    },
+    "hvac": {
+        "label_fr": "Chauffage, ventilation, climatisation",
+        "pollutant": None,
+        "procedures": ["permit", "declaration", "funding"],
+        "procedure_names": [
+            "Permis de construire simplifie",
+            "Declaration installation chauffage",
+            "Subvention Programme Batiments",
+        ],
+        "authorities": ["commune", "canton_energy", "programme_batiments"],
+        "proof_required": [
+            "plans_techniques_cvs",
+            "bilan_energetique",
+            "certificat_conformite_installation",
+            "cecb",
+        ],
+        "contractor_categories": ["hvac_installer", "energy_engineer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_renovate"],
+        "cfst_category": None,
+        "regulatory_basis": "MoPEC, LVLEne, OPAir, Programme Batiments",
+    },
+    "electrical": {
+        "label_fr": "Installations electriques",
+        "pollutant": None,
+        "procedures": ["inspection", "certification"],
+        "procedure_names": [
+            "Controle OIBT periodique",
+            "Rapport de securite electrique (ESTI)",
+        ],
+        "authorities": ["esti", "organisme_controle_agree"],
+        "proof_required": [
+            "rapport_controle_oibt",
+            "schema_electrique",
+            "attestation_conformite",
+            "rapport_securite_esti",
+        ],
+        "contractor_categories": ["electrician_ase", "electrical_inspector"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_sell", "safe_to_insure"],
+        "cfst_category": None,
+        "regulatory_basis": "OIBT (Ordonnance sur les installations basse tension), LIE",
+    },
+    "plumbing": {
+        "label_fr": "Installations sanitaires",
+        "pollutant": None,
+        "procedures": ["permit", "inspection"],
+        "procedure_names": [
+            "Permis de construire simplifie",
+            "Controle raccordement eau/eaux usees",
+        ],
+        "authorities": ["commune", "service_eaux"],
+        "proof_required": [
+            "plans_sanitaires",
+            "attestation_raccordement",
+            "rapport_conformite_eau_potable",
+        ],
+        "contractor_categories": ["plumber", "sanitary_engineer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_sell"],
+        "cfst_category": None,
+        "regulatory_basis": "LEaux, OSEC, Normes SIA 385/386",
+    },
+    "fire_safety": {
+        "label_fr": "Protection incendie",
+        "pollutant": None,
+        "procedures": ["authorization", "inspection", "certification"],
+        "procedure_names": [
+            "Autorisation ECA (concept protection incendie)",
+            "Controle ECA periodique",
+            "Certificat conformite protection incendie",
+        ],
+        "authorities": ["eca", "commune", "police_du_feu"],
+        "proof_required": [
+            "concept_protection_incendie",
+            "plans_evacuation",
+            "rapport_controle_eca",
+            "attestation_conformite_incendie",
+        ],
+        "contractor_categories": ["fire_safety_engineer", "fire_protection_installer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_sell", "safe_to_insure"],
+        "cfst_category": None,
+        "regulatory_basis": "Prescriptions AEAI, LPol incendie cantonale, Normes SIA",
+    },
+    "accessibility": {
+        "label_fr": "Mise en conformite accessibilite",
+        "pollutant": None,
+        "procedures": ["permit", "authorization"],
+        "procedure_names": [
+            "Permis de construire",
+            "Autorisation accessibilite (LHand)",
+        ],
+        "authorities": ["commune", "canton_construction", "bureau_egalite_handicapes"],
+        "proof_required": [
+            "plans_accessibilite",
+            "rapport_conformite_lhand",
+            "permis_construire",
+        ],
+        "contractor_categories": ["general_contractor", "accessibility_consultant"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_sell"],
+        "cfst_category": None,
+        "regulatory_basis": "LHand (Loi sur l'egalite pour les handicapes), Normes SIA 500",
+    },
+    "energy_renovation": {
+        "label_fr": "Renovation energetique",
+        "pollutant": None,
+        "procedures": ["permit", "funding", "certification"],
+        "procedure_names": [
+            "Permis de construire simplifie",
+            "Subvention Programme Batiments",
+            "Certificat CECB",
+        ],
+        "authorities": ["commune", "canton_energy", "programme_batiments"],
+        "proof_required": [
+            "cecb_avant",
+            "devis_travaux_energetiques",
+            "accord_subvention",
+            "justificatifs_fin_travaux",
+            "cecb_apres",
+        ],
+        "contractor_categories": ["energy_consultant_cecb", "insulation_contractor", "hvac_installer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender", "safe_to_finance"],
+        "cfst_category": None,
+        "regulatory_basis": "MoPEC, Loi sur le CO2, Programme Batiments, Normes SIA 380/1",
+    },
+    "waterproofing": {
+        "label_fr": "Etancheite",
+        "pollutant": None,
+        "procedures": ["permit"],
+        "procedure_names": [
+            "Permis de construire simplifie",
+        ],
+        "authorities": ["commune"],
+        "proof_required": [
+            "plans_etancheite",
+            "rapport_expertise_etancheite",
+            "garantie_travaux",
+        ],
+        "contractor_categories": ["waterproofing_specialist", "roofer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_insure"],
+        "cfst_category": None,
+        "regulatory_basis": "Normes SIA 271 (toitures plates), SIA 272 (etancheite)",
+    },
+    "interiors": {
+        "label_fr": "Amenagements interieurs",
+        "pollutant": None,
+        "procedures": ["permit", "declaration"],
+        "procedure_names": [
+            "Permis de construire simplifie",
+            "Declaration cantonale polluants",
+        ],
+        "authorities": ["commune"],
+        "proof_required": [
+            "plans_interieurs",
+            "diagnostic_polluants",
+            "descriptif_amenagements",
+        ],
+        "contractor_categories": ["general_contractor", "interior_designer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_renovate"],
+        "cfst_category": None,
+        "regulatory_basis": "LATC (travaux interieurs), Normes SIA 118",
+    },
+    "external_works": {
+        "label_fr": "Amenagements exterieurs",
+        "pollutant": None,
+        "procedures": ["permit"],
+        "procedure_names": [
+            "Permis de construire",
+        ],
+        "authorities": ["commune", "canton_construction"],
+        "proof_required": [
+            "plans_amenagement_exterieur",
+            "etude_impact_environnement",
+            "permis_construire",
+        ],
+        "contractor_categories": ["landscape_contractor", "civil_engineer"],
+        "safe_to_x_implications": ["safe_to_start", "safe_to_tender"],
+        "cfst_category": None,
+        "regulatory_basis": "LATC, LAT, OAT",
+    },
+    "maintenance": {
+        "label_fr": "Entretien courant",
+        "pollutant": None,
+        "procedures": [],
+        "procedure_names": [],
+        "authorities": [],
+        "proof_required": [
+            "carnet_entretien",
+            "contrats_maintenance",
+        ],
+        "contractor_categories": ["building_manager", "general_contractor"],
+        "safe_to_x_implications": ["safe_to_insure"],
+        "cfst_category": None,
+        "regulatory_basis": "Normes SIA 469 (conservation des ouvrages), CO Art. 256-259",
+    },
+    "transaction_transfer": {
+        "label_fr": "Transaction / transfert de propriete",
+        "pollutant": None,
+        "procedures": ["transfer"],
+        "procedure_names": [
+            "Transfert immobilier (notaire/RF)",
+        ],
+        "authorities": ["registre_foncier", "notaire", "canton_fiscalite"],
+        "proof_required": [
+            "extrait_registre_foncier",
+            "diagnostic_polluants",
+            "cecb",
+            "etat_locatif",
+            "dossier_technique_complet",
+            "assurance_batiment",
+        ],
+        "contractor_categories": ["notary", "real_estate_agent", "property_manager"],
+        "safe_to_x_implications": ["safe_to_sell", "safe_to_finance"],
+        "cfst_category": None,
+        "regulatory_basis": "CC Art. 656 ss (registre foncier), LDFR, LFAIE, Droit cantonal notarial",
+    },
+    "insurance_claim": {
+        "label_fr": "Sinistre / declaration assurance",
+        "pollutant": None,
+        "procedures": ["insurance", "declaration"],
+        "procedure_names": [
+            "Declaration de sinistre ECA/privee",
+            "Expertise assurance",
+        ],
+        "authorities": ["eca", "assurance_privee"],
+        "proof_required": [
+            "declaration_sinistre",
+            "rapport_expertise",
+            "photos_degats",
+            "devis_reparation",
+            "police_assurance",
+        ],
+        "contractor_categories": ["loss_adjuster", "general_contractor", "restoration_specialist"],
+        "safe_to_x_implications": ["safe_to_insure", "safe_to_start"],
+        "cfst_category": None,
+        "regulatory_basis": "LCA (Loi sur le contrat d'assurance), Legislation ECA cantonale",
+    },
+    "subsidy_funding": {
+        "label_fr": "Subventions et financement",
+        "pollutant": None,
+        "procedures": ["funding"],
+        "procedure_names": [
+            "Demande de subvention (Programme Batiments / cantonal)",
+        ],
+        "authorities": ["canton_energy", "programme_batiments", "canton_environment"],
+        "proof_required": [
+            "formulaire_subvention",
+            "devis_travaux",
+            "cecb_ou_audit_energetique",
+            "accord_prealable",
+            "justificatifs_fin_travaux",
+            "factures",
+        ],
+        "contractor_categories": ["energy_consultant_cecb", "financial_advisor"],
+        "safe_to_x_implications": ["safe_to_finance", "safe_to_start"],
+        "cfst_category": None,
+        "regulatory_basis": "Loi sur le CO2, Programme Batiments, Legislations cantonales energie",
+    },
+}
+
+# Convenience: list of all work family names
+WORK_FAMILY_NAMES: list[str] = list(WORK_FAMILIES.keys())

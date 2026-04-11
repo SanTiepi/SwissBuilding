@@ -4,10 +4,10 @@ import { AUTH_FILE } from './e2e-real/auth';
 /**
  * Playwright config for real backend e2e tests.
  *
- * Requires a running backend (port 8000) with seeded data.
+ * Requires a running backend (VPS at swissbuilding.batiscan.ch) with seeded data.
  * Uses a dedicated Vite dev server on port 4000 (avoids collision with
  * a manually started `npm run dev` on port 3000).
- * The Vite proxy forwards /api to localhost:8000.
+ * The Vite proxy forwards /api to the VPS backend.
  *
  * Usage: npm run test:e2e:real
  */

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.action_item import ActionItem
 from app.models.assignment import Assignment
 from app.models.building import Building
-from app.models.change_signal import ChangeSignal
+from app.models.building_change import BuildingSignal
 from app.models.diagnostic import Diagnostic
 from app.models.intervention import Intervention
 from app.models.notification import Notification
@@ -208,12 +208,15 @@ async def test_digest_preview_headline(db_session):
     db_session.add(action)
 
     # Add signal
-    signal = ChangeSignal(
+    signal = BuildingSignal(
         id=uuid.uuid4(),
         building_id=building.id,
         signal_type="regulation_change",
         severity="warning",
         title="New regulation",
+        description="",
+        based_on_type="event",
+        status="active",
         detected_at=datetime.now(UTC) - timedelta(hours=3),
     )
     db_session.add(signal)
@@ -378,13 +381,15 @@ async def test_digest_with_change_signals(db_session):
     building = _make_building(db_session, user.id)
     await db_session.commit()
 
-    signal = ChangeSignal(
+    signal = BuildingSignal(
         id=uuid.uuid4(),
         building_id=building.id,
         signal_type="data_update",
         severity="info",
         title="Address updated",
         description="Building address corrected",
+        based_on_type="event",
+        status="active",
         detected_at=datetime.now(UTC) - timedelta(hours=6),
     )
     db_session.add(signal)

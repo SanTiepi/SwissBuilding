@@ -1,3 +1,9 @@
+/**
+ * MIGRATION: ABSORB INTO BuildingDetail
+ * This page will be absorbed into the BuildingDetail (Building Home) master workspace.
+ * Per ADR-005 and V3 migration plan.
+ * New features should target the master workspace directly.
+ */
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from '@/i18n';
