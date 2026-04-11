@@ -1,3 +1,18 @@
+## Priorité immédiate
+Web check-up bâtiment pour amis propriétaires de Robin. Brief dans `.openclaw/tasks/000-priority-web-checkup.md`.
+
+## Hub d'idées cross-projets
+Lire `docs/studio/BEST.md` pour les idées scorées et les croisements inter-projets.
+
+## Règles studio
+- Langue : code/commits en anglais, docs/rapports en français avec accents
+- Tests verts avant chaque commit
+- 1 commit = 1 feature/fix, message clair (feat:, fix:, docs:)
+- Ne pas push sans review
+- Pas de dépendances inutiles ni de refactor opportuniste
+
+---
+
 # SwissBuilding Claude Bootstrap
 
 Read [AGENTS.md](./AGENTS.md) for operating rules.

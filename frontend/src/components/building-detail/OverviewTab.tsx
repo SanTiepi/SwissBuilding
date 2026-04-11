@@ -10,6 +10,7 @@ import { DataQualityScore } from '@/components/DataQualityScore';
 import { DossierStatusPanel } from '@/components/DossierStatusPanel';
 import { ReadinessSummary } from '@/components/ReadinessSummary';
 import { TrustScorePanel } from '@/components/buildings/TrustScorePanel';
+import { PermitManagementPanel } from '@/components/buildings/PermitManagementPanel';
 import { UnknownIssuesList } from '@/components/UnknownIssuesList';
 import { ChangeSignalsFeed } from '@/components/ChangeSignalsFeed';
 import { ContradictionCard } from '@/components/ContradictionCard';
@@ -714,6 +715,9 @@ export function OverviewTab({
         <ChangeSignalsFeed buildingId={buildingId} />
         <ContradictionCard buildingId={buildingId} />
       </div>
+
+      {/* Permit Management */}
+      <PermitManagementPanel buildingId={buildingId} />
 
       {/* Geo Context Overlays (geo.admin) */}
       <Suspense fallback={<div className="h-24 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />}>

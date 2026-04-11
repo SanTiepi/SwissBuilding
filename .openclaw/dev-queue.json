@@ -216,12 +216,19 @@
   ],
   "failed": [],
   "session_notes": {
-    "session_id": "dev-runner-swissbuilding-wave-9",
-    "date_started": "2026-04-03T01:24Z",
-    "phase_1_status": "✅ Audit complete: G-1, G-2, G-3 already in codebase",
-    "phase_2_status": "IN_PROGRESS — H-1 (Permits) not found, I-2 frontend missing",
-    "next_actions": "Execute H-1 + I-2 frontend, re-launch Wave-10 with remaining briefs",
-    "rate_limit": "Claude Code at API cap — using direct implementation"
+    "session_id": "dev-runner-swissbuilding-wave-10",
+    "date_started": "2026-04-03T01:12Z",
+    "phase_1_status": "✅ Scan complete: H-1 fully implemented (permit model + API + frontend all present)",
+    "phase_2_status": "✅ I-2 Backend present (model + API). Frontend MISSING (priority: ExpertReviewQueue + ExpertDecisionCard)",
+    "api_status": "🔴 Claude Code at API cap — reset 19:00 Europe/Zurich (April 3)",
+    "next_actions": "Resume at 19:00 — I-2 frontend (200 lines React), wave-10 integration, defect-shield 001-007, reno-predict",
+    "briefs_found": 25,
+    "briefs_ready_to_execute": [
+      "I-2-expert-review-override-governance.md (frontend phase)",
+      "wave-10-permits-and-expert-review-frontend.md",
+      "defect-shield-001 through 007",
+      "reno-predict-all.md"
+    ]
   }
 }
 }

@@ -124,6 +124,7 @@ from app.api import (
     incident_response,
     incident_workflow,
     incidents,
+    imports,
     indispensability,
     instant_card,
     insurance_readiness,
@@ -176,6 +177,7 @@ from app.api import (
     passport_export,
     permit_procedures,
     permit_tracking,
+    permits,
     pilot_scorecard,
     pollutant_inventory,
     pollutant_map,
@@ -448,6 +450,7 @@ api_router.include_router(occupancy_risks.router, prefix="/occupancy-risks", tag
 api_router.include_router(operational_gates.router, prefix="", tags=["Operational Gates"])
 api_router.include_router(owner_ops.router, prefix="", tags=["Owner Ops"])
 api_router.include_router(permit_tracking.router, prefix="", tags=["Permit Tracking"])
+api_router.include_router(permits.router, prefix="", tags=["Permits"])
 api_router.include_router(spatial_risk_mapping.router, prefix="", tags=["Spatial Risk Mapping"])
 api_router.include_router(stakeholder_dashboard.router, prefix="", tags=["Stakeholder Dashboard"])
 api_router.include_router(stakeholder_notifications.router, prefix="", tags=["Stakeholder Notifications"])
@@ -536,3 +539,4 @@ api_router.include_router(incident_workflow.router, prefix="", tags=["Incident W
 api_router.include_router(building_reports.router, prefix="", tags=["Building Reports"])
 api_router.include_router(reports.router, prefix="", tags=["Authority Reports"])
 api_router.include_router(ai_feedback.router, prefix="", tags=["AI Feedback Loop"])
+api_router.include_router(imports.router, prefix="", tags=["Data Imports"])

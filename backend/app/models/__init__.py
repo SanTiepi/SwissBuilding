@@ -131,6 +131,7 @@ from app.models.party_role_assignment import PartyRoleAssignment
 from app.models.passport_envelope import BuildingPassportEnvelope, PassportTransferReceipt
 from app.models.passport_publication import PassportPublication
 from app.models.passport_state_diff import PassportStateDiff
+from app.models.permit import Permit, PermitStatus
 from app.models.permit_procedure import PermitProcedure
 from app.models.permit_step import PermitStep
 from app.models.pilot_scorecard import PilotMetric, PilotScorecard

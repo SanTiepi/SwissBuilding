@@ -175,9 +175,11 @@ export default function CompletenessPortfolio() {
   });
 
   // Simulate completeness scores from building data
-  const buildings: BuildingWithScore[] = (buildingsData?.items || []).map(
-    (b: BuildingSummary & { data_quality_score?: number }) => {
-      const score = b.data_quality_score != null ? b.data_quality_score * 100 : Math.random() * 60 + 20;
+  // Use useMemo to avoid impure Math.random during render
+  const buildings: BuildingWithScore[] = useMemo(() => (
+    (buildingsData?.items || []).map(
+      (b: BuildingSummary & { data_quality_score?: number }) => {
+        const score = b.data_quality_score != null ? b.data_quality_score * 100 : 40;
       return {
         ...b,
         completeness_score: Math.round(score),

@@ -50,6 +50,12 @@ class Building(Base):
     cecb_certificate_date = Column(DateTime(timezone=True), nullable=True)
     cecb_fetch_date = Column(DateTime(timezone=True), nullable=True)
     cecb_source = Column(String(100), nullable=True)  # e.g. "CECB VD 2024"
+    # GWR fields (Registre fédéral des bâtiments)
+    heat_source = Column(String(100), nullable=True)  # gaz, mazout, pompe à chaleur, bois, électrique, district, autre
+    construction_period = Column(String(50), nullable=True)  # e.g. "1900-1920", "1990-2010"
+    primary_use = Column(String(100), nullable=True)  # habitation, commerce, industrie, agriculture, etc.
+    hot_water_source = Column(String(100), nullable=True)  # centralisé, décentralisé, sans
+    num_households = Column(Integer, nullable=True)  # nombre de logements
 
     jurisdiction_id = Column(UUID(as_uuid=True), ForeignKey("jurisdictions.id"), nullable=True)
     organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
@@ -71,6 +77,7 @@ class Building(Base):
     diagnostic_publications = relationship("DiagnosticReportPublication", back_populates="building")
     diagnostic_mission_orders = relationship("DiagnosticMissionOrder", back_populates="building")
     defect_timelines = relationship("DefectTimeline", back_populates="building", cascade="all, delete-orphan")
+    permits = relationship("Permit", back_populates="building", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("idx_buildings_canton", "canton"),

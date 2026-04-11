@@ -128,6 +128,7 @@ from app.schemas.portfolio_risk import (
     PortfolioRiskOverviewRead,
     RiskDistributionRead,
 )
+from app.schemas.permit import PermitCreate, PermitRead, PermitUpdate, PermitAlert
 from app.schemas.post_work_item import (
     CompletionStatusRead,
     PostWorkItemComplete,
